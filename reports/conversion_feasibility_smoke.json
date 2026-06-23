@@ -1,0 +1,946 @@
+{
+  "seed": 7,
+  "group_size": 64,
+  "lambdas": [
+    0.1,
+    0.3,
+    0.5,
+    0.7,
+    1.0,
+    1.3
+  ],
+  "policies": [
+    "per_tensor",
+    "per_channel",
+    "groupwise_input"
+  ],
+  "summary": {
+    "activation_outlier": {
+      "best": {
+        "scenario": "activation_outlier",
+        "policy": "groupwise_input",
+        "lambda_value": 0.7,
+        "weight_mse_ratio": 0.18608632462286173,
+        "output_mse_ratio": 0.1867244242470879,
+        "sparsity": 0.421600341796875,
+        "domain_ok": true
+      },
+      "naive": {
+        "scenario": "activation_outlier",
+        "policy": "per_tensor",
+        "lambda_value": 0.5,
+        "weight_mse_ratio": 0.21252472768522587,
+        "output_mse_ratio": 0.2156051958621934,
+        "sparsity": 0.307830810546875,
+        "domain_ok": true
+      },
+      "best_improves_zero_weight": true,
+      "best_improves_zero_output": true,
+      "best_not_worse_than_naive_output": true
+    },
+    "channel_scaled": {
+      "best": {
+        "scenario": "channel_scaled",
+        "policy": "groupwise_input",
+        "lambda_value": 0.7,
+        "weight_mse_ratio": 0.1831250768299179,
+        "output_mse_ratio": 0.18108776752758,
+        "sparsity": 0.419097900390625,
+        "domain_ok": true
+      },
+      "naive": {
+        "scenario": "channel_scaled",
+        "policy": "per_tensor",
+        "lambda_value": 0.5,
+        "weight_mse_ratio": 0.6024456954757992,
+        "output_mse_ratio": 0.6008493110140959,
+        "sparsity": 0.543121337890625,
+        "domain_ok": true
+      },
+      "best_improves_zero_weight": true,
+      "best_improves_zero_output": true,
+      "best_not_worse_than_naive_output": true
+    },
+    "gaussian": {
+      "best": {
+        "scenario": "gaussian",
+        "policy": "groupwise_input",
+        "lambda_value": 0.7,
+        "weight_mse_ratio": 0.1869746375884695,
+        "output_mse_ratio": 0.18949549301453117,
+        "sparsity": 0.423095703125,
+        "domain_ok": true
+      },
+      "naive": {
+        "scenario": "gaussian",
+        "policy": "per_tensor",
+        "lambda_value": 0.5,
+        "weight_mse_ratio": 0.21281953356669372,
+        "output_mse_ratio": 0.21597158307467115,
+        "sparsity": 0.312103271484375,
+        "domain_ok": true
+      },
+      "best_improves_zero_weight": true,
+      "best_improves_zero_output": true,
+      "best_not_worse_than_naive_output": true
+    },
+    "heavy_tail": {
+      "best": {
+        "scenario": "heavy_tail",
+        "policy": "groupwise_input",
+        "lambda_value": 1.3,
+        "weight_mse_ratio": 0.3903304547684357,
+        "output_mse_ratio": 0.3897347367580406,
+        "sparsity": 0.75030517578125,
+        "domain_ok": true
+      },
+      "naive": {
+        "scenario": "heavy_tail",
+        "policy": "per_tensor",
+        "lambda_value": 0.5,
+        "weight_mse_ratio": 0.4707977866955455,
+        "output_mse_ratio": 0.47025258440207407,
+        "sparsity": 0.38055419921875,
+        "domain_ok": true
+      },
+      "best_improves_zero_weight": true,
+      "best_improves_zero_output": true,
+      "best_not_worse_than_naive_output": true
+    },
+    "low_rank_plus_noise": {
+      "best": {
+        "scenario": "low_rank_plus_noise",
+        "policy": "groupwise_input",
+        "lambda_value": 0.7,
+        "weight_mse_ratio": 0.18610138692642136,
+        "output_mse_ratio": 0.1896836894281191,
+        "sparsity": 0.42230224609375,
+        "domain_ok": true
+      },
+      "naive": {
+        "scenario": "low_rank_plus_noise",
+        "policy": "per_tensor",
+        "lambda_value": 0.5,
+        "weight_mse_ratio": 0.2280437904853976,
+        "output_mse_ratio": 0.23118505795130898,
+        "sparsity": 0.3179931640625,
+        "domain_ok": true
+      },
+      "best_improves_zero_weight": true,
+      "best_improves_zero_output": true,
+      "best_not_worse_than_naive_output": true
+    }
+  },
+  "results": [
+    {
+      "scenario": "gaussian",
+      "policy": "per_tensor",
+      "lambda_value": 0.1,
+      "weight_mse_ratio": 0.32409502188027867,
+      "output_mse_ratio": 0.3265236911979528,
+      "sparsity": 0.0657958984375,
+      "domain_ok": true
+    },
+    {
+      "scenario": "gaussian",
+      "policy": "per_tensor",
+      "lambda_value": 0.3,
+      "weight_mse_ratio": 0.25888989107005417,
+      "output_mse_ratio": 0.2608387428448546,
+      "sparsity": 0.1904296875,
+      "domain_ok": true
+    },
+    {
+      "scenario": "gaussian",
+      "policy": "per_tensor",
+      "lambda_value": 0.5,
+      "weight_mse_ratio": 0.21281953356669372,
+      "output_mse_ratio": 0.21597158307467115,
+      "sparsity": 0.312103271484375,
+      "domain_ok": true
+    },
+    {
+      "scenario": "gaussian",
+      "policy": "per_tensor",
+      "lambda_value": 0.7,
+      "weight_mse_ratio": 0.1915293317067787,
+      "output_mse_ratio": 0.19347913957966945,
+      "sparsity": 0.424560546875,
+      "domain_ok": true
+    },
+    {
+      "scenario": "gaussian",
+      "policy": "per_tensor",
+      "lambda_value": 1.0,
+      "weight_mse_ratio": 0.2063292187055734,
+      "output_mse_ratio": 0.20846872826353977,
+      "sparsity": 0.5751953125,
+      "domain_ok": true
+    },
+    {
+      "scenario": "gaussian",
+      "policy": "per_tensor",
+      "lambda_value": 1.3,
+      "weight_mse_ratio": 0.2739090742306818,
+      "output_mse_ratio": 0.2759911677963402,
+      "sparsity": 0.7003173828125,
+      "domain_ok": true
+    },
+    {
+      "scenario": "gaussian",
+      "policy": "per_channel",
+      "lambda_value": 0.1,
+      "weight_mse_ratio": 0.32253401913711227,
+      "output_mse_ratio": 0.3249892071056955,
+      "sparsity": 0.065399169921875,
+      "domain_ok": true
+    },
+    {
+      "scenario": "gaussian",
+      "policy": "per_channel",
+      "lambda_value": 0.3,
+      "weight_mse_ratio": 0.2576564529462543,
+      "output_mse_ratio": 0.25974739968524235,
+      "sparsity": 0.18927001953125,
+      "domain_ok": true
+    },
+    {
+      "scenario": "gaussian",
+      "policy": "per_channel",
+      "lambda_value": 0.5,
+      "weight_mse_ratio": 0.21168451466859436,
+      "output_mse_ratio": 0.21481052425143754,
+      "sparsity": 0.311248779296875,
+      "domain_ok": true
+    },
+    {
+      "scenario": "gaussian",
+      "policy": "per_channel",
+      "lambda_value": 0.7,
+      "weight_mse_ratio": 0.19043148041080982,
+      "output_mse_ratio": 0.19167873395319573,
+      "sparsity": 0.423370361328125,
+      "domain_ok": true
+    },
+    {
+      "scenario": "gaussian",
+      "policy": "per_channel",
+      "lambda_value": 1.0,
+      "weight_mse_ratio": 0.20571069060109184,
+      "output_mse_ratio": 0.20848871305069827,
+      "sparsity": 0.574554443359375,
+      "domain_ok": true
+    },
+    {
+      "scenario": "gaussian",
+      "policy": "per_channel",
+      "lambda_value": 1.3,
+      "weight_mse_ratio": 0.27388115284619047,
+      "output_mse_ratio": 0.27592309750372446,
+      "sparsity": 0.699981689453125,
+      "domain_ok": true
+    },
+    {
+      "scenario": "gaussian",
+      "policy": "groupwise_input",
+      "lambda_value": 0.1,
+      "weight_mse_ratio": 0.3181065792868645,
+      "output_mse_ratio": 0.32110823908623565,
+      "sparsity": 0.064483642578125,
+      "domain_ok": true
+    },
+    {
+      "scenario": "gaussian",
+      "policy": "groupwise_input",
+      "lambda_value": 0.3,
+      "weight_mse_ratio": 0.2535554082333,
+      "output_mse_ratio": 0.25578989418304776,
+      "sparsity": 0.18768310546875,
+      "domain_ok": true
+    },
+    {
+      "scenario": "gaussian",
+      "policy": "groupwise_input",
+      "lambda_value": 0.5,
+      "weight_mse_ratio": 0.20844914251381633,
+      "output_mse_ratio": 0.21199906587296435,
+      "sparsity": 0.30743408203125,
+      "domain_ok": true
+    },
+    {
+      "scenario": "gaussian",
+      "policy": "groupwise_input",
+      "lambda_value": 0.7,
+      "weight_mse_ratio": 0.1869746375884695,
+      "output_mse_ratio": 0.18949549301453117,
+      "sparsity": 0.423095703125,
+      "domain_ok": true
+    },
+    {
+      "scenario": "gaussian",
+      "policy": "groupwise_input",
+      "lambda_value": 1.0,
+      "weight_mse_ratio": 0.20367422030264734,
+      "output_mse_ratio": 0.206426767383585,
+      "sparsity": 0.57440185546875,
+      "domain_ok": true
+    },
+    {
+      "scenario": "gaussian",
+      "policy": "groupwise_input",
+      "lambda_value": 1.3,
+      "weight_mse_ratio": 0.27517094538737996,
+      "output_mse_ratio": 0.27830836781710516,
+      "sparsity": 0.70037841796875,
+      "domain_ok": true
+    },
+    {
+      "scenario": "channel_scaled",
+      "policy": "per_tensor",
+      "lambda_value": 0.1,
+      "weight_mse_ratio": 0.7299245131828757,
+      "output_mse_ratio": 0.73010790815198,
+      "sparsity": 0.159454345703125,
+      "domain_ok": true
+    },
+    {
+      "scenario": "channel_scaled",
+      "policy": "per_tensor",
+      "lambda_value": 0.3,
+      "weight_mse_ratio": 0.6609529869195642,
+      "output_mse_ratio": 0.6599057990329967,
+      "sparsity": 0.388763427734375,
+      "domain_ok": true
+    },
+    {
+      "scenario": "channel_scaled",
+      "policy": "per_tensor",
+      "lambda_value": 0.5,
+      "weight_mse_ratio": 0.6024456954757992,
+      "output_mse_ratio": 0.6008493110140959,
+      "sparsity": 0.543121337890625,
+      "domain_ok": true
+    },
+    {
+      "scenario": "channel_scaled",
+      "policy": "per_tensor",
+      "lambda_value": 0.7,
+      "weight_mse_ratio": 0.5553363215428814,
+      "output_mse_ratio": 0.5540462020161508,
+      "sparsity": 0.645294189453125,
+      "domain_ok": true
+    },
+    {
+      "scenario": "channel_scaled",
+      "policy": "per_tensor",
+      "lambda_value": 1.0,
+      "weight_mse_ratio": 0.5015102485419389,
+      "output_mse_ratio": 0.5009686425687588,
+      "sparsity": 0.743316650390625,
+      "domain_ok": true
+    },
+    {
+      "scenario": "channel_scaled",
+      "policy": "per_tensor",
+      "lambda_value": 1.3,
+      "weight_mse_ratio": 0.4634191419179479,
+      "output_mse_ratio": 0.4617613272345642,
+      "sparsity": 0.803253173828125,
+      "domain_ok": true
+    },
+    {
+      "scenario": "channel_scaled",
+      "policy": "per_channel",
+      "lambda_value": 0.1,
+      "weight_mse_ratio": 0.31711070565149496,
+      "output_mse_ratio": 0.31502907275070463,
+      "sparsity": 0.06494140625,
+      "domain_ok": true
+    },
+    {
+      "scenario": "channel_scaled",
+      "policy": "per_channel",
+      "lambda_value": 0.3,
+      "weight_mse_ratio": 0.2521660914856516,
+      "output_mse_ratio": 0.25081636234575205,
+      "sparsity": 0.18951416015625,
+      "domain_ok": true
+    },
+    {
+      "scenario": "channel_scaled",
+      "policy": "per_channel",
+      "lambda_value": 0.5,
+      "weight_mse_ratio": 0.2073195862794287,
+      "output_mse_ratio": 0.20598502258743775,
+      "sparsity": 0.309783935546875,
+      "domain_ok": true
+    },
+    {
+      "scenario": "channel_scaled",
+      "policy": "per_channel",
+      "lambda_value": 0.7,
+      "weight_mse_ratio": 0.18735521828802454,
+      "output_mse_ratio": 0.18281421824021213,
+      "sparsity": 0.4205322265625,
+      "domain_ok": true
+    },
+    {
+      "scenario": "channel_scaled",
+      "policy": "per_channel",
+      "lambda_value": 1.0,
+      "weight_mse_ratio": 0.20342553302889715,
+      "output_mse_ratio": 0.19861933346342883,
+      "sparsity": 0.574432373046875,
+      "domain_ok": true
+    },
+    {
+      "scenario": "channel_scaled",
+      "policy": "per_channel",
+      "lambda_value": 1.3,
+      "weight_mse_ratio": 0.2708081596787485,
+      "output_mse_ratio": 0.26243706967152836,
+      "sparsity": 0.7005615234375,
+      "domain_ok": true
+    },
+    {
+      "scenario": "channel_scaled",
+      "policy": "groupwise_input",
+      "lambda_value": 0.1,
+      "weight_mse_ratio": 0.31269930249816746,
+      "output_mse_ratio": 0.3108755419491734,
+      "sparsity": 0.064117431640625,
+      "domain_ok": true
+    },
+    {
+      "scenario": "channel_scaled",
+      "policy": "groupwise_input",
+      "lambda_value": 0.3,
+      "weight_mse_ratio": 0.2490012679782008,
+      "output_mse_ratio": 0.24568298901067315,
+      "sparsity": 0.187347412109375,
+      "domain_ok": true
+    },
+    {
+      "scenario": "channel_scaled",
+      "policy": "groupwise_input",
+      "lambda_value": 0.5,
+      "weight_mse_ratio": 0.2035214566041859,
+      "output_mse_ratio": 0.2036970718856968,
+      "sparsity": 0.306396484375,
+      "domain_ok": true
+    },
+    {
+      "scenario": "channel_scaled",
+      "policy": "groupwise_input",
+      "lambda_value": 0.7,
+      "weight_mse_ratio": 0.1831250768299179,
+      "output_mse_ratio": 0.18108776752758,
+      "sparsity": 0.419097900390625,
+      "domain_ok": true
+    },
+    {
+      "scenario": "channel_scaled",
+      "policy": "groupwise_input",
+      "lambda_value": 1.0,
+      "weight_mse_ratio": 0.20098635386835792,
+      "output_mse_ratio": 0.1919884209767537,
+      "sparsity": 0.57281494140625,
+      "domain_ok": true
+    },
+    {
+      "scenario": "channel_scaled",
+      "policy": "groupwise_input",
+      "lambda_value": 1.3,
+      "weight_mse_ratio": 0.2731131994937193,
+      "output_mse_ratio": 0.2675208712326294,
+      "sparsity": 0.700042724609375,
+      "domain_ok": true
+    },
+    {
+      "scenario": "heavy_tail",
+      "policy": "per_tensor",
+      "lambda_value": 0.1,
+      "weight_mse_ratio": 0.5705737904602665,
+      "output_mse_ratio": 0.5694205491664086,
+      "sparsity": 0.08038330078125,
+      "domain_ok": true
+    },
+    {
+      "scenario": "heavy_tail",
+      "policy": "per_tensor",
+      "lambda_value": 0.3,
+      "weight_mse_ratio": 0.5147914726675005,
+      "output_mse_ratio": 0.5138278545069148,
+      "sparsity": 0.235931396484375,
+      "domain_ok": true
+    },
+    {
+      "scenario": "heavy_tail",
+      "policy": "per_tensor",
+      "lambda_value": 0.5,
+      "weight_mse_ratio": 0.4707977866955455,
+      "output_mse_ratio": 0.47025258440207407,
+      "sparsity": 0.38055419921875,
+      "domain_ok": true
+    },
+    {
+      "scenario": "heavy_tail",
+      "policy": "per_tensor",
+      "lambda_value": 0.7,
+      "weight_mse_ratio": 0.4414975615178428,
+      "output_mse_ratio": 0.4413910685567539,
+      "sparsity": 0.505889892578125,
+      "domain_ok": true
+    },
+    {
+      "scenario": "heavy_tail",
+      "policy": "per_tensor",
+      "lambda_value": 1.0,
+      "weight_mse_ratio": 0.42402498986600495,
+      "output_mse_ratio": 0.4252839757298449,
+      "sparsity": 0.65338134765625,
+      "domain_ok": true
+    },
+    {
+      "scenario": "heavy_tail",
+      "policy": "per_tensor",
+      "lambda_value": 1.3,
+      "weight_mse_ratio": 0.42973863278595337,
+      "output_mse_ratio": 0.42767990232746556,
+      "sparsity": 0.756500244140625,
+      "domain_ok": true
+    },
+    {
+      "scenario": "heavy_tail",
+      "policy": "per_channel",
+      "lambda_value": 0.1,
+      "weight_mse_ratio": 0.5675481938857897,
+      "output_mse_ratio": 0.5660138973977004,
+      "sparsity": 0.080078125,
+      "domain_ok": true
+    },
+    {
+      "scenario": "heavy_tail",
+      "policy": "per_channel",
+      "lambda_value": 0.3,
+      "weight_mse_ratio": 0.5110592837046025,
+      "output_mse_ratio": 0.5098163279532851,
+      "sparsity": 0.235107421875,
+      "domain_ok": true
+    },
+    {
+      "scenario": "heavy_tail",
+      "policy": "per_channel",
+      "lambda_value": 0.5,
+      "weight_mse_ratio": 0.46640027350138347,
+      "output_mse_ratio": 0.464217803913193,
+      "sparsity": 0.379364013671875,
+      "domain_ok": true
+    },
+    {
+      "scenario": "heavy_tail",
+      "policy": "per_channel",
+      "lambda_value": 0.7,
+      "weight_mse_ratio": 0.4361247137021597,
+      "output_mse_ratio": 0.43709121877508517,
+      "sparsity": 0.50360107421875,
+      "domain_ok": true
+    },
+    {
+      "scenario": "heavy_tail",
+      "policy": "per_channel",
+      "lambda_value": 1.0,
+      "weight_mse_ratio": 0.4165121468161284,
+      "output_mse_ratio": 0.41714939346003727,
+      "sparsity": 0.6513671875,
+      "domain_ok": true
+    },
+    {
+      "scenario": "heavy_tail",
+      "policy": "per_channel",
+      "lambda_value": 1.3,
+      "weight_mse_ratio": 0.42090574951959203,
+      "output_mse_ratio": 0.4202235129983275,
+      "sparsity": 0.7552490234375,
+      "domain_ok": true
+    },
+    {
+      "scenario": "heavy_tail",
+      "policy": "groupwise_input",
+      "lambda_value": 0.1,
+      "weight_mse_ratio": 0.5587131057682899,
+      "output_mse_ratio": 0.5572225975280373,
+      "sparsity": 0.07855224609375,
+      "domain_ok": true
+    },
+    {
+      "scenario": "heavy_tail",
+      "policy": "groupwise_input",
+      "lambda_value": 0.3,
+      "weight_mse_ratio": 0.4995946401982469,
+      "output_mse_ratio": 0.4977965545332305,
+      "sparsity": 0.23297119140625,
+      "domain_ok": true
+    },
+    {
+      "scenario": "heavy_tail",
+      "policy": "groupwise_input",
+      "lambda_value": 0.5,
+      "weight_mse_ratio": 0.45160805201651527,
+      "output_mse_ratio": 0.45086395883311386,
+      "sparsity": 0.375732421875,
+      "domain_ok": true
+    },
+    {
+      "scenario": "heavy_tail",
+      "policy": "groupwise_input",
+      "lambda_value": 0.7,
+      "weight_mse_ratio": 0.4182011875910645,
+      "output_mse_ratio": 0.4188014427737953,
+      "sparsity": 0.500335693359375,
+      "domain_ok": true
+    },
+    {
+      "scenario": "heavy_tail",
+      "policy": "groupwise_input",
+      "lambda_value": 1.0,
+      "weight_mse_ratio": 0.39304683137098806,
+      "output_mse_ratio": 0.39258151968068183,
+      "sparsity": 0.646148681640625,
+      "domain_ok": true
+    },
+    {
+      "scenario": "heavy_tail",
+      "policy": "groupwise_input",
+      "lambda_value": 1.3,
+      "weight_mse_ratio": 0.3903304547684357,
+      "output_mse_ratio": 0.3897347367580406,
+      "sparsity": 0.75030517578125,
+      "domain_ok": true
+    },
+    {
+      "scenario": "low_rank_plus_noise",
+      "policy": "per_tensor",
+      "lambda_value": 0.1,
+      "weight_mse_ratio": 0.3419444586655486,
+      "output_mse_ratio": 0.3437117553505943,
+      "sparsity": 0.063629150390625,
+      "domain_ok": true
+    },
+    {
+      "scenario": "low_rank_plus_noise",
+      "policy": "per_tensor",
+      "lambda_value": 0.3,
+      "weight_mse_ratio": 0.27474564321444184,
+      "output_mse_ratio": 0.27639214449013444,
+      "sparsity": 0.194244384765625,
+      "domain_ok": true
+    },
+    {
+      "scenario": "low_rank_plus_noise",
+      "policy": "per_tensor",
+      "lambda_value": 0.5,
+      "weight_mse_ratio": 0.2280437904853976,
+      "output_mse_ratio": 0.23118505795130898,
+      "sparsity": 0.3179931640625,
+      "domain_ok": true
+    },
+    {
+      "scenario": "low_rank_plus_noise",
+      "policy": "per_tensor",
+      "lambda_value": 0.7,
+      "weight_mse_ratio": 0.2046901286892393,
+      "output_mse_ratio": 0.20841833062482368,
+      "sparsity": 0.433013916015625,
+      "domain_ok": true
+    },
+    {
+      "scenario": "low_rank_plus_noise",
+      "policy": "per_tensor",
+      "lambda_value": 1.0,
+      "weight_mse_ratio": 0.21695963980643723,
+      "output_mse_ratio": 0.21842154017984416,
+      "sparsity": 0.581146240234375,
+      "domain_ok": true
+    },
+    {
+      "scenario": "low_rank_plus_noise",
+      "policy": "per_tensor",
+      "lambda_value": 1.3,
+      "weight_mse_ratio": 0.2789128058252945,
+      "output_mse_ratio": 0.28276791231667564,
+      "sparsity": 0.705291748046875,
+      "domain_ok": true
+    },
+    {
+      "scenario": "low_rank_plus_noise",
+      "policy": "per_channel",
+      "lambda_value": 0.1,
+      "weight_mse_ratio": 0.32371114132624706,
+      "output_mse_ratio": 0.324845414145808,
+      "sparsity": 0.06182861328125,
+      "domain_ok": true
+    },
+    {
+      "scenario": "low_rank_plus_noise",
+      "policy": "per_channel",
+      "lambda_value": 0.3,
+      "weight_mse_ratio": 0.25803587045189574,
+      "output_mse_ratio": 0.26127880935094433,
+      "sparsity": 0.187530517578125,
+      "domain_ok": true
+    },
+    {
+      "scenario": "low_rank_plus_noise",
+      "policy": "per_channel",
+      "lambda_value": 0.5,
+      "weight_mse_ratio": 0.21165439632112507,
+      "output_mse_ratio": 0.21556452800452444,
+      "sparsity": 0.311004638671875,
+      "domain_ok": true
+    },
+    {
+      "scenario": "low_rank_plus_noise",
+      "policy": "per_channel",
+      "lambda_value": 0.7,
+      "weight_mse_ratio": 0.18992618654747426,
+      "output_mse_ratio": 0.1928738044944678,
+      "sparsity": 0.4229736328125,
+      "domain_ok": true
+    },
+    {
+      "scenario": "low_rank_plus_noise",
+      "policy": "per_channel",
+      "lambda_value": 1.0,
+      "weight_mse_ratio": 0.20665881177210266,
+      "output_mse_ratio": 0.2097066355979978,
+      "sparsity": 0.573516845703125,
+      "domain_ok": true
+    },
+    {
+      "scenario": "low_rank_plus_noise",
+      "policy": "per_channel",
+      "lambda_value": 1.3,
+      "weight_mse_ratio": 0.2760313768341927,
+      "output_mse_ratio": 0.280015991583099,
+      "sparsity": 0.700469970703125,
+      "domain_ok": true
+    },
+    {
+      "scenario": "low_rank_plus_noise",
+      "policy": "groupwise_input",
+      "lambda_value": 0.1,
+      "weight_mse_ratio": 0.31950919533008726,
+      "output_mse_ratio": 0.3215919178049817,
+      "sparsity": 0.06134033203125,
+      "domain_ok": true
+    },
+    {
+      "scenario": "low_rank_plus_noise",
+      "policy": "groupwise_input",
+      "lambda_value": 0.3,
+      "weight_mse_ratio": 0.2541284426265118,
+      "output_mse_ratio": 0.25809652397919375,
+      "sparsity": 0.186248779296875,
+      "domain_ok": true
+    },
+    {
+      "scenario": "low_rank_plus_noise",
+      "policy": "groupwise_input",
+      "lambda_value": 0.5,
+      "weight_mse_ratio": 0.20741148950732838,
+      "output_mse_ratio": 0.21086466602200116,
+      "sparsity": 0.310211181640625,
+      "domain_ok": true
+    },
+    {
+      "scenario": "low_rank_plus_noise",
+      "policy": "groupwise_input",
+      "lambda_value": 0.7,
+      "weight_mse_ratio": 0.18610138692642136,
+      "output_mse_ratio": 0.1896836894281191,
+      "sparsity": 0.42230224609375,
+      "domain_ok": true
+    },
+    {
+      "scenario": "low_rank_plus_noise",
+      "policy": "groupwise_input",
+      "lambda_value": 1.0,
+      "weight_mse_ratio": 0.20351667898653933,
+      "output_mse_ratio": 0.20496148947151915,
+      "sparsity": 0.571685791015625,
+      "domain_ok": true
+    },
+    {
+      "scenario": "low_rank_plus_noise",
+      "policy": "groupwise_input",
+      "lambda_value": 1.3,
+      "weight_mse_ratio": 0.27433985051098264,
+      "output_mse_ratio": 0.2790933684676589,
+      "sparsity": 0.698883056640625,
+      "domain_ok": true
+    },
+    {
+      "scenario": "activation_outlier",
+      "policy": "per_tensor",
+      "lambda_value": 0.1,
+      "weight_mse_ratio": 0.32377354331122504,
+      "output_mse_ratio": 0.3269042882204279,
+      "sparsity": 0.062744140625,
+      "domain_ok": true
+    },
+    {
+      "scenario": "activation_outlier",
+      "policy": "per_tensor",
+      "lambda_value": 0.3,
+      "weight_mse_ratio": 0.25699550777343527,
+      "output_mse_ratio": 0.26170285936120674,
+      "sparsity": 0.18951416015625,
+      "domain_ok": true
+    },
+    {
+      "scenario": "activation_outlier",
+      "policy": "per_tensor",
+      "lambda_value": 0.5,
+      "weight_mse_ratio": 0.21252472768522587,
+      "output_mse_ratio": 0.2156051958621934,
+      "sparsity": 0.307830810546875,
+      "domain_ok": true
+    },
+    {
+      "scenario": "activation_outlier",
+      "policy": "per_tensor",
+      "lambda_value": 0.7,
+      "weight_mse_ratio": 0.1905258474570085,
+      "output_mse_ratio": 0.1919710212029013,
+      "sparsity": 0.423828125,
+      "domain_ok": true
+    },
+    {
+      "scenario": "activation_outlier",
+      "policy": "per_tensor",
+      "lambda_value": 1.0,
+      "weight_mse_ratio": 0.20644737437605937,
+      "output_mse_ratio": 0.20631748843796446,
+      "sparsity": 0.5743408203125,
+      "domain_ok": true
+    },
+    {
+      "scenario": "activation_outlier",
+      "policy": "per_tensor",
+      "lambda_value": 1.3,
+      "weight_mse_ratio": 0.2754005337530166,
+      "output_mse_ratio": 0.27219281097458875,
+      "sparsity": 0.7003173828125,
+      "domain_ok": true
+    },
+    {
+      "scenario": "activation_outlier",
+      "policy": "per_channel",
+      "lambda_value": 0.1,
+      "weight_mse_ratio": 0.3223730256175169,
+      "output_mse_ratio": 0.32526559466199545,
+      "sparsity": 0.062591552734375,
+      "domain_ok": true
+    },
+    {
+      "scenario": "activation_outlier",
+      "policy": "per_channel",
+      "lambda_value": 0.3,
+      "weight_mse_ratio": 0.2557054708224264,
+      "output_mse_ratio": 0.2597638569342384,
+      "sparsity": 0.188934326171875,
+      "domain_ok": true
+    },
+    {
+      "scenario": "activation_outlier",
+      "policy": "per_channel",
+      "lambda_value": 0.5,
+      "weight_mse_ratio": 0.21167717943065373,
+      "output_mse_ratio": 0.21442182905393195,
+      "sparsity": 0.306243896484375,
+      "domain_ok": true
+    },
+    {
+      "scenario": "activation_outlier",
+      "policy": "per_channel",
+      "lambda_value": 0.7,
+      "weight_mse_ratio": 0.18966554300171834,
+      "output_mse_ratio": 0.1910145252079322,
+      "sparsity": 0.42352294921875,
+      "domain_ok": true
+    },
+    {
+      "scenario": "activation_outlier",
+      "policy": "per_channel",
+      "lambda_value": 1.0,
+      "weight_mse_ratio": 0.2061159503971759,
+      "output_mse_ratio": 0.20741983381564322,
+      "sparsity": 0.574066162109375,
+      "domain_ok": true
+    },
+    {
+      "scenario": "activation_outlier",
+      "policy": "per_channel",
+      "lambda_value": 1.3,
+      "weight_mse_ratio": 0.27685391942022974,
+      "output_mse_ratio": 0.27440686836932,
+      "sparsity": 0.701690673828125,
+      "domain_ok": true
+    },
+    {
+      "scenario": "activation_outlier",
+      "policy": "groupwise_input",
+      "lambda_value": 0.1,
+      "weight_mse_ratio": 0.31859722670341817,
+      "output_mse_ratio": 0.32105979345551466,
+      "sparsity": 0.062286376953125,
+      "domain_ok": true
+    },
+    {
+      "scenario": "activation_outlier",
+      "policy": "groupwise_input",
+      "lambda_value": 0.3,
+      "weight_mse_ratio": 0.2521157591454112,
+      "output_mse_ratio": 0.25550189191705136,
+      "sparsity": 0.187744140625,
+      "domain_ok": true
+    },
+    {
+      "scenario": "activation_outlier",
+      "policy": "groupwise_input",
+      "lambda_value": 0.5,
+      "weight_mse_ratio": 0.20746484106394378,
+      "output_mse_ratio": 0.21060400485797148,
+      "sparsity": 0.305999755859375,
+      "domain_ok": true
+    },
+    {
+      "scenario": "activation_outlier",
+      "policy": "groupwise_input",
+      "lambda_value": 0.7,
+      "weight_mse_ratio": 0.18608632462286173,
+      "output_mse_ratio": 0.1867244242470879,
+      "sparsity": 0.421600341796875,
+      "domain_ok": true
+    },
+    {
+      "scenario": "activation_outlier",
+      "policy": "groupwise_input",
+      "lambda_value": 1.0,
+      "weight_mse_ratio": 0.20344333473000653,
+      "output_mse_ratio": 0.20307212802265054,
+      "sparsity": 0.57305908203125,
+      "domain_ok": true
+    },
+    {
+      "scenario": "activation_outlier",
+      "policy": "groupwise_input",
+      "lambda_value": 1.3,
+      "weight_mse_ratio": 0.2750102925568025,
+      "output_mse_ratio": 0.27143022242742365,
+      "sparsity": 0.69970703125,
+      "domain_ok": true
+    }
+  ]
+}

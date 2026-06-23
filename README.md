@@ -6,6 +6,11 @@
 
 - Paper Link: https://arxiv.org/pdf/2310.11453.pdf
 
+## Modernization Notes
+
+- [Existing model to BitNet conversion plan](./docs/existing_model_to_bitnet_conversion_plan.md)
+- [TurboQuant + BitNet KV-cache plan](./docs/turboquant_bitnet_implementation_plan.md)
+
 ## Prepare Dev env
 
 ```bash
