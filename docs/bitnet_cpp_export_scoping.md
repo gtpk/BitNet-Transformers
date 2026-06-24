@@ -326,6 +326,35 @@ write OUR `round(W/mean|W|)` codes + `mean|W|` scale so the runtime reconstructs
 our gamma*T. Verify by loading in bitnet.cpp and dequantizing back, not by
 byte-diff against the (sign x absmax) golden.
 
+### RT-104D (Path A'): feed ALREADY-ternarized dense weights
+
+Insight (math): upstream I2_S = `sign(W) x max|W|`. If we feed the materialized
+per-tensor b1.58 weights `Wq = gamma*T` (gamma=mean|W|, T in {-1,0,+1}) instead
+of latent FP, then `max|Wq|=gamma`, `sign(Wq)=T`, zeros stay zero, so
+`Q_upstream(Wq) = gamma*T = Wq` — lossless repack, no Path B byte-writer.
+
+Tested (`scripts/rt104d_quantized_dense.py`): materialized Wq into a dense HF
+model, Path A export + I2_S quantize.
+
+- **CONFIRMED (the scale half):** the I2_S stored scale equals our `gamma=mean|W|`
+  exactly (attn_q 0.0496667, attn_k 0.0526054, attn_v 0.0443794) — i.e. upstream
+  stored `max|Wq| = gamma`, NOT the latent absmax (0.389). The insight's core holds:
+  feeding ternary-dense makes upstream preserve our mean-scale.
+- bitnet PPL improved 62554 -> **21384** (3x) vs the latent path. Directionally right.
+
+NOT yet closed (honest):
+- bitnet PPL (21384) is still ~10x our Python reference (2012).
+- Our GGUF code decoder matches `sign(Wq)` only ~50% (the scale path is bug-free,
+  so this is most likely an element-order bug in the verification harness, but a
+  real code reordering is not yet ruled out). So byte-faithfulness of the CODES is
+  not yet proven.
+- Therefore the residual (21384 vs 2012) is not yet split between (a) runtime int8
+  activation quant and (b) a code issue. -> RT-106.
+
+Net: the scale-repack insight is validated; weight-export via Path A' is promising
+(scale exact), but a clean output-parity verdict needs the code-decode/order item
+resolved and activation int8 isolated.
+
 ### Step 3: Minimal Export Artifact
 
 Use a `per_tensor_ste_native`-trained model (I2_S-compatible scale) as the source,
