@@ -1,0 +1,46 @@
+{
+  "results": [
+    {
+      "id": "PTX-101/layer-roundtrip",
+      "pass": true,
+      "detail": "max_err=0.00e+00"
+    },
+    {
+      "id": "PTX-102/model-roundtrip",
+      "pass": true,
+      "detail": "max_logit_err=3.58e-07"
+    },
+    {
+      "id": "PTX-103/save-load",
+      "pass": true,
+      "detail": "max_logit_err=3.58e-07"
+    },
+    {
+      "id": "PTX-104/storage",
+      "pass": true,
+      "detail": "target 8.00x, model 3.68x, target_bits/elem=2.00"
+    },
+    {
+      "id": "PTX-105/ppl-preserved",
+      "pass": true,
+      "detail": "PPL base=264.45 native=254.64 imported=254.64 (native-vs-imported CE delta=0.00e+00)"
+    }
+  ],
+  "info": {
+    "storage": {
+      "i2s_target_bytes": 81948,
+      "fp16_other_bytes": 132352,
+      "i2s_total_bytes": 214300,
+      "fp16_total_bytes": 787712,
+      "target_compression_vs_fp16": 7.9972665592814955,
+      "model_compression_vs_fp16": 3.675744283714419,
+      "num_layers": 14,
+      "target_bits_per_elem": 2.0
+    },
+    "ce": {
+      "base": 5.577664375305176,
+      "native": 5.53983736038208,
+      "imported": 5.53983736038208
+    }
+  }
+}
