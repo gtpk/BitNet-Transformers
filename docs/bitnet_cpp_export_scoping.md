@@ -263,6 +263,21 @@ the custom tokenizer file). Also unresolved: our tiny model is plain LLaMA (no
 BitNet SubLN `attn_sub_norm`/`ffn_sub_norm`), so RT-103B must check whether the
 converter/runtime accepts a plain-LLaMA-shaped model or expects `BitnetForCausalLM`.
 
+**RT-103B (F32 GGUF convert smoke): PASS, zero converter edits.**
+`convert-hf-to-gguf-bitnet.py models/tiny_pt_native --outtype f32` succeeded
+(rc=0) -> `ggml-model-f32.gguf` (37M, 20 tensors). `llama-gguf` reads it
+(version 3, n_tensors 20, tensor data accessible). Findings:
+
+- Tensor names match RT-101 exactly: `token_embd.weight`,
+  `blk.N.attn_q/attn_k/attn_v/attn_output.weight`,
+  `blk.N.ffn_gate/ffn_up/ffn_down.weight`, `blk.N.attn_norm/ffn_norm.weight`,
+  `output_norm.weight`. lm_head tied (no `output.weight`).
+- The RT-103A tokenizer worry did NOT block the converter: it reads
+  tokenizer.model/json directly, not via AutoTokenizer's custom class.
+- **plain LLaMA (no SubLN) converts fine at F32** — the converter did not force
+  `BitnetForCausalLM`/SubLN. Whether the I2_S quantize + bitnet.cpp I2_S kernel
+  accept this llama-arch GGUF is the RT-103C question.
+
 A Python reference of this artifact is now implemented and PASSED (see
 [I2_S Export PoC Plan](./i2s_export_poc_plan.md), commit `5df98bf`):
 `bitnet_llama/i2s_export.py` writes `gamma + 2-bit codes` and re-imports with
