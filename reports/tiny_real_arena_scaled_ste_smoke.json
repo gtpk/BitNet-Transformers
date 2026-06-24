@@ -1,6 +1,9 @@
 {
   "config": {
     "seed": 31,
+    "data_mode": "synthetic",
+    "text_path": null,
+    "tokenizer": null,
     "vocab_size": 64,
     "seq_len": 32,
     "batch_size": 16,
@@ -30,6 +33,128 @@
     "strict": true,
     "json_out": "reports/tiny_real_arena_scaled_ste_smoke.json"
   },
+  "data_info": {
+    "total_tokens": null,
+    "vocab_size": 64,
+    "tokenizer": "synthetic"
+  },
+  "generation_smoke": {
+    "fp16_dense": {
+      "finite": true,
+      "unique_tokens": 15,
+      "degenerate": false,
+      "generated": [
+        21,
+        25,
+        31,
+        39,
+        47,
+        59,
+        16,
+        22,
+        30,
+        36,
+        44,
+        52,
+        5,
+        12,
+        21,
+        34
+      ]
+    },
+    "s1_projected_qat": {
+      "finite": true,
+      "unique_tokens": 12,
+      "degenerate": false,
+      "generated": [
+        21,
+        29,
+        45,
+        8,
+        36,
+        19,
+        62,
+        8,
+        17,
+        34,
+        51,
+        17,
+        59,
+        44,
+        44,
+        51
+      ]
+    },
+    "s1_scaled_ste": {
+      "finite": true,
+      "unique_tokens": 15,
+      "degenerate": false,
+      "generated": [
+        24,
+        33,
+        38,
+        47,
+        58,
+        14,
+        61,
+        7,
+        16,
+        29,
+        56,
+        26,
+        51,
+        19,
+        23,
+        29
+      ]
+    },
+    "s1_scaled_ste_export_pt": {
+      "finite": true,
+      "unique_tokens": 12,
+      "degenerate": false,
+      "generated": [
+        23,
+        26,
+        33,
+        42,
+        48,
+        5,
+        46,
+        51,
+        58,
+        63,
+        13,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "per_tensor_ste_native": {
+      "finite": true,
+      "unique_tokens": 12,
+      "degenerate": false,
+      "generated": [
+        21,
+        31,
+        49,
+        12,
+        40,
+        24,
+        7,
+        12,
+        21,
+        30,
+        47,
+        5,
+        40,
+        47,
+        56,
+        4
+      ]
+    }
+  },
   "train_loss_start": 4.1816487312316895,
   "train_loss_end": 2.805948257446289,
   "projected_qat_loss_start": 2.919456720352173,
@@ -40,7 +165,10 @@
   "scaled_ste_loss_start": 3.153543472290039,
   "scaled_ste_loss_end": 2.7202115058898926,
   "scaled_replacements": 7,
-  "train_elapsed_seconds": 0.31208241599961184,
+  "per_tensor_ste_loss_start": 4.167933940887451,
+  "per_tensor_ste_loss_end": 3.0797719955444336,
+  "per_tensor_replacements": 7,
+  "train_elapsed_seconds": 0.31567441600054735,
   "results": [
     {
       "name": "fp16_dense",
@@ -195,6 +323,62 @@
       "peak_ram_proxy_mb": 61.44,
       "fitness": 0.4778379553940161,
       "pareto_frontier": true
+    },
+    {
+      "name": "s1_scaled_ste_export_pt_int8_kv",
+      "quality_source": "S1_scaled_STE_export_per_tensor",
+      "runtime_policy": "packed_b1_58_weight_int8_kv",
+      "loss": 3.795140504837036,
+      "perplexity": 44.484486251943096,
+      "token_accuracy": 0.10080645233392715,
+      "logit_kl_to_fp16": 1.1118559837341309,
+      "bytes_per_token_mb": 0.016650390625,
+      "ideal_latency_ms_at_100gbps": 0.000174592,
+      "peak_ram_proxy_mb": 71.68,
+      "fitness": 0.3687210334733687,
+      "pareto_frontier": false
+    },
+    {
+      "name": "s1_scaled_ste_export_pt_int4_kv",
+      "quality_source": "S1_scaled_STE_export_per_tensor",
+      "runtime_policy": "packed_b1_58_weight_int4_kv",
+      "loss": 3.795140504837036,
+      "perplexity": 44.484486251943096,
+      "token_accuracy": 0.10080645233392715,
+      "logit_kl_to_fp16": 1.1118559837341309,
+      "bytes_per_token_mb": 0.01463623046875,
+      "ideal_latency_ms_at_100gbps": 0.000153472,
+      "peak_ram_proxy_mb": 58.88,
+      "fitness": 0.393350824082077,
+      "pareto_frontier": false
+    },
+    {
+      "name": "per_tensor_ste_native_int8_kv",
+      "quality_source": "per_tensor_b1_58_native_STE",
+      "runtime_policy": "packed_b1_58_weight_int8_kv",
+      "loss": 2.956115245819092,
+      "perplexity": 19.223149306550624,
+      "token_accuracy": 0.16179434955120087,
+      "logit_kl_to_fp16": 0.3571667969226837,
+      "bytes_per_token_mb": 0.016650390625,
+      "ideal_latency_ms_at_100gbps": 0.000174592,
+      "peak_ram_proxy_mb": 71.68,
+      "fitness": 0.4297089306906425,
+      "pareto_frontier": false
+    },
+    {
+      "name": "per_tensor_ste_native_int4_kv",
+      "quality_source": "per_tensor_b1_58_native_STE",
+      "runtime_policy": "packed_b1_58_weight_int4_kv",
+      "loss": 2.956115245819092,
+      "perplexity": 19.223149306550624,
+      "token_accuracy": 0.16179434955120087,
+      "logit_kl_to_fp16": 0.3571667969226837,
+      "bytes_per_token_mb": 0.01463623046875,
+      "ideal_latency_ms_at_100gbps": 0.000153472,
+      "peak_ram_proxy_mb": 58.88,
+      "fitness": 0.4543387212993507,
+      "pareto_frontier": false
     }
   ],
   "quality_winner": "s1_scaled_ste_int8_kv",

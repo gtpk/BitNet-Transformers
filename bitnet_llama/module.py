@@ -165,6 +165,41 @@ class ScaledBitLinear(nn.Linear):
         return self.quantize_activations(output)
 
 
+class PerTensorBitLinear(nn.Linear):
+    """BitNet b1.58 native layer: a single per-tensor absmean scale, STE-trained.
+
+    This matches bitnet.cpp's I2_S scale granularity exactly (one gamma per
+    weight matrix), so a model trained with this layer is directly I2_S
+    exportable. It exists to discriminate: does per-tensor itself underperform,
+    or only post-hoc per-tensor conversion of a groupwise-trained model?
+    """
+
+    def __init__(self, in_features, out_features, bias=True, activation_bits=None):
+        super(PerTensorBitLinear, self).__init__(in_features, out_features, bias)
+        self.activation_bits = activation_bits
+        self.eps = 1e-12
+
+    def quantize_weight(self):
+        # gamma = mean(|W|); T = clamp(round(W/gamma), -1, 1); dequant = gamma * T
+        gamma = self.weight.detach().abs().mean().clamp(min=self.eps)
+        ternary = torch.clamp(torch.round(self.weight / gamma), -1.0, 1.0)
+        quantized = gamma * ternary
+        return (quantized - self.weight).detach() + self.weight
+
+    def quantize_activations(self, x):
+        if self.activation_bits is None or self.activation_bits <= 1:
+            return x
+        qmax = 2 ** (self.activation_bits - 1) - 1
+        scale = x.detach().abs().amax().clamp(min=self.eps) / qmax
+        quantized = torch.clamp(torch.round(x / scale), -qmax, qmax) * scale
+        return (quantized - x).detach() + x
+
+    def forward(self, input):
+        weight = self.quantize_weight()
+        output = F.linear(input, weight, self.bias)
+        return self.quantize_activations(output)
+
+
 class BitLinearOptimized(BitLinear):
     def __init__(self, in_features, out_features, bias=True, num_groups=1):
         super(BitLinearOptimized, self).__init__(in_features, out_features, bias, num_groups=num_groups)

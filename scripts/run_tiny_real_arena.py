@@ -26,7 +26,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
 from bitnet_llama import conversion as C  # noqa: E402
-from bitnet_llama.module import BitLinear, ScaledBitLinear  # noqa: E402
+from bitnet_llama.module import BitLinear, ScaledBitLinear, PerTensorBitLinear  # noqa: E402
 from scripts.estimate_memory_traffic import ModelShape, default_policies, estimate  # noqa: E402
 
 
@@ -268,6 +268,46 @@ def recover_s1_with_scaled_ste(model, args: argparse.Namespace, source):
     return recovered, losses, replacement_count
 
 
+def replace_target_linears_with_per_tensor(model, args: argparse.Namespace) -> int:
+    replacements = 0
+    for name, module in list(model.named_modules()):
+        if not isinstance(module, nn.Linear) or not is_target_linear_name(name):
+            continue
+        replacement = PerTensorBitLinear(
+            module.in_features,
+            module.out_features,
+            bias=module.bias is not None,
+            activation_bits=args.scaled_ste_activation_bits,
+        )
+        replacement.to(device=module.weight.device, dtype=module.weight.dtype)
+        with torch.no_grad():
+            replacement.weight.copy_(module.weight)
+            if module.bias is not None:
+                replacement.bias.copy_(module.bias)
+        set_nested_module(model, name, replacement)
+        replacements += 1
+    return replacements
+
+
+def recover_with_per_tensor_ste(model, args: argparse.Namespace, source):
+    """BitNet b1.58 native per-tensor STE recovery (same budget as scaled-STE)."""
+    recovered = copy.deepcopy(model)
+    replacement_count = replace_target_linears_with_per_tensor(recovered, args)
+    recovered.train()
+    optimizer = torch.optim.AdamW(recovered.parameters(), lr=args.scaled_ste_learning_rate)
+    losses: list[float] = []
+    for step in range(args.scaled_ste_steps):
+        input_ids = source.batch(args.batch_size, args.seq_len, args.seed + 50000 + step)
+        output = recovered(input_ids=input_ids, labels=input_ids)
+        loss = output.loss
+        optimizer.zero_grad(set_to_none=True)
+        loss.backward()
+        optimizer.step()
+        losses.append(float(loss.detach()))
+    recovered.eval()
+    return recovered, losses, replacement_count
+
+
 def recover_s1_with_projected_qat(model, args: argparse.Namespace, source):
     recovered = copy.deepcopy(model)
     project_model_to_s1(recovered)
@@ -424,6 +464,12 @@ def evaluate_candidates(
     export_model = clone_with_state(model, export_state)
     export_loss, export_acc, export_logits = evaluate_model(export_model, eval_ids)
 
+    # per-tensor b1.58 NATIVE STE (trained per-tensor from the start, same budget
+    # as scaled-STE). Discriminates A (per-tensor is weak) vs B (only post-hoc
+    # per-tensor conversion of a groupwise model is weak). This is I2_S-exportable.
+    pt_model, pt_losses, pt_replacements = recover_with_per_tensor_ste(model, args, source)
+    pt_loss, pt_acc, pt_logits = evaluate_model(pt_model, eval_ids)
+
     # generation smoke (watch metric): finite logits + non-degenerate decode
     prompt = eval_ids[:1, : min(8, eval_ids.shape[1])]
     gen_smoke = {
@@ -431,6 +477,7 @@ def evaluate_candidates(
         "s1_projected_qat": generation_smoke(qat_model, prompt),
         "s1_scaled_ste": generation_smoke(scaled_model, prompt),
         "s1_scaled_ste_export_pt": generation_smoke(export_model, prompt),
+        "per_tensor_ste_native": generation_smoke(pt_model, prompt),
     }
 
     traffic = traffic_by_policy(config, args.seq_len)
@@ -552,6 +599,24 @@ def evaluate_candidates(
             "kl": logit_kl(fp_logits, export_logits),
             "ram_factor": 0.23,
         },
+        {
+            "name": "per_tensor_ste_native_int8_kv",
+            "quality_source": "per_tensor_b1_58_native_STE",
+            "runtime_policy": "packed_b1_58_weight_int8_kv",
+            "loss": pt_loss,
+            "accuracy": pt_acc,
+            "kl": logit_kl(fp_logits, pt_logits),
+            "ram_factor": 0.28,
+        },
+        {
+            "name": "per_tensor_ste_native_int4_kv",
+            "quality_source": "per_tensor_b1_58_native_STE",
+            "runtime_policy": "packed_b1_58_weight_int4_kv",
+            "loss": pt_loss,
+            "accuracy": pt_acc,
+            "kl": logit_kl(fp_logits, pt_logits),
+            "ram_factor": 0.23,
+        },
     ]
     max_bytes = max(traffic[item["runtime_policy"]][0] for item in raw)
     max_latency = max(traffic[item["runtime_policy"]][1] for item in raw)
@@ -587,7 +652,8 @@ def evaluate_candidates(
             )
         )
     mark_pareto(results)
-    return results, qat_losses, ste_losses, scaled_losses, bitlinear_replacements, scaled_replacements, gen_smoke
+    return (results, qat_losses, ste_losses, scaled_losses, bitlinear_replacements,
+            scaled_replacements, gen_smoke, pt_losses, pt_replacements)
 
 
 def print_results(results: list[CandidateResult], train_losses: list[float], elapsed: float) -> None:
@@ -677,6 +743,8 @@ def main() -> None:
         bitlinear_replacements,
         scaled_replacements,
         gen_smoke,
+        pt_losses,
+        pt_replacements,
     ) = evaluate_candidates(
         model, config, eval_ids, args, train_source
     )
@@ -690,6 +758,9 @@ def main() -> None:
     if scaled_losses:
         print(f"  scaled_ste_loss: start={scaled_losses[0]:.4f} end={scaled_losses[-1]:.4f}")
         print(f"  scaled_replacements: {scaled_replacements}")
+    if pt_losses:
+        print(f"  per_tensor_ste_loss: start={pt_losses[0]:.4f} end={pt_losses[-1]:.4f}")
+        print(f"  per_tensor_replacements: {pt_replacements}")
     print("  generation smoke:")
     for name, smoke in gen_smoke.items():
         print(f"    {name:18} finite={smoke['finite']} unique_tokens={smoke['unique_tokens']} degenerate={smoke['degenerate']}")
@@ -711,6 +782,9 @@ def main() -> None:
         "scaled_ste_loss_start": scaled_losses[0] if scaled_losses else None,
         "scaled_ste_loss_end": scaled_losses[-1] if scaled_losses else None,
         "scaled_replacements": scaled_replacements,
+        "per_tensor_ste_loss_start": pt_losses[0] if pt_losses else None,
+        "per_tensor_ste_loss_end": pt_losses[-1] if pt_losses else None,
+        "per_tensor_replacements": pt_replacements,
         "train_elapsed_seconds": elapsed,
         "results": [asdict(item) for item in results],
         "quality_winner": max(results, key=lambda item: item.token_accuracy).name,
