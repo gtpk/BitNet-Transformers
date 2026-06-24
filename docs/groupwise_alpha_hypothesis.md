@@ -28,10 +28,12 @@ post-hoc per-tensor export of the groupwise model: 9.85 / 10.55 / 11.31 (broken)
 So the earlier +18.4% (fixture) and +67% (real-text) per-tensor losses were a
 **post-hoc conversion artifact (hypothesis B)**, not evidence that per-tensor is
 inherently weak (hypothesis A). Trained per-tensor from the start, the model
-recovers fully. Practical consequence: **direct bitnet.cpp/I2_S export is viable
-via per-tensor-native training** — no groupwise GGUF extension or custom kernel
-is required for the export path. Groupwise alpha remains a legitimate format with
-slightly better reconstruction, but it is not necessary for deployable quality.
+recovers fully. Practical consequence: per-tensor-native training is the right
+export source. Official bitnet.cpp I2_S has since been verified on x86, while the
+local Mac M5 build is broken; our own x86 I2_S artifact still needs RT-112 before
+we claim deployable end-to-end quality. Groupwise alpha remains a legitimate
+format with slightly better reconstruction, but it is not necessary for the
+current default path.
 
 ## Short Version
 

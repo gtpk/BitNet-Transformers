@@ -18,23 +18,31 @@ logit error 0.0으로 통과했다. blocked dequant matmul reference는 dense we
 materialization 없이 8.0x 작은 transient working set으로 동일 출력을 냈지만,
 Python loop라 latency는 아직 느리다.
 
-**Export 판별 완료(2026-06-24):** post-hoc per-tensor export는 lossy(PPL +55~77%)지만,
-**처음부터 per-tensor b1.58로 native STE 학습하면 groupwise와 ±1% PPL로 동급**이다
-(Wikitext seed 31/32/33, frontier 2/3, KL 정상, generation 정상). 즉 groupwise는
-품질의 본질이 아니라 사후 변환이 문제였고, **직접 bitnet.cpp/I2_S export가 viable**하다 —
-groupwise GGUF 확장이나 custom kernel 없이 갈 수 있다.
+**Export/runtime 판별 최신 결론(2026-06-25):** post-hoc groupwise->per-tensor
+export는 lossy(PPL +55~77%)지만, **처음부터 per-tensor b1.58로 native STE
+학습하면 groupwise와 ±1% PPL로 동급**이다. Python I2_S reference와 HF/F16/F32
+GGUF export도 통과했다. bitnet.cpp I2_S는 **x86 Colab에서 공식 모델 f32
+PPL 1.8547 vs i2_s PPL 1.8548로 정상**임이 확인됐다. 반면 Mac M5/macOS26/clang21
+로컬 빌드는 I2_S/TL1 ternary runtime이 깨진 상태다. 따라서 알고리즘/포맷은
+유효하고, 현재 배포 검증 타겟은 **x86/Linux I2_S**다.
 
 ## 지금 바로 할 일
 
-I2_S export Python PoC(PTX-101~105, commit 5df98bf)와 **RT-101 upstream layout 감사**가
-끝났다([I2_S Layout Audit](./bitnet_cpp_i2s_layout_audit.md)): 우리 artifact는 의미상
-동일하지만 byte-incompatible(128-block interleave, MSB 필드, code remap, trailing fp32
-scale x8)이고, I2_S는 convert 스크립트가 아니라 별도 quantize 단계 산출물이다.
-다음은 **RT-102**: bitnet.cpp를 pinned commit으로 빌드 → 공식 I2_S GGUF
-(`microsoft/bitnet-b1.58-2B-4T-gguf`) load smoke + 실제 I2_S tensor byte 덤프로 #412
-layout을 소스 대비 검증. 그다음 RT-103(Path A: F32 GGUF→I2_S quantize 우선) →
-RT-104 Python reference 대비 logit/PPL parity → RT-105~107. **여기부터 C++/runtime 트랙**이라
-로컬 MCP 없이 빌드 환경이 필요하다.
+RT-101~111까지의 runtime 조사는 완료됐다. 핵심 결론은:
+
+- upstream I2_S quantizer는 latent fp weight에 대해 `sign(W) * absmax`라서
+  우리 `mean(abs)` native quantization과 의미가 다르다.
+- materialized ternary-dense `Wq = gamma*T`를 넣으면 저장 scale은 우리
+  `gamma`로 보존된다(`Q_absmax(Q_mean(W))`의 scale half 실증).
+- Mac M5 로컬 bitnet.cpp ternary runtime은 빌드/툴체인 문제로 신뢰 불가:
+  I2_S는 공식 모델도 붕괴, TL1은 기본 `BITNET_ARM_TL1=OFF` 및 clang LUT
+  compile blowup으로 막힘.
+- x86 Colab에서는 같은 commit/모델/quantize 경로로 I2_S가 f32와 PPL parity를
+  냈다.
+
+**지금 바로 할 일은 RT-112:** 우리 tiny per-tensor-native 모델을 x86/Linux
+I2_S에서 검증한다. 비교 축은 `Python reference`, `F16/F32 GGUF`, `I2_S GGUF`
+이며, latent Path A와 ternary-dense Path A'를 나눠 PPL을 확인한다.
 
 packed format Phase 1/2/3/4 검증(로컬):
 
@@ -106,14 +114,12 @@ real-text fixture smoke(로컬, harness 확인용):
 8c. [I2_S Export PoC Plan](./i2s_export_poc_plan.md)
    - per-tensor-native → I2_S artifact → import logit 동일성(PTX-101~105)과 다음 runtime gate TC.
 8d. [bitnet.cpp I2_S Layout Audit](./bitnet_cpp_i2s_layout_audit.md)
-   - RT-101 upstream I2_S byte layout 감사 + 우리 artifact 매핑표, 미확정 항목.
-9. [GGUF / bitnet.cpp Export Scoping Plan](./bitnet_cpp_export_scoping.md)
-   - reference ladder 이후 기존 ternary runtime으로 내보낼 수 있는지 확인하는 다음 트랙이다.
-10. [Groupwise Alpha Hypothesis](./groupwise_alpha_hypothesis.md)
+   - RT-101 upstream I2_S byte layout 감사 + RT-111 x86/Mac runtime 판정.
+9. [Groupwise Alpha Hypothesis](./groupwise_alpha_hypothesis.md)
    - 왜 groupwise `alpha*T`가 per-tensor BitNet b1.58보다 품질을 더 잘 보존할 수 있는지 설명한다.
-11. [Research Signal Note](./research_signal_note.md)
+10. [Research Signal Note](./research_signal_note.md)
    - 왜 이 결과가 "연구자가 꿈꾸는 초반부"인지 해석한다.
-12. [TurboQuant + BitNet Implementation Plan](./turboquant_bitnet_implementation_plan.md)
+11. [TurboQuant + BitNet Implementation Plan](./turboquant_bitnet_implementation_plan.md)
    - weight 변환이 안정화된 뒤 KV cache 압축으로 확장하는 별도 축이다.
 
 ## 문서 그래프
@@ -239,20 +245,27 @@ flowchart TD
 - local fixture smoke 신호: groupwise `loss 2.400/acc 0.311`, per-tensor export `loss 2.472/acc 0.274`; 참고용이며 판정은 Colab Wikitext에서 수행
 - `per_tensor_ste_native` 후보 추가(`PerTensorBitLinear`, b1.58 absmean, 단일 γ, STE) — I2_S와 동일 scale granularity
 - **Per-tensor native 판별 게이트 통과(Colab Wikitext seed 31/32/33)**: native per-tensor PPL이 groupwise 대비 `-0.9% / +1.0% / 0.0%`(±1% 이내), frontier `2/3`(seed 33은 quality+resource winner), KL `0.149~0.175`(정상), generation 정상
-- **결정**: post-hoc export(PPL +55~77%)는 lossy지만 native per-tensor는 동급 → **direct I2_S export viable**, groupwise는 품질의 본질 아님(가설 B 입증)
+- **결정**: post-hoc export(PPL +55~77%)는 lossy지만 native per-tensor는 동급 → per-tensor-native가 올바른 export source이며, groupwise는 품질의 본질 아님(가설 B 입증). Runtime은 x86 I2_S에서 검증 중.
 - **I2_S export Python PoC 통과(commit 5df98bf)**: `bitnet_llama/i2s_export.py`(gamma+2-bit codes), `scripts/check_i2s_export.py` PTX-101~105 — native→artifact→import logit/PPL 동일(err 3.6e-7), target 8x vs fp16. Python reference는 정확성 증명이며 runtime speed는 아직 아님
+- **RT-101~103 통과**: bitnet.cpp I2_S layout 감사, official/tiny F32 GGUF 변환, I2_S quantize/load smoke 완료. plain LLaMA arch도 converter/runtime loader가 받음.
+- **RT-104~106 판정**: latent FP를 upstream I2_S로 바로 quantize하면 semantics가 달라져 붕괴한다(`absmax/sign` vs 우리 `mean(abs)/round`). ternary-dense `Wq=gamma*T`를 넣으면 scale은 `gamma`로 보존되지만, Mac I2_S runtime에서는 PPL이 깨짐.
+- **RT-107~109 판정**: Mac M5/macOS26/clang21 로컬 ternary runtime은 신뢰 불가. official I2_S도 붕괴, TL1은 `BITNET_ARM_TL1=OFF` 기본 빌드와 clang LUT compile blowup으로 막힘.
+- **RT-111 판정**: x86 Colab에서 official `bitnet_b1_58-large` f32 PPL `1.8547`, i2_s PPL `1.8548`로 parity. I2_S upstream/runtime은 정상이며 Mac 한정 빌드/툴체인 문제로 결론.
 
 다음:
 
-1. Colab JSON(`reports/tiny_real_text_per_tensor_seed*.json`)을 회수/보존(휘발성).
-2. bitnet.cpp/GGUF I2_S block layout upstream 재확인 + reference artifact 매핑표(RT-101).
-3. per-tensor-native 모델용 GGUF writer 작성(또는 convert-hf-to-gguf-bitnet 적응), I2_S 타겟.
-4. bitnet.cpp 빌드 후 RT-102~107(loader/logit/PPL/storage/latency/generation)을 Python reference 대비 검증.
+1. **RT-112:** x86/Linux에서 우리 tiny per-tensor-native 모델을 I2_S로 검증한다.
+   `Python reference`, `F16/F32 GGUF`, `I2_S GGUF` PPL을 비교하고, latent Path A와
+   ternary-dense Path A'를 분리한다.
+2. RT-112가 통과하면 storage/latency/generation을 x86에서 측정한다.
+3. RT-112가 깨지면 official x86 parity는 정상이라는 전제 아래 우리 artifact/metadata
+   또는 direct writer(Path B)를 다시 본다.
+4. Mac M5 I2_S/TL1은 보류한다. 필요하면 upstream bug report용 최소 재현으로 분리한다.
 
 이전 보류 항목 중 packed reference ladder는 완료됐고, export 경로도 판별됐다
 (per-tensor-native → I2_S 직행). 남은 다음 축:
 
-- bitnet.cpp/I2_S export artifact 구현 (per-tensor-native 모델 기준)
+- bitnet.cpp/I2_S export artifact 검증 (x86/Linux, per-tensor-native 모델 기준)
 - groupwise GGUF 확장 / custom kernel: export 트랙이면 불필요. groupwise의 약간 더 나은
   reconstruction을 살리려는 연구용으로만 선택적
 - TurboQuant KV cache 구현

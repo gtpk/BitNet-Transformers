@@ -14,9 +14,9 @@ writer, per the "do not assume the format" rule. This is RT-101: the mapping
 table from our Python reference `I2SWeight` to the real GGUF I2_S layout, plus an
 explicit list of what still must be confirmed from source/runtime.
 
-Confidence labels below: **[confirmed]** from upstream source/quotes,
-**[community]** from a reverse-engineering issue (treat as strong hint, verify in
-source before trusting a writer), **[TODO]** not yet pinned.
+Confidence labels below: **[confirmed]** from upstream source/real bytes,
+**[historical]** from the earlier reverse-engineering issue that was later
+superseded by source inspection.
 
 ## Upstream anchors
 
@@ -68,9 +68,11 @@ Still open: exact in-block element interleave + MSB field order + code mapping
 (below) are not provable from sizes alone — confirm in `ggml-bitnet*` source or by
 byte-diffing a Path B writer against this golden I2_S file (its intended use).
 
-## I2_S weight byte layout  [size law confirmed; interleave/code mapping community, verify in source]
+## I2_S weight byte layout  [source-confirmed]
 
-From Issue #412 (reverse-engineered from the llama.cpp fork):
+Later RT-105 source inspection supersedes the earlier Issue #412 interpretation.
+The active code path is `src/ggml-bitnet-mad.cpp::quantize_i2_s` and
+`ggml-quants.c::dequantize_row_i2_s` in the pinned fork.
 
 - Block: each **32-byte block stores 128 ternary elements** in 4 groups of 32
   (128-element interleaving, NOT sequential packing).
@@ -78,20 +80,24 @@ From Issue #412 (reverse-engineered from the llama.cpp fork):
   at offsets `gp, 32+gp, 64+gp, 96+gp`:
   - `bits[7:6]` = offset 0, `bits[5:4]` = offset 32, `bits[3:2]` = offset 64,
     `bits[1:0]` = offset 96  (extract: `shift = 6 - 2*group; (byte >> shift) & 0x3`)
-- Ternary->code: **`0b00 = 0`, `0b01 = +1`, `0b10 = -1`** (`0b11` unused).
-- Per-tensor scale: **trailing 32 bytes = one float32 replicated 8x**, appended
-  after `ceil(numel/4)` code bytes. Total tensor bytes = `ceil(numel/4) + 32`.
+- Ternary->code in the active dequant map: **`0b00 = -1`, `0b01 = 0`,
+  `0b10 = +1`, `0b11 = 0`**.
+- Per-tensor scale region: tensor byte law remains **`ceil(numel/4) + 32`**, but
+  the trailing 32 bytes are **one fp32 scale followed by padding/garbage**, not
+  eight replicated scales.
 
-## Scale semantics  [partly confirmed]
+## Scale semantics  [confirmed for upstream quantize]
 
-- I2_S scale is **per-tensor float32** [community].
-- The runtime dequant is `code_value * scale` with `code_value in {-1,0,+1}`, so
-  the stored scale is a **multiplicative gamma** (not 1/gamma). **[TODO confirm]**
-  in the I2_S dot-product/dequant kernel (`ggml-bitnet-*.cpp`).
-- BitNet b1.58 *training* uses `gamma = mean(|W|)`. But note: the converter's
-  TL1/TL2 path computes **`scale = max(|W|)`** [confirmed in
-  `convert-hf-to-gguf-bitnet.py`], not mean. Whichever scale we store, we must
-  store codes `= round(W/scale)` consistently so `scale * code == our to_dense()`.
+- I2_S scale is a **per-tensor float32 multiplicative scale**.
+- Upstream `llama-quantize ... I2_S` computes **`scale = max(|W|)`** and writes
+  sign codes. This was confirmed from source and by parsing real GGUF scales.
+- BitNet b1.58 *training* in this project uses `gamma = mean(|W|)` and ternary
+  `round(W/gamma)`. Therefore latent-FP Path A re-quantizes with different
+  semantics.
+- If the F32 GGUF already contains materialized ternary-dense weights
+  `Wq = gamma*T`, upstream `max(|Wq|)` stores `gamma`. This scale-repack theorem
+  was experimentally confirmed, but project-specific x86 PPL parity is still
+  pending RT-112.
 
 ## Converter reality  [confirmed]
 
@@ -100,7 +106,7 @@ I2_S path in the convert script. I2_S is produced by a **separate quantization
 step** (`setup_env.py -q i2_s`, i.e. a `llama-quantize`-style pass to
 `GGML_TYPE_I2_S`). Consequence: two possible writer paths (see below).
 
-## Tensor distribution  [community]
+## Tensor distribution  [confirmed]
 
 - `token_embd.weight` is **F16**, not I2_S (embeddings excluded; matches our
   fp16 embedding policy).
@@ -114,17 +120,19 @@ step** (`setup_env.py -q i2_s`, i.e. a `llama-quantize`-style pass to
 | --- | --- | --- | --- |
 | code packing order | sequential, 4 elems/byte, row-major flat | 128-elem block, byte holds offsets `[gp,32+gp,64+gp,96+gp]` | **re-pack with 128-block interleave** |
 | 2-bit field order | LSB-first (`elem0` in bits[1:0]) | MSB-first (`offset0` in bits[7:6]) | **reorder fields** |
-| code mapping | `0b00=-1, 0b01=0, 0b10=+1` (shifted `T+1`) | `0b00=0, 0b01=+1, 0b10=-1` | **remap codes** |
-| scale storage | one fp32 scalar field | fp32 **replicated 8x in trailing 32 bytes** of tensor data | **append 32-byte trailing scale** |
-| scale value | `gamma = mean(|W|)`, dequant `gamma*T` | per-tensor fp32, multiplicative | keep `gamma`; **[TODO] confirm multiply** |
+| code mapping | `0b00=-1, 0b01=0, 0b10=+1` (shifted `T+1`) | `0b00=-1, 0b01=0, 0b10=+1`, `0b11=0` | no value remap; still repack fields/order |
+| scale storage | one fp32 scalar field | one fp32 scale at trailing region start + padding to 32B | **append 32-byte scale/pad region** |
+| scale value | `gamma = mean(|W|)`, dequant `gamma*T` | upstream quantize uses `absmax`; runtime multiplies by stored scale | keep `gamma` only via ternary-dense Path A' or direct writer |
 | tail padding | pad to multiple of 4 | pad to multiple of **128** per block | pad to 128 |
-| dtype/transpose | torch `[out, in]` | GGUF `[out, in]` (assumed) | **[TODO] confirm no transpose** |
-| tensor names | `model.layers.N.self_attn.q_proj.weight` ... | GGUF `blk.N.attn_q/attn_k/attn_v/attn_output/ffn_gate/ffn_up/ffn_down.weight` (llama.cpp convention) | **name map; [TODO] confirm via tensor_map** |
+| dtype/transpose | torch `[out, in]` | GGUF converter/runtime accepted the plain LLaMA shapes | no transpose issue observed in F16/F32 parity |
+| tensor names | `model.layers.N.self_attn.q_proj.weight` ... | GGUF `blk.N.attn_q/attn_k/attn_v/attn_output/ffn_gate/ffn_up/ffn_down.weight` (llama.cpp convention) | name map confirmed via converter/dump |
 | embeddings / lm_head | fp16 embed, separate lm_head | `token_embd.weight` F16, **tied** (no `output.weight`) | match tie; keep embed F16 |
 
 Conclusion: our reference artifact is **semantically identical** (ternary + a
 single per-tensor scale, dequant `scale*T`) but **byte-incompatible**. A writer
-must re-pack (interleave + MSB fields + code remap + trailing scale).
+must re-pack (interleave + MSB fields + trailing scale/pad). The code value map
+now matches our shifted `T+1` convention, so the earlier code-remap requirement
+is obsolete.
 
 ## Two export paths
 
@@ -138,30 +146,34 @@ must re-pack (interleave + MSB fields + code remap + trailing scale).
   exact match to our Python reference, but we own every byte detail and must
   track upstream format changes.
 
-Decision: **try Path A first** (cheaper, upstream-owned format), and use our
-Python reference as the RT-104 ground truth. Fall back to Path B only if Path A's
-scale rule degrades logit/PPL parity.
+Decision update after RT-111:
 
-## Remaining confirmations before writing (RT-101 exit criteria)
+- Latent Path A is mechanically valid but semantically unfaithful for our model
+  because upstream I2_S quantizes latent FP as `sign(W)*absmax`.
+- Ternary-dense Path A' preserves our scale and may avoid a direct writer; it is
+  the next path to test on x86 in RT-112.
+- Path B remains the fallback if official I2_S is healthy but our Path A' artifact
+  still drifts.
+
+## Remaining confirmations / current exit criteria
 
 1. **[DONE]** commit hashes pinned (above).
-2. **[partial]** byte-size law `ceil(numel/4)+32` confirmed from real bytes;
-   in-block interleave + MSB field order still to confirm in `ggml-bitnet*` source
-   (or by byte-diff vs the golden I2_S file).
-3. **[TODO]** confirm scale is multiplicative gamma in the I2_S dequant kernel.
-4. **[TODO]** confirm tensor element order / no transpose for I2_S tensors.
+2. **[DONE]** byte-size law `ceil(numel/4)+32`, 128-block interleave, MSB field
+   order, code map, and scale location confirmed from source/real bytes.
+3. **[DONE]** scale is multiplicative and upstream I2_S quantize uses absmax.
+4. **[partial]** tensor element order is source-understood, but the local Python
+   parser still had an order bug. RT-112 can avoid this by comparing PPL/runtime
+   outputs on x86 first.
 5. **[DONE]** GGUF tensor names confirmed via `llama-gguf` dump (`blk.*` convention
    + BitNet `attn_sub_norm`/`ffn_sub_norm`); `token_embd.weight` is F16.
-6. **[partial]** Path A confirmed = `setup_env.py -q i2_s` converts to F32 GGUF
-   then quantizes to I2_S; whether the quantize step re-derives the scale (vs uses
-   a stored one) is the RT-104 parity question.
+6. **[DONE]** official x86 I2_S runtime sanity passed: f32 PPL `1.8547`, i2_s PPL
+   `1.8548`. Mac M5 failure is a local toolchain/backend issue.
 
 ## Next steps
 
-- RT-102: build bitnet.cpp at the pinned commit; load an official I2_S GGUF
-  (e.g. `microsoft/bitnet-b1.58-2B-4T-gguf`) as a smoke; inspect a dumped I2_S
-  tensor to verify the #412 layout against real bytes.
-- RT-103: export our tiny per-tensor-native model via Path A; if scale parity is
-  poor, implement Path B writer (`scripts/i2s_to_gguf.py`).
-- RT-104: logit/PPL parity vs the Python `i2s_export` reference.
-- RT-105..107: storage, latency, generation smoke.
+- RT-112: run our tiny per-tensor-native model on x86/Linux I2_S. Compare
+  Python reference, F16/F32 GGUF, latent Path A I2_S, and ternary-dense Path A'
+  I2_S PPL.
+- If Path A' passes, proceed to x86 storage/latency/generation.
+- If Path A' fails while official x86 I2_S remains healthy, inspect metadata or
+  implement direct Path B writer.

@@ -12,6 +12,13 @@ Start here:
 
 - [Research index and reading path](./docs/index.md)
 
+Current modernization status:
+
+- Python-side per-tensor b1.58 export/import is verified.
+- Official bitnet.cpp I2_S is verified on x86/Linux; the local Mac M5 build is
+  currently blocked by toolchain/backend issues.
+- Next gate: run this repo's tiny per-tensor-native model on x86 I2_S (RT-112).
+
 Core documents:
 
 - [Memory-traffic-first BitNet plan](./docs/memory_traffic_first_plan.md)
@@ -23,6 +30,8 @@ Core documents:
 - [Real tiny text validation plan](./docs/real_tiny_text_validation_plan.md)
 - [Packed ternary weight format plan](./docs/packed_ternary_format_plan.md)
 - [GGUF / bitnet.cpp export scoping plan](./docs/bitnet_cpp_export_scoping.md)
+- [I2_S export PoC plan](./docs/i2s_export_poc_plan.md)
+- [bitnet.cpp I2_S layout audit](./docs/bitnet_cpp_i2s_layout_audit.md)
 - [Groupwise alpha hypothesis](./docs/groupwise_alpha_hypothesis.md)
 - [Research signal note](./docs/research_signal_note.md)
 - [TurboQuant + BitNet KV-cache plan](./docs/turboquant_bitnet_implementation_plan.md)

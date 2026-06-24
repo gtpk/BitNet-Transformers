@@ -139,15 +139,12 @@ The right move is not to overclaim. The right move is to keep closing gates:
 4. push runtime work only after separating reference modules from real kernels
 5. package the story if the signal keeps surviving
 
-The next practical research move is to build the GGUF/bitnet.cpp I2_S export
-path for the per-tensor-native candidate before writing a custom kernel. That
-tests whether an existing runtime can provide the latency half of the story
-while this project keeps the conversion and validation trail honest.
-
-The first export result narrowed that move: post-hoc groupwise -> I2_S export is
-lossy, but per-tensor-native b1.58 matches groupwise within +-1% PPL on Wikitext.
-So the next honest test is now an artifact writer plus runtime checks: load,
-logit/PPL preservation, storage, and latency.
+The next practical research move is narrower now. Python export correctness,
+HF/F16/F32 GGUF plumbing, and official x86 I2_S runtime sanity have all survived.
+The local Mac M5 ternary runtime failed, but x86 official I2_S matched f32 PPL to
+the fourth decimal. So the next honest test is not more Mac build debugging; it
+is RT-112: run this repo's tiny per-tensor-native model through x86 I2_S and
+compare Python/F16/F32/I2_S PPL before measuring latency.
 
 This thread is worth following because the positive results are not isolated.
 They line up with a plausible mechanism.

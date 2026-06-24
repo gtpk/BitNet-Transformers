@@ -306,7 +306,7 @@ frontier on a tiny fitness/RAM tie-break.
 Decision:
 
 ```text
-PASS -> direct I2_S export is viable via per-tensor-native training.
+PASS -> per-tensor-native is the viable export source.
 ```
 
 - Native per-tensor PPL is within +-1% of groupwise on all three seeds
@@ -317,8 +317,10 @@ PASS -> direct I2_S export is viable via per-tensor-native training.
 - Native per-tensor (PPL ~6) crushes post-hoc export (PPL ~10), which proves the
   earlier export loss was a post-hoc conversion artifact, not a per-tensor weakness.
 
-Consequence: the export track does not need a groupwise GGUF extension or a custom
-kernel. Train per-tensor b1.58 native, then export to bitnet.cpp I2_S.
+Consequence: train per-tensor b1.58 native rather than post-hoc converting a
+groupwise model. Later runtime work showed official bitnet.cpp I2_S is faithful
+on x86/Linux, while the local Mac M5 build is broken. The remaining project gate
+is our own tiny model on x86 I2_S (RT-112).
 
 ## I2_S Export PoC Milestone (local)
 
@@ -385,6 +387,30 @@ They were not committed from the local workspace and may be ephemeral. Treat
 this document as the milestone record, not as a replacement for raw result
 archival. Re-run the sweep before making a paper-style quantitative claim.
 
+## Runtime Platform Resolution (RT-111)
+
+Date: 2026-06-25
+
+After local Mac M5 runs showed I2_S collapse and TL1 build failures, x86 Colab
+was used as a controlled runtime sanity check with the official
+`1bitLLM/bitnet_b1_58-large` model, same pinned bitnet.cpp commit, and the same
+`llama-quantize ... I2_S` path.
+
+| Platform | F32/F16 PPL | I2_S PPL | Verdict |
+| --- | ---: | ---: | --- |
+| x86 Colab/Linux | `1.8547` | `1.8548` | I2_S runtime valid |
+| Mac M5/macOS26/clang21 | `13.95` official f32 | `112791` official i2_s | local toolchain/backend broken |
+
+Interpretation:
+
+- bitnet.cpp I2_S is not an upstream/runtime-design failure.
+- The Mac M5 failure is local build/backend trouble: I2_S Metal produced garbage,
+  I2_S CPU crashed, TL1 default build had `BITNET_ARM_TL1=OFF`, and TL1 ON hit a
+  clang LUT compile blowup.
+- Our quantization/export work remains valid; f16 GGUF parity had already shown
+  the weights and protocol are sound.
+- Runtime validation should continue on x86/Linux first.
+
 ## Next Actions
 
 Synthetic gates, real-text validation, and packed-format Phase 1/2/3/4 reference are all done.
@@ -392,13 +418,14 @@ Recommended order from here:
 
 1. Archive the real-text JSON reports from Colab back into `reports/` or rerun
    the sweep before paper-style quantitative claims.
-2. Define I2_S-style export TCs for the per-tensor-native path: artifact
-   loadability, logit equality against the Python reference, storage ratio, PPL
-   on tiny real text, and latency/memory against the Python reference path.
-3. Implement the exporter from a `per_tensor_ste_native` state_dict to the target
-   bitnet.cpp/GGUF I2_S layout.
-4. Keep groupwise GGUF extension and custom fused kernels as fallback tracks only
-   if the direct I2_S artifact/runtime path fails.
+2. Run **RT-112** on x86/Linux: our tiny per-tensor-native model, comparing
+   Python reference, F16/F32 GGUF, and I2_S GGUF PPL. Test latent Path A and
+   ternary-dense Path A' separately.
+3. If RT-112 passes, measure storage, generation, and latency on x86/Linux.
+4. If RT-112 fails while official I2_S remains healthy, inspect our artifact/
+   metadata or implement a direct writer(Path B).
+5. Keep Mac M5 I2_S/TL1 work as a separate upstream/toolchain issue, not the main
+   research path.
 
 See [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) for the
 format spec and TC matrix.

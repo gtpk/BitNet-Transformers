@@ -250,10 +250,15 @@ real-text에서 scaled-STE는 CE/PPL/accuracy가 projected-QAT보다 좋지만 K
 
 ## Decision after this phase
 
-format/TC, `PackedTernaryLinear`, blocked dequant reference가 모두 logit 동일성을 통과했다. 다음은:
+format/TC, `PackedTernaryLinear`, blocked dequant reference가 모두 logit 동일성을 통과했다.
+이후 export/runtime 조사는 별도 문서에서 진행됐고, 현재 결론은 다음으로 갱신됐다:
 
-1. GGUF/bitnet.cpp export 스코핑 결과에 따라 lossy `per_tensor_b158` quality gate 실행
-2. 손실이 작으면 I2_S-style export artifact/logit/storage/latency TC 설계
-3. 손실이 크면 groupwise GGUF extension 또는 Phase 4b CPU/Metal/CUDA fused kernel을 별도 스코핑
-4. pretrained small model에서 storage/logit/PPL/latency를 재검증
-5. TurboQuant KV cache는 weight runtime 경로가 정해진 뒤 별도 축으로
+1. lossy `per_tensor_b158` quality gate는 완료됐다. post-hoc groupwise->per-tensor는
+   lossy지만, `per_tensor_ste_native`는 groupwise와 ±1% PPL로 동급이다.
+2. Python I2_S export PoC(PTX-101~105)는 통과했다. `gamma + 2-bit codes` artifact가
+   native 모델 logits/PPL을 보존한다.
+3. bitnet.cpp I2_S는 x86 Colab에서 official model f32/i2_s PPL parity를 냈다.
+   Mac M5 로컬 I2_S/TL1 실패는 플랫폼/툴체인 문제로 분리됐다.
+4. 다음 runtime gate는 x86/Linux에서 우리 tiny per-tensor-native 모델의 I2_S PPL을
+   Python/F16/F32 reference와 비교하는 RT-112다.
+5. TurboQuant KV cache는 weight runtime 경로가 x86에서 닫힌 뒤 별도 축으로 진행한다.

@@ -90,25 +90,44 @@ NOT proven yet:
 - real GGUF on-disk layout compatibility (field order, tensor names, block
   structure) — that is the next stage's job.
 
-## Next: bitnet.cpp / GGUF Runtime Gate (TC draft)
+## Runtime Gate Status
 
-The C++/runtime track checks the exported artifact against this Python reference.
+The C++/runtime track now has two separate conclusions:
+
+```text
+Python artifact correctness : PASS (this document, PTX-101..105)
+bitnet.cpp I2_S runtime     : PASS on x86/Linux official model, broken on local Mac M5
+```
+
+RT-111 verified that official bitnet.cpp I2_S is faithful on x86 Colab:
+`f32 PPL 1.8547` vs `i2_s PPL 1.8548`. The earlier Mac M5 collapse is a local
+M5/macOS26/clang21 build/backend problem, not an I2_S design or algorithm issue.
+
+The remaining project-specific runtime gate is therefore RT-112: run **our tiny
+per-tensor-native model** on x86/Linux I2_S and compare it against this Python
+reference plus F16/F32 GGUF.
+
+## bitnet.cpp / GGUF Runtime Gate Matrix
 
 | ID | Area | Check | Pass criterion |
 | --- | --- | --- | --- |
-| RT-101 | Format remap | reference `I2SWeight` -> actual GGUF I2_S block layout | field-by-field mapping table, no gaps |
-| RT-102 | Loader | exported GGUF loads in bitnet.cpp | no loader/shape/name error |
-| RT-103 | Logit parity | bitnet.cpp logits vs Python `gamma*T` reference | max logit delta below recorded threshold |
-| RT-104 | PPL parity | tiny-text PPL bitnet.cpp vs Python reference | delta small and recorded |
-| RT-105 | Storage | on-disk GGUF size vs fp16 GGUF | exact ratio recorded |
-| RT-106 | Latency | per-token latency vs fp16 llama.cpp baseline | measured, no overclaim |
-| RT-107 | Generation | short generation smoke in bitnet.cpp | finite, non-degenerate |
+| RT-101 | Format remap | reference `I2SWeight` -> actual GGUF I2_S block layout | DONE |
+| RT-102 | Loader/build | official/tiny GGUF build and load smoke | DONE |
+| RT-103 | Export plumbing | tiny HF -> F32 GGUF -> I2_S load smoke | DONE |
+| RT-104 | Semantics | latent Path A vs Python `gamma*T` reference | DONE: latent Path A unfaithful |
+| RT-105 | Layout/debug | source semantics + code/order investigation | DONE enough for strategy |
+| RT-106 | Activation/protocol | int8 activation and F16 GGUF controls | DONE: not activation/protocol |
+| RT-107 | Local runtime | zero-free and official model on Mac I2_S | DONE: Mac runtime broken |
+| RT-108/109 | Mac TL1 | TL1 sanity/rebuild | DONE: local toolchain blocked |
+| RT-111 | x86 sanity | official f32 vs i2_s PPL on x86 | DONE: parity |
+| RT-112 | Our x86 runtime | our tiny Python/F16/F32/I2_S PPL | NEXT |
 
 Decision rule:
 
 ```text
-RT-103 / RT-104 pass with small delta -> I2_S export is the deployable path.
-Logit/PPL drift large -> inspect tensor layout/transpose/scale dtype before kernel blame.
+RT-112 passes -> I2_S export is deployable on x86/Linux for our model.
+RT-112 fails but official I2_S remains healthy -> inspect our artifact/metadata or Path B.
+Mac M5 failures do not block x86/Linux deployment; treat them as toolchain bugs.
 ```
 
 ## Implementation Order From Here
@@ -116,8 +135,8 @@ Logit/PPL drift large -> inspect tensor layout/transpose/scale dtype before kern
 1. (this doc) fix the Python PoC as a milestone. DONE.
 2. RT-101: re-inspect the bitnet.cpp/GGUF I2_S format from upstream source and
    produce the field mapping table. **DONE** -> [I2_S Layout Audit](./bitnet_cpp_i2s_layout_audit.md)
-   (byte layout differs: 128-block interleave, MSB fields, code remap, trailing
-   fp32 scale x8; I2_S is a separate quantize step, not the convert script).
-3. Write a GGUF writer for the per-tensor-native model (or adapt
-   `convert-hf-to-gguf-bitnet`), targeting I2_S.
-4. Build bitnet.cpp, run RT-102..107 against the Python reference.
+   (byte layout differs: 128-block interleave, MSB fields, trailing fp32 scale
+   plus padding; I2_S is a separate quantize step, not the convert script).
+3. RT-101..111 completed; see [GGUF / bitnet.cpp Export Scoping Plan](./bitnet_cpp_export_scoping.md).
+4. RT-112: run our tiny per-tensor-native model on x86/Linux I2_S. Compare latent
+   Path A and ternary-dense Path A' against Python/F16/F32 references.

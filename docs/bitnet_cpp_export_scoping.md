@@ -27,26 +27,27 @@ existing optimized ternary runtime before writing a custom kernel?
 
 That question has now been narrowed. Post-hoc export of a groupwise-trained
 model to per-tensor I2_S is lossy, but a model trained natively with per-tensor
-b1.58 STE matches groupwise quality. The active export path is therefore:
+b1.58 STE matches groupwise quality. The active runtime target is now:
 
 ```text
-train per-tensor-native b1.58 -> export directly to bitnet.cpp/GGUF I2_S
+train per-tensor-native b1.58 -> materialize/check I2_S artifact -> run on x86/Linux bitnet.cpp I2_S
 ```
 
 ## Status
 
-Date: 2026-06-24
+Date: 2026-06-25
 
 ```text
 Step 0/1 complete.
 Mapping decision for groupwise -> I2_S: lossy re-quantization.
 Step 2 complete: native per-tensor b1.58 gate PASSED.
-RT-101 layout audit + RT-102 build/verify complete.
-RT-103A/B/C complete: Path A holds END TO END for a plain-LLaMA model.
-Next: RT-104 logit/PPL parity (bitnet.cpp I2_S vs Python i2s_export reference).
+RT-101..111 complete.
+x86 official I2_S sanity: PASS (f32 PPL 1.8547 vs i2_s PPL 1.8548).
+Mac M5 I2_S/TL1: BROKEN local toolchain/backend, not algorithm.
+Next: RT-112 our tiny model on x86 I2_S (Python/F16/F32/I2_S PPL parity).
 ```
 
-**RT-103C (I2_S quantize + runtime smoke): PASS. Path A is real.**
+**RT-103C (I2_S quantize + runtime smoke): PASS as plumbing, not final parity.**
 `llama-quantize --token-embedding-type f16 ggml-model-f32.gguf ggml-model-i2_s.gguf I2_S 1 1`
 succeeded (36MB -> 16MB); each target linear logged "converting to i2_s",
 norms kept f32. Byte law holds (attn 256x256 -> 16416 B = 65536/4+32).
@@ -57,12 +58,10 @@ Output is gibberish (random untrained tiny model; quality is RT-104). Note: the
 `llama-gguf` example tool reports "failed to read tensor data" on I2_S (its size
 calc doesn't know type 36) but the real `llama_model_loader` handles it fine.
 
-The current bitnet.cpp/GGUF route is viable only through the per-tensor-native
-training path. The bit-level ternary family is compatible, and the scale
-granularity matches I2_S when the model is trained with one per-tensor
-`gamma = mean(abs(W))` from the start. What remains is engineering validation:
-artifact writing, loader compatibility, logit/PPL preservation, storage, and
-runtime latency.
+The current bitnet.cpp/GGUF route is viable on **x86/Linux**. On this local Mac
+M5 build, I2_S/TL1 are blocked by toolchain/backend issues. What remains is
+project-specific validation: run our tiny per-tensor-native artifact on x86 I2_S
+and compare Python/F16/F32/I2_S PPL before claiming deployment readiness.
 
 Post-hoc conversion of the groupwise scaled-STE model to I2_S remains a failed
 path. It collapses groupwise `alpha` to one tensor scale after the model has
@@ -248,15 +247,15 @@ generation smoke was finite/non-degenerate on all three (decodes to English).
 Decision:
 
 ```text
-DIRECT I2_S EXPORT IS VIABLE -- via per-tensor-native training, not post-hoc conversion.
+PER-TENSOR-NATIVE EXPORT IS VIABLE -- but runtime deployment is platform-scoped.
 ```
 
 The mapping is "lossy" only if you convert a groupwise-trained model after the
 fact. If the model is trained per-tensor (BitNet b1.58 native) from the start,
-its scale granularity already matches I2_S, so export becomes lossless and quality
-is preserved. No groupwise GGUF extension or custom kernel is needed for the
-export track. See [Groupwise Alpha Hypothesis](./groupwise_alpha_hypothesis.md)
-Gate Result (strong form refuted).
+its scale granularity matches the I2_S target. Python/F16/F32 references preserve
+quality, and official bitnet.cpp I2_S is faithful on x86. The remaining claim to
+close is our own tiny model on x86 I2_S (RT-112). Groupwise GGUF/custom kernels
+remain fallback/research options, not the default path.
 
 ### RT-104 result: Path A is mechanically open but semantically UNFAITHFUL
 
@@ -286,14 +285,10 @@ our trained per-tensor quantization to the runtime (PPL collapses on this model)
 Path A is fine for models trained the bitnet.cpp way; it is unfaithful to ours.
 ```
 
-Decision: to deploy OUR per-tensor b1.58 quantization faithfully, use **Path B** —
-write the I2_S bytes ourselves (our codes + our `mean|W|` scale) into bitnet's
-layout, which we now know: 32-byte/128-elem blocks, byte `gp` holds offsets
-`[gp,32+gp,64+gp,96+gp]` at bits `[7:6,5:4,3:2,1:0]`, code `0b00=-1/0b01=0/0b10=+1`,
-then a trailing fp32 scale (x8 = 32 bytes). Remaining for Path B: confirm the
-ACTIVE quantizer's exact element order against a byte-diff of our writer vs a
-golden file (our decode currently matches ~50-62%, so finalize the order/rule
-before trusting the writer).
+Interim decision at RT-104 was Path B, but RT-104D/RT-111 refined this. Feeding
+already-ternarized dense weights `Wq=gamma*T` makes upstream I2_S store our
+`gamma`, so Path A' may avoid a custom writer. Path B remains a fallback only if
+our x86 Path A' artifact still drifts while official I2_S remains healthy.
 
 ### RT-105A investigation (layout cert): semantics confirmed, byte-order open
 
@@ -571,25 +566,21 @@ Only after correctness:
 | EXPORT-006 | Storage | artifact size vs fp16 | report exact ratio |
 | EXPORT-007 | Latency | runtime latency vs Python reference/dense | report, no overclaim |
 
-## Decision Rule
-
-Proceed to export implementation when the source model is trained in the target
-scale format.
+## Current Decision Rule
 
 The groupwise -> I2_S mapping is lossy and should not be used for deployment.
-The per-tensor-native path has passed the real-text quality gate, so I2_S export
-can now be claimed as viable in this narrower sense:
+The per-tensor-native path has passed the real-text quality gate, but runtime
+deployment is now platform-scoped:
 
 ```text
-I2_S-compatible model = trained per-tensor-native from the start.
-Not I2_S-compatible model = groupwise-trained model converted post-hoc.
+x86/Linux I2_S official runtime = verified healthy (RT-111).
+Mac M5 local I2_S/TL1 runtime = blocked by build/backend issues.
+Our model on x86 I2_S = RT-112 pending.
 ```
 
-If mapping is blocked, split into:
-
-1. custom GGUF extension/export path
-2. custom CPU/Metal/CUDA fused kernel track
-3. bitnet.cpp contribution or adapter track
+If RT-112 passes, continue with x86 storage/latency/generation. If RT-112 fails,
+inspect our artifact/metadata or implement a direct Path B writer. Mac M5 work is
+now a separate upstream/toolchain issue, not the main research path.
 
 ## RT-110/111: x86 (Colab) I2_S verification — build saga
 
