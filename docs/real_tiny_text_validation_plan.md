@@ -100,8 +100,10 @@ Pause if:
 
 ## Next Implementation Task
 
-Add a real-text mode to the arena instead of creating a separate one-off
-notebook. The preferred shape is:
+Status: implemented in `scripts/run_tiny_real_arena.py`.
+
+The arena now supports a real-text mode instead of requiring a separate one-off
+notebook:
 
 ```text
 scripts/run_tiny_real_arena.py
@@ -110,9 +112,86 @@ scripts/run_tiny_real_arena.py
   --tokenizer <hf-tokenizer-or-local>
 ```
 
-If tokenizer/dataset setup becomes too heavy, use a small committed text
-fixture first and keep the interface compatible with a later tokenizer-backed
-path.
+Default tokenization is byte-level with vocab size `256`, so local smoke tests
+do not need downloads. A small committed fixture exists at `data/tiny_corpus.txt`.
+
+Local harness smoke:
+
+```bash
+.venv/bin/python scripts/run_tiny_real_arena.py \
+  --data-mode text \
+  --text-path data/tiny_corpus.txt \
+  --train-steps 40 \
+  --qat-steps 12 \
+  --ste-qat-steps 12 \
+  --scaled-ste-steps 12 \
+  --seq-len 64 \
+  --batch-size 8 \
+  --eval-batch-size 16 \
+  --json-out reports/tiny_real_text_fixture_smoke.json
+```
+
+This fixture smoke is a harness check, not a scientific result. The fixture is
+only a few kilobytes, so small accuracy differences are noise. Its purpose is
+to verify:
+
+- text mode loads and splits real text
+- byte tokenizer path works without network
+- synthetic mode remains unchanged
+- generation smoke reports finite, non-degenerate outputs
+
+## Colab Real-Text Plan
+
+For the actual real-text validation, create a larger text file in Colab, then
+run the arena with `--data-mode text`.
+
+Target:
+
+```text
+train tokens: 50k-200k
+eval tokens : 10k-50k
+seeds       : 31, 32, 33
+```
+
+Example command shape:
+
+```bash
+python scripts/run_tiny_real_arena.py \
+  --data-mode text \
+  --text-path data/wikitext_tiny.txt \
+  --train-steps 800 \
+  --qat-steps 128 \
+  --ste-qat-steps 128 \
+  --scaled-ste-steps 128 \
+  --hidden-size 128 \
+  --intermediate-size 256 \
+  --num-layers 2 \
+  --seq-len 64 \
+  --batch-size 32 \
+  --eval-batch-size 128 \
+  --json-out reports/tiny_real_text_scaled_ste_seed31.json \
+  --strict
+```
+
+Or use the Colab runner wrapper:
+
+```bash
+DATA_MODE=text \
+TEXT_PATH=data/wikitext_tiny.txt \
+SEED=31 \
+TRAIN_STEPS=800 \
+QAT_STEPS=128 \
+STE_QAT_STEPS=128 \
+SCALED_STE_STEPS=128 \
+HIDDEN_SIZE=128 \
+INTERMEDIATE_SIZE=256 \
+NUM_LAYERS=2 \
+SEQ_LEN=64 \
+BATCH_SIZE=32 \
+EVAL_BATCH_SIZE=128 \
+ARENA_JSON_OUT=reports/tiny_real_text_scaled_ste_seed31.json \
+bash scripts/run_colab_scaled_ste_arena.sh
+```
 
 ## Decision After This Phase
 

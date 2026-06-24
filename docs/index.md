@@ -16,9 +16,17 @@ group-size sweep, activation fake-quant tiebreaker 모두에서 projected-QAT와
 다음은 synthetic patterned data를 벗어나 real tiny text subset에서 검증한다:
 
 ```bash
-# next implementation target:
-# add a tiny real-text arena/eval path and compare fp16, projected-QAT,
-# scaled-STE act0, and scaled-STE act8 on real token distributions.
+.venv/bin/python scripts/run_tiny_real_arena.py \
+  --data-mode text \
+  --text-path data/tiny_corpus.txt \
+  --train-steps 40 \
+  --qat-steps 12 \
+  --ste-qat-steps 12 \
+  --scaled-ste-steps 12 \
+  --seq-len 64 \
+  --batch-size 8 \
+  --eval-batch-size 16 \
+  --json-out reports/tiny_real_text_fixture_smoke.json
 ```
 
 자세한 실행법:
@@ -126,11 +134,13 @@ flowchart TD
 - act8 tiebreaker seed `32/33` 통과
 - seed `32/33`에서 scaled-STE act8은 quality winner, resource winner, frontier 유지
 - watch item: scaled-STE의 KL-to-fp16이 projected-QAT보다 약간 높음
+- text mode implemented in `scripts/run_tiny_real_arena.py`
+- local byte-level fixture smoke passes, but is harness-only
 
 다음:
 
 1. Colab sweep JSON을 `reports/`로 회수해 commit.
-2. synthetic patterned data에서 tiny real text subset으로 이동.
+2. Colab에서 Wikitext-style tiny text file을 만들고 `--data-mode text`로 seed `31/32/33` 실행.
 3. real text에서 CE/PPL/token accuracy/generation smoke/KL-to-fp16을 같이 본다.
 4. 이후 packed ternary kernel, export, TurboQuant 중 우선순위를 고른다.
 

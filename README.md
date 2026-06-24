@@ -31,6 +31,7 @@ Core documents:
 .venv/bin/python scripts/run_tiny_real_arena.py --train-steps 200 --json-out reports/tiny_real_arena_smoke_200.json --strict
 .venv/bin/python scripts/check_scaled_bitlinear.py --json-out reports/scaled_bitlinear_tc.json
 .venv/bin/python scripts/run_tiny_real_arena.py --train-steps 200 --json-out reports/tiny_real_arena_scaled_ste_smoke.json --strict
+.venv/bin/python scripts/run_tiny_real_arena.py --data-mode text --text-path data/tiny_corpus.txt --train-steps 40 --qat-steps 12 --ste-qat-steps 12 --scaled-ste-steps 12 --seq-len 64 --batch-size 8 --eval-batch-size 16 --json-out reports/tiny_real_text_fixture_smoke.json
 ```
 
 ## Prepare Dev env

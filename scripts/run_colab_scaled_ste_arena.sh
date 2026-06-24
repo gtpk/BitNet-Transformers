@@ -15,8 +15,17 @@ mkdir -p reports
 "${PYTHON_BIN}" scripts/check_scaled_bitlinear.py \
   --json-out "${TC_JSON_OUT:-reports/scaled_bitlinear_tc_colab.json}"
 
+arena_data_args=(--data-mode "${DATA_MODE:-synthetic}")
+if [[ -n "${TEXT_PATH:-}" ]]; then
+  arena_data_args+=(--text-path "$TEXT_PATH")
+fi
+if [[ -n "${TOKENIZER:-}" ]]; then
+  arena_data_args+=(--tokenizer "$TOKENIZER")
+fi
+
 "${PYTHON_BIN}" scripts/run_tiny_real_arena.py \
   --seed "${SEED:-31}" \
+  "${arena_data_args[@]}" \
   --train-steps "${TRAIN_STEPS:-800}" \
   --qat-steps "${QAT_STEPS:-128}" \
   --ste-qat-steps "${STE_QAT_STEPS:-128}" \

@@ -1,0 +1,52 @@
+The measurement of time has shaped human life for as long as people have
+watched the sky. Early communities marked the passing of days by the rise and
+fall of the sun, and they marked the passing of months by the changing face of
+the moon. These natural clocks were reliable but coarse. A farmer could know
+the season, and a traveler could know the hour within an hour or two, but no
+one could agree on a smaller unit that everyone would share.
+
+The first real instruments were shadows. A vertical stick planted in flat
+ground casts a shadow that swings through the day, short at noon and long at
+dawn and dusk. By marking the ground where the shadow fell, people built the
+sundial, the oldest device that turns the motion of the heavens into a number a
+person can read. Sundials were carved in stone, painted on walls, and carried
+in the pocket, yet they all shared one weakness. When clouds covered the sky,
+or when night fell, the shadow vanished and the clock stopped.
+
+To measure time without the sun, builders turned to flowing things. Water
+clocks let a steady stream drain from one vessel into another, and the rising
+level marked the hours. Sand glasses did the same with fine grains pinched
+through a narrow waist of glass. These devices ran in darkness and in storms,
+but they drifted. Water flows faster when the vessel is full and slower when it
+is nearly empty, and sand wears the glass it passes through. A clock that
+cannot keep a steady pace is only a little better than a guess.
+
+The breakthrough came with the pendulum. A weight on a string swings with a
+period that depends almost entirely on its length, not on how far it travels.
+This simple fact, once understood, gave clockmakers a heartbeat they could
+trust. Gears counted the swings, hands displayed the count, and for the first
+time a machine could keep pace with the turning earth for days without
+correction. Towns mounted such clocks in their tallest towers so that everyone
+below could share the same hour.
+
+Ships at sea posed a harder problem. To find longitude, a navigator needed to
+know the time at a distant port while reading the local time from the sun. A
+pendulum is useless on a rolling deck, so the answer was a spring. The marine
+chronometer replaced the swinging weight with a coiled spring and a balance
+wheel that beat steadily no matter how the ship pitched. With an accurate clock
+in a sealed box, a captain could at last fix a position far from any coast.
+
+Modern timekeeping abandoned moving parts almost entirely. A quartz crystal,
+when squeezed by a small electric current, vibrates at a frequency so stable
+that a cheap watch can hold the hour for a month. Atomic clocks went further
+still, counting the unwavering oscillations of atoms to divide a second into
+billions of equal slices. The networks that carry our messages, the satellites
+that guide our maps, and the markets that trade in fractions of a second all
+lean on these silent, tireless clocks.
+
+What began as a shadow on the ground became a number shared across the planet.
+Each step traded something away to gain precision, from the open sky to the
+sealed box, from the visible swing to the invisible hum of an atom. The story
+of the clock is the slow discovery that time, which feels personal and loose,
+can be cut into pieces small enough and steady enough for the whole world to
+agree.
