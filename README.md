@@ -22,6 +22,7 @@ Core documents:
 - [Colab validation summary](./docs/colab_validation_summary.md)
 - [Real tiny text validation plan](./docs/real_tiny_text_validation_plan.md)
 - [Packed ternary weight format plan](./docs/packed_ternary_format_plan.md)
+- [GGUF / bitnet.cpp export scoping plan](./docs/bitnet_cpp_export_scoping.md)
 - [Research signal note](./docs/research_signal_note.md)
 - [TurboQuant + BitNet KV-cache plan](./docs/turboquant_bitnet_implementation_plan.md)
 
@@ -37,6 +38,7 @@ Core documents:
 .venv/bin/python scripts/check_packed_ternary.py --json-out reports/packed_ternary_tc.json --strict
 .venv/bin/python scripts/check_packed_model.py --json-out reports/packed_model_tc.json --strict
 .venv/bin/python scripts/check_packed_runtime.py --json-out reports/packed_runtime_tc.json --strict
+.venv/bin/python scripts/check_packed_matmul.py --json-out reports/packed_matmul_tc.json --strict
 ```
 
 ## Prepare Dev env

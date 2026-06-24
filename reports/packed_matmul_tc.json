@@ -1,0 +1,32 @@
+{
+  "results": [
+    {
+      "id": "PACK-301/correctness",
+      "pass": true,
+      "detail": "max_err=0.00e+00"
+    },
+    {
+      "id": "PACK-302/peak-memory",
+      "pass": true,
+      "detail": "peak_weight_numel=8192 vs full=65536 -> 8.0x smaller working set"
+    },
+    {
+      "id": "PACK-303/fused-module",
+      "pass": true,
+      "detail": "max_logit_err=0.00e+00"
+    },
+    {
+      "id": "PACK-304/latency-measured",
+      "pass": true,
+      "detail": "dense 0.339ms, blocked 0.399ms -> 1.2x slower (expected; memory win, not speed)"
+    }
+  ],
+  "phase4": {
+    "peak_weight_numel": 8192,
+    "full_weight_numel": 65536,
+    "working_set_reduction": 8.0,
+    "dense_ms": 0.3394479001144646,
+    "blocked_ms": 0.39933539992489386,
+    "blocked_slowdown": 1.176426190264352
+  }
+}

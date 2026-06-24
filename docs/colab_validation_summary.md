@@ -216,6 +216,32 @@ materializes dense `alpha*T` before calling `F.linear`, so storage/load memory i
 reduced but compute-time peak memory and latency are not solved yet. That is the
 Phase 4 job.
 
+## Blocked Dequant Matmul Reference Milestone
+
+Date: 2026-06-24
+
+Phase 4 answered the memory part of the runtime question: packed weights can be
+used for matmul without ever materializing the full dense `[out,in]` weight.
+The reference path walks output-row chunks, unpacks only that chunk, applies
+groupwise scales, and accumulates with `F.linear`-equivalent math.
+
+```text
+PACK-301 correctness     : max_err=0.00e+00
+PACK-302 working set     : 8192 vs 65536 weight elements, 8.0x smaller
+PACK-303 fused module    : max_logit_err=0.00e+00
+PACK-304 latency honesty : dense 0.339 ms, blocked 0.399 ms, 1.2x slower
+```
+
+Interpretation:
+
+```text
+Memory win: real, at the reference working-set level.
+Speed win : not yet. Python-loop blocked matmul is slower, as expected.
+```
+
+The Python/PyTorch reference ladder is now complete. Further latency work needs
+either a real fused kernel or an export path into an optimized ternary runtime.
+
 ## Artifact Note
 
 The seed sweep JSON files were generated inside the Colab session:
@@ -262,16 +288,18 @@ archival. Re-run the sweep before making a paper-style quantitative claim.
 
 ## Next Actions
 
-Synthetic gates, real-text validation, and packed-format Phase 1/2/3 are all done.
+Synthetic gates, real-text validation, and packed-format Phase 1/2/3/4 reference are all done.
 Recommended order from here:
 
 1. Archive the real-text JSON reports from Colab back into `reports/` or rerun
    the sweep before paper-style quantitative claims.
-2. Packed format Phase 4: implement a CPU fused/dequant matmul reference path
-   that avoids dense `[out,in]` weight materialization.
-3. Check Phase 4 logits against `PackedTernaryLinear` and the S1-unpacked model.
-4. Measure peak intermediate memory and latency; only then scope a real kernel
-   target (CPU first, then Metal/CUDA/bitnet.cpp).
+2. Scope GGUF/bitnet.cpp export first: verify current runtime format, loader
+   expectations, and whether this project’s groupwise `alpha*T` layout can map
+   cleanly. Start from [GGUF / bitnet.cpp Export Scoping Plan](./bitnet_cpp_export_scoping.md).
+3. Define export TCs: logit equality, storage, PPL on tiny real text, and
+   latency/memory against the Python reference path.
+4. If export mapping blocks, split Phase 4b into CPU/Metal/CUDA fused-kernel
+   scoping.
 
 See [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) for the
 format spec and TC matrix.

@@ -87,6 +87,16 @@ def _pack(scheme: str, ternary: torch.Tensor) -> torch.Tensor:
     raise ValueError(f"unknown scheme: {scheme}")
 
 
+def unpack_range(scheme: str, packed: torch.Tensor, start: int, end: int) -> torch.Tensor:
+    """Unpack only the flat ternary slice ``[start:end]`` without expanding the
+    whole tensor. Materializes ~(end-start) trits, not the full matrix."""
+    k = 4 if scheme == "two_bit" else 5
+    b0, b1 = start // k, (end + k - 1) // k
+    block = _unpack(scheme, packed[b0:b1], (b1 - b0) * k)
+    off = start - b0 * k
+    return block[off : off + (end - start)]
+
+
 def _unpack(scheme: str, packed: torch.Tensor, numel: int) -> torch.Tensor:
     if scheme == "two_bit":
         return unpack_two_bit(packed, numel)
@@ -288,19 +298,59 @@ def model_storage_report(model: nn.Module, artifact: dict, scale_dtype_bits: int
 
 
 # --------------------------------------------------------------------------- #
+# Blocked dequant matmul (Phase 4 reference).  Computes y = x @ (alpha*T)^T + b
+# WITHOUT ever materializing the full dense weight: it walks output-row chunks,
+# unpacks one chunk from the packed bytes, scales, and accumulates. Peak
+# transient weight = chunk * in_features. This is a memory reference, NOT fast —
+# the Python loop is slower than a dense matmul; latency wins need a real kernel.
+# --------------------------------------------------------------------------- #
+def _expand_scales(scales_block: torch.Tensor, group_size: int, in_features: int) -> torch.Tensor:
+    """[chunk, n_groups] groupwise alpha -> [chunk, in_features] per-column alpha."""
+    return torch.repeat_interleave(scales_block, group_size, dim=1)[:, :in_features]
+
+
+def packed_linear_matmul(
+    input: torch.Tensor,
+    packed: "PackedTernaryWeight",
+    bias: torch.Tensor | None = None,
+    out_chunk: int | None = None,
+    return_peak: bool = False,
+):
+    """Reference dequant matmul that never holds the full dense weight."""
+    out_features, in_features = packed.out_features, packed.in_features
+    chunk = out_chunk if out_chunk and out_chunk > 0 else max(1, packed.group_size)
+    y = input.new_zeros(*input.shape[:-1], out_features)
+    peak_weight_numel = 0
+    for r0 in range(0, out_features, chunk):
+        r1 = min(r0 + chunk, out_features)
+        flat = unpack_range(packed.scheme, packed.packed, r0 * in_features, r1 * in_features)
+        block = flat.reshape(r1 - r0, in_features).to(input.dtype)
+        peak_weight_numel = max(peak_weight_numel, block.numel())
+        alpha = _expand_scales(packed.scales[r0:r1], packed.group_size, in_features).to(input.dtype)
+        block = block * alpha
+        y[..., r0:r1] = input @ block.t()
+    if bias is not None:
+        y = y + bias.to(input.dtype)
+    return (y, peak_weight_numel) if return_peak else y
+
+
+# --------------------------------------------------------------------------- #
 # Runtime module (Phase 3).  Holds packed bytes (no dense weight param) and
 # unpacks alpha*T on the fly for a reference F.linear. NOT a fast kernel.
+# With fused=True it uses the blocked dequant matmul (Phase 4) instead, so the
+# full dense weight is never materialized.
 # --------------------------------------------------------------------------- #
 class PackedTernaryLinear(nn.Module):
     """Drop-in linear that stores a packed ternary weight instead of a dense one."""
 
-    def __init__(self, packed: "PackedTernaryWeight", bias: torch.Tensor | None = None):
+    def __init__(self, packed: "PackedTernaryWeight", bias: torch.Tensor | None = None, fused: bool = False):
         super().__init__()
         self.scheme = packed.scheme
         self.out_features = packed.out_features
         self.in_features = packed.in_features
         self.group_size = packed.group_size
         self.n_groups = packed.n_groups
+        self.fused = fused  # True -> blocked dequant matmul (no full dense weight)
         # packed codes + scales are buffers (no [out,in] float weight parameter)
         self.register_buffer("packed_codes", packed.packed)
         self.register_buffer("scales", packed.scales)
@@ -324,8 +374,10 @@ class PackedTernaryLinear(nn.Module):
         return self._as_packed().to_dense()
 
     def forward(self, input: torch.Tensor) -> torch.Tensor:
-        weight = self.dense_weight().to(dtype=input.dtype, device=input.device)
         bias = self.bias.to(input.dtype) if self.bias is not None else None
+        if self.fused:
+            return packed_linear_matmul(input, self._as_packed(), bias)
+        weight = self.dense_weight().to(dtype=input.dtype, device=input.device)
         return F.linear(input, weight, bias)
 
     def stored_bytes(self, scale_dtype_bits: int = 16) -> int:
@@ -334,19 +386,21 @@ class PackedTernaryLinear(nn.Module):
 
     @classmethod
     def from_linear(
-        cls, linear: nn.Linear, group_size: int = 64, lambda_value: float = 0.7, scheme: str = "trit"
+        cls, linear: nn.Linear, group_size: int = 64, lambda_value: float = 0.7,
+        scheme: str = "trit", fused: bool = False,
     ) -> "PackedTernaryLinear":
         packed = PackedTernaryWeight.from_weight(linear.weight, group_size, lambda_value, scheme)
-        return cls(packed, linear.bias)
+        return cls(packed, linear.bias, fused=fused)
 
 
 def replace_target_linears_with_packed(
-    model: nn.Module, group_size: int = 64, lambda_value: float = 0.7, scheme: str = "trit"
+    model: nn.Module, group_size: int = 64, lambda_value: float = 0.7, scheme: str = "trit",
+    fused: bool = False,
 ) -> int:
     """Swap each target ``nn.Linear`` for a ``PackedTernaryLinear`` in place."""
     count = 0
     for name, module in list(_named_target_linears(model)):
-        replacement = PackedTernaryLinear.from_linear(module, group_size, lambda_value, scheme)
+        replacement = PackedTernaryLinear.from_linear(module, group_size, lambda_value, scheme, fused=fused)
         parent_path, _, child = name.rpartition(".")
         parent = model.get_submodule(parent_path) if parent_path else model
         setattr(parent, child, replacement)

@@ -10,20 +10,22 @@ scaled-STE, Colab 실험 준비 문서의 시작점이다.
 `ScaledBitLinear` + CE-only STE 후학습은 로컬 tiny arena, Colab seed sweep,
 group-size sweep, activation fake-quant tiebreaker, 그리고 **real-text
 (Wikitext, seed 31/32/33, act0·act8)** 모두에서 projected-QAT를 동률~우위로
-이기는 첫 native BitLinear-style 후보다. packed ternary format은 Phase 3까지
+이기는 첫 native BitLinear-style 후보다. packed ternary format은 Phase 4 reference까지
 통과해 layer-level b1.58 저장(trit 1.600 bits/elem, 512x2048에서 fp16 대비
 8.65x)과 모델 단위 export/import(logit error 0.0, whole-model 3.78x)를
 검증했고, dense weight 파라미터 없는 `PackedTernaryLinear` runtime PoC도
-logit error 0.0으로 통과했다.
+logit error 0.0으로 통과했다. blocked dequant matmul reference는 dense weight
+materialization 없이 8.0x 작은 transient working set으로 동일 출력을 냈지만,
+Python loop라 latency는 아직 느리다.
 
 ## 지금 바로 할 일
 
-real-text 검증이 통과했고 packed ternary format Phase 3가 끝났다. 다음은
-[Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md)의
-Phase 4 — CPU fused/dequant matmul reference PoC다. 목표는 forward 중 dense
-`[out,in]` weight materialization을 피할 수 있는지 확인하는 것이다.
+real-text 검증과 packed ternary reference ladder(Phase 1-4)가 끝났다. 다음은
+GGUF/bitnet.cpp export 스코핑이다. 목표는 직접 kernel을 먼저 짜기 전에 현재
+`alpha*T` packed format을 기존 ternary runtime 포맷에 매핑할 수 있는지 확인하는 것이다.
+시작 문서는 [GGUF / bitnet.cpp Export Scoping Plan](./bitnet_cpp_export_scoping.md)이다.
 
-packed format Phase 1/2/3 검증(로컬):
+packed format Phase 1/2/3/4 검증(로컬):
 
 ```bash
 .venv/bin/python scripts/check_packed_ternary.py \
@@ -32,6 +34,8 @@ packed format Phase 1/2/3 검증(로컬):
   --json-out reports/packed_model_tc.json --strict
 .venv/bin/python scripts/check_packed_runtime.py \
   --json-out reports/packed_runtime_tc.json --strict
+.venv/bin/python scripts/check_packed_matmul.py \
+  --json-out reports/packed_matmul_tc.json --strict
 ```
 
 real-text fixture smoke(로컬, harness 확인용):
@@ -82,9 +86,11 @@ real-text fixture smoke(로컬, harness 확인용):
    - synthetic arena 이후 실제 토큰 분포 검증의 계획, 결과, 재현 경로다.
 8. [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md)
    - real-text 통과 후 첫 storage 산출물. b1.58을 실제 byte로 바꾸는 format/TC다.
-9. [Research Signal Note](./research_signal_note.md)
+9. [GGUF / bitnet.cpp Export Scoping Plan](./bitnet_cpp_export_scoping.md)
+   - reference ladder 이후 기존 ternary runtime으로 내보낼 수 있는지 확인하는 다음 트랙이다.
+10. [Research Signal Note](./research_signal_note.md)
    - 왜 이 결과가 "연구자가 꿈꾸는 초반부"인지 해석한다.
-10. [TurboQuant + BitNet Implementation Plan](./turboquant_bitnet_implementation_plan.md)
+11. [TurboQuant + BitNet Implementation Plan](./turboquant_bitnet_implementation_plan.md)
    - weight 변환이 안정화된 뒤 KV cache 압축으로 확장하는 별도 축이다.
 
 ## 문서 그래프
@@ -101,6 +107,7 @@ flowchart TD
   J --> L["research_signal_note.md"]
   J --> M["packed_ternary_format_plan.md"]
   K --> M["packed_ternary_format_plan.md"]
+  M --> R["bitnet_cpp_export_scoping.md"]
   B --> E
   B --> G["turboquant_bitnet_implementation_plan.md"]
   F --> H["reports/tiny_real_arena_scaled_ste_smoke.json"]
@@ -108,6 +115,7 @@ flowchart TD
   M --> N["reports/packed_ternary_tc.json"]
   M --> O["reports/packed_model_tc.json"]
   M --> P["reports/packed_runtime_tc.json"]
+  M --> Q["reports/packed_matmul_tc.json"]
 ```
 
 ## 문서별 역할
@@ -122,6 +130,7 @@ flowchart TD
 | [colab_validation_summary.md](./colab_validation_summary.md) | Colab moderate run과 seed sweep milestone 기록 | Colab 결과가 다음 단계 조건을 충족했는지 확인할 때 |
 | [real_tiny_text_validation_plan.md](./real_tiny_text_validation_plan.md) | synthetic task 이후 실제 토큰 분포 검증 계획과 통과 결과 | packed/export 전에 품질 위험을 줄일 때 |
 | [packed_ternary_format_plan.md](./packed_ternary_format_plan.md) | packed ternary weight format, 2-bit/trit layout, storage TC | b1.58을 실제 byte로 저장/검증할 때 |
+| [bitnet_cpp_export_scoping.md](./bitnet_cpp_export_scoping.md) | GGUF/bitnet.cpp export 가능성, format mapping, export TC 초안 | Python reference 이후 실제 runtime으로 넘어갈 때 |
 | [research_signal_note.md](./research_signal_note.md) | 현재 결과가 연구 신호로서 왜 의미 있는지 해석 | 논문화 가능성과 다음 방향을 판단할 때 |
 | [turboquant_bitnet_implementation_plan.md](./turboquant_bitnet_implementation_plan.md) | KV cache 압축 계획과 TC | weight 변환 이후 긴 문맥으로 확장할 때 |
 
@@ -139,6 +148,7 @@ flowchart TD
 | [scripts/check_packed_ternary.py](../scripts/check_packed_ternary.py) | [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) | PACK-001..006 storage TC |
 | [scripts/check_packed_model.py](../scripts/check_packed_model.py) | [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) | PACK-101..103 model export/import TC |
 | [scripts/check_packed_runtime.py](../scripts/check_packed_runtime.py) | [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) | PACK-201..204 packed runtime module TC |
+| [scripts/check_packed_matmul.py](../scripts/check_packed_matmul.py) | [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) | PACK-301..304 blocked dequant matmul reference TC |
 
 ## 리포트 연결
 
@@ -152,6 +162,7 @@ flowchart TD
 | [packed_ternary_tc.json](../reports/packed_ternary_tc.json) | `scripts/check_packed_ternary.py` | trit/two_bit pack round-trip, dense 일치, storage 압축률 확인 |
 | [packed_model_tc.json](../reports/packed_model_tc.json) | `scripts/check_packed_model.py` | 모델 단위 pack/unpack logit 동일성, save/load, whole-model storage 확인 |
 | [packed_runtime_tc.json](../reports/packed_runtime_tc.json) | `scripts/check_packed_runtime.py` | `PackedTernaryLinear` forward/logit/state round-trip, no dense weight 확인 |
+| [packed_matmul_tc.json](../reports/packed_matmul_tc.json) | `scripts/check_packed_matmul.py` | dense materialize 없는 blocked dequant matmul 정확성, working-set, latency honesty 확인 |
 
 ## 현재 실험 상태
 
@@ -183,15 +194,18 @@ flowchart TD
 - packed ternary format Phase 3 구현·통과: `PackedTernaryLinear`, `replace_target_linears_with_packed`
 - runtime module TC 통과: layer/model/state logit error `0.00e+00`, 14 packed modules, dense float weight parameter 없음, target linear storage `8.65x` vs fp16
 - Phase 3 한계 확인: forward에서 dense `alpha*T` weight를 일시 materialize하므로 compute-time memory/latency 이득은 Phase 4 대상
+- packed ternary format Phase 4 reference 구현·통과: `unpack_range`, `packed_linear_matmul`, `PackedTernaryLinear(fused=True)`
+- blocked dequant matmul TC 통과: correctness/logit error `0.00e+00`, transient working set `8.0x` 감소
+- latency honesty: Python-loop blocked path는 dense보다 느림(현재 리포트 기준 `1.2x`). 실제 speed gain은 kernel/export runtime 필요
 
 다음:
 
 1. Colab real-text JSON을 `reports/`로 회수하거나 재실행해 raw evidence를 보존한다.
-2. packed format Phase 4: CPU fused/dequant matmul reference PoC 구현.
-3. Phase 3 dense-materialize runtime과 logit 동일성을 확인한다.
-4. peak intermediate memory와 latency를 측정한 뒤 kernel 타겟(CPU 우선, 이후 Metal/CUDA/bitnet.cpp)을 스코핑.
+2. GGUF/bitnet.cpp export 스코핑: 현재 bitnet.cpp/GGUF 기대 포맷과 `alpha*T`/trit layout 매핑 가능성 확인.
+3. export artifact의 logit equality, storage, PPL, latency TC를 설계한다.
+4. export가 막히면 Phase 4b로 CPU/Metal/CUDA fused kernel을 별도 스코핑한다.
 
-이전 보류 항목 중 packed kernel은 진입했고(Phase 1 완료), 남은 다음 축:
+이전 보류 항목 중 packed reference ladder는 완료됐다. 남은 다음 축:
 
 - GGUF/bitnet.cpp export
 - TurboQuant KV cache 구현

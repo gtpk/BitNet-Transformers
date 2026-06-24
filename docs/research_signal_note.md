@@ -59,6 +59,7 @@ Current evidence:
 - packed ternary format Phase 1 passed at `1.600 bits/elem`
 - packed model export/import preserved logits exactly and measured whole-model `3.78x`
 - packed runtime module preserved logits exactly without a dense weight parameter
+- blocked dequant matmul preserved logits while reducing transient weight working set `8.0x`
 - projected-QAT was beaten by scaled-STE in the main gates
 - generation smoke stayed finite and non-degenerate in the real-text harness
 
@@ -67,6 +68,7 @@ Important caveat:
 ```text
 This is still early-stage evidence. The current validation is not yet a
 pretrained-model, benchmark-suite, packed-kernel, or optimized production-runtime result.
+The reference path proves storage and working-set reduction, not latency.
 ```
 
 ## Why This Is Not Yet A Paper
@@ -102,6 +104,7 @@ Track:
 - KL-to-fp16
 - generation smoke
 - packed storage size, first at layer format level, then whole model, then runtime module
+- blocked/fused working set
 - real runtime latency
 
 ## Researcher's Framing
@@ -120,6 +123,11 @@ The right move is not to overclaim. The right move is to keep closing gates:
 3. measure packed storage honestly
 4. push runtime work only after separating reference modules from real kernels
 5. package the story if the signal keeps surviving
+
+The next practical research move is to scope GGUF/bitnet.cpp export before
+writing a custom kernel. That tests whether an existing runtime can provide the
+latency half of the story while this project keeps the conversion and validation
+trail honest.
 
 This thread is worth following because the positive results are not isolated.
 They line up with a plausible mechanism.
