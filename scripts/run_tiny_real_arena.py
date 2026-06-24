@@ -19,12 +19,14 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 
 import torch
+import torch.nn as nn
 import torch.nn.functional as F
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
 from bitnet_llama import conversion as C  # noqa: E402
+from bitnet_llama.module import BitLinear  # noqa: E402
 from scripts.estimate_memory_traffic import ModelShape, default_policies, estimate  # noqa: E402
 
 
@@ -96,6 +98,65 @@ def train_model(model, args: argparse.Namespace) -> list[float]:
 def project_model_to_s1(model) -> None:
     projected_state, _ = C.convert_state_dict(model.state_dict(), C.S1)
     model.load_state_dict(projected_state)
+
+
+def is_target_linear_name(name: str) -> bool:
+    return C.is_target_weight_key(f"{name}.weight")
+
+
+def set_nested_module(root: nn.Module, name: str, module: nn.Module) -> None:
+    parent = root
+    parts = name.split(".")
+    for part in parts[:-1]:
+        parent = getattr(parent, part)
+    setattr(parent, parts[-1], module)
+
+
+def replace_target_linears_with_bitlinear(model, num_groups: int) -> int:
+    replacements = 0
+    for name, module in list(model.named_modules()):
+        if not isinstance(module, nn.Linear) or not is_target_linear_name(name):
+            continue
+        ternary_code, _, _ = C.quantize_weight(module.weight, C.S1)
+        replacement = BitLinear(
+            module.in_features,
+            module.out_features,
+            bias=module.bias is not None,
+            num_groups=num_groups,
+        )
+        replacement.to(device=module.weight.device, dtype=module.weight.dtype)
+        with torch.no_grad():
+            replacement.weight.copy_(
+                ternary_code.to(device=module.weight.device, dtype=module.weight.dtype)
+            )
+            if module.bias is not None:
+                replacement.bias.copy_(module.bias)
+        set_nested_module(model, name, replacement)
+        replacements += 1
+    return replacements
+
+
+def recover_s1_with_bitlinear_ste(model, args: argparse.Namespace):
+    recovered = copy.deepcopy(model)
+    replacement_count = replace_target_linears_with_bitlinear(recovered, args.ste_num_groups)
+    recovered.train()
+    optimizer = torch.optim.AdamW(recovered.parameters(), lr=args.ste_qat_learning_rate)
+    losses: list[float] = []
+    for step in range(args.ste_qat_steps):
+        input_ids = make_batch(
+            batch_size=args.batch_size,
+            seq_len=args.seq_len,
+            vocab_size=args.vocab_size,
+            seed=args.seed + 30000 + step,
+        )
+        output = recovered(input_ids=input_ids, labels=input_ids)
+        loss = output.loss
+        optimizer.zero_grad(set_to_none=True)
+        loss.backward()
+        optimizer.step()
+        losses.append(float(loss.detach()))
+    recovered.eval()
+    return recovered, losses, replacement_count
 
 
 def recover_s1_with_projected_qat(model, args: argparse.Namespace):
@@ -203,7 +264,12 @@ def mark_pareto(results: list[CandidateResult]) -> None:
         )
 
 
-def evaluate_candidates(model, config, eval_ids: torch.Tensor, args: argparse.Namespace) -> list[CandidateResult]:
+def evaluate_candidates(
+    model,
+    config,
+    eval_ids: torch.Tensor,
+    args: argparse.Namespace,
+) -> tuple[list[CandidateResult], list[float], list[float], int]:
     fp_loss, fp_acc, fp_logits = evaluate_model(model, eval_ids)
     converted_s0, _ = C.convert_state_dict(model.state_dict(), C.S0)
     converted_s1, _ = C.convert_state_dict(model.state_dict(), C.S1)
@@ -213,6 +279,8 @@ def evaluate_candidates(model, config, eval_ids: torch.Tensor, args: argparse.Na
     s1_loss, s1_acc, s1_logits = evaluate_model(s1_model, eval_ids)
     qat_model, qat_losses = recover_s1_with_projected_qat(model, args)
     qat_loss, qat_acc, qat_logits = evaluate_model(qat_model, eval_ids)
+    ste_model, ste_losses, bitlinear_replacements = recover_s1_with_bitlinear_ste(model, args)
+    ste_loss, ste_acc, ste_logits = evaluate_model(ste_model, eval_ids)
 
     traffic = traffic_by_policy(config, args.seq_len)
     raw = [
@@ -279,6 +347,24 @@ def evaluate_candidates(model, config, eval_ids: torch.Tensor, args: argparse.Na
             "kl": logit_kl(fp_logits, qat_logits),
             "ram_factor": 0.23,
         },
+        {
+            "name": "s1_bitlinear_ste_int8_kv",
+            "quality_source": "S1_BitLinear_STE",
+            "runtime_policy": "packed_b1_58_weight_int8_kv",
+            "loss": ste_loss,
+            "accuracy": ste_acc,
+            "kl": logit_kl(fp_logits, ste_logits),
+            "ram_factor": 0.28,
+        },
+        {
+            "name": "s1_bitlinear_ste_int4_kv",
+            "quality_source": "S1_BitLinear_STE",
+            "runtime_policy": "packed_b1_58_weight_int4_kv",
+            "loss": ste_loss,
+            "accuracy": ste_acc,
+            "kl": logit_kl(fp_logits, ste_logits),
+            "ram_factor": 0.23,
+        },
     ]
     max_bytes = max(traffic[item["runtime_policy"]][0] for item in raw)
     max_latency = max(traffic[item["runtime_policy"]][1] for item in raw)
@@ -314,7 +400,7 @@ def evaluate_candidates(model, config, eval_ids: torch.Tensor, args: argparse.Na
             )
         )
     mark_pareto(results)
-    return results, qat_losses
+    return results, qat_losses, ste_losses, bitlinear_replacements
 
 
 def print_results(results: list[CandidateResult], train_losses: list[float], elapsed: float) -> None:
@@ -358,6 +444,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--learning-rate", type=float, default=5e-3)
     parser.add_argument("--qat-steps", type=int, default=48)
     parser.add_argument("--qat-learning-rate", type=float, default=2e-3)
+    parser.add_argument("--ste-qat-steps", type=int, default=48)
+    parser.add_argument("--ste-qat-learning-rate", type=float, default=2e-3)
+    parser.add_argument("--ste-num-groups", type=int, default=1)
     parser.add_argument("--hidden-size", type=int, default=64)
     parser.add_argument("--intermediate-size", type=int, default=128)
     parser.add_argument("--num-layers", type=int, default=1)
@@ -381,10 +470,15 @@ def main() -> None:
     train_losses = train_model(model, args)
     elapsed = time.perf_counter() - start
     eval_ids = make_batch(args.eval_batch_size, args.seq_len, args.vocab_size, args.seed + 9999)
-    results, qat_losses = evaluate_candidates(model, config, eval_ids, args)
+    results, qat_losses, ste_losses, bitlinear_replacements = evaluate_candidates(
+        model, config, eval_ids, args
+    )
     print_results(results, train_losses, elapsed)
     if qat_losses:
         print(f"  projected_qat_loss: start={qat_losses[0]:.4f} end={qat_losses[-1]:.4f}")
+    if ste_losses:
+        print(f"  bitlinear_ste_loss: start={ste_losses[0]:.4f} end={ste_losses[-1]:.4f}")
+        print(f"  bitlinear_replacements: {bitlinear_replacements}")
 
     payload = {
         "config": {
@@ -395,6 +489,9 @@ def main() -> None:
         "train_loss_end": train_losses[-1],
         "projected_qat_loss_start": qat_losses[0] if qat_losses else None,
         "projected_qat_loss_end": qat_losses[-1] if qat_losses else None,
+        "bitlinear_ste_loss_start": ste_losses[0] if ste_losses else None,
+        "bitlinear_ste_loss_end": ste_losses[-1] if ste_losses else None,
+        "bitlinear_replacements": bitlinear_replacements,
         "train_elapsed_seconds": elapsed,
         "results": [asdict(item) for item in results],
         "quality_winner": max(results, key=lambda item: item.token_accuracy).name,
@@ -411,6 +508,8 @@ def main() -> None:
             train_losses[-1] < train_losses[0],
             any(item.pareto_frontier for item in results),
             resource_winner.name != "fp16_dense",
+            bitlinear_replacements > 0,
+            bool(ste_losses) and ste_losses[-1] < ste_losses[0],
         ]
         if not all(checks):
             raise SystemExit(1)

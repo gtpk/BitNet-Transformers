@@ -210,6 +210,7 @@ Projected QAT recovery smoke:
 
 ```bash
 .venv/bin/python scripts/run_tiny_real_arena.py --train-steps 200 --json-out reports/tiny_real_arena_qat_smoke.json --strict
+.venv/bin/python scripts/run_tiny_real_arena.py --train-steps 200 --json-out reports/tiny_real_arena_ste_qat_smoke.json --strict
 ```
 
 - starts from S1 groupwise ternary projection
@@ -220,17 +221,35 @@ Projected QAT recovery smoke:
 - projected QAT loss: `2.9195 -> 2.6178`
 - report: `reports/tiny_real_arena_qat_smoke.json`
 
+BitLinear STE reference smoke:
+
+- replaces LLaMA attention and MLP projection linears with the current `BitLinear`
+  reference layer
+- initializes those layers from the S1 ternary code `T`, not from `alpha*T`,
+  because the current `BitLinear` layer does not preserve S1 scale factors
+- replaced layers: `7`
+- BitLinear STE recovery loss: `4.2146 -> 3.5910`
+- evaluated loss/accuracy: `3.8172 / 0.0605`
+- quality winner remains `s1_projected_qat_int8_kv`
+- resource-aware winner remains `s1_projected_qat_int4_kv`
+- report: `reports/tiny_real_arena_ste_qat_smoke.json`
+
 Interpretation:
 
 ```text
 quality-only selection and low-resource selection already diverge.
 Projected QAT shows that CE-only post-training recovery is a meaningful next
 candidate before moving larger jobs to Colab.
+The current BitLinear STE reference path can train, but it underperforms the
+scaled S1 projected-QAT path. This points to a specific implementation gap:
+native BitLinear should preserve groupwise scales, or the arena should add a
+separate scaled-STE BitLinear candidate before spending Colab budget.
 ```
 
 Next step:
 
 ```text
-Replace this projected-QAT smoke with a true BitLinear STE candidate, then run
-the same arena on a larger tiny model or Colab-backed batch.
+Add a scaled-STE BitLinear candidate that forwards alpha*T while training with
+STE, then compare it against projected-QAT on a larger tiny model or
+Colab-backed batch.
 ```
