@@ -252,7 +252,8 @@ real-text에서 scaled-STE는 CE/PPL/accuracy가 projected-QAT보다 좋지만 K
 
 format/TC, `PackedTernaryLinear`, blocked dequant reference가 모두 logit 동일성을 통과했다. 다음은:
 
-1. GGUF/bitnet.cpp export 스코핑으로 기존 runtime 포맷과 매핑 가능성 확인
-2. 필요하면 Phase 4b로 CPU/Metal/CUDA fused kernel을 별도 스코핑
-3. pretrained small model에서 storage/logit/PPL/latency를 재검증
-4. TurboQuant KV cache는 weight runtime 경로가 정해진 뒤 별도 축으로
+1. GGUF/bitnet.cpp export 스코핑 결과에 따라 lossy `per_tensor_b158` quality gate 실행
+2. 손실이 작으면 I2_S-style export artifact/logit/storage/latency TC 설계
+3. 손실이 크면 groupwise GGUF extension 또는 Phase 4b CPU/Metal/CUDA fused kernel을 별도 스코핑
+4. pretrained small model에서 storage/logit/PPL/latency를 재검증
+5. TurboQuant KV cache는 weight runtime 경로가 정해진 뒤 별도 축으로

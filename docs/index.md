@@ -20,10 +20,11 @@ Python loop라 latency는 아직 느리다.
 
 ## 지금 바로 할 일
 
-real-text 검증과 packed ternary reference ladder(Phase 1-4)가 끝났다. 다음은
-GGUF/bitnet.cpp export 스코핑이다. 목표는 직접 kernel을 먼저 짜기 전에 현재
-`alpha*T` packed format을 기존 ternary runtime 포맷에 매핑할 수 있는지 확인하는 것이다.
-시작 문서는 [GGUF / bitnet.cpp Export Scoping Plan](./bitnet_cpp_export_scoping.md)이다.
+real-text 검증과 packed ternary reference ladder(Phase 1-4)가 끝났고,
+GGUF/bitnet.cpp export Step 0/1도 완료됐다. 결론은 직접 I2_S-style export가
+`alpha*T` groupwise scale을 per-tensor scale로 무너뜨리는 **lossy re-quantization**
+이라는 것이다. 다음은 per-tensor b1.58 후보를 real-text arena에 넣어 PPL 손실이
+감당 가능한지 확인하는 quality gate다.
 
 packed format Phase 1/2/3/4 검증(로컬):
 
@@ -36,6 +37,8 @@ packed format Phase 1/2/3/4 검증(로컬):
   --json-out reports/packed_runtime_tc.json --strict
 .venv/bin/python scripts/check_packed_matmul.py \
   --json-out reports/packed_matmul_tc.json --strict
+.venv/bin/python scripts/check_export_mapping.py \
+  --json-out reports/export_mapping_gap.json --strict
 ```
 
 real-text fixture smoke(로컬, harness 확인용):
@@ -116,6 +119,7 @@ flowchart TD
   M --> O["reports/packed_model_tc.json"]
   M --> P["reports/packed_runtime_tc.json"]
   M --> Q["reports/packed_matmul_tc.json"]
+  R --> S["reports/export_mapping_gap.json"]
 ```
 
 ## 문서별 역할
@@ -149,6 +153,7 @@ flowchart TD
 | [scripts/check_packed_model.py](../scripts/check_packed_model.py) | [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) | PACK-101..103 model export/import TC |
 | [scripts/check_packed_runtime.py](../scripts/check_packed_runtime.py) | [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) | PACK-201..204 packed runtime module TC |
 | [scripts/check_packed_matmul.py](../scripts/check_packed_matmul.py) | [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) | PACK-301..304 blocked dequant matmul reference TC |
+| [scripts/check_export_mapping.py](../scripts/check_export_mapping.py) | [GGUF / bitnet.cpp Export Scoping Plan](./bitnet_cpp_export_scoping.md) | EXPORT-002 groupwise vs per-tensor b1.58 mapping gap |
 
 ## 리포트 연결
 
@@ -163,6 +168,7 @@ flowchart TD
 | [packed_model_tc.json](../reports/packed_model_tc.json) | `scripts/check_packed_model.py` | 모델 단위 pack/unpack logit 동일성, save/load, whole-model storage 확인 |
 | [packed_runtime_tc.json](../reports/packed_runtime_tc.json) | `scripts/check_packed_runtime.py` | `PackedTernaryLinear` forward/logit/state round-trip, no dense weight 확인 |
 | [packed_matmul_tc.json](../reports/packed_matmul_tc.json) | `scripts/check_packed_matmul.py` | dense materialize 없는 blocked dequant matmul 정확성, working-set, latency honesty 확인 |
+| [export_mapping_gap.json](../reports/export_mapping_gap.json) | `scripts/check_export_mapping.py` | bitnet.cpp-style per-tensor b1.58 export가 groupwise S1보다 얼마나 lossy한지 확인 |
 
 ## 현재 실험 상태
 
@@ -197,13 +203,16 @@ flowchart TD
 - packed ternary format Phase 4 reference 구현·통과: `unpack_range`, `packed_linear_matmul`, `PackedTernaryLinear(fused=True)`
 - blocked dequant matmul TC 통과: correctness/logit error `0.00e+00`, transient working set `8.0x` 감소
 - latency honesty: Python-loop blocked path는 dense보다 느림(현재 리포트 기준 `1.2x`). 실제 speed gain은 kernel/export runtime 필요
+- GGUF/bitnet.cpp export Step 0/1 완료: bit layout은 호환 가능성이 있으나 scale granularity가 불일치
+- direct I2_S-style mapping 판정: groupwise `alpha`를 per-tensor scale로 무너뜨려야 하므로 lossy
+- export mapping gap 측정: per-tensor b1.58 output error가 groupwise S1보다 `+18.4%` 나쁨, 14/14 target linears
 
 다음:
 
 1. Colab real-text JSON을 `reports/`로 회수하거나 재실행해 raw evidence를 보존한다.
-2. GGUF/bitnet.cpp export 스코핑: 현재 bitnet.cpp/GGUF 기대 포맷과 `alpha*T`/trit layout 매핑 가능성 확인.
-3. export artifact의 logit equality, storage, PPL, latency TC를 설계한다.
-4. export가 막히면 Phase 4b로 CPU/Metal/CUDA fused kernel을 별도 스코핑한다.
+2. arena에 `per_tensor_b158` 후보를 추가하고 real-text CE/PPL quality gate를 실행한다.
+3. 손실이 작으면 I2_S-style export artifact/logit/storage/latency TC를 설계한다.
+4. 손실이 크면 groupwise GGUF 확장 또는 Phase 4b CPU/Metal/CUDA fused kernel을 별도 스코핑한다.
 
 이전 보류 항목 중 packed reference ladder는 완료됐다. 남은 다음 축:
 

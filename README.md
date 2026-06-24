@@ -39,6 +39,7 @@ Core documents:
 .venv/bin/python scripts/check_packed_model.py --json-out reports/packed_model_tc.json --strict
 .venv/bin/python scripts/check_packed_runtime.py --json-out reports/packed_runtime_tc.json --strict
 .venv/bin/python scripts/check_packed_matmul.py --json-out reports/packed_matmul_tc.json --strict
+.venv/bin/python scripts/check_export_mapping.py --json-out reports/export_mapping_gap.json --strict
 ```
 
 ## Prepare Dev env

@@ -242,6 +242,33 @@ Speed win : not yet. Python-loop blocked matmul is slower, as expected.
 The Python/PyTorch reference ladder is now complete. Further latency work needs
 either a real fused kernel or an export path into an optimized ternary runtime.
 
+## Export Mapping Scoping Milestone
+
+Date: 2026-06-24
+
+GGUF/bitnet.cpp Step 0/1 was completed. The ternary value domain and 2-bit-style
+packing family are compatible enough to investigate, but the scale model is not
+lossless for this project.
+
+```text
+This project      : groupwise alpha[out, in/group], lambda-threshold ternary
+I2_S-style export : per-tensor scale, absmean round/clamp ternary
+Mapping decision  : lossy re-quantization
+```
+
+The local mapping check compared groupwise S1 against per-tensor b1.58 on the
+same tiny Llama-shaped fixture:
+
+```text
+groupwise output error : 0.4339
+per-tensor output err  : 0.5139
+relative degradation   : +18.4%
+affected layers        : 14 / 14
+```
+
+Decision: do not claim I2_S compatibility yet. Add a per-tensor b1.58 candidate
+to the real-text arena and measure CE/PPL first.
+
 ## Artifact Note
 
 The seed sweep JSON files were generated inside the Colab session:
@@ -293,13 +320,13 @@ Recommended order from here:
 
 1. Archive the real-text JSON reports from Colab back into `reports/` or rerun
    the sweep before paper-style quantitative claims.
-2. Scope GGUF/bitnet.cpp export first: verify current runtime format, loader
-   expectations, and whether this project’s groupwise `alpha*T` layout can map
-   cleanly. Start from [GGUF / bitnet.cpp Export Scoping Plan](./bitnet_cpp_export_scoping.md).
-3. Define export TCs: logit equality, storage, PPL on tiny real text, and
-   latency/memory against the Python reference path.
-4. If export mapping blocks, split Phase 4b into CPU/Metal/CUDA fused-kernel
-   scoping.
+2. Add a `per_tensor_b158` candidate to the real-text arena and run the lossy
+   export quality gate.
+3. If CE/PPL damage is small, define I2_S-style export TCs: logit equality,
+   storage, PPL on tiny real text, and latency/memory against the Python
+   reference path.
+4. If CE/PPL damage is large, split into groupwise GGUF extension or Phase 4b
+   CPU/Metal/CUDA fused-kernel scoping.
 
 See [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) for the
 format spec and TC matrix.

@@ -1,0 +1,81 @@
+{
+  "summary": {
+    "n_layers": 14,
+    "groupwise_mean_out_err": 0.4339,
+    "per_tensor_mean_out_err": 0.5139,
+    "per_tensor_vs_groupwise_rel_degradation": 0.1841
+  },
+  "layers": [
+    {
+      "key": "model.layers.0.self_attn.q_proj.weight",
+      "groupwise_out_err": 0.43446531891822815,
+      "per_tensor_out_err": 0.5169386863708496
+    },
+    {
+      "key": "model.layers.0.self_attn.k_proj.weight",
+      "groupwise_out_err": 0.42905497550964355,
+      "per_tensor_out_err": 0.5142390131950378
+    },
+    {
+      "key": "model.layers.0.self_attn.v_proj.weight",
+      "groupwise_out_err": 0.4328589141368866,
+      "per_tensor_out_err": 0.5168512463569641
+    },
+    {
+      "key": "model.layers.0.self_attn.o_proj.weight",
+      "groupwise_out_err": 0.4344329833984375,
+      "per_tensor_out_err": 0.5145532488822937
+    },
+    {
+      "key": "model.layers.0.mlp.gate_proj.weight",
+      "groupwise_out_err": 0.4319770336151123,
+      "per_tensor_out_err": 0.5123381614685059
+    },
+    {
+      "key": "model.layers.0.mlp.up_proj.weight",
+      "groupwise_out_err": 0.4329460859298706,
+      "per_tensor_out_err": 0.5142497420310974
+    },
+    {
+      "key": "model.layers.0.mlp.down_proj.weight",
+      "groupwise_out_err": 0.4275342524051666,
+      "per_tensor_out_err": 0.5085466504096985
+    },
+    {
+      "key": "model.layers.1.self_attn.q_proj.weight",
+      "groupwise_out_err": 0.4415934681892395,
+      "per_tensor_out_err": 0.5131463408470154
+    },
+    {
+      "key": "model.layers.1.self_attn.k_proj.weight",
+      "groupwise_out_err": 0.43566542863845825,
+      "per_tensor_out_err": 0.5198343992233276
+    },
+    {
+      "key": "model.layers.1.self_attn.v_proj.weight",
+      "groupwise_out_err": 0.4289426803588867,
+      "per_tensor_out_err": 0.509530246257782
+    },
+    {
+      "key": "model.layers.1.self_attn.o_proj.weight",
+      "groupwise_out_err": 0.4373106062412262,
+      "per_tensor_out_err": 0.5076650381088257
+    },
+    {
+      "key": "model.layers.1.mlp.gate_proj.weight",
+      "groupwise_out_err": 0.43802210688591003,
+      "per_tensor_out_err": 0.5126370787620544
+    },
+    {
+      "key": "model.layers.1.mlp.up_proj.weight",
+      "groupwise_out_err": 0.43568336963653564,
+      "per_tensor_out_err": 0.5151777267456055
+    },
+    {
+      "key": "model.layers.1.mlp.down_proj.weight",
+      "groupwise_out_err": 0.43480104207992554,
+      "per_tensor_out_err": 0.5182635188102722
+    }
+  ],
+  "verdict": "lossy re-quantization (per-tensor degrades output error) -> run a quality gate before claiming I2_S compatibility"
+}

@@ -60,6 +60,7 @@ Current evidence:
 - packed model export/import preserved logits exactly and measured whole-model `3.78x`
 - packed runtime module preserved logits exactly without a dense weight parameter
 - blocked dequant matmul preserved logits while reducing transient weight working set `8.0x`
+- bitnet.cpp-style direct export mapping was classified as lossy, not blocked
 - projected-QAT was beaten by scaled-STE in the main gates
 - generation smoke stayed finite and non-degenerate in the real-text harness
 
@@ -69,6 +70,8 @@ Important caveat:
 This is still early-stage evidence. The current validation is not yet a
 pretrained-model, benchmark-suite, packed-kernel, or optimized production-runtime result.
 The reference path proves storage and working-set reduction, not latency.
+The first export scoping result also says the cheap I2_S path may require
+quality sacrifice because it collapses groupwise alpha to a per-tensor scale.
 ```
 
 ## Why This Is Not Yet A Paper
@@ -128,6 +131,10 @@ The next practical research move is to scope GGUF/bitnet.cpp export before
 writing a custom kernel. That tests whether an existing runtime can provide the
 latency half of the story while this project keeps the conversion and validation
 trail honest.
+
+The first export result narrowed that move: direct I2_S-style export is lossy,
+so the next honest test is not an artifact writer yet. It is a real-text
+quality gate for a `per_tensor_b158` candidate.
 
 This thread is worth following because the positive results are not isolated.
 They line up with a plausible mechanism.
