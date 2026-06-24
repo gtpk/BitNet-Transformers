@@ -1,0 +1,30 @@
+{
+  "results": [
+    {
+      "id": "PACK-201/layer-forward",
+      "pass": true,
+      "detail": "max_err=0.00e+00"
+    },
+    {
+      "id": "PACK-202/model-logits",
+      "pass": true,
+      "detail": "layers=14 max_err=0.00e+00"
+    },
+    {
+      "id": "PACK-203/no-dense-weight",
+      "pass": true,
+      "detail": "14 packed modules, uint8 codes, no float weight param"
+    },
+    {
+      "id": "PACK-204/state-roundtrip",
+      "pass": true,
+      "detail": "max_err=0.00e+00"
+    }
+  ],
+  "runtime": {
+    "packed_layers": 14,
+    "target_stored_bytes": 75780,
+    "target_fp16_bytes": 655360,
+    "target_compression_vs_fp16": 8.648192135128003
+  }
+}

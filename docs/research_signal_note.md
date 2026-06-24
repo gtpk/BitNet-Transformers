@@ -58,6 +58,7 @@ Current evidence:
 - real-text tiny validation passed
 - packed ternary format Phase 1 passed at `1.600 bits/elem`
 - packed model export/import preserved logits exactly and measured whole-model `3.78x`
+- packed runtime module preserved logits exactly without a dense weight parameter
 - projected-QAT was beaten by scaled-STE in the main gates
 - generation smoke stayed finite and non-degenerate in the real-text harness
 
@@ -65,7 +66,7 @@ Important caveat:
 
 ```text
 This is still early-stage evidence. The current validation is not yet a
-pretrained-model, benchmark-suite, packed-kernel, or production-runtime result.
+pretrained-model, benchmark-suite, packed-kernel, or optimized production-runtime result.
 ```
 
 ## Why This Is Not Yet A Paper
@@ -100,7 +101,7 @@ Track:
 - token accuracy
 - KL-to-fp16
 - generation smoke
-- packed storage size, first at layer format level and then whole model
+- packed storage size, first at layer format level, then whole model, then runtime module
 - real runtime latency
 
 ## Researcher's Framing
@@ -117,7 +118,7 @@ The right move is not to overclaim. The right move is to keep closing gates:
 1. preserve the evidence trail
 2. move to pretrained small models
 3. measure packed storage honestly
-4. only then push runtime/export work
+4. push runtime work only after separating reference modules from real kernels
 5. package the story if the signal keeps surviving
 
 This thread is worth following because the positive results are not isolated.

@@ -10,25 +10,28 @@ scaled-STE, Colab 실험 준비 문서의 시작점이다.
 `ScaledBitLinear` + CE-only STE 후학습은 로컬 tiny arena, Colab seed sweep,
 group-size sweep, activation fake-quant tiebreaker, 그리고 **real-text
 (Wikitext, seed 31/32/33, act0·act8)** 모두에서 projected-QAT를 동률~우위로
-이기는 첫 native BitLinear-style 후보다. packed ternary format은 Phase 2까지
+이기는 첫 native BitLinear-style 후보다. packed ternary format은 Phase 3까지
 통과해 layer-level b1.58 저장(trit 1.600 bits/elem, 512x2048에서 fp16 대비
 8.65x)과 모델 단위 export/import(logit error 0.0, whole-model 3.78x)를
-검증했다.
+검증했고, dense weight 파라미터 없는 `PackedTernaryLinear` runtime PoC도
+logit error 0.0으로 통과했다.
 
 ## 지금 바로 할 일
 
-real-text 검증이 통과했고 packed ternary format Phase 2가 끝났다. 다음은
+real-text 검증이 통과했고 packed ternary format Phase 3가 끝났다. 다음은
 [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md)의
-Phase 3 — `PackedTernaryLinear` reference runtime PoC와 dense 대비 forward logit
-동일성 TC다.
+Phase 4 — CPU fused/dequant matmul reference PoC다. 목표는 forward 중 dense
+`[out,in]` weight materialization을 피할 수 있는지 확인하는 것이다.
 
-packed format Phase 1/2 검증(로컬):
+packed format Phase 1/2/3 검증(로컬):
 
 ```bash
 .venv/bin/python scripts/check_packed_ternary.py \
   --json-out reports/packed_ternary_tc.json --strict
 .venv/bin/python scripts/check_packed_model.py \
   --json-out reports/packed_model_tc.json --strict
+.venv/bin/python scripts/check_packed_runtime.py \
+  --json-out reports/packed_runtime_tc.json --strict
 ```
 
 real-text fixture smoke(로컬, harness 확인용):
@@ -104,6 +107,7 @@ flowchart TD
   D --> I["reports/scaled_bitlinear_tc.json"]
   M --> N["reports/packed_ternary_tc.json"]
   M --> O["reports/packed_model_tc.json"]
+  M --> P["reports/packed_runtime_tc.json"]
 ```
 
 ## 문서별 역할
@@ -134,6 +138,7 @@ flowchart TD
 | [bitnet_llama/packing.py](../bitnet_llama/packing.py) | [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) | two_bit/trit pack·unpack, groupwise alpha, model export/import, storage |
 | [scripts/check_packed_ternary.py](../scripts/check_packed_ternary.py) | [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) | PACK-001..006 storage TC |
 | [scripts/check_packed_model.py](../scripts/check_packed_model.py) | [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) | PACK-101..103 model export/import TC |
+| [scripts/check_packed_runtime.py](../scripts/check_packed_runtime.py) | [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) | PACK-201..204 packed runtime module TC |
 
 ## 리포트 연결
 
@@ -146,6 +151,7 @@ flowchart TD
 | [memory_traffic_bitllama_512x4.json](../reports/memory_traffic_bitllama_512x4.json) | `scripts/estimate_memory_traffic.py` | weight/KV policy별 bytes/token 추정 |
 | [packed_ternary_tc.json](../reports/packed_ternary_tc.json) | `scripts/check_packed_ternary.py` | trit/two_bit pack round-trip, dense 일치, storage 압축률 확인 |
 | [packed_model_tc.json](../reports/packed_model_tc.json) | `scripts/check_packed_model.py` | 모델 단위 pack/unpack logit 동일성, save/load, whole-model storage 확인 |
+| [packed_runtime_tc.json](../reports/packed_runtime_tc.json) | `scripts/check_packed_runtime.py` | `PackedTernaryLinear` forward/logit/state round-trip, no dense weight 확인 |
 
 ## 현재 실험 상태
 
@@ -174,13 +180,16 @@ flowchart TD
 - packed ternary format Phase 1 구현·통과: `bitnet_llama/packing.py`, `scripts/check_packed_ternary.py`, trit 1.600 bits/elem, fp16 대비 8.65x, to_dense가 conversion.S1과 정확히 일치
 - packed ternary format Phase 2 구현·통과: `pack_model`, `unpack_into_model`, `save_packed_model`, `load_packed_model`, `model_storage_report`
 - model-wide export/import TC 통과: logit error `0.00e+00`, artifact save/load error `0.00e+00`, 14 layers packed, whole-model `3.78x` vs fp16
+- packed ternary format Phase 3 구현·통과: `PackedTernaryLinear`, `replace_target_linears_with_packed`
+- runtime module TC 통과: layer/model/state logit error `0.00e+00`, 14 packed modules, dense float weight parameter 없음, target linear storage `8.65x` vs fp16
+- Phase 3 한계 확인: forward에서 dense `alpha*T` weight를 일시 materialize하므로 compute-time memory/latency 이득은 Phase 4 대상
 
 다음:
 
 1. Colab real-text JSON을 `reports/`로 회수하거나 재실행해 raw evidence를 보존한다.
-2. packed format Phase 3: `PackedTernaryLinear` reference runtime PoC 구현.
-3. packed-module model과 S1-unpacked model의 forward logit 동일성 TC 작성.
-4. runtime wiring이 통과하면 kernel 타겟(CPU 우선, 이후 Metal/CUDA/bitnet.cpp)을 스코핑.
+2. packed format Phase 4: CPU fused/dequant matmul reference PoC 구현.
+3. Phase 3 dense-materialize runtime과 logit 동일성을 확인한다.
+4. peak intermediate memory와 latency를 측정한 뒤 kernel 타겟(CPU 우선, 이후 Metal/CUDA/bitnet.cpp)을 스코핑.
 
 이전 보류 항목 중 packed kernel은 진입했고(Phase 1 완료), 남은 다음 축:
 

@@ -36,6 +36,7 @@ Core documents:
 .venv/bin/python scripts/run_tiny_real_arena.py --data-mode text --text-path data/tiny_corpus.txt --train-steps 40 --qat-steps 12 --ste-qat-steps 12 --scaled-ste-steps 12 --seq-len 64 --batch-size 8 --eval-batch-size 16 --json-out reports/tiny_real_text_fixture_smoke.json
 .venv/bin/python scripts/check_packed_ternary.py --json-out reports/packed_ternary_tc.json --strict
 .venv/bin/python scripts/check_packed_model.py --json-out reports/packed_model_tc.json --strict
+.venv/bin/python scripts/check_packed_runtime.py --json-out reports/packed_runtime_tc.json --strict
 ```
 
 ## Prepare Dev env

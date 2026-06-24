@@ -194,6 +194,28 @@ The whole-model compression ratio is lower than the layer-only `8.65x` number
 because embedding, `lm_head`, norms, and biases remain fp16. That is the right
 number to track for end-to-end artifacts.
 
+## Packed Runtime Module Milestone
+
+Date: 2026-06-24
+
+Phase 3 verified a runtime-facing module, not just a saved artifact.
+`PackedTernaryLinear` holds uint8 packed codes and scale buffers with no dense
+`[out,in]` float weight parameter, then reconstructs `alpha*T` on-the-fly for a
+reference `F.linear`.
+
+```text
+PACK-201 layer forward      : max_err=0.00e+00
+PACK-202 model logits       : 14 modules swapped, max_err=0.00e+00
+PACK-203 no dense weight    : uint8 codes, no float weight parameter
+PACK-204 state round-trip   : max_err=0.00e+00
+target linear storage       : 74.0 KB packed vs 640.0 KB fp16, 8.65x
+```
+
+Important limitation: this is still a reference runtime. Forward currently
+materializes dense `alpha*T` before calling `F.linear`, so storage/load memory is
+reduced but compute-time peak memory and latency are not solved yet. That is the
+Phase 4 job.
+
 ## Artifact Note
 
 The seed sweep JSON files were generated inside the Colab session:
@@ -240,17 +262,16 @@ archival. Re-run the sweep before making a paper-style quantitative claim.
 
 ## Next Actions
 
-Synthetic gates, real-text validation, and packed-format Phase 1/2 are all done.
+Synthetic gates, real-text validation, and packed-format Phase 1/2/3 are all done.
 Recommended order from here:
 
 1. Archive the real-text JSON reports from Colab back into `reports/` or rerun
    the sweep before paper-style quantitative claims.
-2. Packed format Phase 3: implement `PackedTernaryLinear` as a reference
-   runtime module that holds packed weights and unpacks on-the-fly for
-   `F.linear`.
-3. Check packed-module model logits against the S1-unpacked model.
-4. Use the export/runtime logit checks to watch the KL-to-fp16 item; only then
-   scope a real kernel target (CPU first, then Metal/CUDA/bitnet.cpp).
+2. Packed format Phase 4: implement a CPU fused/dequant matmul reference path
+   that avoids dense `[out,in]` weight materialization.
+3. Check Phase 4 logits against `PackedTernaryLinear` and the S1-unpacked model.
+4. Measure peak intermediate memory and latency; only then scope a real kernel
+   target (CPU first, then Metal/CUDA/bitnet.cpp).
 
 See [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) for the
 format spec and TC matrix.

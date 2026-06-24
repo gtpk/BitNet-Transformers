@@ -25,6 +25,7 @@ from dataclasses import dataclass
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 from . import conversion as _conv  # single source for the target-layer policy
 
@@ -159,7 +160,12 @@ class PackedTernaryWeight:
     def to_dense(self) -> torch.Tensor:
         """Reconstruct ``alpha * T`` as a dense float tensor (== ScaledBitLinear forward value)."""
         ternary = self.unpack_ternary().float()
-        dense = torch.zeros(self.out_features, self.in_features)
+        dense = torch.zeros(
+            self.out_features,
+            self.in_features,
+            dtype=self.scales.dtype,
+            device=self.scales.device,
+        )
         for index, start in enumerate(range(0, self.in_features, self.group_size)):
             end = min(start + self.group_size, self.in_features)
             dense[:, start:end] = ternary[:, start:end] * self.scales[:, index : index + 1]
@@ -279,6 +285,73 @@ def model_storage_report(model: nn.Module, artifact: dict, scale_dtype_bits: int
         "target_fraction": target_numel / max(all_numel, 1),
         "num_packed_layers": len(artifact["layers"]),
     }
+
+
+# --------------------------------------------------------------------------- #
+# Runtime module (Phase 3).  Holds packed bytes (no dense weight param) and
+# unpacks alpha*T on the fly for a reference F.linear. NOT a fast kernel.
+# --------------------------------------------------------------------------- #
+class PackedTernaryLinear(nn.Module):
+    """Drop-in linear that stores a packed ternary weight instead of a dense one."""
+
+    def __init__(self, packed: "PackedTernaryWeight", bias: torch.Tensor | None = None):
+        super().__init__()
+        self.scheme = packed.scheme
+        self.out_features = packed.out_features
+        self.in_features = packed.in_features
+        self.group_size = packed.group_size
+        self.n_groups = packed.n_groups
+        # packed codes + scales are buffers (no [out,in] float weight parameter)
+        self.register_buffer("packed_codes", packed.packed)
+        self.register_buffer("scales", packed.scales)
+        if bias is not None:
+            self.bias = nn.Parameter(bias.detach().clone())
+        else:
+            self.register_parameter("bias", None)
+
+    def _as_packed(self) -> "PackedTernaryWeight":
+        return PackedTernaryWeight(
+            scheme=self.scheme,
+            out_features=self.out_features,
+            in_features=self.in_features,
+            group_size=self.group_size,
+            n_groups=self.n_groups,
+            packed=self.packed_codes,
+            scales=self.scales,
+        )
+
+    def dense_weight(self) -> torch.Tensor:
+        return self._as_packed().to_dense()
+
+    def forward(self, input: torch.Tensor) -> torch.Tensor:
+        weight = self.dense_weight().to(dtype=input.dtype, device=input.device)
+        bias = self.bias.to(input.dtype) if self.bias is not None else None
+        return F.linear(input, weight, bias)
+
+    def stored_bytes(self, scale_dtype_bits: int = 16) -> int:
+        bias_bytes = self.bias.numel() * 2 if self.bias is not None else 0
+        return self._as_packed().nbytes(scale_dtype_bits) + bias_bytes
+
+    @classmethod
+    def from_linear(
+        cls, linear: nn.Linear, group_size: int = 64, lambda_value: float = 0.7, scheme: str = "trit"
+    ) -> "PackedTernaryLinear":
+        packed = PackedTernaryWeight.from_weight(linear.weight, group_size, lambda_value, scheme)
+        return cls(packed, linear.bias)
+
+
+def replace_target_linears_with_packed(
+    model: nn.Module, group_size: int = 64, lambda_value: float = 0.7, scheme: str = "trit"
+) -> int:
+    """Swap each target ``nn.Linear`` for a ``PackedTernaryLinear`` in place."""
+    count = 0
+    for name, module in list(_named_target_linears(model)):
+        replacement = PackedTernaryLinear.from_linear(module, group_size, lambda_value, scheme)
+        parent_path, _, child = name.rpartition(".")
+        parent = model.get_submodule(parent_path) if parent_path else model
+        setattr(parent, child, replacement)
+        count += 1
+    return count
 
 
 def storage_report(
