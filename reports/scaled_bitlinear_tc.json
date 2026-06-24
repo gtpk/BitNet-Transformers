@@ -1,0 +1,28 @@
+{
+  "all_passed": true,
+  "checks": [
+    {
+      "id": "SSTE-001",
+      "name": "S1 alpha*T equivalence",
+      "max_abs_diff": 0.0,
+      "passed": true
+    },
+    {
+      "id": "SSTE-002",
+      "name": "STE gradient flow",
+      "loss": 0.8677810430526733,
+      "grad_norm": 1.095815658569336,
+      "passed": true
+    },
+    {
+      "id": "SSTE-003",
+      "name": "activation fake quant finite output",
+      "shape": [
+        2,
+        4,
+        5
+      ],
+      "passed": true
+    }
+  ]
+}

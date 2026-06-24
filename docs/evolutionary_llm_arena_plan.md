@@ -234,6 +234,25 @@ BitLinear STE reference smoke:
 - resource-aware winner remains `s1_projected_qat_int4_kv`
 - report: `reports/tiny_real_arena_ste_qat_smoke.json`
 
+Scaled-STE BitLinear smoke:
+
+```bash
+.venv/bin/python scripts/check_scaled_bitlinear.py --json-out reports/scaled_bitlinear_tc.json
+.venv/bin/python scripts/run_tiny_real_arena.py --train-steps 200 --json-out reports/tiny_real_arena_scaled_ste_smoke.json --strict
+```
+
+- adds `ScaledBitLinear`, which forwards S1-style `alpha*T` and uses STE for
+  the latent full-precision weight
+- TC checks confirm S1 `alpha*T` equivalence, finite STE gradients, and finite
+  activation fake-quant output
+- replaced layers: `7`
+- scaled-STE recovery loss: `3.1535 -> 2.7202`
+- quality winner: `s1_scaled_ste_int8_kv`
+- resource-aware winner: `s1_scaled_ste_int4_kv`
+- Pareto frontier: `s1_projected_qat_int4_kv`, `s1_scaled_ste_int4_kv`
+- reports: `reports/scaled_bitlinear_tc.json`,
+  `reports/tiny_real_arena_scaled_ste_smoke.json`
+
 Interpretation:
 
 ```text
@@ -244,12 +263,13 @@ The current BitLinear STE reference path can train, but it underperforms the
 scaled S1 projected-QAT path. This points to a specific implementation gap:
 native BitLinear should preserve groupwise scales, or the arena should add a
 separate scaled-STE BitLinear candidate before spending Colab budget.
+Scaled-STE closes that gap in the tiny local arena and is now the first native
+BitLinear-style candidate worth scaling in Colab.
 ```
 
 Next step:
 
 ```text
-Add a scaled-STE BitLinear candidate that forwards alpha*T while training with
-STE, then compare it against projected-QAT on a larger tiny model or
-Colab-backed batch.
+Run the Colab moderate arena from docs/colab_arena_runbook.md, then seed-sweep
+scaled-STE against projected-QAT before touching packed kernels.
 ```

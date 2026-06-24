@@ -4,6 +4,7 @@
 """ PyTorch BitLinear Layer."""
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 class BitLinearNaive(nn.Linear):
@@ -106,6 +107,62 @@ class BitLinear(nn.Linear):
         output = self.quantize_activations_groupwise(output)
 
         return output
+
+
+class ScaledBitLinear(nn.Linear):
+    """BitLinear-style STE layer that preserves groupwise ternary scales.
+
+    The forward weight is ``alpha * T`` with ``T in {-1, 0, +1}``, using the
+    same groupwise-input policy as ``conversion.S1``. Gradients flow through the
+    latent full-precision weight with a straight-through estimator.
+    """
+
+    def __init__(
+        self,
+        in_features,
+        out_features,
+        bias=True,
+        group_size=64,
+        lambda_value=0.7,
+        activation_bits=None,
+    ):
+        super(ScaledBitLinear, self).__init__(in_features, out_features, bias)
+        self.group_size = group_size
+        self.lambda_value = lambda_value
+        self.activation_bits = activation_bits
+        self.eps = 1e-12
+
+    def _quantize_block(self, block):
+        work = block.float()
+        absw = work.abs()
+        threshold = self.lambda_value * absw.mean(dim=1, keepdim=True)
+        mask = absw > threshold
+        ternary = torch.where(mask, torch.sign(work), torch.zeros_like(work))
+        denom = mask.sum(dim=1, keepdim=True).clamp(min=1).to(work.dtype)
+        scale = (absw * mask).sum(dim=1, keepdim=True) / denom
+        return (scale * ternary).to(dtype=block.dtype, device=block.device)
+
+    def quantize_weight_groupwise(self):
+        group_size = self.in_features if self.group_size <= 0 else self.group_size
+        quantized_blocks = []
+        for start in range(0, self.in_features, group_size):
+            end = min(start + group_size, self.in_features)
+            quantized_blocks.append(self._quantize_block(self.weight[:, start:end]))
+        quantized = torch.cat(quantized_blocks, dim=1)
+        return (quantized - self.weight).detach() + self.weight
+
+    def quantize_activations(self, x):
+        if self.activation_bits is None or self.activation_bits <= 1:
+            return x
+        qmax = 2 ** (self.activation_bits - 1) - 1
+        scale = x.detach().abs().amax().clamp(min=self.eps) / qmax
+        quantized = torch.clamp(torch.round(x / scale), -qmax, qmax) * scale
+        return (quantized - x).detach() + x
+
+    def forward(self, input):
+        weight = self.quantize_weight_groupwise()
+        output = F.linear(input, weight, self.bias)
+        return self.quantize_activations(output)
 
 
 class BitLinearOptimized(BitLinear):

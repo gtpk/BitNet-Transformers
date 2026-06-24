@@ -26,7 +26,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
 from bitnet_llama import conversion as C  # noqa: E402
-from bitnet_llama.module import BitLinear  # noqa: E402
+from bitnet_llama.module import BitLinear, ScaledBitLinear  # noqa: E402
 from scripts.estimate_memory_traffic import ModelShape, default_policies, estimate  # noqa: E402
 
 
@@ -159,6 +159,52 @@ def recover_s1_with_bitlinear_ste(model, args: argparse.Namespace):
     return recovered, losses, replacement_count
 
 
+def replace_target_linears_with_scaled_bitlinear(model, args: argparse.Namespace) -> int:
+    replacements = 0
+    for name, module in list(model.named_modules()):
+        if not isinstance(module, nn.Linear) or not is_target_linear_name(name):
+            continue
+        replacement = ScaledBitLinear(
+            module.in_features,
+            module.out_features,
+            bias=module.bias is not None,
+            group_size=args.scaled_ste_group_size,
+            lambda_value=args.scaled_ste_lambda,
+            activation_bits=args.scaled_ste_activation_bits,
+        )
+        replacement.to(device=module.weight.device, dtype=module.weight.dtype)
+        with torch.no_grad():
+            replacement.weight.copy_(module.weight)
+            if module.bias is not None:
+                replacement.bias.copy_(module.bias)
+        set_nested_module(model, name, replacement)
+        replacements += 1
+    return replacements
+
+
+def recover_s1_with_scaled_ste(model, args: argparse.Namespace):
+    recovered = copy.deepcopy(model)
+    replacement_count = replace_target_linears_with_scaled_bitlinear(recovered, args)
+    recovered.train()
+    optimizer = torch.optim.AdamW(recovered.parameters(), lr=args.scaled_ste_learning_rate)
+    losses: list[float] = []
+    for step in range(args.scaled_ste_steps):
+        input_ids = make_batch(
+            batch_size=args.batch_size,
+            seq_len=args.seq_len,
+            vocab_size=args.vocab_size,
+            seed=args.seed + 40000 + step,
+        )
+        output = recovered(input_ids=input_ids, labels=input_ids)
+        loss = output.loss
+        optimizer.zero_grad(set_to_none=True)
+        loss.backward()
+        optimizer.step()
+        losses.append(float(loss.detach()))
+    recovered.eval()
+    return recovered, losses, replacement_count
+
+
 def recover_s1_with_projected_qat(model, args: argparse.Namespace):
     recovered = copy.deepcopy(model)
     project_model_to_s1(recovered)
@@ -269,7 +315,7 @@ def evaluate_candidates(
     config,
     eval_ids: torch.Tensor,
     args: argparse.Namespace,
-) -> tuple[list[CandidateResult], list[float], list[float], int]:
+) -> tuple[list[CandidateResult], list[float], list[float], list[float], int, int]:
     fp_loss, fp_acc, fp_logits = evaluate_model(model, eval_ids)
     converted_s0, _ = C.convert_state_dict(model.state_dict(), C.S0)
     converted_s1, _ = C.convert_state_dict(model.state_dict(), C.S1)
@@ -281,6 +327,8 @@ def evaluate_candidates(
     qat_loss, qat_acc, qat_logits = evaluate_model(qat_model, eval_ids)
     ste_model, ste_losses, bitlinear_replacements = recover_s1_with_bitlinear_ste(model, args)
     ste_loss, ste_acc, ste_logits = evaluate_model(ste_model, eval_ids)
+    scaled_model, scaled_losses, scaled_replacements = recover_s1_with_scaled_ste(model, args)
+    scaled_loss, scaled_acc, scaled_logits = evaluate_model(scaled_model, eval_ids)
 
     traffic = traffic_by_policy(config, args.seq_len)
     raw = [
@@ -365,6 +413,24 @@ def evaluate_candidates(
             "kl": logit_kl(fp_logits, ste_logits),
             "ram_factor": 0.23,
         },
+        {
+            "name": "s1_scaled_ste_int8_kv",
+            "quality_source": "S1_scaled_STE",
+            "runtime_policy": "packed_b1_58_weight_int8_kv",
+            "loss": scaled_loss,
+            "accuracy": scaled_acc,
+            "kl": logit_kl(fp_logits, scaled_logits),
+            "ram_factor": 0.29,
+        },
+        {
+            "name": "s1_scaled_ste_int4_kv",
+            "quality_source": "S1_scaled_STE",
+            "runtime_policy": "packed_b1_58_weight_int4_kv",
+            "loss": scaled_loss,
+            "accuracy": scaled_acc,
+            "kl": logit_kl(fp_logits, scaled_logits),
+            "ram_factor": 0.24,
+        },
     ]
     max_bytes = max(traffic[item["runtime_policy"]][0] for item in raw)
     max_latency = max(traffic[item["runtime_policy"]][1] for item in raw)
@@ -400,7 +466,7 @@ def evaluate_candidates(
             )
         )
     mark_pareto(results)
-    return results, qat_losses, ste_losses, bitlinear_replacements
+    return results, qat_losses, ste_losses, scaled_losses, bitlinear_replacements, scaled_replacements
 
 
 def print_results(results: list[CandidateResult], train_losses: list[float], elapsed: float) -> None:
@@ -447,6 +513,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--ste-qat-steps", type=int, default=48)
     parser.add_argument("--ste-qat-learning-rate", type=float, default=2e-3)
     parser.add_argument("--ste-num-groups", type=int, default=1)
+    parser.add_argument("--scaled-ste-steps", type=int, default=48)
+    parser.add_argument("--scaled-ste-learning-rate", type=float, default=2e-3)
+    parser.add_argument("--scaled-ste-group-size", type=int, default=64)
+    parser.add_argument("--scaled-ste-lambda", type=float, default=0.7)
+    parser.add_argument("--scaled-ste-activation-bits", type=int, default=0)
     parser.add_argument("--hidden-size", type=int, default=64)
     parser.add_argument("--intermediate-size", type=int, default=128)
     parser.add_argument("--num-layers", type=int, default=1)
@@ -470,7 +541,14 @@ def main() -> None:
     train_losses = train_model(model, args)
     elapsed = time.perf_counter() - start
     eval_ids = make_batch(args.eval_batch_size, args.seq_len, args.vocab_size, args.seed + 9999)
-    results, qat_losses, ste_losses, bitlinear_replacements = evaluate_candidates(
+    (
+        results,
+        qat_losses,
+        ste_losses,
+        scaled_losses,
+        bitlinear_replacements,
+        scaled_replacements,
+    ) = evaluate_candidates(
         model, config, eval_ids, args
     )
     print_results(results, train_losses, elapsed)
@@ -479,6 +557,9 @@ def main() -> None:
     if ste_losses:
         print(f"  bitlinear_ste_loss: start={ste_losses[0]:.4f} end={ste_losses[-1]:.4f}")
         print(f"  bitlinear_replacements: {bitlinear_replacements}")
+    if scaled_losses:
+        print(f"  scaled_ste_loss: start={scaled_losses[0]:.4f} end={scaled_losses[-1]:.4f}")
+        print(f"  scaled_replacements: {scaled_replacements}")
 
     payload = {
         "config": {
@@ -492,6 +573,9 @@ def main() -> None:
         "bitlinear_ste_loss_start": ste_losses[0] if ste_losses else None,
         "bitlinear_ste_loss_end": ste_losses[-1] if ste_losses else None,
         "bitlinear_replacements": bitlinear_replacements,
+        "scaled_ste_loss_start": scaled_losses[0] if scaled_losses else None,
+        "scaled_ste_loss_end": scaled_losses[-1] if scaled_losses else None,
+        "scaled_replacements": scaled_replacements,
         "train_elapsed_seconds": elapsed,
         "results": [asdict(item) for item in results],
         "quality_winner": max(results, key=lambda item: item.token_accuracy).name,
@@ -509,7 +593,8 @@ def main() -> None:
             any(item.pareto_frontier for item in results),
             resource_winner.name != "fp16_dense",
             bitlinear_replacements > 0,
-            bool(ste_losses) and ste_losses[-1] < ste_losses[0],
+            scaled_replacements > 0,
+            bool(scaled_losses) and scaled_losses[-1] < scaled_losses[0],
         ]
         if not all(checks):
             raise SystemExit(1)

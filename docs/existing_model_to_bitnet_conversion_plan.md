@@ -240,6 +240,9 @@ T_i in {-1, 0, +1}
 | QAT-001 | STE | ternary layer의 gradient가 끊기지 않는다 | small CE loss backward | finite grad |
 | QAT-002 | No Teacher | QAT loop가 teacher logits/hidden을 참조하지 않는다 | code path/static test | teacher loss/reference 없음 |
 | QAT-003 | Schedule | gradual quantization이 layer order를 지킨다 | schedule trace | 지정 순서와 일치 |
+| SSTE-001 | Scaled STE | `ScaledBitLinear` forward weight가 S1 `alpha*T`와 일치한다 | `scripts/check_scaled_bitlinear.py` | max abs diff <= 1e-6 |
+| SSTE-002 | Scaled STE | latent full-precision weight로 gradient가 흐른다 | MSE backward smoke | finite non-zero grad |
+| SSTE-003 | Scaled STE | activation fake quant option이 NaN을 만들지 않는다 | 8-bit activation smoke | finite output |
 | EVAL-001 | Disabled Equivalence | conversion off는 baseline과 동일하다 | same model forward | logits max diff == 0 |
 | EVAL-002 | PTQ Perplexity | S0/S1 변환 후 PPL을 측정한다 | Wikitext subset | pass/fail 대신 baseline delta 기록 |
 | EVAL-003 | Recovery | S2/S3가 S0/S1보다 PPL을 회복한다 | 동일 eval set 비교 | PPL 감소 |
