@@ -21,6 +21,7 @@ Core documents:
 - [Colab arena runbook](./docs/colab_arena_runbook.md)
 - [Colab validation summary](./docs/colab_validation_summary.md)
 - [Real tiny text validation plan](./docs/real_tiny_text_validation_plan.md)
+- [Packed ternary weight format plan](./docs/packed_ternary_format_plan.md)
 - [Research signal note](./docs/research_signal_note.md)
 - [TurboQuant + BitNet KV-cache plan](./docs/turboquant_bitnet_implementation_plan.md)
 
@@ -33,6 +34,7 @@ Core documents:
 .venv/bin/python scripts/check_scaled_bitlinear.py --json-out reports/scaled_bitlinear_tc.json
 .venv/bin/python scripts/run_tiny_real_arena.py --train-steps 200 --json-out reports/tiny_real_arena_scaled_ste_smoke.json --strict
 .venv/bin/python scripts/run_tiny_real_arena.py --data-mode text --text-path data/tiny_corpus.txt --train-steps 40 --qat-steps 12 --ste-qat-steps 12 --scaled-ste-steps 12 --seq-len 64 --batch-size 8 --eval-batch-size 16 --json-out reports/tiny_real_text_fixture_smoke.json
+.venv/bin/python scripts/check_packed_ternary.py --json-out reports/packed_ternary_tc.json --strict
 ```
 
 ## Prepare Dev env

@@ -1,6 +1,6 @@
 # Real Tiny Text Validation Plan
 
-Document position: [Index](./index.md) -> next validation phase after Colab synthetic gates.
+Document position: [Index](./index.md) -> completed validation phase after Colab synthetic gates.
 
 Related docs:
 
@@ -19,6 +19,25 @@ Does scaled-STE still beat projected-QAT on real token distributions?
 
 This phase should answer that before packed ternary kernels, GGUF export, or
 TurboQuant integration work.
+
+## Status
+
+Date: 2026-06-24
+
+```text
+PASS
+```
+
+Colab Wikitext real-text validation passed after the synthetic seed,
+group-size, and activation fake-quant gates. On a 200 KB Wikitext-2 sample
+(`180177` train / `20020` eval byte tokens), seeds `31`, `32`, and `33` all
+favored scaled-STE over projected-QAT on accuracy, loss, PPL, and fitness.
+Both act0 and act8 scaled-STE stayed non-degenerate in generation smoke.
+
+The full fixed result table is in
+[Colab Validation Summary](./colab_validation_summary.md#real-text-validation-result).
+The raw Colab JSON files were not yet committed locally, so paper-style
+quantitative claims should either archive those files or rerun the sweep.
 
 ## Why Real Text Comes Before Kernels
 
@@ -140,20 +159,30 @@ to verify:
 - synthetic mode remains unchanged
 - generation smoke reports finite, non-degenerate outputs
 
-## Colab Real-Text Plan
+## Colab Real-Text Result
 
-For the actual real-text validation, create a larger text file in Colab, then
-run the arena with `--data-mode text`.
+The actual real-text validation used a larger text file in Colab, then ran the
+arena with `--data-mode text`.
 
-Target:
+Observed setup:
 
 ```text
-train tokens: 50k-200k
-eval tokens : 10k-50k
+train tokens: 180177
+eval tokens : 20020
 seeds       : 31, 32, 33
+dataset     : Wikitext-2 sample, 200 KB text file
 ```
 
-Example command shape:
+Summary:
+
+```text
+scaled-STE act0: PASS, 3/3 seeds over projected-QAT
+scaled-STE act8: PASS, 3/3 seeds over projected-QAT
+generation     : finite and non-degenerate
+watch item     : KL-to-fp16 remains higher than projected-QAT, but CE/PPL are better
+```
+
+Reproduction command shape:
 
 ```bash
 python scripts/run_tiny_real_arena.py \
@@ -195,15 +224,14 @@ bash scripts/run_colab_scaled_ste_arena.sh
 
 ## Decision After This Phase
 
-If real text passes:
+Real text passed, so the quality gate no longer blocks storage/export work.
 
-1. archive Colab JSON reports
-2. scope packed ternary kernel storage and matmul path
-3. scope GGUF/bitnet.cpp export path
-4. revisit TurboQuant KV cache for long-context runtime memory
+Next:
 
-If real text fails:
+1. archive or regenerate the Colab JSON reports
+2. proceed to [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md)
+3. implement model-level pack/unpack export with dense logit-equivalence TC
+4. then scope packed reference matmul, GGUF/bitnet.cpp export, and TurboQuant KV cache
 
-1. inspect projection-wise error
-2. tune scaled-STE group size, lambda, and activation quant
-3. consider Extra RMSNorm/stabilization before kernels
+If a future rerun fails, inspect projection-wise error, tune scaled-STE group
+size/lambda/activation quant, and consider stabilization before any kernel work.

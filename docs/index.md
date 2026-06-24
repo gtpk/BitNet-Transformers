@@ -8,12 +8,26 @@ scaled-STE, Colab 실험 준비 문서의 시작점이다.
 기존 모델을 teacher distillation 없이 BitNet-style ternary 영역으로 바로
 내리는 것은 단순 PTQ만으로는 약하지만, S1 `alpha*T` scale을 보존하는
 `ScaledBitLinear` + CE-only STE 후학습은 로컬 tiny arena, Colab seed sweep,
-group-size sweep, activation fake-quant tiebreaker 모두에서 projected-QAT와
-동률~우위를 보이는 첫 native BitLinear-style 후보다.
+group-size sweep, activation fake-quant tiebreaker, 그리고 **real-text
+(Wikitext, seed 31/32/33, act0·act8)** 모두에서 projected-QAT를 동률~우위로
+이기는 첫 native BitLinear-style 후보다. 첫 storage 산출물인 **packed ternary
+format Phase 1**도 통과해 이론 b1.58이 실제 byte 감소(trit 1.600 bits/elem,
+512x2048에서 fp16 대비 8.65x)로 이어짐을 증명했다.
 
 ## 지금 바로 할 일
 
-다음은 synthetic patterned data를 벗어나 real tiny text subset에서 검증한다:
+real-text 검증이 통과했고 packed ternary format Phase 1이 끝났다. 다음은
+[Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md)의
+Phase 2 — 모델 단위 pack/unpack export와 dense 대비 forward logit 동일성 TC다.
+
+packed format Phase 1 검증(로컬):
+
+```bash
+.venv/bin/python scripts/check_packed_ternary.py \
+  --json-out reports/packed_ternary_tc.json --strict
+```
+
+real-text fixture smoke(로컬, harness 확인용):
 
 ```bash
 .venv/bin/python scripts/run_tiny_real_arena.py \
@@ -58,10 +72,12 @@ group-size sweep, activation fake-quant tiebreaker 모두에서 projected-QAT와
 6. [Colab Validation Summary](./colab_validation_summary.md)
    - Colab moderate run과 seed sweep 통과 결과를 기록한다.
 7. [Real Tiny Text Validation Plan](./real_tiny_text_validation_plan.md)
-   - synthetic arena 이후 실제 토큰 분포로 넘어가는 다음 검증 계획이다.
-8. [Research Signal Note](./research_signal_note.md)
+   - synthetic arena 이후 실제 토큰 분포 검증의 계획, 결과, 재현 경로다.
+8. [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md)
+   - real-text 통과 후 첫 storage 산출물. b1.58을 실제 byte로 바꾸는 format/TC다.
+9. [Research Signal Note](./research_signal_note.md)
    - 왜 이 결과가 "연구자가 꿈꾸는 초반부"인지 해석한다.
-9. [TurboQuant + BitNet Implementation Plan](./turboquant_bitnet_implementation_plan.md)
+10. [TurboQuant + BitNet Implementation Plan](./turboquant_bitnet_implementation_plan.md)
    - weight 변환이 안정화된 뒤 KV cache 압축으로 확장하는 별도 축이다.
 
 ## 문서 그래프
@@ -76,10 +92,13 @@ flowchart TD
   F --> J["colab_validation_summary.md"]
   J --> K["real_tiny_text_validation_plan.md"]
   J --> L["research_signal_note.md"]
+  J --> M["packed_ternary_format_plan.md"]
+  K --> M["packed_ternary_format_plan.md"]
   B --> E
   B --> G["turboquant_bitnet_implementation_plan.md"]
   F --> H["reports/tiny_real_arena_scaled_ste_smoke.json"]
   D --> I["reports/scaled_bitlinear_tc.json"]
+  M --> N["reports/packed_ternary_tc.json"]
 ```
 
 ## 문서별 역할
@@ -92,7 +111,8 @@ flowchart TD
 | [evolutionary_llm_arena_plan.md](./evolutionary_llm_arena_plan.md) | 후보 선택 fitness, Pareto, arena 결과 | 어떤 후보가 이겼는지 볼 때 |
 | [colab_arena_runbook.md](./colab_arena_runbook.md) | Colab 실행 명령, sweep, 결과 해석 | 큰 run을 돌릴 때 |
 | [colab_validation_summary.md](./colab_validation_summary.md) | Colab moderate run과 seed sweep milestone 기록 | Colab 결과가 다음 단계 조건을 충족했는지 확인할 때 |
-| [real_tiny_text_validation_plan.md](./real_tiny_text_validation_plan.md) | synthetic task 이후 실제 토큰 분포 검증 계획 | packed/export 전에 품질 위험을 줄일 때 |
+| [real_tiny_text_validation_plan.md](./real_tiny_text_validation_plan.md) | synthetic task 이후 실제 토큰 분포 검증 계획과 통과 결과 | packed/export 전에 품질 위험을 줄일 때 |
+| [packed_ternary_format_plan.md](./packed_ternary_format_plan.md) | packed ternary weight format, 2-bit/trit layout, storage TC | b1.58을 실제 byte로 저장/검증할 때 |
 | [research_signal_note.md](./research_signal_note.md) | 현재 결과가 연구 신호로서 왜 의미 있는지 해석 | 논문화 가능성과 다음 방향을 판단할 때 |
 | [turboquant_bitnet_implementation_plan.md](./turboquant_bitnet_implementation_plan.md) | KV cache 압축 계획과 TC | weight 변환 이후 긴 문맥으로 확장할 때 |
 
@@ -106,6 +126,8 @@ flowchart TD
 | [scripts/run_tiny_real_arena.py](../scripts/run_tiny_real_arena.py) | [Evolutionary LLM Arena Plan](./evolutionary_llm_arena_plan.md) | 후보별 tiny real-model arena |
 | [scripts/run_colab_scaled_ste_arena.sh](../scripts/run_colab_scaled_ste_arena.sh) | [Colab Arena Runbook](./colab_arena_runbook.md) | Colab용 실행 wrapper |
 | [scripts/estimate_memory_traffic.py](../scripts/estimate_memory_traffic.py) | [Memory-Traffic-First BitNet Plan](./memory_traffic_first_plan.md) | bytes/token 추정 |
+| [bitnet_llama/packing.py](../bitnet_llama/packing.py) | [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) | two_bit/trit pack·unpack, groupwise alpha, storage |
+| [scripts/check_packed_ternary.py](../scripts/check_packed_ternary.py) | [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) | PACK-001..006 storage TC |
 
 ## 리포트 연결
 
@@ -116,6 +138,7 @@ flowchart TD
 | [tiny_real_arena_ste_qat_smoke.json](../reports/tiny_real_arena_ste_qat_smoke.json) | 이전 BitLinear STE smoke | scale 없는 STE가 왜 약한지 비교 |
 | [tiny_real_arena_qat_smoke.json](../reports/tiny_real_arena_qat_smoke.json) | projected-QAT smoke | scaled-STE의 비교 기준 |
 | [memory_traffic_bitllama_512x4.json](../reports/memory_traffic_bitllama_512x4.json) | `scripts/estimate_memory_traffic.py` | weight/KV policy별 bytes/token 추정 |
+| [packed_ternary_tc.json](../reports/packed_ternary_tc.json) | `scripts/check_packed_ternary.py` | trit/two_bit pack round-trip, dense 일치, storage 압축률 확인 |
 
 ## 현재 실험 상태
 
@@ -140,19 +163,20 @@ flowchart TD
 - watch item: scaled-STE의 KL-to-fp16이 projected-QAT보다 약간 높음
 - text mode implemented in `scripts/run_tiny_real_arena.py`
 - local byte-level fixture smoke passes, but is harness-only
+- Colab real-text 검증 통과: Wikitext-2 200KB, seed `31/32/33`, act0·act8 모두 scaled-STE가 acc/loss/PPL/fitness에서 projected-QAT 상회, frontier `3/3`, generation smoke 정상
+- packed ternary format Phase 1 구현·통과: `bitnet_llama/packing.py`, `scripts/check_packed_ternary.py`, trit 1.600 bits/elem, fp16 대비 8.65x, to_dense가 conversion.S1과 정확히 일치
 
 다음:
 
-1. Colab sweep JSON을 `reports/`로 회수해 commit.
-2. Colab에서 Wikitext-style tiny text file을 만들고 `--data-mode text`로 seed `31/32/33` 실행.
-3. real text에서 CE/PPL/token accuracy/generation smoke/KL-to-fp16을 같이 본다.
-4. 이후 packed ternary kernel, export, TurboQuant 중 우선순위를 고른다.
+1. Colab real-text JSON을 `reports/`로 회수하거나 재실행해 raw evidence를 보존한다.
+2. packed format Phase 2: 모델 단위 pack/unpack export + dense 대비 forward logit 동일성 TC, 전체 모델 storage 리포트.
+3. packed format Phase 3: packed 경로 reference matmul(속도 아님, 정확성) — dense와 logit 동일성.
+4. export/logit check에서 KL-to-fp16을 추적하며 kernel 타겟(CPU 우선, 이후 Metal/CUDA/bitnet.cpp)을 스코핑.
 
-이전 보류 항목에서 진입 조건을 충족한 다음 phase 후보:
+이전 보류 항목 중 packed kernel은 진입했고(Phase 1 완료), 남은 다음 축:
 
-- packed ternary kernel
 - GGUF/bitnet.cpp export
 - TurboQuant KV cache 구현
 
-단, raw Colab seed JSON이 현재 local workspace에 없으므로 논문식 정량 주장 전에는
+단, raw Colab JSON이 현재 local workspace에 없으므로 논문식 정량 주장 전에는
 보고서를 회수하거나 sweep을 재실행한다.

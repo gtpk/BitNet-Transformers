@@ -1,0 +1,54 @@
+{
+  "results": [
+    {
+      "id": "PACK-001/two_bit-domain",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "PACK-002/two_bit-roundtrip",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "PACK-001/trit-domain",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "PACK-002/trit-roundtrip",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "PACK-003/two_bit-dense-match-conversion",
+      "pass": true,
+      "detail": "max_err=0.00e+00"
+    },
+    {
+      "id": "PACK-003/trit-dense-match-conversion",
+      "pass": true,
+      "detail": "max_err=0.00e+00"
+    },
+    {
+      "id": "PACK-004/scaled-bitlinear-export",
+      "pass": true,
+      "detail": "max_err=7.45e-09"
+    },
+    {
+      "id": "PACK-005/save-load-roundtrip",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "PACK-006/storage-ordering",
+      "pass": true,
+      "detail": "trit=1536 two_bit=1848 int8=6240 fp16=12480"
+    },
+    {
+      "id": "PACK-006/trit-near-b158",
+      "pass": true,
+      "detail": "trit_bits_per_elem=1.600 vs 1.585"
+    }
+  ]
+}

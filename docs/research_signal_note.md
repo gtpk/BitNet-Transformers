@@ -56,6 +56,7 @@ Current evidence:
 - group-size sweep passed
 - activation fake-quant tiebreaker passed
 - real-text tiny validation passed
+- packed ternary format Phase 1 passed at `1.600 bits/elem`
 - projected-QAT was beaten by scaled-STE in the main gates
 - generation smoke stayed finite and non-degenerate in the real-text harness
 
@@ -73,7 +74,7 @@ A paper-level claim still needs stronger evidence:
 - pretrained small-model conversion, not only tiny arena models
 - larger and more varied real-text evaluation
 - stronger baselines such as GPTQ/AWQ/RTN or low-bit QAT references
-- packed storage or runtime memory measurements
+- model-wide packed storage and runtime memory measurements
 - seed variance and ablations
 - failure analysis
 
@@ -98,7 +99,7 @@ Track:
 - token accuracy
 - KL-to-fp16
 - generation smoke
-- packed storage size
+- packed storage size, first at layer format level and then whole model
 - real runtime latency
 
 ## Researcher's Framing

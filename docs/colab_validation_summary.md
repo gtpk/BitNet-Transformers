@@ -23,6 +23,13 @@ frontier in the moderate run, was the quality winner across all three seed
 sweep runs, stayed robust across the first group-size sweep, and passed the
 activation fake-quant tiebreaker.
 
+It then **passed real-text validation** (Wikitext-2, seeds 31/32/33, act0 and
+act8): scaled-STE beat projected-QAT on accuracy, loss, PPL, and fitness in all
+three seeds and stayed on the Pareto frontier. The first storage artifact
+(packed ternary format, Phase 1) also landed and proved the b1.58 byte
+reduction. See the Real-Text Validation Result and Packed Ternary Format
+Milestone sections below.
+
 ## Validation Checklist
 
 | Step | Result | Notes |
@@ -111,6 +118,63 @@ even when scaled-STE has better accuracy, loss, and fitness.
 This does not block progress, but it should be tracked in real-text validation
 and any export/logit-equivalence checks.
 
+## Real-Text Validation Result
+
+Date: 2026-06-24
+
+Real text removes the largest remaining quality risk before kernel/export work.
+The arena was run in `--data-mode text` on a 200 KB Wikitext-2 sample
+(byte-level tokenizer, `180177` train / `20020` eval tokens) at the moderate
+config across seeds `31`, `32`, `33`, at both activation settings.
+
+| Seed | Candidate | Acc | Loss | PPL | KL to fp16 | Fitness | Pareto |
+| ---: | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| `31` | `fp16_dense` | `0.435` | `1.911` | `6.76` | `0.000` | `0.435` | No |
+| `31` | `s1_projected_qat_int4` | `0.453` | `1.879` | `6.55` | `0.113` | `0.758` | Yes |
+| `31` | `s1_scaled_ste_int4` (act0) | `0.466` | `1.847` | `6.34` | `0.180` | `0.768` | Yes |
+| `31` | `s1_scaled_ste_int4` (act8) | `0.469` | `1.828` | `6.22` | `0.168` | `0.772` | Yes |
+| `32` | `fp16_dense` | `0.453` | `1.826` | `6.21` | `0.000` | `0.453` | No |
+| `32` | `s1_projected_qat_int4` | `0.458` | `1.805` | `6.08` | `0.112` | `0.763` | Yes |
+| `32` | `s1_scaled_ste_int4` (act0) | `0.477` | `1.784` | `5.95` | `0.152` | `0.780` | Yes |
+| `32` | `s1_scaled_ste_int4` (act8) | `0.476` | `1.786` | `5.96` | `0.142` | `0.779` | Yes |
+| `33` | `fp16_dense` | `0.424` | `1.956` | `7.07` | `0.000` | `0.424` | No |
+| `33` | `s1_projected_qat_int4` | `0.431` | `1.926` | `6.86` | `0.101` | `0.735` | Yes |
+| `33` | `s1_scaled_ste_int4` (act0) | `0.434` | `1.904` | `6.71` | `0.145` | `0.737` | Yes |
+| `33` | `s1_scaled_ste_int4` (act8) | `0.437` | `1.897` | `6.67` | `0.148` | `0.740` | Yes |
+
+Real-text decision:
+
+```text
+PASS
+```
+
+- scaled-STE (act0 and act8) beat projected-QAT on accuracy, loss, PPL, and
+  fitness in all three seeds, and stayed on the Pareto frontier `3/3`.
+- Generation smoke produced finite, non-degenerate decodes for every candidate.
+- On real text, act8 did **not** hurt scaled-STE (seeds 31/33 slightly better
+  than act0, seed 32 tied). This confirms the synthetic seed-31 act8 frontier
+  miss was synthetic-specific noise.
+- KL-to-fp16 watch item persists (scaled-STE higher than projected-QAT) but
+  CE/PPL are better, so it is not a contradiction. Carry it into export/logit
+  checks rather than treating it as a pause.
+
+## Packed Ternary Format Milestone
+
+Date: 2026-06-24
+
+With real text passed, the first storage artifact landed (Phase 1 of
+[Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md)):
+`bitnet_llama/packing.py` + `scripts/check_packed_ternary.py`. This proves the
+theoretical b1.58 maps to a real byte reduction.
+
+```text
+trit packing      : 1.600 bits/elem  (b1.58 bound = log2(3) = 1.585)
+512x2048 layer    : trit 8.65x, two_bit 7.11x vs fp16
+to_dense()        : == conversion.S1 alpha*T exactly (max_err 0.0)
+ScaledBitLinear export round-trip : max_err 7e-9
+TC PACK-001..006  : all pass
+```
+
 ## Artifact Note
 
 The seed sweep JSON files were generated inside the Colab session:
@@ -139,18 +203,34 @@ reports/tiny_real_arena_scaled_ste_colab_act8_seed32.json
 reports/tiny_real_arena_scaled_ste_colab_act8_seed33.json
 ```
 
+The real-text JSON files (with the `data/wikitext_tiny.txt` 200 KB sample) were
+also generated inside the Colab session:
+
+```text
+reports/tiny_real_arena_text_wikitext_seed31.json
+reports/tiny_real_arena_text_wikitext_seed32.json
+reports/tiny_real_arena_text_wikitext_seed33.json
+reports/tiny_real_arena_text_wikitext_act8_seed31.json
+reports/tiny_real_arena_text_wikitext_act8_seed32.json
+reports/tiny_real_arena_text_wikitext_act8_seed33.json
+```
+
 They were not committed from the local workspace and may be ephemeral. Treat
 this document as the milestone record, not as a replacement for raw result
 archival. Re-run the sweep before making a paper-style quantitative claim.
 
 ## Next Actions
 
-Recommended order:
+Synthetic gates, real-text validation, and packed-format Phase 1 are all done.
+Recommended order from here:
 
-1. Archive sweep JSON reports from Colab back into `reports/`.
-2. Move the arena from synthetic patterned tokens to a tiny real text subset.
-3. Track KL-to-fp16 alongside CE loss, perplexity, token accuracy, and generation smoke.
-4. Only after real-text validation, scope packed ternary kernels or export paths.
+1. Archive the real-text and packing JSON reports from Colab back into `reports/`.
+2. Packed format Phase 2: model-wide pack/unpack export with a forward
+   logit-equality TC against the dense model, and a whole-model storage report.
+3. Packed format Phase 3: reference matmul through the packed path (correctness,
+   not speed), checking logit equality with the dense path.
+4. Use the export/logit checks to watch the KL-to-fp16 item; only then scope a
+   real kernel target (CPU first, then Metal/CUDA/bitnet.cpp).
 
-The immediate next experiment should be real tiny text validation. Runtime and
-export work are now allowed, but real text removes more risk first.
+See [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) for the
+format spec and TC matrix.
