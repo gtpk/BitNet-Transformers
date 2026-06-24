@@ -7,18 +7,17 @@ scaled-STE, Colab 실험 준비 문서의 시작점이다.
 
 기존 모델을 teacher distillation 없이 BitNet-style ternary 영역으로 바로
 내리는 것은 단순 PTQ만으로는 약하지만, S1 `alpha*T` scale을 보존하는
-`ScaledBitLinear` + CE-only STE 후학습은 로컬 tiny arena와 Colab seed sweep
-모두에서 projected-QAT와 동률~우위를 보이는 첫 native BitLinear-style
-후보다.
+`ScaledBitLinear` + CE-only STE 후학습은 로컬 tiny arena, Colab seed sweep,
+group-size sweep 모두에서 projected-QAT와 동률~우위를 보이는 첫 native
+BitLinear-style 후보다.
 
 ## 지금 바로 할 일
 
 Colab에서 다음 sweep을 돌린다:
 
 ```bash
-SCALED_STE_GROUP_SIZE=32 ARENA_JSON_OUT=reports/tiny_real_arena_scaled_ste_colab_g32.json bash scripts/run_colab_scaled_ste_arena.sh
-SCALED_STE_GROUP_SIZE=64 ARENA_JSON_OUT=reports/tiny_real_arena_scaled_ste_colab_g64.json bash scripts/run_colab_scaled_ste_arena.sh
-SCALED_STE_GROUP_SIZE=128 ARENA_JSON_OUT=reports/tiny_real_arena_scaled_ste_colab_g128.json bash scripts/run_colab_scaled_ste_arena.sh
+SCALED_STE_ACTIVATION_BITS=0 ARENA_JSON_OUT=reports/tiny_real_arena_scaled_ste_colab_act0.json bash scripts/run_colab_scaled_ste_arena.sh
+SCALED_STE_ACTIVATION_BITS=8 ARENA_JSON_OUT=reports/tiny_real_arena_scaled_ste_colab_act8.json bash scripts/run_colab_scaled_ste_arena.sh
 ```
 
 자세한 실행법:
@@ -115,14 +114,15 @@ flowchart TD
 - Colab runner와 runbook 작성
 - Colab faster smoke, moderate arena, seed sweep `31/32/33` 통과
 - scaled-STE quality winner `3/3`, Pareto frontier 조건 충족
+- group-size sweep `32/64/128` 통과
+- group-size별 scaled-STE quality winner `3/3`, frontier `3/3`, loss band `0.2875-0.2996`
 
 다음:
 
-1. `SCALED_STE_GROUP_SIZE` sweep: `32`, `64`, `128`.
-2. `SCALED_STE_ACTIVATION_BITS` sweep: `0`, `8`.
-3. Colab sweep JSON을 `reports/`로 회수해 commit.
-4. 결과가 안정적이면 synthetic patterned data에서 tiny real text subset으로 이동.
-5. 이후 packed ternary kernel, export, TurboQuant 중 우선순위를 고른다.
+1. `SCALED_STE_ACTIVATION_BITS` sweep: `0`, `8`.
+2. Colab sweep JSON을 `reports/`로 회수해 commit.
+3. 결과가 안정적이면 synthetic patterned data에서 tiny real text subset으로 이동.
+4. 이후 packed ternary kernel, export, TurboQuant 중 우선순위를 고른다.
 
 이전 보류 항목에서 진입 조건을 충족한 다음 phase 후보:
 

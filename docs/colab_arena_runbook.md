@@ -115,7 +115,8 @@ for group_size in [32, 64, 128]:
     !SCALED_STE_GROUP_SIZE={group_size} ARENA_JSON_OUT=reports/tiny_real_arena_scaled_ste_colab_g{group_size}.json bash scripts/run_colab_scaled_ste_arena.sh
 ```
 
-Recommended next sweep.
+Status: completed once. Scaled-STE was quality winner `3/3`, remained on the
+frontier `3/3`, and final loss stayed in a narrow `0.2875-0.2996` band.
 
 Activation fake-quant sweep:
 
@@ -123,6 +124,9 @@ Activation fake-quant sweep:
 for bits in [0, 8]:
     !SCALED_STE_ACTIVATION_BITS={bits} ARENA_JSON_OUT=reports/tiny_real_arena_scaled_ste_colab_act{bits}.json bash scripts/run_colab_scaled_ste_arena.sh
 ```
+
+Recommended next sweep. Pause packed-kernel/export work if `bits=8` collapses
+quality or drops scaled-STE from the frontier.
 
 ## Reading The Result
 
@@ -170,6 +174,7 @@ Summary:
 faster smoke arena : pass
 moderate arena     : pass
 seed sweep 31/32/33: pass
+group-size 32/64/128: pass
 scaled-STE quality : winner 3/3
 decision           : PROCEED
 ```
@@ -177,6 +182,6 @@ decision           : PROCEED
 Next decision gate:
 
 ```text
-group-size sweep and activation fake-quant sweep should confirm whether the
-scaled-STE recipe is robust enough to justify packed-kernel or export work.
+activation fake-quant sweep should confirm whether the scaled-STE recipe still
+holds when the runtime path starts resembling a low-bit deployment path.
 ```

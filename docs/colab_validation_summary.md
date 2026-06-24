@@ -19,8 +19,8 @@ PROCEED
 ```
 
 `ScaledBitLinear` passed the Colab scale-up gate. It remained on the Pareto
-frontier in the moderate run, and it was the quality winner across all three
-seed sweep runs.
+frontier in the moderate run, was the quality winner across all three seed
+sweep runs, and stayed robust across the first group-size sweep.
 
 ## Validation Checklist
 
@@ -31,6 +31,7 @@ seed sweep runs.
 | Faster smoke arena | Pass | `strict` passed; SSTE TC passed `3/3` |
 | Moderate arena | Pass | `800` train steps; scaled-STE and projected-QAT were tied/competitive on the Pareto frontier |
 | Seed sweep | Pass | Seeds `31`, `32`, `33` all returned `rc=0`; scaled-STE was quality winner `3/3` |
+| Group-size sweep | Pass | Group sizes `32`, `64`, `128` all kept scaled-STE quality winner `3/3` and frontier `3/3`; loss stayed in a narrow `0.2875-0.2996` band |
 
 ## Research Interpretation
 
@@ -41,8 +42,8 @@ ScaledBitLinear = S1 groupwise scale preservation + CE-only STE
 ```
 
 This candidate is no longer just a local tiny smoke artifact. It is stable
-enough across the first Colab seed sweep to justify the next optimization
-stage.
+enough across the first Colab seed and group-size sweeps to justify the next
+optimization stage.
 
 The previous hold conditions are now satisfied:
 
@@ -60,6 +61,14 @@ reports/tiny_real_arena_scaled_ste_colab_seed_32.json
 reports/tiny_real_arena_scaled_ste_colab_seed_33.json
 ```
 
+The group-size sweep JSON files were also generated inside the Colab session:
+
+```text
+reports/tiny_real_arena_scaled_ste_colab_g32.json
+reports/tiny_real_arena_scaled_ste_colab_g64.json
+reports/tiny_real_arena_scaled_ste_colab_g128.json
+```
+
 They were not committed from the local workspace and may be ephemeral. Treat
 this document as the milestone record, not as a replacement for raw result
 archival. Re-run the sweep before making a paper-style quantitative claim.
@@ -68,12 +77,11 @@ archival. Re-run the sweep before making a paper-style quantitative claim.
 
 Recommended order:
 
-1. Group-size sweep: `SCALED_STE_GROUP_SIZE in {32, 64, 128}`.
-2. Activation fake-quant sweep: `SCALED_STE_ACTIVATION_BITS in {0, 8}`.
-3. Archive sweep JSON reports from Colab back into `reports/`.
-4. Move the arena from synthetic patterned tokens to a tiny real text subset.
-5. Only after the above, scope packed ternary kernels or export paths.
+1. Activation fake-quant sweep: `SCALED_STE_ACTIVATION_BITS in {0, 8}`.
+2. Archive sweep JSON reports from Colab back into `reports/`.
+3. Move the arena from synthetic patterned tokens to a tiny real text subset.
+4. Only after the above, scope packed ternary kernels or export paths.
 
-The immediate next experiment should be the group-size sweep because it tests
-whether the S1 scale granularity is a fragile local choice or a stable
-conversion knob.
+The immediate next experiment should be activation fake-quant because the
+runbook pause condition is explicit: if 8-bit activation fake-quant collapses,
+runtime/export work should wait.

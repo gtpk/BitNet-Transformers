@@ -269,6 +269,8 @@ Colab validation:
 - scaled-STE and projected-QAT remained tied/competitive on the Pareto frontier
 - seed sweep `31/32/33` passed with `rc=0` for all runs
 - scaled-STE was quality winner `3/3`
+- group-size sweep `32/64/128` passed with scaled-STE quality winner `3/3`
+  and frontier `3/3`
 - milestone: [Colab Validation Summary](./colab_validation_summary.md)
 
 Interpretation:
@@ -286,12 +288,14 @@ BitLinear-style candidate worth scaling in Colab.
 The first Colab seed sweep keeps scaled-STE on the frontier and makes it the
 quality winner in all three seeds, so the arena can proceed to sensitivity
 sweeps before runtime kernel work.
+The group-size sweep narrows risk around S1 scale granularity; activation
+fake-quant is the remaining near-runtime sensitivity check.
 ```
 
 Next step:
 
 ```text
-Run group-size and activation fake-quant sweeps from docs/colab_arena_runbook.md,
-archive raw JSON reports, then decide whether packed kernels or real-text data
-should be the next branch.
+Run activation fake-quant sweep from docs/colab_arena_runbook.md, archive raw
+JSON reports, then decide whether packed kernels or real-text data should be
+the next branch.
 ```

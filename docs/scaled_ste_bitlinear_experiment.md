@@ -121,6 +121,9 @@ Summary:
 - scaled-STE and projected-QAT were tied/competitive on the Pareto frontier
 - seed sweep over `31`, `32`, `33` passed `3/3`
 - scaled-STE was quality winner `3/3`
+- group-size sweep over `32`, `64`, `128` passed `3/3`
+- scaled-STE stayed quality winner `3/3` and frontier `3/3` with loss in
+  `0.2875-0.2996`
 
 Updated interpretation:
 
@@ -129,6 +132,8 @@ The Colab result satisfies the scale-up gate. ScaledBitLinear is now stable
 enough to justify sensitivity sweeps and the first runtime/export scoping work.
 Packed kernels should still wait until group-size and activation fake-quant
 sweeps confirm that the conversion recipe is not brittle.
+Group-size is now checked; activation fake-quant is the remaining deployment
+adjacent sensitivity gate.
 ```
 
 ## Kill Criteria Before Bigger Runs
@@ -142,8 +147,7 @@ Do not spend Colab budget if any of these fail locally:
 
 ## Next Experiments
 
-1. Group size sweep: `32`, `64`, `128`.
-2. Activation fake-quant sweep: off vs 8-bit.
-3. Archive Colab JSON reports into `reports/`.
-4. If stable, move from synthetic patterned data to a tiny real text subset.
-5. Then scope packed ternary kernels, GGUF/bitnet.cpp export, or TurboQuant KV.
+1. Activation fake-quant sweep: off vs 8-bit.
+2. Archive Colab JSON reports into `reports/`.
+3. If stable, move from synthetic patterned data to a tiny real text subset.
+4. Then scope packed ternary kernels, GGUF/bitnet.cpp export, or TurboQuant KV.
