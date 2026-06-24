@@ -206,13 +206,31 @@ Tiny real-model arena smoke:
 - Pareto frontier: `fp16_dense`, `s1_groupwise_ptq_int4_kv`
 - report: `reports/tiny_real_arena_smoke_200.json`
 
+Projected QAT recovery smoke:
+
+```bash
+.venv/bin/python scripts/run_tiny_real_arena.py --train-steps 200 --json-out reports/tiny_real_arena_qat_smoke.json --strict
+```
+
+- starts from S1 groupwise ternary projection
+- uses CE loss only, no teacher logits/hidden states
+- projects target linear weights back to S1 after each recovery step
+- quality winner: `s1_projected_qat_int8_kv`
+- resource-aware winner: `s1_projected_qat_int4_kv`
+- projected QAT loss: `2.9195 -> 2.6178`
+- report: `reports/tiny_real_arena_qat_smoke.json`
+
 Interpretation:
 
 ```text
 quality-only selection and low-resource selection already diverge.
-This is the minimum signal needed before adding real QAT candidates.
+Projected QAT shows that CE-only post-training recovery is a meaningful next
+candidate before moving larger jobs to Colab.
 ```
 
-The next meaningful candidate is not another static PTQ variant. It is a real
-post-training QAT recovery branch that starts from S1 and optimizes CE loss
-without teacher distillation.
+Next step:
+
+```text
+Replace this projected-QAT smoke with a true BitLinear STE candidate, then run
+the same arena on a larger tiny model or Colab-backed batch.
+```

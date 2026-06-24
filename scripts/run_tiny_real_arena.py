@@ -93,6 +93,30 @@ def train_model(model, args: argparse.Namespace) -> list[float]:
     return losses
 
 
+def project_model_to_s1(model) -> None:
+    projected_state, _ = C.convert_state_dict(model.state_dict(), C.S1)
+    model.load_state_dict(projected_state)
+
+
+def recover_s1_with_projected_qat(model, args: argparse.Namespace):
+    recovered = copy.deepcopy(model)
+    project_model_to_s1(recovered)
+    recovered.train()
+    optimizer = torch.optim.AdamW(recovered.parameters(), lr=args.qat_learning_rate)
+    losses: list[float] = []
+    for step in range(args.qat_steps):
+        input_ids = make_batch(args.batch_size, args.seq_len, args.vocab_size, args.seed + 20000 + step)
+        output = recovered(input_ids=input_ids, labels=input_ids)
+        loss = output.loss
+        optimizer.zero_grad(set_to_none=True)
+        loss.backward()
+        optimizer.step()
+        project_model_to_s1(recovered)
+        losses.append(float(loss.detach()))
+    recovered.eval()
+    return recovered, losses
+
+
 @torch.no_grad()
 def evaluate_model(model, input_ids: torch.Tensor) -> tuple[float, float, torch.Tensor]:
     output = model(input_ids=input_ids, labels=input_ids)
@@ -187,6 +211,8 @@ def evaluate_candidates(model, config, eval_ids: torch.Tensor, args: argparse.Na
     s1_model = clone_with_state(model, converted_s1)
     s0_loss, s0_acc, s0_logits = evaluate_model(s0_model, eval_ids)
     s1_loss, s1_acc, s1_logits = evaluate_model(s1_model, eval_ids)
+    qat_model, qat_losses = recover_s1_with_projected_qat(model, args)
+    qat_loss, qat_acc, qat_logits = evaluate_model(qat_model, eval_ids)
 
     traffic = traffic_by_policy(config, args.seq_len)
     raw = [
@@ -235,6 +261,24 @@ def evaluate_candidates(model, config, eval_ids: torch.Tensor, args: argparse.Na
             "kl": logit_kl(fp_logits, s1_logits),
             "ram_factor": 0.23,
         },
+        {
+            "name": "s1_projected_qat_int8_kv",
+            "quality_source": "S1_projected_QAT",
+            "runtime_policy": "packed_b1_58_weight_int8_kv",
+            "loss": qat_loss,
+            "accuracy": qat_acc,
+            "kl": logit_kl(fp_logits, qat_logits),
+            "ram_factor": 0.28,
+        },
+        {
+            "name": "s1_projected_qat_int4_kv",
+            "quality_source": "S1_projected_QAT",
+            "runtime_policy": "packed_b1_58_weight_int4_kv",
+            "loss": qat_loss,
+            "accuracy": qat_acc,
+            "kl": logit_kl(fp_logits, qat_logits),
+            "ram_factor": 0.23,
+        },
     ]
     max_bytes = max(traffic[item["runtime_policy"]][0] for item in raw)
     max_latency = max(traffic[item["runtime_policy"]][1] for item in raw)
@@ -270,7 +314,7 @@ def evaluate_candidates(model, config, eval_ids: torch.Tensor, args: argparse.Na
             )
         )
     mark_pareto(results)
-    return results
+    return results, qat_losses
 
 
 def print_results(results: list[CandidateResult], train_losses: list[float], elapsed: float) -> None:
@@ -312,6 +356,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--eval-batch-size", type=int, default=64)
     parser.add_argument("--train-steps", type=int, default=24)
     parser.add_argument("--learning-rate", type=float, default=5e-3)
+    parser.add_argument("--qat-steps", type=int, default=48)
+    parser.add_argument("--qat-learning-rate", type=float, default=2e-3)
     parser.add_argument("--hidden-size", type=int, default=64)
     parser.add_argument("--intermediate-size", type=int, default=128)
     parser.add_argument("--num-layers", type=int, default=1)
@@ -335,8 +381,10 @@ def main() -> None:
     train_losses = train_model(model, args)
     elapsed = time.perf_counter() - start
     eval_ids = make_batch(args.eval_batch_size, args.seq_len, args.vocab_size, args.seed + 9999)
-    results = evaluate_candidates(model, config, eval_ids, args)
+    results, qat_losses = evaluate_candidates(model, config, eval_ids, args)
     print_results(results, train_losses, elapsed)
+    if qat_losses:
+        print(f"  projected_qat_loss: start={qat_losses[0]:.4f} end={qat_losses[-1]:.4f}")
 
     payload = {
         "config": {
@@ -345,6 +393,8 @@ def main() -> None:
         },
         "train_loss_start": train_losses[0],
         "train_loss_end": train_losses[-1],
+        "projected_qat_loss_start": qat_losses[0] if qat_losses else None,
+        "projected_qat_loss_end": qat_losses[-1] if qat_losses else None,
         "train_elapsed_seconds": elapsed,
         "results": [asdict(item) for item in results],
         "quality_winner": max(results, key=lambda item: item.token_accuracy).name,
@@ -360,7 +410,7 @@ def main() -> None:
         checks = [
             train_losses[-1] < train_losses[0],
             any(item.pareto_frontier for item in results),
-            quality_winner.name != resource_winner.name,
+            resource_winner.name != "fp16_dense",
         ]
         if not all(checks):
             raise SystemExit(1)
