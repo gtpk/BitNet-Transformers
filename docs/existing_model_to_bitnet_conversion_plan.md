@@ -1,5 +1,13 @@
 # Existing Model to BitNet Conversion Plan
 
+문서 위치: [Index](./index.md) -> 기존 dense model을 BitNet-style ternary로 변환하는 전체 ladder
+
+관련 문서:
+
+- [Memory-Traffic-First BitNet Plan](./memory_traffic_first_plan.md)
+- [Scaled-STE BitLinear Experiment](./scaled_ste_bitlinear_experiment.md)
+- [Evolutionary LLM Arena Plan](./evolutionary_llm_arena_plan.md)
+
 ## 목적
 
 이 문서는 기존 full-precision LLM checkpoint를 teacher distillation 없이 BitNet-style ternary 모델로 변환할 수 있는지 검증하기 위한 계획서다. 목표는 "새로 BitNet을 pretrain"하거나 "teacher logits로 증류"하는 것이 아니라, 일반 quantization처럼 기존 모델을 후처리, calibration, reconstruction, 짧은 후학습으로 1.58-bit weight domain에 가깝게 내리는 것이다.

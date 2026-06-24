@@ -1,5 +1,13 @@
 # Colab Arena Runbook
 
+Document position: [Index](./index.md) -> next executable scale-up step.
+
+Related docs:
+
+- [Scaled-STE BitLinear Experiment](./scaled_ste_bitlinear_experiment.md)
+- [Evolutionary LLM Arena Plan](./evolutionary_llm_arena_plan.md)
+- [Existing Model to BitNet Conversion Plan](./existing_model_to_bitnet_conversion_plan.md)
+
 ## Goal
 
 Run the teacher-free BitNet conversion arena at a size that is still cheap on

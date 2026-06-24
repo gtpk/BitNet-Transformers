@@ -1,5 +1,13 @@
 # Memory-Traffic-First BitNet Plan
 
+문서 위치: [Index](./index.md) -> 방향성/병목 정의
+
+관련 문서:
+
+- [Existing Model to BitNet Conversion Plan](./existing_model_to_bitnet_conversion_plan.md)
+- [Evolutionary LLM Arena Plan](./evolutionary_llm_arena_plan.md)
+- [TurboQuant + BitNet Implementation Plan](./turboquant_bitnet_implementation_plan.md)
+
 ## 목적
 
 흙수저용 LLM의 핵심 병목은 "GPU가 충분한가"보다 "토큰 하나를 만들 때 메모리를 얼마나 읽고 쓰는가"다. 작은 장비에서는 연산량보다 weight, KV cache, activation scratch를 DRAM/VRAM/CPU cache 사이에서 옮기는 시간이 더 쉽게 병목이 된다.

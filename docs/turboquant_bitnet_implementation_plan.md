@@ -1,5 +1,13 @@
 # TurboQuant + BitNet Implementation Plan
 
+문서 위치: [Index](./index.md) -> weight 변환 이후 KV cache 압축 확장 계획
+
+관련 문서:
+
+- [Memory-Traffic-First BitNet Plan](./memory_traffic_first_plan.md)
+- [Existing Model to BitNet Conversion Plan](./existing_model_to_bitnet_conversion_plan.md)
+- [Evolutionary LLM Arena Plan](./evolutionary_llm_arena_plan.md)
+
 ## 목적
 
 이 문서는 BitNet-Transformers에 TurboQuant 아이디어를 넣기 전, 구현 범위와 테스트 케이스를 먼저 고정하기 위한 계획서다. 목표는 BitNet의 ternary weight 구조를 유지하면서, 긴 문맥 추론에서 커지는 KV cache를 TurboQuant 방식으로 압축하는 것이다.
@@ -290,4 +298,3 @@ python scripts/benchmark_turboquant_kv.py --profile long-context
 - [ ] 모든 TC가 독립적으로 실행 가능하다.
 - [ ] benchmark가 품질, 메모리, 속도를 함께 기록한다.
 - [ ] packed/kernel 최적화가 reference correctness 위에 올라간다.
-

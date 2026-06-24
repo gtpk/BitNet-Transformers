@@ -1,5 +1,13 @@
 # Evolutionary LLM Arena Plan
 
+Document position: [Index](./index.md) -> candidate selection and resource-aware evaluation.
+
+Related docs:
+
+- [Memory-Traffic-First BitNet Plan](./memory_traffic_first_plan.md)
+- [Scaled-STE BitLinear Experiment](./scaled_ste_bitlinear_experiment.md)
+- [Colab Arena Runbook](./colab_arena_runbook.md)
+
 ## Purpose
 
 This document defines a small, testable arena for evolving low-resource LLM candidates. The goal is not to claim that models magically self-improve. The goal is to build a measurement loop where architecture, quantization, runtime policy, and task data compete under resource pressure.

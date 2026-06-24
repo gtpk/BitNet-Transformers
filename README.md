@@ -8,9 +8,17 @@
 
 ## Modernization Notes
 
-- [Existing model to BitNet conversion plan](./docs/existing_model_to_bitnet_conversion_plan.md)
+Start here:
+
+- [Research index and reading path](./docs/index.md)
+
+Core documents:
+
 - [Memory-traffic-first BitNet plan](./docs/memory_traffic_first_plan.md)
+- [Existing model to BitNet conversion plan](./docs/existing_model_to_bitnet_conversion_plan.md)
+- [Scaled-STE BitLinear experiment](./docs/scaled_ste_bitlinear_experiment.md)
 - [Evolutionary low-resource LLM arena plan](./docs/evolutionary_llm_arena_plan.md)
+- [Colab arena runbook](./docs/colab_arena_runbook.md)
 - [TurboQuant + BitNet KV-cache plan](./docs/turboquant_bitnet_implementation_plan.md)
 
 ## Low-Resource Experiment Runners
@@ -19,6 +27,8 @@
 .venv/bin/python scripts/estimate_memory_traffic.py
 .venv/bin/python scripts/run_arena_feasibility.py --strict
 .venv/bin/python scripts/run_tiny_real_arena.py --train-steps 200 --json-out reports/tiny_real_arena_smoke_200.json --strict
+.venv/bin/python scripts/check_scaled_bitlinear.py --json-out reports/scaled_bitlinear_tc.json
+.venv/bin/python scripts/run_tiny_real_arena.py --train-steps 200 --json-out reports/tiny_real_arena_scaled_ste_smoke.json --strict
 ```
 
 ## Prepare Dev env

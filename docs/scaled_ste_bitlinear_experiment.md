@@ -1,5 +1,13 @@
 # Scaled-STE BitLinear Experiment
 
+Document position: [Index](./index.md) -> conversion ladder S3 candidate -> Colab scale-up gate.
+
+Related docs:
+
+- [Existing Model to BitNet Conversion Plan](./existing_model_to_bitnet_conversion_plan.md)
+- [Evolutionary LLM Arena Plan](./evolutionary_llm_arena_plan.md)
+- [Colab Arena Runbook](./colab_arena_runbook.md)
+
 ## Purpose
 
 The first BitLinear STE arena candidate was useful because it failed clearly:
