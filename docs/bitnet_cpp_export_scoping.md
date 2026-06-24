@@ -250,6 +250,19 @@ Gate Result (strong form refuted).
 Use a `per_tensor_ste_native`-trained model (I2_S-compatible scale) as the source,
 not a groupwise model.
 
+**RT-103A (HF export round-trip): PASS.** `scripts/export_hf_per_tensor.py` builds
+a tiny standard `LlamaForCausalLM` (9.5M params, borrowing the LLaMA SPM tokenizer
++ vocab 32002 from `bitnet_b1_58-large`), saves `config.json` + `model.safetensors`
++ tokenizer files, and reloads via `AutoModelForCausalLM` with **logit max_err
+0.0**. Path A note honored: the dir holds latent fp weights (upstream re-quantizes).
+
+Open item carried to RT-103B: the borrowed `tokenizer_config.json` references a
+custom `BitnetTokenizer` class, so `AutoTokenizer` fails without it. Fix in
+RT-103B by normalizing the tokenizer to a standard LLaMA tokenizer (or shipping
+the custom tokenizer file). Also unresolved: our tiny model is plain LLaMA (no
+BitNet SubLN `attn_sub_norm`/`ffn_sub_norm`), so RT-103B must check whether the
+converter/runtime accepts a plain-LLaMA-shaped model or expects `BitnetForCausalLM`.
+
 A Python reference of this artifact is now implemented and PASSED (see
 [I2_S Export PoC Plan](./i2s_export_poc_plan.md), commit `5df98bf`):
 `bitnet_llama/i2s_export.py` writes `gamma + 2-bit codes` and re-imports with
