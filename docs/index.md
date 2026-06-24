@@ -59,7 +59,9 @@ group-size sweep, activation fake-quant tiebreaker 모두에서 projected-QAT와
    - Colab moderate run과 seed sweep 통과 결과를 기록한다.
 7. [Real Tiny Text Validation Plan](./real_tiny_text_validation_plan.md)
    - synthetic arena 이후 실제 토큰 분포로 넘어가는 다음 검증 계획이다.
-8. [TurboQuant + BitNet Implementation Plan](./turboquant_bitnet_implementation_plan.md)
+8. [Research Signal Note](./research_signal_note.md)
+   - 왜 이 결과가 "연구자가 꿈꾸는 초반부"인지 해석한다.
+9. [TurboQuant + BitNet Implementation Plan](./turboquant_bitnet_implementation_plan.md)
    - weight 변환이 안정화된 뒤 KV cache 압축으로 확장하는 별도 축이다.
 
 ## 문서 그래프
@@ -73,6 +75,7 @@ flowchart TD
   E --> F["colab_arena_runbook.md"]
   F --> J["colab_validation_summary.md"]
   J --> K["real_tiny_text_validation_plan.md"]
+  J --> L["research_signal_note.md"]
   B --> E
   B --> G["turboquant_bitnet_implementation_plan.md"]
   F --> H["reports/tiny_real_arena_scaled_ste_smoke.json"]
@@ -90,6 +93,7 @@ flowchart TD
 | [colab_arena_runbook.md](./colab_arena_runbook.md) | Colab 실행 명령, sweep, 결과 해석 | 큰 run을 돌릴 때 |
 | [colab_validation_summary.md](./colab_validation_summary.md) | Colab moderate run과 seed sweep milestone 기록 | Colab 결과가 다음 단계 조건을 충족했는지 확인할 때 |
 | [real_tiny_text_validation_plan.md](./real_tiny_text_validation_plan.md) | synthetic task 이후 실제 토큰 분포 검증 계획 | packed/export 전에 품질 위험을 줄일 때 |
+| [research_signal_note.md](./research_signal_note.md) | 현재 결과가 연구 신호로서 왜 의미 있는지 해석 | 논문화 가능성과 다음 방향을 판단할 때 |
 | [turboquant_bitnet_implementation_plan.md](./turboquant_bitnet_implementation_plan.md) | KV cache 압축 계획과 TC | weight 변환 이후 긴 문맥으로 확장할 때 |
 
 ## 코드와 문서 연결

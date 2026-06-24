@@ -21,6 +21,7 @@ Core documents:
 - [Colab arena runbook](./docs/colab_arena_runbook.md)
 - [Colab validation summary](./docs/colab_validation_summary.md)
 - [Real tiny text validation plan](./docs/real_tiny_text_validation_plan.md)
+- [Research signal note](./docs/research_signal_note.md)
 - [TurboQuant + BitNet KV-cache plan](./docs/turboquant_bitnet_implementation_plan.md)
 
 ## Low-Resource Experiment Runners
