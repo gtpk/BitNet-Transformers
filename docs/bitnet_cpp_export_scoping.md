@@ -420,6 +420,38 @@ encoding). Redirect:
 - Our weights/quantization are export-ready (f16 parity holds); only the ternary
   *runtime* needs a working type/platform.
 
+### RT-108 (TL1 sanity): local bitnet.cpp build is broken on this M5 (NEON=0)
+
+Prepared the official model in TL1 (`setup_env.py -q tl1`, codegen + rebuild) and
+ran perplexity:
+
+- **TL1 on Metal**: aborts — `ggml-metal.m:1799: MUL MAT-MAT not implemented`
+  (the Metal backend doesn't implement BitNet ternary matmul).
+- **TL1 on CPU (`-ngl 0`)**: segfaults (rc 139) at the warmup matmul.
+- (recall) I2_S on Metal: garbage (PPL 112791 official); I2_S on CPU: crashes.
+
+Root cause: the build's `system_info` reports **`NEON = 0`** on an Apple M5
+(arm64). bitnet.cpp's I2_S/TL1 CPU kernels are ARM-NEON; built without NEON they
+segfault, and the Metal backend doesn't implement these types. So NO BitNet
+ternary type runs on this local build.
+
+```text
+CONCLUSION: this is a BUILD/TOOLCHAIN misconfig on a brand-new M5 / macOS 26 /
+clang 21 (NEON disabled, Metal kernels absent), NOT a flaw in our quantization
+(f16 GGUF parity holds) and NOT a fundamental I2_S/TL1 limitation. The local
+bitnet.cpp runtime track is SUSPENDED here.
+```
+
+Options (per the pre-agreed branch 3):
+1. Rebuild bitnet.cpp with ARM NEON enabled (cmake `-DGGML_NATIVE=ON` or explicit
+   `-mcpu`/`-march`); the NEON=0 is the concrete lead. Uncertain on bleeding-edge M5.
+2. Re-verify on x86/Linux (TL2/I2_S) or an older Apple Silicon with a known-good build.
+3. File a minimal bitnet.cpp repro (M5, NEON=0, Metal MUL-MAT-MAT unimplemented).
+
+Our deliverables stand: per-tensor b1.58 quantization validated (f16 parity
+1863~2012), HF/F32/F16 GGUF export works, scale-repack math confirmed. Only the
+ternary *runtime* on this specific local build is blocked.
+
 ### Step 3: Minimal Export Artifact
 
 Use a `per_tensor_ste_native`-trained model (I2_S-compatible scale) as the source,
