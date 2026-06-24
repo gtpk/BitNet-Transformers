@@ -693,3 +693,64 @@ Consequences:
   exist (codegen step) — if configure errors on a missing `bitnet-lut-kernels.h`,
   run setup_env's codegen (or `python utils/codegen_*`) first, OR build via
   `python setup_env.py -q i2_s` which wires codegen + cmake together.
+
+## RT-112: our tiny per-tensor-native model on x86 I2_S (latent vs ternary-dense)
+
+RT-111 settled the *runtime* (x86 I2_S is faithful; the M5 collapse is toolchain).
+RT-112 settles OUR *artifact*: does the trained tiny per-tensor b1.58 model reach
+F16/F32/Python parity through the x86 I2_S runtime, and via which encoding?
+
+Compared on one eval token stream with the one llama-perplexity tool:
+
+| path | encoding | expectation |
+| --- | --- | --- |
+| latent (Path A) | trained latent-FP -> upstream I2_S (sign*absmax re-quant) | collapse (control) |
+| ternary (Path A') | Wq=gamma*T dense -> upstream I2_S (lossless repack) | F16 parity |
+
+Anchors per path: F32 + F16 GGUF (faithful-runtime) and the Python refs from
+`reports/rt104_reference.json` (per_tensor_ste / latent_fp / i2s_export gamma*T).
+
+Verdict rule:
+- `Path A' i2_s ~= f16 ~= Python` -> PASS: our b1.58 model runs faithfully on real
+  x86 I2_S; no Path B byte-writer needed; advance to storage/latency (EXPORT-006/7).
+- official passed (RT-111) but our Path A' collapses -> our artifact/encoding issue
+  -> implement Path B direct I2_S byte-writer.
+- latent collapses but Wq is clean -> the absmax-vs-absmean math is fully confirmed.
+
+Driver: `scripts/rt112_x86_arena.py` (trains via rt104, materializes via rt104d,
+builds f32/f16/i2_s for both paths, runs perplexity, prints the table + verdict).
+
+### Colab x86 runbook (self-contained; colab-mcp or manual)
+
+```python
+# Stage A — build bitnet.cpp (binaries + official control + tokenizer dir)
+import re, subprocess, os
+def sh(c, cwd=None):
+    r=subprocess.run(c, shell=True, cwd=cwd, capture_output=True, text=True)
+    print("$",c,"-> rc",r.returncode); print((r.stdout+r.stderr)[-400:]); return r.returncode
+sh("apt-get install -y -q clang >/dev/null 2>&1; clang --version|head -1")
+sh("pip install -q sentencepiece huggingface_hub cmake 2>&1 | tail -1")
+sh("rm -rf /content/bitnet.cpp && git clone -q https://github.com/microsoft/BitNet.git /content/bitnet.cpp")
+sh("git checkout -q 01eb415772c342d9f20dc42772f1583ae1e5b102 && git submodule update --init --recursive 2>&1|tail -1",
+   cwd="/content/bitnet.cpp")
+# const patch BOTH y_col occurrences (the grep-guard false-positive trap)
+p="/content/bitnet.cpp/src/ggml-bitnet-mad.cpp"; s=open(p).read()
+s=re.sub(r'(?:const\s+)?int8_t\s*\*\s*y_col\s*=\s*y\s*\+\s*col\s*\*\s*by\s*;',
+         'const int8_t * y_col = y + col * by;', s); open(p,"w").write(s)
+# setup_env wires codegen (bitnet-lut-kernels.h) + cmake + downloads the model
+sh("python setup_env.py -hr 1bitLLM/bitnet_b1_58-large -q i2_s 2>&1 | tail -5", cwd="/content/bitnet.cpp")
+print("perplexity bin:", os.path.exists("/content/bitnet.cpp/build/bin/llama-perplexity"))
+```
+
+```python
+# Stage B — our repo + RT-112 driver  (origin must contain scripts/rt112_x86_arena.py)
+import subprocess
+subprocess.run("rm -rf /content/BNT && git clone -q https://github.com/gtpk/BitNet-Transformers /content/BNT", shell=True)
+print(subprocess.run("pip install -q safetensors 2>&1|tail -1", shell=True, capture_output=True, text=True).stdout)
+r=subprocess.run("python scripts/rt112_x86_arena.py --bitnet /content/bitnet.cpp --ctx 64",
+                 shell=True, cwd="/content/BNT", capture_output=True, text=True)
+print((r.stdout+r.stderr)[-3000:])
+```
+
+NOTE: Stage B clones `origin` — the driver `scripts/rt112_x86_arena.py` must be
+pushed there first (rt104/rt104d/conversion/data are already on origin).
