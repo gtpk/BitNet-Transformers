@@ -8,16 +8,17 @@ scaled-STE, Colab 실험 준비 문서의 시작점이다.
 기존 모델을 teacher distillation 없이 BitNet-style ternary 영역으로 바로
 내리는 것은 단순 PTQ만으로는 약하지만, S1 `alpha*T` scale을 보존하는
 `ScaledBitLinear` + CE-only STE 후학습은 로컬 tiny arena, Colab seed sweep,
-group-size sweep 모두에서 projected-QAT와 동률~우위를 보이는 첫 native
-BitLinear-style 후보다.
+group-size sweep, activation fake-quant tiebreaker 모두에서 projected-QAT와
+동률~우위를 보이는 첫 native BitLinear-style 후보다.
 
 ## 지금 바로 할 일
 
-Colab에서 다음 sweep을 돌린다:
+다음은 synthetic patterned data를 벗어나 real tiny text subset에서 검증한다:
 
 ```bash
-SEED=32 SCALED_STE_ACTIVATION_BITS=8 ARENA_JSON_OUT=reports/tiny_real_arena_scaled_ste_colab_act8_seed32.json bash scripts/run_colab_scaled_ste_arena.sh
-SEED=33 SCALED_STE_ACTIVATION_BITS=8 ARENA_JSON_OUT=reports/tiny_real_arena_scaled_ste_colab_act8_seed33.json bash scripts/run_colab_scaled_ste_arena.sh
+# next implementation target:
+# add a tiny real-text arena/eval path and compare fp16, projected-QAT,
+# scaled-STE act0, and scaled-STE act8 on real token distributions.
 ```
 
 자세한 실행법:
@@ -48,7 +49,9 @@ SEED=33 SCALED_STE_ACTIVATION_BITS=8 ARENA_JSON_OUT=reports/tiny_real_arena_scal
    - 로컬 smoke 이후 Colab에서 크기를 키우는 실행 절차다.
 6. [Colab Validation Summary](./colab_validation_summary.md)
    - Colab moderate run과 seed sweep 통과 결과를 기록한다.
-7. [TurboQuant + BitNet Implementation Plan](./turboquant_bitnet_implementation_plan.md)
+7. [Real Tiny Text Validation Plan](./real_tiny_text_validation_plan.md)
+   - synthetic arena 이후 실제 토큰 분포로 넘어가는 다음 검증 계획이다.
+8. [TurboQuant + BitNet Implementation Plan](./turboquant_bitnet_implementation_plan.md)
    - weight 변환이 안정화된 뒤 KV cache 압축으로 확장하는 별도 축이다.
 
 ## 문서 그래프
@@ -61,6 +64,7 @@ flowchart TD
   D --> E["evolutionary_llm_arena_plan.md"]
   E --> F["colab_arena_runbook.md"]
   F --> J["colab_validation_summary.md"]
+  J --> K["real_tiny_text_validation_plan.md"]
   B --> E
   B --> G["turboquant_bitnet_implementation_plan.md"]
   F --> H["reports/tiny_real_arena_scaled_ste_smoke.json"]
@@ -77,6 +81,7 @@ flowchart TD
 | [evolutionary_llm_arena_plan.md](./evolutionary_llm_arena_plan.md) | 후보 선택 fitness, Pareto, arena 결과 | 어떤 후보가 이겼는지 볼 때 |
 | [colab_arena_runbook.md](./colab_arena_runbook.md) | Colab 실행 명령, sweep, 결과 해석 | 큰 run을 돌릴 때 |
 | [colab_validation_summary.md](./colab_validation_summary.md) | Colab moderate run과 seed sweep milestone 기록 | Colab 결과가 다음 단계 조건을 충족했는지 확인할 때 |
+| [real_tiny_text_validation_plan.md](./real_tiny_text_validation_plan.md) | synthetic task 이후 실제 토큰 분포 검증 계획 | packed/export 전에 품질 위험을 줄일 때 |
 | [turboquant_bitnet_implementation_plan.md](./turboquant_bitnet_implementation_plan.md) | KV cache 압축 계획과 TC | weight 변환 이후 긴 문맥으로 확장할 때 |
 
 ## 코드와 문서 연결
@@ -118,12 +123,15 @@ flowchart TD
 - group-size별 scaled-STE quality winner `3/3`, frontier `3/3`, loss band `0.2875-0.2996`
 - activation fake-quant seed `31`은 collapse 없이 borderline frontier 이탈
 - act8 seed `31`: acc `0.906`, loss `0.286`, KL `0.083`, projected-QAT에 RAM/accuracy tie-break로 dominate
+- act8 tiebreaker seed `32/33` 통과
+- seed `32/33`에서 scaled-STE act8은 quality winner, resource winner, frontier 유지
+- watch item: scaled-STE의 KL-to-fp16이 projected-QAT보다 약간 높음
 
 다음:
 
-1. `SCALED_STE_ACTIVATION_BITS=8` tiebreaker: seeds `32`, `33`.
-2. Colab sweep JSON을 `reports/`로 회수해 commit.
-3. act8이 collapse하지 않으면 synthetic patterned data에서 tiny real text subset으로 이동.
+1. Colab sweep JSON을 `reports/`로 회수해 commit.
+2. synthetic patterned data에서 tiny real text subset으로 이동.
+3. real text에서 CE/PPL/token accuracy/generation smoke/KL-to-fp16을 같이 본다.
 4. 이후 packed ternary kernel, export, TurboQuant 중 우선순위를 고른다.
 
 이전 보류 항목에서 진입 조건을 충족한 다음 phase 후보:

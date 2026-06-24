@@ -20,7 +20,8 @@ PROCEED
 
 `ScaledBitLinear` passed the Colab scale-up gate. It remained on the Pareto
 frontier in the moderate run, was the quality winner across all three seed
-sweep runs, and stayed robust across the first group-size sweep.
+sweep runs, stayed robust across the first group-size sweep, and passed the
+activation fake-quant tiebreaker.
 
 ## Validation Checklist
 
@@ -33,6 +34,7 @@ sweep runs, and stayed robust across the first group-size sweep.
 | Seed sweep | Pass | Seeds `31`, `32`, `33` all returned `rc=0`; scaled-STE was quality winner `3/3` |
 | Group-size sweep | Pass | Group sizes `32`, `64`, `128` all kept scaled-STE quality winner `3/3` and frontier `3/3`; loss stayed in a narrow `0.2875-0.2996` band |
 | Activation fake-quant seed 31 | Borderline | No quality collapse. `bits=8` improved loss/KL but lost frontier by a tiny accuracy/RAM tie-break against projected-QAT |
+| Activation fake-quant seeds 32/33 | Pass | `bits=8` made scaled-STE quality winner, resource winner, and Pareto member on both seeds |
 
 ## Research Interpretation
 
@@ -43,8 +45,8 @@ ScaledBitLinear = S1 groupwise scale preservation + CE-only STE
 ```
 
 This candidate is no longer just a local tiny smoke artifact. It is stable
-enough across the first Colab seed and group-size sweeps to justify the next
-optimization stage.
+enough across Colab seed, group-size, and activation fake-quant sweeps to
+justify the next optimization stage.
 
 The previous hold conditions are now satisfied:
 
@@ -77,8 +79,37 @@ accuracy edge by ~0.001, projected-QAT dominates it on the Pareto check.
 Decision:
 
 ```text
-Do not pause yet. Run act8 on seeds 32 and 33 as the tiebreaker.
+Resolved by act8 seeds 32 and 33. This was seed-specific frontier noise, not
+activation-quant collapse.
 ```
+
+## Activation Fake-Quant Tiebreaker Result
+
+| Seed | Candidate | Accuracy | Loss | KL to fp16 | Fitness | Pareto |
+| ---: | --- | ---: | ---: | ---: | ---: | --- |
+| `32` | `s1_scaled_ste_int4` | `0.918` | `0.261` | `0.084` | `1.221` | Yes |
+| `32` | `s1_projected_qat_int4` | `0.909` | `0.285` | `0.076` | `1.214` | Yes |
+| `33` | `s1_scaled_ste_int4` | `0.908` | `0.287` | `0.138` | `1.211` | Yes |
+| `33` | `s1_projected_qat_int4` | `0.905` | `0.306` | `0.104` | `1.209` | Yes |
+
+Final act8 decision:
+
+```text
+PASS
+```
+
+Activation fake-quant is robust enough for the next validation phase. The seed
+31 frontier miss is now classified as a tiny Pareto-margin artifact.
+
+Watch item:
+
+```text
+scaled-STE has slightly higher KL-to-fp16 than projected-QAT on the act8 runs,
+even when scaled-STE has better accuracy, loss, and fitness.
+```
+
+This does not block progress, but it should be tracked in real-text validation
+and any export/logit-equivalence checks.
 
 ## Artifact Note
 
@@ -98,6 +129,16 @@ reports/tiny_real_arena_scaled_ste_colab_g64.json
 reports/tiny_real_arena_scaled_ste_colab_g128.json
 ```
 
+The activation fake-quant JSON files were also generated inside the Colab
+session:
+
+```text
+reports/tiny_real_arena_scaled_ste_colab_act0.json
+reports/tiny_real_arena_scaled_ste_colab_act8.json
+reports/tiny_real_arena_scaled_ste_colab_act8_seed32.json
+reports/tiny_real_arena_scaled_ste_colab_act8_seed33.json
+```
+
 They were not committed from the local workspace and may be ephemeral. Treat
 this document as the milestone record, not as a replacement for raw result
 archival. Re-run the sweep before making a paper-style quantitative claim.
@@ -106,12 +147,10 @@ archival. Re-run the sweep before making a paper-style quantitative claim.
 
 Recommended order:
 
-1. Activation fake-quant tiebreaker: `SCALED_STE_ACTIVATION_BITS=8` on seeds `32`, `33`.
-2. Archive sweep JSON reports from Colab back into `reports/`.
-3. Move the arena from synthetic patterned tokens to a tiny real text subset if act8 does not collapse.
-4. Only after the above, scope packed ternary kernels or export paths.
+1. Archive sweep JSON reports from Colab back into `reports/`.
+2. Move the arena from synthetic patterned tokens to a tiny real text subset.
+3. Track KL-to-fp16 alongside CE loss, perplexity, token accuracy, and generation smoke.
+4. Only after real-text validation, scope packed ternary kernels or export paths.
 
-The immediate next experiment should be the act8 seed `32/33` tiebreaker. If
-both also fall off frontier despite stable loss/accuracy, activation quant
-needs tuning before runtime/export work. If they remain frontier or near-frontier
-without quality collapse, proceed to the real tiny text subset.
+The immediate next experiment should be real tiny text validation. Runtime and
+export work are now allowed, but real text removes more risk first.

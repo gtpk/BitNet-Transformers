@@ -133,8 +133,8 @@ for seed in [32, 33]:
     !SEED={seed} SCALED_STE_ACTIVATION_BITS=8 ARENA_JSON_OUT=reports/tiny_real_arena_scaled_ste_colab_act8_seed{seed}.json bash scripts/run_colab_scaled_ste_arena.sh
 ```
 
-Pause packed-kernel/export work only if act8 shows real quality collapse or
-falls off frontier across the tiebreaker seeds as well.
+Status: completed. Seeds `32` and `33` both made scaled-STE the quality winner,
+resource winner, and Pareto member. Activation fake-quant is cleared.
 
 ## Reading The Result
 
@@ -179,17 +179,18 @@ See [Colab Validation Summary](./colab_validation_summary.md).
 Summary:
 
 ```text
-faster smoke arena : pass
-moderate arena     : pass
-seed sweep 31/32/33: pass
-group-size 32/64/128: pass
-scaled-STE quality : winner 3/3
-decision           : PROCEED
+faster smoke arena      : pass
+moderate arena          : pass
+seed sweep 31/32/33     : pass
+group-size 32/64/128    : pass
+activation act8 32/33   : pass
+scaled-STE quality      : winner 3/3 seed sweep
+decision                : PROCEED to real text
 ```
 
 Next decision gate:
 
 ```text
-act8 seed 32/33 should decide whether the seed31 frontier miss was noise around
-a tiny Pareto margin or a real activation-quantization issue.
+real tiny text validation should decide whether the synthetic-patterned arena
+result survives real token distributions before packed-kernel or export work.
 ```

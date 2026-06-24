@@ -126,6 +126,10 @@ Summary:
   `0.2875-0.2996`
 - activation fake-quant seed `31` did not collapse quality but missed the
   frontier by a tiny accuracy/RAM tie-break
+- activation fake-quant seeds `32` and `33` passed; scaled-STE was quality
+  winner, resource winner, and Pareto member on both
+- watch item: scaled-STE KL-to-fp16 is slightly higher than projected-QAT even
+  when scaled-STE has better accuracy/loss/fitness
 
 Updated interpretation:
 
@@ -138,6 +142,8 @@ Group-size is now checked; activation fake-quant is the remaining deployment
 adjacent sensitivity gate.
 Seed 31 act8 is a borderline miss, not a collapse, so seeds 32/33 should decide
 whether the frontier miss is noise or a repeatable activation-quant issue.
+Seeds 32/33 clear the tiebreaker. Move to real tiny text before runtime/export
+work because KL-to-fp16 should be checked on real token distributions.
 ```
 
 ## Kill Criteria Before Bigger Runs
@@ -151,7 +157,7 @@ Do not spend Colab budget if any of these fail locally:
 
 ## Next Experiments
 
-1. Activation fake-quant tiebreaker: 8-bit on seeds `32`, `33`.
-2. Archive Colab JSON reports into `reports/`.
-3. If stable, move from synthetic patterned data to a tiny real text subset.
+1. Archive Colab JSON reports into `reports/`.
+2. Move from synthetic patterned data to a tiny real text subset.
+3. Track CE/PPL/token accuracy/generation smoke/KL-to-fp16.
 4. Then scope packed ternary kernels, GGUF/bitnet.cpp export, or TurboQuant KV.

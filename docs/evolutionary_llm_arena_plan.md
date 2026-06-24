@@ -273,6 +273,8 @@ Colab validation:
   and frontier `3/3`
 - activation fake-quant seed `31` showed no quality collapse, but act8 missed
   the frontier by a tiny accuracy/RAM tie-break
+- activation fake-quant seeds `32/33` passed with scaled-STE quality winner,
+  resource winner, and Pareto membership on both seeds
 - milestone: [Colab Validation Summary](./colab_validation_summary.md)
 
 Interpretation:
@@ -295,12 +297,13 @@ fake-quant is the remaining near-runtime sensitivity check.
 Seed 31 act8 is inconclusive rather than failing: the quality metrics remain
 healthy, while Pareto status flips because projected-QAT keeps a slightly lower
 RAM proxy. Use seed 32/33 as the tiebreaker.
+Seed 32/33 clear the tiebreaker, so activation fake-quant is not blocking.
+The remaining risk is whether the synthetic task signal transfers to real text.
 ```
 
 Next step:
 
 ```text
-Run act8 seed 32/33 tiebreaker from docs/colab_arena_runbook.md, archive raw
-JSON reports, then decide whether real-text data or activation quant tuning
-should be the next branch.
+Move to real tiny text validation, archive raw JSON reports, and keep KL-to-fp16
+as a watch metric before packed-kernel or export work.
 ```
