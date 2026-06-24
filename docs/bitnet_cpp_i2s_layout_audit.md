@@ -29,10 +29,46 @@ source before trusting a writer), **[TODO]** not yet pinned.
 - Papers: [Bitnet.cpp (2502.11880)](https://arxiv.org/abs/2502.11880),
   [1-bit AI Infra (2410.16144)](https://arxiv.org/abs/2410.16144)
 
-**[TODO] pin the exact commit hash** of microsoft/BitNet + its vendored llama.cpp
-fork at implementation time; the format is not in any spec, only in source.
+**Pinned commits (RT-102 local clone, 2026-06-24):**
 
-## I2_S weight byte layout  [community, verify in ggml-bitnet source]
+```text
+microsoft/BitNet        : 01eb415772c342d9f20dc42772f1583ae1e5b102
+3rdparty/llama.cpp fork : 1f86f058de0c3f4098dedae2ae8653c335c868a1  (b3639-323-g1f86f058)
+```
+
+**Confirmed: setup_env.py's i2_s flow IS Path A.** For `-q i2_s`,
+`setup_env.py` runs `convert-hf-to-gguf-bitnet.py <model> --outtype f32` (F32
+GGUF) and then a separate I2_S quantize step — exactly the "F32 GGUF -> upstream
+I2_S quantize" path. So Path A is upstream's own i2_s pipeline; RT-103 reuses it
+by pointing it at our per-tensor-native model dir. Smallest supported model:
+`1bitLLM/bitnet_b1_58-large`. Supported `--quant-type` on this build: `i2_s`, `tl1`.
+
+## RT-102 results (built + verified against real bytes, 2026-06-24)
+
+Built bitnet.cpp at the pinned commit (cmake 4.3.4, Apple clang 21, arm64) and ran
+`setup_env.py -hr 1bitLLM/bitnet_b1_58-large -q i2_s`. It produced both
+`ggml-model-f32.gguf` (2.7G) and `ggml-model-i2_s.gguf` (257M) — Path A end to end.
+`llama-cli` loads and runs the I2_S model (output is gibberish for this old small
+model, but load+run+no-crash is the RT-102 bar). `llama-gguf` dump confirmed:
+
+- **I2_S ggml type id = 36** in this fork. (Caution: upstream pip `gguf` enum maps
+  36 -> `MOSTLY_TQ1_0`, so it raises on these files; inspect with the fork's
+  gguf-py or the C `llama-gguf` tool, not stock pip gguf.)
+- **Byte-size law `ceil(numel/4) + 32` CONFIRMED** from tensor offset deltas:
+  `attn_q/k/v/o` are `1536x1536 = 2,359,296` elems -> `589,824 + 32 = 589,856`
+  bytes each. So 2 bits/elem packing + a 32-byte trailing per-tensor scale block,
+  exactly as #412 describes.
+- **`token_embd.weight` is F16 CONFIRMED**: `32002 x 1536 x 2 = 98,310,144` bytes.
+- **GGUF tensor names** (llama.cpp `blk.*` convention) CONFIRMED:
+  `token_embd.weight`; per block `blk.N.attn_q/attn_k/attn_v/attn_output.weight`,
+  `blk.N.ffn_gate/ffn_up/ffn_down.weight`, plus norms `attn_norm`, `ffn_norm`,
+  and BitNet-specific **`attn_sub_norm` / `ffn_sub_norm`** (SubLN) kept F16/F32.
+
+Still open: exact in-block element interleave + MSB field order + code mapping
+(below) are not provable from sizes alone — confirm in `ggml-bitnet*` source or by
+byte-diffing a Path B writer against this golden I2_S file (its intended use).
+
+## I2_S weight byte layout  [size law confirmed; interleave/code mapping community, verify in source]
 
 From Issue #412 (reverse-engineered from the llama.cpp fork):
 
@@ -108,15 +144,17 @@ scale rule degrades logit/PPL parity.
 
 ## Remaining confirmations before writing (RT-101 exit criteria)
 
-1. **[TODO]** pin microsoft/BitNet + llama.cpp-fork commit hashes.
-2. **[TODO]** confirm I2_S byte layout in `ggml-bitnet*` source (the #412 note is
-   community-reverse-engineered).
+1. **[DONE]** commit hashes pinned (above).
+2. **[partial]** byte-size law `ceil(numel/4)+32` confirmed from real bytes;
+   in-block interleave + MSB field order still to confirm in `ggml-bitnet*` source
+   (or by byte-diff vs the golden I2_S file).
 3. **[TODO]** confirm scale is multiplicative gamma in the I2_S dequant kernel.
 4. **[TODO]** confirm tensor element order / no transpose for I2_S tensors.
-5. **[TODO]** confirm GGUF tensor-name map (`tensor_map.get_name`) for the target
-   architecture, and tied-embedding handling.
-6. **[TODO]** confirm whether `setup_env.py -q i2_s` re-derives codes/scale (Path
-   A) or just repacks an already-ternary tensor.
+5. **[DONE]** GGUF tensor names confirmed via `llama-gguf` dump (`blk.*` convention
+   + BitNet `attn_sub_norm`/`ffn_sub_norm`); `token_embd.weight` is F16.
+6. **[partial]** Path A confirmed = `setup_env.py -q i2_s` converts to F32 GGUF
+   then quantizes to I2_S; whether the quantize step re-derives the scale (vs uses
+   a stored one) is the RT-104 parity question.
 
 ## Next steps
 
