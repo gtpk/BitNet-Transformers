@@ -7,6 +7,7 @@ Related docs:
 - [Scaled-STE BitLinear Experiment](./scaled_ste_bitlinear_experiment.md)
 - [Colab Validation Summary](./colab_validation_summary.md)
 - [Real Tiny Text Validation Plan](./real_tiny_text_validation_plan.md)
+- [Groupwise Alpha Hypothesis](./groupwise_alpha_hypothesis.md)
 
 ## Short Version
 
@@ -47,6 +48,16 @@ Dense LLM checkpoints can be moved toward BitNet-style ternary weights without
 teacher distillation if the conversion preserves groupwise alpha*T scales and
 uses CE-only STE recovery.
 ```
+
+Mechanism note:
+
+```text
+The likely reason groupwise alpha*T is stronger than direct BitNet b1.58
+per-tensor export is local scale preservation.
+```
+
+See [Groupwise Alpha Hypothesis](./groupwise_alpha_hypothesis.md) for the
+working explanation and falsification tests.
 
 ## What Has Survived So Far
 

@@ -23,6 +23,7 @@ Core documents:
 - [Real tiny text validation plan](./docs/real_tiny_text_validation_plan.md)
 - [Packed ternary weight format plan](./docs/packed_ternary_format_plan.md)
 - [GGUF / bitnet.cpp export scoping plan](./docs/bitnet_cpp_export_scoping.md)
+- [Groupwise alpha hypothesis](./docs/groupwise_alpha_hypothesis.md)
 - [Research signal note](./docs/research_signal_note.md)
 - [TurboQuant + BitNet KV-cache plan](./docs/turboquant_bitnet_implementation_plan.md)
 

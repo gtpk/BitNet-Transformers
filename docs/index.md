@@ -91,9 +91,11 @@ real-text fixture smoke(로컬, harness 확인용):
    - real-text 통과 후 첫 storage 산출물. b1.58을 실제 byte로 바꾸는 format/TC다.
 9. [GGUF / bitnet.cpp Export Scoping Plan](./bitnet_cpp_export_scoping.md)
    - reference ladder 이후 기존 ternary runtime으로 내보낼 수 있는지 확인하는 다음 트랙이다.
-10. [Research Signal Note](./research_signal_note.md)
+10. [Groupwise Alpha Hypothesis](./groupwise_alpha_hypothesis.md)
+   - 왜 groupwise `alpha*T`가 per-tensor BitNet b1.58보다 품질을 더 잘 보존할 수 있는지 설명한다.
+11. [Research Signal Note](./research_signal_note.md)
    - 왜 이 결과가 "연구자가 꿈꾸는 초반부"인지 해석한다.
-11. [TurboQuant + BitNet Implementation Plan](./turboquant_bitnet_implementation_plan.md)
+12. [TurboQuant + BitNet Implementation Plan](./turboquant_bitnet_implementation_plan.md)
    - weight 변환이 안정화된 뒤 KV cache 압축으로 확장하는 별도 축이다.
 
 ## 문서 그래프
@@ -111,6 +113,8 @@ flowchart TD
   J --> M["packed_ternary_format_plan.md"]
   K --> M["packed_ternary_format_plan.md"]
   M --> R["bitnet_cpp_export_scoping.md"]
+  R --> T["groupwise_alpha_hypothesis.md"]
+  T --> L
   B --> E
   B --> G["turboquant_bitnet_implementation_plan.md"]
   F --> H["reports/tiny_real_arena_scaled_ste_smoke.json"]
@@ -135,6 +139,7 @@ flowchart TD
 | [real_tiny_text_validation_plan.md](./real_tiny_text_validation_plan.md) | synthetic task 이후 실제 토큰 분포 검증 계획과 통과 결과 | packed/export 전에 품질 위험을 줄일 때 |
 | [packed_ternary_format_plan.md](./packed_ternary_format_plan.md) | packed ternary weight format, 2-bit/trit layout, storage TC | b1.58을 실제 byte로 저장/검증할 때 |
 | [bitnet_cpp_export_scoping.md](./bitnet_cpp_export_scoping.md) | GGUF/bitnet.cpp export 가능성, format mapping, export TC 초안 | Python reference 이후 실제 runtime으로 넘어갈 때 |
+| [groupwise_alpha_hypothesis.md](./groupwise_alpha_hypothesis.md) | groupwise scale이 품질을 보존하는 이유와 검증할 ablation | 알고리즘 우위의 원인을 설명하거나 반증할 때 |
 | [research_signal_note.md](./research_signal_note.md) | 현재 결과가 연구 신호로서 왜 의미 있는지 해석 | 논문화 가능성과 다음 방향을 판단할 때 |
 | [turboquant_bitnet_implementation_plan.md](./turboquant_bitnet_implementation_plan.md) | KV cache 압축 계획과 TC | weight 변환 이후 긴 문맥으로 확장할 때 |
 
