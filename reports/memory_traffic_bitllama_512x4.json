@@ -1,0 +1,364 @@
+{
+  "shape": {
+    "hidden_size": 512,
+    "intermediate_size": 2048,
+    "num_layers": 4,
+    "num_attention_heads": 32,
+    "num_key_value_heads": 32
+  },
+  "batch_size": 1,
+  "dtype_bits": 16.0,
+  "context_lengths": [
+    128,
+    512,
+    2048,
+    8192
+  ],
+  "bandwidth_gbps": [
+    50.0,
+    100.0,
+    200.0
+  ],
+  "estimates": [
+    {
+      "policy": "fp16_baseline",
+      "context_length": 128,
+      "batch_size": 1,
+      "weight_read_mb": 32.0,
+      "dequant_temp_mb": 0.0,
+      "kv_read_mb": 1.0,
+      "kv_write_mb": 0.0078125,
+      "activation_scratch_mb": 0.140625,
+      "total_mb_per_token": 33.1484375,
+      "ideal_tokens_per_second_at_bandwidth": {
+        "50_GBps": 1438.490602168277,
+        "100_GBps": 2876.981204336554,
+        "200_GBps": 5753.962408673108
+      },
+      "materializes_dequant_weight": false
+    },
+    {
+      "policy": "current_py_bitlinear_reference",
+      "context_length": 128,
+      "batch_size": 1,
+      "weight_read_mb": 32.0,
+      "dequant_temp_mb": 64.0,
+      "kv_read_mb": 1.0,
+      "kv_write_mb": 0.0078125,
+      "activation_scratch_mb": 0.18281250000000002,
+      "total_mb_per_token": 97.190625,
+      "ideal_tokens_per_second_at_bandwidth": {
+        "50_GBps": 490.6205286807498,
+        "100_GBps": 981.2410573614997,
+        "200_GBps": 1962.4821147229993
+      },
+      "materializes_dequant_weight": true
+    },
+    {
+      "policy": "packed_b1_58_weight_fp16_kv",
+      "context_length": 128,
+      "batch_size": 1,
+      "weight_read_mb": 4.05078125,
+      "dequant_temp_mb": 0.0,
+      "kv_read_mb": 1.0,
+      "kv_write_mb": 0.0078125,
+      "activation_scratch_mb": 0.1125,
+      "total_mb_per_token": 5.17109375,
+      "ideal_tokens_per_second_at_bandwidth": {
+        "50_GBps": 9221.20505363348,
+        "100_GBps": 18442.41010726696,
+        "200_GBps": 36884.82021453392
+      },
+      "materializes_dequant_weight": false
+    },
+    {
+      "policy": "packed_b1_58_weight_int8_kv",
+      "context_length": 128,
+      "batch_size": 1,
+      "weight_read_mb": 4.05078125,
+      "dequant_temp_mb": 0.0,
+      "kv_read_mb": 0.5,
+      "kv_write_mb": 0.00390625,
+      "activation_scratch_mb": 0.1125,
+      "total_mb_per_token": 4.6671875,
+      "ideal_tokens_per_second_at_bandwidth": {
+        "50_GBps": 10216.798836625378,
+        "100_GBps": 20433.597673250755,
+        "200_GBps": 40867.19534650151
+      },
+      "materializes_dequant_weight": false
+    },
+    {
+      "policy": "packed_b1_58_weight_int4_kv",
+      "context_length": 128,
+      "batch_size": 1,
+      "weight_read_mb": 4.05078125,
+      "dequant_temp_mb": 0.0,
+      "kv_read_mb": 0.25,
+      "kv_write_mb": 0.001953125,
+      "activation_scratch_mb": 0.1125,
+      "total_mb_per_token": 4.415234375,
+      "ideal_tokens_per_second_at_bandwidth": {
+        "50_GBps": 10799.81531451827,
+        "100_GBps": 21599.63062903654,
+        "200_GBps": 43199.26125807308
+      },
+      "materializes_dequant_weight": false
+    },
+    {
+      "policy": "fp16_baseline",
+      "context_length": 512,
+      "batch_size": 1,
+      "weight_read_mb": 32.0,
+      "dequant_temp_mb": 0.0,
+      "kv_read_mb": 4.0,
+      "kv_write_mb": 0.0078125,
+      "activation_scratch_mb": 0.328125,
+      "total_mb_per_token": 36.3359375,
+      "ideal_tokens_per_second_at_bandwidth": {
+        "50_GBps": 1312.3017899376478,
+        "100_GBps": 2624.6035798752955,
+        "200_GBps": 5249.207159750591
+      },
+      "materializes_dequant_weight": false
+    },
+    {
+      "policy": "current_py_bitlinear_reference",
+      "context_length": 512,
+      "batch_size": 1,
+      "weight_read_mb": 32.0,
+      "dequant_temp_mb": 64.0,
+      "kv_read_mb": 4.0,
+      "kv_write_mb": 0.0078125,
+      "activation_scratch_mb": 0.4265625,
+      "total_mb_per_token": 100.434375,
+      "ideal_tokens_per_second_at_bandwidth": {
+        "50_GBps": 474.7748549270357,
+        "100_GBps": 949.5497098540714,
+        "200_GBps": 1899.0994197081427
+      },
+      "materializes_dequant_weight": true
+    },
+    {
+      "policy": "packed_b1_58_weight_fp16_kv",
+      "context_length": 512,
+      "batch_size": 1,
+      "weight_read_mb": 4.05078125,
+      "dequant_temp_mb": 0.0,
+      "kv_read_mb": 4.0,
+      "kv_write_mb": 0.0078125,
+      "activation_scratch_mb": 0.2625,
+      "total_mb_per_token": 8.32109375,
+      "ideal_tokens_per_second_at_bandwidth": {
+        "50_GBps": 5730.462515256784,
+        "100_GBps": 11460.925030513568,
+        "200_GBps": 22921.850061027137
+      },
+      "materializes_dequant_weight": false
+    },
+    {
+      "policy": "packed_b1_58_weight_int8_kv",
+      "context_length": 512,
+      "batch_size": 1,
+      "weight_read_mb": 4.05078125,
+      "dequant_temp_mb": 0.0,
+      "kv_read_mb": 2.0,
+      "kv_write_mb": 0.00390625,
+      "activation_scratch_mb": 0.2625,
+      "total_mb_per_token": 6.3171875,
+      "ideal_tokens_per_second_at_bandwidth": {
+        "50_GBps": 7548.250834776156,
+        "100_GBps": 15096.501669552312,
+        "200_GBps": 30193.003339104624
+      },
+      "materializes_dequant_weight": false
+    },
+    {
+      "policy": "packed_b1_58_weight_int4_kv",
+      "context_length": 512,
+      "batch_size": 1,
+      "weight_read_mb": 4.05078125,
+      "dequant_temp_mb": 0.0,
+      "kv_read_mb": 1.0,
+      "kv_write_mb": 0.001953125,
+      "activation_scratch_mb": 0.2625,
+      "total_mb_per_token": 5.315234375,
+      "ideal_tokens_per_second_at_bandwidth": {
+        "50_GBps": 8971.140773131476,
+        "100_GBps": 17942.28154626295,
+        "200_GBps": 35884.5630925259
+      },
+      "materializes_dequant_weight": false
+    },
+    {
+      "policy": "fp16_baseline",
+      "context_length": 2048,
+      "batch_size": 1,
+      "weight_read_mb": 32.0,
+      "dequant_temp_mb": 0.0,
+      "kv_read_mb": 16.0,
+      "kv_write_mb": 0.0078125,
+      "activation_scratch_mb": 1.078125,
+      "total_mb_per_token": 49.0859375,
+      "ideal_tokens_per_second_at_bandwidth": {
+        "50_GBps": 971.4333320070031,
+        "100_GBps": 1942.8666640140061,
+        "200_GBps": 3885.7333280280122
+      },
+      "materializes_dequant_weight": false
+    },
+    {
+      "policy": "current_py_bitlinear_reference",
+      "context_length": 2048,
+      "batch_size": 1,
+      "weight_read_mb": 32.0,
+      "dequant_temp_mb": 64.0,
+      "kv_read_mb": 16.0,
+      "kv_write_mb": 0.0078125,
+      "activation_scratch_mb": 1.4015625,
+      "total_mb_per_token": 113.409375,
+      "ideal_tokens_per_second_at_bandwidth": {
+        "50_GBps": 420.4565611997465,
+        "100_GBps": 840.913122399493,
+        "200_GBps": 1681.826244798986
+      },
+      "materializes_dequant_weight": true
+    },
+    {
+      "policy": "packed_b1_58_weight_fp16_kv",
+      "context_length": 2048,
+      "batch_size": 1,
+      "weight_read_mb": 4.05078125,
+      "dequant_temp_mb": 0.0,
+      "kv_read_mb": 16.0,
+      "kv_write_mb": 0.0078125,
+      "activation_scratch_mb": 0.8625,
+      "total_mb_per_token": 20.92109375,
+      "ideal_tokens_per_second_at_bandwidth": {
+        "50_GBps": 2279.2171571007134,
+        "100_GBps": 4558.434314201427,
+        "200_GBps": 9116.868628402854
+      },
+      "materializes_dequant_weight": false
+    },
+    {
+      "policy": "packed_b1_58_weight_int8_kv",
+      "context_length": 2048,
+      "batch_size": 1,
+      "weight_read_mb": 4.05078125,
+      "dequant_temp_mb": 0.0,
+      "kv_read_mb": 8.0,
+      "kv_write_mb": 0.00390625,
+      "activation_scratch_mb": 0.8625,
+      "total_mb_per_token": 12.9171875,
+      "ideal_tokens_per_second_at_bandwidth": {
+        "50_GBps": 3691.4936645699768,
+        "100_GBps": 7382.9873291399535,
+        "200_GBps": 14765.974658279907
+      },
+      "materializes_dequant_weight": false
+    },
+    {
+      "policy": "packed_b1_58_weight_int4_kv",
+      "context_length": 2048,
+      "batch_size": 1,
+      "weight_read_mb": 4.05078125,
+      "dequant_temp_mb": 0.0,
+      "kv_read_mb": 4.0,
+      "kv_write_mb": 0.001953125,
+      "activation_scratch_mb": 0.8625,
+      "total_mb_per_token": 8.915234375,
+      "ideal_tokens_per_second_at_bandwidth": {
+        "50_GBps": 5348.565591727643,
+        "100_GBps": 10697.131183455285,
+        "200_GBps": 21394.26236691057
+      },
+      "materializes_dequant_weight": false
+    },
+    {
+      "policy": "fp16_baseline",
+      "context_length": 8192,
+      "batch_size": 1,
+      "weight_read_mb": 32.0,
+      "dequant_temp_mb": 0.0,
+      "kv_read_mb": 64.0,
+      "kv_write_mb": 0.0078125,
+      "activation_scratch_mb": 4.078125,
+      "total_mb_per_token": 100.0859375,
+      "ideal_tokens_per_second_at_bandwidth": {
+        "50_GBps": 476.4277281242682,
+        "100_GBps": 952.8554562485364,
+        "200_GBps": 1905.7109124970727
+      },
+      "materializes_dequant_weight": false
+    },
+    {
+      "policy": "current_py_bitlinear_reference",
+      "context_length": 8192,
+      "batch_size": 1,
+      "weight_read_mb": 32.0,
+      "dequant_temp_mb": 64.0,
+      "kv_read_mb": 64.0,
+      "kv_write_mb": 0.0078125,
+      "activation_scratch_mb": 5.3015625,
+      "total_mb_per_token": 165.309375,
+      "ideal_tokens_per_second_at_bandwidth": {
+        "50_GBps": 288.45137077260443,
+        "100_GBps": 576.9027415452089,
+        "200_GBps": 1153.8054830904177
+      },
+      "materializes_dequant_weight": true
+    },
+    {
+      "policy": "packed_b1_58_weight_fp16_kv",
+      "context_length": 8192,
+      "batch_size": 1,
+      "weight_read_mb": 4.05078125,
+      "dequant_temp_mb": 0.0,
+      "kv_read_mb": 64.0,
+      "kv_write_mb": 0.0078125,
+      "activation_scratch_mb": 3.2625,
+      "total_mb_per_token": 71.32109375,
+      "ideal_tokens_per_second_at_bandwidth": {
+        "50_GBps": 668.5780224775717,
+        "100_GBps": 1337.1560449551434,
+        "200_GBps": 2674.312089910287
+      },
+      "materializes_dequant_weight": false
+    },
+    {
+      "policy": "packed_b1_58_weight_int8_kv",
+      "context_length": 8192,
+      "batch_size": 1,
+      "weight_read_mb": 4.05078125,
+      "dequant_temp_mb": 0.0,
+      "kv_read_mb": 32.0,
+      "kv_write_mb": 0.00390625,
+      "activation_scratch_mb": 3.2625,
+      "total_mb_per_token": 39.3171875,
+      "ideal_tokens_per_second_at_bandwidth": {
+        "50_GBps": 1212.7956970552,
+        "100_GBps": 2425.5913941104,
+        "200_GBps": 4851.1827882208
+      },
+      "materializes_dequant_weight": false
+    },
+    {
+      "policy": "packed_b1_58_weight_int4_kv",
+      "context_length": 8192,
+      "batch_size": 1,
+      "weight_read_mb": 4.05078125,
+      "dequant_temp_mb": 0.0,
+      "kv_read_mb": 16.0,
+      "kv_write_mb": 0.001953125,
+      "activation_scratch_mb": 3.2625,
+      "total_mb_per_token": 23.315234375,
+      "ideal_tokens_per_second_at_bandwidth": {
+        "50_GBps": 2045.1742004121502,
+        "100_GBps": 4090.3484008243004,
+        "200_GBps": 8180.696801648601
+      },
+      "materializes_dequant_weight": false
+    }
+  ]
+}

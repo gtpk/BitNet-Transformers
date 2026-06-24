@@ -1,0 +1,218 @@
+# Evolutionary LLM Arena Plan
+
+## Purpose
+
+This document defines a small, testable arena for evolving low-resource LLM candidates. The goal is not to claim that models magically self-improve. The goal is to build a measurement loop where architecture, quantization, runtime policy, and task data compete under resource pressure.
+
+The arena is useful only if it can prove the following:
+
+```text
+quality signal > evaluation noise
+resource-aware selection changes the winner
+Pareto frontier exists
+adversarial tasks stay valid and useful
+holdout quality does not collapse
+generation cost stays inside budget
+```
+
+## Core Objects
+
+```text
+m in M: model/runtime candidate
+t in T: task/environment sample
+q(m, t): task quality score in [0, 1]
+r(m): resource cost, e.g. bytes/token, latency, RAM
+```
+
+Model fitness:
+
+```text
+F(m; D) = E_{t~D}[q(m,t)]
+        - lambda_b * normalized_bytes(m)
+        - lambda_l * normalized_latency(m)
+        - lambda_r * normalized_ram(m)
+```
+
+Task/adversary fitness:
+
+```text
+A(t; P) = E_{m~P}[1 - q(m,t)]
+        + beta * novelty(t)
+        - gamma * invalidity(t)
+        - penalty_if_too_easy_or_too_hard(t)
+```
+
+## Relationship To GANs
+
+The arena is GAN-like only at the high level:
+
+```text
+model candidates try to survive tasks
+adversaries try to expose model failures
+```
+
+It is not a standard differentiable GAN. Most mutations are non-differentiable:
+
+- BitNet weight format
+- KV cache policy
+- tokenizer
+- data mixture
+- CPU/GPU/Metal runtime path
+- packed kernel layout
+- task generator rules
+
+This is closer to adversarial co-evolution, population-based training, AutoML, red teaming, and self-play.
+
+## Low-Resource Fitness
+
+For this project, quality alone is not enough. A model that is slightly weaker but much cheaper may be better.
+
+Primary axes:
+
+- task quality
+- bytes moved per generated token
+- latency
+- peak RAM
+- energy proxy
+- holdout robustness
+
+Selection should use a Pareto frontier plus a scalar score for quick smoke tests.
+
+## Feasibility Gates
+
+### Gate 1: Fitness Signal-To-Noise
+
+For two candidates `a` and `b`:
+
+```text
+delta = mean(F_a - F_b)
+SE    = std(F_a - F_b) / sqrt(n)
+```
+
+Selection is meaningful only if:
+
+```text
+abs(delta) > k * SE
+```
+
+The smoke runner uses `k = 2` by default.
+
+### Gate 2: Pareto Frontier
+
+Candidate `a` dominates candidate `b` if:
+
+```text
+quality(a) >= quality(b)
+bytes(a)   <= bytes(b)
+latency(a) <= latency(b)
+ram(a)     <= ram(b)
+```
+
+and at least one inequality is strict.
+
+The arena is interesting if the frontier has multiple candidates or resource-aware selection differs from quality-only selection.
+
+### Gate 3: Adversarial Task Validity
+
+Good adversarial tasks should not be impossible or trivial.
+
+Target pass-rate range:
+
+```text
+0.2 <= pass_rate(task) <= 0.8
+```
+
+Invalid task generation must stay low.
+
+### Gate 4: Holdout Safety
+
+Arena-generated tasks can overfit the population. A holdout set must remain stable:
+
+```text
+delta_holdout >= -epsilon
+```
+
+### Gate 5: Budget
+
+One generation cost must be bounded:
+
+```text
+C_gen = N_models * N_tasks * C_eval + N_train * C_train
+```
+
+If this exceeds local budget, the arena is not a low-resource method.
+
+## MVP
+
+The first runner does not train real LLMs. It simulates candidates and tasks to verify that the selection machinery is not nonsense.
+
+Candidates:
+
+- fp16 tiny baseline
+- int8 weight baseline
+- current PyTorch BitLinear reference
+- packed b1.58 weight
+- packed b1.58 + int8 KV
+- packed b1.58 + int4 KV
+- packed b1.58 + QAT recovery
+
+Tasks:
+
+- arithmetic
+- retrieval
+- code
+- summarization
+- long-context stress
+
+Metrics:
+
+- mean quality
+- resource-adjusted fitness
+- pairwise separability
+- Pareto frontier
+- adversarial task difficulty
+- holdout stability proxy
+
+## Next Step After Smoke
+
+If the synthetic smoke passes, replace simulated candidate scores with measured values:
+
+1. Use `estimate_memory_traffic.py` for bytes/token.
+2. Use tiny local models for actual loss/logit metrics.
+3. Use CPU wall-clock timing for latency.
+4. Add Colab GPU jobs only when model training or real batch evaluation becomes necessary.
+
+## Current Local Smoke Results
+
+The first local runners are in place:
+
+```bash
+.venv/bin/python scripts/run_arena_feasibility.py --strict
+.venv/bin/python scripts/run_tiny_real_arena.py --train-steps 200 --json-out reports/tiny_real_arena_smoke_200.json --strict
+```
+
+Synthetic arena smoke:
+
+- quality winner: `fp16_tiny_baseline`
+- resource-aware winner: `packed_b1_58_qat_recovery`
+- signal-to-noise, Pareto frontier, adversary validity, and holdout checks passed
+- report: `reports/arena_feasibility_smoke.json`
+
+Tiny real-model arena smoke:
+
+- trains a tiny LLaMA on patterned sequences locally on CPU
+- quality winner: `fp16_dense`
+- resource-aware winner: `s1_groupwise_ptq_int4_kv`
+- Pareto frontier: `fp16_dense`, `s1_groupwise_ptq_int4_kv`
+- report: `reports/tiny_real_arena_smoke_200.json`
+
+Interpretation:
+
+```text
+quality-only selection and low-resource selection already diverge.
+This is the minimum signal needed before adding real QAT candidates.
+```
+
+The next meaningful candidate is not another static PTQ variant. It is a real
+post-training QAT recovery branch that starts from S1 and optimizes CE loss
+without teacher distillation.

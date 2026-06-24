@@ -1,0 +1,409 @@
+{
+  "seed": 19,
+  "config": {
+    "tasks_per_domain": 12,
+    "holdout_tasks_per_domain": 6,
+    "repeats": 5,
+    "adversarial_count": 20,
+    "lambda_bytes": 0.075,
+    "lambda_latency": 0.045,
+    "lambda_ram": 0.035,
+    "signal_k": 2.0
+  },
+  "candidates": [
+    {
+      "name": "fp16_tiny_baseline",
+      "skills": {
+        "arithmetic": 0.72,
+        "retrieval": 0.7,
+        "code": 0.66,
+        "summary": 0.74,
+        "long_context": 0.68
+      },
+      "bytes_per_token_mb": 49.0,
+      "latency_ms": 38.0,
+      "peak_ram_mb": 900.0,
+      "robustness": 0.7,
+      "family": "dense"
+    },
+    {
+      "name": "int8_weight_baseline",
+      "skills": {
+        "arithmetic": 0.7,
+        "retrieval": 0.69,
+        "code": 0.64,
+        "summary": 0.72,
+        "long_context": 0.67
+      },
+      "bytes_per_token_mb": 30.0,
+      "latency_ms": 29.0,
+      "peak_ram_mb": 620.0,
+      "robustness": 0.68,
+      "family": "quantized_dense"
+    },
+    {
+      "name": "current_py_bitlinear_reference",
+      "skills": {
+        "arithmetic": 0.55,
+        "retrieval": 0.54,
+        "code": 0.5,
+        "summary": 0.57,
+        "long_context": 0.52
+      },
+      "bytes_per_token_mb": 113.0,
+      "latency_ms": 82.0,
+      "peak_ram_mb": 980.0,
+      "robustness": 0.46,
+      "family": "reference_bitlinear"
+    },
+    {
+      "name": "packed_b1_58_weight",
+      "skills": {
+        "arithmetic": 0.62,
+        "retrieval": 0.61,
+        "code": 0.58,
+        "summary": 0.64,
+        "long_context": 0.6
+      },
+      "bytes_per_token_mb": 21.0,
+      "latency_ms": 23.0,
+      "peak_ram_mb": 360.0,
+      "robustness": 0.56,
+      "family": "packed_bitnet"
+    },
+    {
+      "name": "packed_b1_58_int8_kv",
+      "skills": {
+        "arithmetic": 0.61,
+        "retrieval": 0.61,
+        "code": 0.57,
+        "summary": 0.63,
+        "long_context": 0.62
+      },
+      "bytes_per_token_mb": 13.0,
+      "latency_ms": 18.0,
+      "peak_ram_mb": 290.0,
+      "robustness": 0.57,
+      "family": "packed_bitnet_kv"
+    },
+    {
+      "name": "packed_b1_58_int4_kv",
+      "skills": {
+        "arithmetic": 0.58,
+        "retrieval": 0.58,
+        "code": 0.54,
+        "summary": 0.6,
+        "long_context": 0.59
+      },
+      "bytes_per_token_mb": 9.0,
+      "latency_ms": 16.0,
+      "peak_ram_mb": 245.0,
+      "robustness": 0.51,
+      "family": "packed_bitnet_kv"
+    },
+    {
+      "name": "packed_b1_58_qat_recovery",
+      "skills": {
+        "arithmetic": 0.68,
+        "retrieval": 0.67,
+        "code": 0.63,
+        "summary": 0.7,
+        "long_context": 0.65
+      },
+      "bytes_per_token_mb": 13.5,
+      "latency_ms": 18.5,
+      "peak_ram_mb": 300.0,
+      "robustness": 0.65,
+      "family": "packed_bitnet_qat"
+    }
+  ],
+  "metrics": [
+    {
+      "name": "fp16_tiny_baseline",
+      "family": "dense",
+      "quality_mean": 0.5918210054756412,
+      "quality_se": 0.04253729023881881,
+      "holdout_quality_mean": 0.6409098664276531,
+      "bytes_per_token_mb": 49.0,
+      "latency_ms": 38.0,
+      "peak_ram_mb": 900.0,
+      "fitness": 0.6920800817518844,
+      "fitness_se": 0.0425372902388188
+    },
+    {
+      "name": "int8_weight_baseline",
+      "family": "quantized_dense",
+      "quality_mean": 0.5599064076051552,
+      "quality_se": 0.043554141328003906,
+      "holdout_quality_mean": 0.6213032134261607,
+      "bytes_per_token_mb": 30.0,
+      "latency_ms": 29.0,
+      "peak_ram_mb": 620.0,
+      "fitness": 0.722168902438311,
+      "fitness_se": 0.043554141328003906
+    },
+    {
+      "name": "current_py_bitlinear_reference",
+      "family": "reference_bitlinear",
+      "quality_mean": 0.28340933642235033,
+      "quality_se": 0.038928840025885335,
+      "holdout_quality_mean": 0.31603498037358363,
+      "bytes_per_token_mb": 113.0,
+      "latency_ms": 82.0,
+      "peak_ram_mb": 980.0,
+      "fitness": 0.28340933642235033,
+      "fitness_se": 0.038928840025885335
+    },
+    {
+      "name": "packed_b1_58_weight",
+      "family": "packed_bitnet",
+      "quality_mean": 0.40956909124946667,
+      "quality_se": 0.04299144279693375,
+      "holdout_quality_mean": 0.47453757175306155,
+      "bytes_per_token_mb": 21.0,
+      "latency_ms": 23.0,
+      "peak_ram_mb": 360.0,
+      "fitness": 0.6280398201412214,
+      "fitness_se": 0.04299144279693375
+    },
+    {
+      "name": "packed_b1_58_int8_kv",
+      "family": "packed_bitnet_kv",
+      "quality_mean": 0.4093205489603057,
+      "quality_se": 0.04270594857590615,
+      "holdout_quality_mean": 0.46714084034545,
+      "bytes_per_token_mb": 13.0,
+      "latency_ms": 18.0,
+      "peak_ram_mb": 290.0,
+      "fitness": 0.6823575782796235,
+      "fitness_se": 0.04270594857590615
+    },
+    {
+      "name": "packed_b1_58_int4_kv",
+      "family": "packed_bitnet_kv",
+      "quality_mean": 0.3482738000387378,
+      "quality_se": 0.04146435120058432,
+      "holdout_quality_mean": 0.3981826057081091,
+      "bytes_per_token_mb": 9.0,
+      "latency_ms": 16.0,
+      "peak_ram_mb": 245.0,
+      "fitness": 0.6600922194072443,
+      "fitness_se": 0.04146435120058432
+    },
+    {
+      "name": "packed_b1_58_qat_recovery",
+      "family": "packed_bitnet_qat",
+      "quality_mean": 0.5221833228033674,
+      "quality_se": 0.043517665716433535,
+      "holdout_quality_mean": 0.5802834143190914,
+      "bytes_per_token_mb": 13.5,
+      "latency_ms": 18.5,
+      "peak_ram_mb": 300.0,
+      "fitness": 0.7899703193768577,
+      "fitness_se": 0.043517665716433535
+    }
+  ],
+  "report": {
+    "signal_to_noise_pass": true,
+    "pareto_frontier_pass": true,
+    "resource_selection_pass": true,
+    "adversary_pass": true,
+    "holdout_pass": true,
+    "quality_winner": "fp16_tiny_baseline",
+    "resource_winner": "packed_b1_58_qat_recovery",
+    "best_delta_over_second": 0.06780141693854654,
+    "best_delta_se": 0.004643267757382165,
+    "pareto_frontier": [
+      "fp16_tiny_baseline",
+      "int8_weight_baseline",
+      "packed_b1_58_int8_kv",
+      "packed_b1_58_int4_kv",
+      "packed_b1_58_qat_recovery"
+    ],
+    "adversarial_mid_difficulty_rate": 1.0,
+    "adversarial_invalidity_mean": 0.010960547743141898,
+    "holdout_delta_best": 0.05810009151572393
+  },
+  "adversarial_tasks": [
+    {
+      "task_id": "adv_arithmetic_000",
+      "domain": "arithmetic",
+      "difficulty": 0.5842064275979227,
+      "resource_stress": 0.39330692829599595,
+      "novelty": 0.6461028331783963,
+      "invalidity": 0.02372242398973083,
+      "split": "adversarial"
+    },
+    {
+      "task_id": "adv_retrieval_001",
+      "domain": "retrieval",
+      "difficulty": 0.5472265904503687,
+      "resource_stress": 0.7062408962757571,
+      "novelty": 0.9236652129461007,
+      "invalidity": 0.012625910156520096,
+      "split": "adversarial"
+    },
+    {
+      "task_id": "adv_retrieval_002",
+      "domain": "retrieval",
+      "difficulty": 0.5896781479832531,
+      "resource_stress": 0.2544333991963408,
+      "novelty": 0.27844026590773185,
+      "invalidity": 0.00030599134967580223,
+      "split": "adversarial"
+    },
+    {
+      "task_id": "adv_long_context_003",
+      "domain": "long_context",
+      "difficulty": 0.5414787810063728,
+      "resource_stress": 0.8104595693612338,
+      "novelty": 0.3690588953534587,
+      "invalidity": 0.018489270011757437,
+      "split": "adversarial"
+    },
+    {
+      "task_id": "adv_long_context_004",
+      "domain": "long_context",
+      "difficulty": 0.5944088547336557,
+      "resource_stress": 0.8836433287380749,
+      "novelty": 0.7556087435543289,
+      "invalidity": 0.002734233762441701,
+      "split": "adversarial"
+    },
+    {
+      "task_id": "adv_summary_005",
+      "domain": "summary",
+      "difficulty": 0.5866400458207143,
+      "resource_stress": 0.3355778919290877,
+      "novelty": 0.6133439266645322,
+      "invalidity": 0.0022241588342065822,
+      "split": "adversarial"
+    },
+    {
+      "task_id": "adv_code_006",
+      "domain": "code",
+      "difficulty": 0.5278257515834526,
+      "resource_stress": 0.6619449030662723,
+      "novelty": 0.2930090207594569,
+      "invalidity": 2.8575941933587308e-05,
+      "split": "adversarial"
+    },
+    {
+      "task_id": "adv_summary_007",
+      "domain": "summary",
+      "difficulty": 0.6097860561072922,
+      "resource_stress": 0.4215099128267561,
+      "novelty": 0.8506573870609873,
+      "invalidity": 0.0011384691233687898,
+      "split": "adversarial"
+    },
+    {
+      "task_id": "adv_retrieval_008",
+      "domain": "retrieval",
+      "difficulty": 0.5264792435906711,
+      "resource_stress": 0.5736711675600286,
+      "novelty": 0.6719178775491372,
+      "invalidity": 0.005647662508770469,
+      "split": "adversarial"
+    },
+    {
+      "task_id": "adv_long_context_009",
+      "domain": "long_context",
+      "difficulty": 0.5520289212795061,
+      "resource_stress": 0.8570857678065186,
+      "novelty": 0.392669240229314,
+      "invalidity": 0.002055746927497965,
+      "split": "adversarial"
+    },
+    {
+      "task_id": "adv_retrieval_010",
+      "domain": "retrieval",
+      "difficulty": 0.5216985623042193,
+      "resource_stress": 0.40024697799188264,
+      "novelty": 0.5966755580631565,
+      "invalidity": 7.394469399183117e-05,
+      "split": "adversarial"
+    },
+    {
+      "task_id": "adv_code_011",
+      "domain": "code",
+      "difficulty": 0.5184067929394439,
+      "resource_stress": 0.7476678581775263,
+      "novelty": 0.763983518312596,
+      "invalidity": 0.012722993800893291,
+      "split": "adversarial"
+    },
+    {
+      "task_id": "adv_retrieval_012",
+      "domain": "retrieval",
+      "difficulty": 0.52456500178837,
+      "resource_stress": 0.5842580461894206,
+      "novelty": 0.3054892036258132,
+      "invalidity": 0.0049101374529007995,
+      "split": "adversarial"
+    },
+    {
+      "task_id": "adv_retrieval_013",
+      "domain": "retrieval",
+      "difficulty": 0.5535895486021499,
+      "resource_stress": 0.159335539598441,
+      "novelty": 0.6888837298356196,
+      "invalidity": 0.03640239112912893,
+      "split": "adversarial"
+    },
+    {
+      "task_id": "adv_arithmetic_014",
+      "domain": "arithmetic",
+      "difficulty": 0.5880778896393175,
+      "resource_stress": 0.6721654092195041,
+      "novelty": 0.24412983927018878,
+      "invalidity": 0.006836048343231512,
+      "split": "adversarial"
+    },
+    {
+      "task_id": "adv_arithmetic_015",
+      "domain": "arithmetic",
+      "difficulty": 0.5830324138740062,
+      "resource_stress": 0.4992267656009798,
+      "novelty": 0.7261379729376585,
+      "invalidity": 1.844013140402745e-05,
+      "split": "adversarial"
+    },
+    {
+      "task_id": "adv_summary_016",
+      "domain": "summary",
+      "difficulty": 0.6061978719369927,
+      "resource_stress": 0.47025313959597925,
+      "novelty": 0.738860338094884,
+      "invalidity": 0.007954241504035718,
+      "split": "adversarial"
+    },
+    {
+      "task_id": "adv_arithmetic_017",
+      "domain": "arithmetic",
+      "difficulty": 0.5590717454574671,
+      "resource_stress": 0.5247559955512473,
+      "novelty": 0.6184547384019714,
+      "invalidity": 0.017127280762321135,
+      "split": "adversarial"
+    },
+    {
+      "task_id": "adv_arithmetic_018",
+      "domain": "arithmetic",
+      "difficulty": 0.4978496794840439,
+      "resource_stress": 0.6658370737820097,
+      "novelty": 0.44959567809619083,
+      "invalidity": 0.01258633625796164,
+      "split": "adversarial"
+    },
+    {
+      "task_id": "adv_retrieval_019",
+      "domain": "retrieval",
+      "difficulty": 0.4977728983679962,
+      "resource_stress": 0.6909852265170114,
+      "novelty": 0.4538981405982735,
+      "invalidity": 0.05160669818106581,
+      "split": "adversarial"
+    }
+  ]
+}

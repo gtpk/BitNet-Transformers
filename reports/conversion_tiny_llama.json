@@ -1,0 +1,384 @@
+{
+  "seed": 7,
+  "batch": 4,
+  "seq_len": 64,
+  "results": [
+    {
+      "config": "S0",
+      "policy": "per_tensor",
+      "lambda": 0.5,
+      "group_size": 64,
+      "num_layers": 14,
+      "mean_weight_mse_ratio": 0.2128,
+      "mean_output_error": 0.4646,
+      "max_output_error": 0.4756,
+      "mean_sparsity": 0.309,
+      "mean_compression_vs_fp16": 10.09,
+      "all_domain_ok": true,
+      "all_scale_finite": true,
+      "ref_loss": 5.5546,
+      "conv_loss": 5.5563,
+      "ref_ppl": 258.414,
+      "conv_ppl": 258.851,
+      "logit_rel_error": 0.7051,
+      "per_layer": [
+        {
+          "key": "model.layers.0.self_attn.q_proj.weight",
+          "shape": [
+            128,
+            128
+          ],
+          "sparsity": 0.3092,
+          "weight_mse_ratio": 0.2149,
+          "output_error": 0.4655,
+          "compression_vs_fp16": 10.089
+        },
+        {
+          "key": "model.layers.0.self_attn.k_proj.weight",
+          "shape": [
+            128,
+            128
+          ],
+          "sparsity": 0.3076,
+          "weight_mse_ratio": 0.2109,
+          "output_error": 0.465,
+          "compression_vs_fp16": 10.089
+        },
+        {
+          "key": "model.layers.0.self_attn.v_proj.weight",
+          "shape": [
+            128,
+            128
+          ],
+          "sparsity": 0.3109,
+          "weight_mse_ratio": 0.213,
+          "output_error": 0.4653,
+          "compression_vs_fp16": 10.089
+        },
+        {
+          "key": "model.layers.0.self_attn.o_proj.weight",
+          "shape": [
+            128,
+            128
+          ],
+          "sparsity": 0.3119,
+          "weight_mse_ratio": 0.2115,
+          "output_error": 0.4705,
+          "compression_vs_fp16": 10.089
+        },
+        {
+          "key": "model.layers.0.mlp.gate_proj.weight",
+          "shape": [
+            256,
+            128
+          ],
+          "sparsity": 0.3101,
+          "weight_mse_ratio": 0.2137,
+          "output_error": 0.4575,
+          "compression_vs_fp16": 10.092
+        },
+        {
+          "key": "model.layers.0.mlp.up_proj.weight",
+          "shape": [
+            256,
+            128
+          ],
+          "sparsity": 0.3105,
+          "weight_mse_ratio": 0.2115,
+          "output_error": 0.4608,
+          "compression_vs_fp16": 10.092
+        },
+        {
+          "key": "model.layers.0.mlp.down_proj.weight",
+          "shape": [
+            128,
+            256
+          ],
+          "sparsity": 0.3099,
+          "weight_mse_ratio": 0.2131,
+          "output_error": 0.465,
+          "compression_vs_fp16": 10.092
+        },
+        {
+          "key": "model.layers.1.self_attn.q_proj.weight",
+          "shape": [
+            128,
+            128
+          ],
+          "sparsity": 0.3038,
+          "weight_mse_ratio": 0.2119,
+          "output_error": 0.4646,
+          "compression_vs_fp16": 10.089
+        },
+        {
+          "key": "model.layers.1.self_attn.k_proj.weight",
+          "shape": [
+            128,
+            128
+          ],
+          "sparsity": 0.3098,
+          "weight_mse_ratio": 0.2131,
+          "output_error": 0.4708,
+          "compression_vs_fp16": 10.089
+        },
+        {
+          "key": "model.layers.1.self_attn.v_proj.weight",
+          "shape": [
+            128,
+            128
+          ],
+          "sparsity": 0.306,
+          "weight_mse_ratio": 0.2127,
+          "output_error": 0.4572,
+          "compression_vs_fp16": 10.089
+        },
+        {
+          "key": "model.layers.1.self_attn.o_proj.weight",
+          "shape": [
+            128,
+            128
+          ],
+          "sparsity": 0.3091,
+          "weight_mse_ratio": 0.2141,
+          "output_error": 0.4756,
+          "compression_vs_fp16": 10.089
+        },
+        {
+          "key": "model.layers.1.mlp.gate_proj.weight",
+          "shape": [
+            256,
+            128
+          ],
+          "sparsity": 0.3093,
+          "weight_mse_ratio": 0.2131,
+          "output_error": 0.4604,
+          "compression_vs_fp16": 10.092
+        },
+        {
+          "key": "model.layers.1.mlp.up_proj.weight",
+          "shape": [
+            256,
+            128
+          ],
+          "sparsity": 0.3111,
+          "weight_mse_ratio": 0.2144,
+          "output_error": 0.4653,
+          "compression_vs_fp16": 10.092
+        },
+        {
+          "key": "model.layers.1.mlp.down_proj.weight",
+          "shape": [
+            128,
+            256
+          ],
+          "sparsity": 0.3073,
+          "weight_mse_ratio": 0.2113,
+          "output_error": 0.4611,
+          "compression_vs_fp16": 10.092
+        }
+      ]
+    },
+    {
+      "config": "S1",
+      "policy": "groupwise_input",
+      "lambda": 0.7,
+      "group_size": 64,
+      "num_layers": 14,
+      "mean_weight_mse_ratio": 0.1867,
+      "mean_output_error": 0.4341,
+      "max_output_error": 0.4418,
+      "mean_sparsity": 0.4201,
+      "mean_compression_vs_fp16": 8.72,
+      "all_domain_ok": true,
+      "all_scale_finite": true,
+      "ref_loss": 5.5546,
+      "conv_loss": 5.5476,
+      "ref_ppl": 258.414,
+      "conv_ppl": 256.622,
+      "logit_rel_error": 0.6639,
+      "per_layer": [
+        {
+          "key": "model.layers.0.self_attn.q_proj.weight",
+          "shape": [
+            128,
+            128
+          ],
+          "sparsity": 0.4188,
+          "weight_mse_ratio": 0.1881,
+          "output_error": 0.4349,
+          "compression_vs_fp16": 8.72
+        },
+        {
+          "key": "model.layers.0.self_attn.k_proj.weight",
+          "shape": [
+            128,
+            128
+          ],
+          "sparsity": 0.4209,
+          "weight_mse_ratio": 0.185,
+          "output_error": 0.431,
+          "compression_vs_fp16": 8.72
+        },
+        {
+          "key": "model.layers.0.self_attn.v_proj.weight",
+          "shape": [
+            128,
+            128
+          ],
+          "sparsity": 0.4188,
+          "weight_mse_ratio": 0.1862,
+          "output_error": 0.4333,
+          "compression_vs_fp16": 8.72
+        },
+        {
+          "key": "model.layers.0.self_attn.o_proj.weight",
+          "shape": [
+            128,
+            128
+          ],
+          "sparsity": 0.4203,
+          "weight_mse_ratio": 0.1865,
+          "output_error": 0.4418,
+          "compression_vs_fp16": 8.72
+        },
+        {
+          "key": "model.layers.0.mlp.gate_proj.weight",
+          "shape": [
+            256,
+            128
+          ],
+          "sparsity": 0.4222,
+          "weight_mse_ratio": 0.1879,
+          "output_error": 0.4297,
+          "compression_vs_fp16": 8.72
+        },
+        {
+          "key": "model.layers.0.mlp.up_proj.weight",
+          "shape": [
+            256,
+            128
+          ],
+          "sparsity": 0.4198,
+          "weight_mse_ratio": 0.1849,
+          "output_error": 0.4284,
+          "compression_vs_fp16": 8.72
+        },
+        {
+          "key": "model.layers.0.mlp.down_proj.weight",
+          "shape": [
+            128,
+            256
+          ],
+          "sparsity": 0.4225,
+          "weight_mse_ratio": 0.186,
+          "output_error": 0.4334,
+          "compression_vs_fp16": 8.72
+        },
+        {
+          "key": "model.layers.1.self_attn.q_proj.weight",
+          "shape": [
+            128,
+            128
+          ],
+          "sparsity": 0.417,
+          "weight_mse_ratio": 0.1862,
+          "output_error": 0.4415,
+          "compression_vs_fp16": 8.72
+        },
+        {
+          "key": "model.layers.1.self_attn.k_proj.weight",
+          "shape": [
+            128,
+            128
+          ],
+          "sparsity": 0.4207,
+          "weight_mse_ratio": 0.1874,
+          "output_error": 0.436,
+          "compression_vs_fp16": 8.72
+        },
+        {
+          "key": "model.layers.1.self_attn.v_proj.weight",
+          "shape": [
+            128,
+            128
+          ],
+          "sparsity": 0.4192,
+          "weight_mse_ratio": 0.1869,
+          "output_error": 0.4303,
+          "compression_vs_fp16": 8.72
+        },
+        {
+          "key": "model.layers.1.self_attn.o_proj.weight",
+          "shape": [
+            128,
+            128
+          ],
+          "sparsity": 0.4203,
+          "weight_mse_ratio": 0.1885,
+          "output_error": 0.4377,
+          "compression_vs_fp16": 8.72
+        },
+        {
+          "key": "model.layers.1.mlp.gate_proj.weight",
+          "shape": [
+            256,
+            128
+          ],
+          "sparsity": 0.4216,
+          "weight_mse_ratio": 0.1863,
+          "output_error": 0.435,
+          "compression_vs_fp16": 8.72
+        },
+        {
+          "key": "model.layers.1.mlp.up_proj.weight",
+          "shape": [
+            256,
+            128
+          ],
+          "sparsity": 0.4209,
+          "weight_mse_ratio": 0.1886,
+          "output_error": 0.4329,
+          "compression_vs_fp16": 8.72
+        },
+        {
+          "key": "model.layers.1.mlp.down_proj.weight",
+          "shape": [
+            128,
+            256
+          ],
+          "sparsity": 0.4188,
+          "weight_mse_ratio": 0.1853,
+          "output_error": 0.4309,
+          "compression_vs_fp16": 8.72
+        }
+      ]
+    }
+  ],
+  "per_projection_output_error": {
+    "S0": {
+      "down_proj": 0.4631,
+      "gate_proj": 0.4589,
+      "k_proj": 0.4679,
+      "o_proj": 0.473,
+      "q_proj": 0.4651,
+      "up_proj": 0.463,
+      "v_proj": 0.4612
+    },
+    "S1": {
+      "down_proj": 0.4322,
+      "gate_proj": 0.4324,
+      "k_proj": 0.4335,
+      "o_proj": 0.4397,
+      "q_proj": 0.4382,
+      "up_proj": 0.4306,
+      "v_proj": 0.4318
+    }
+  },
+  "checks": {
+    "s0_domain_ok": true,
+    "s1_domain_ok": true,
+    "s0_scale_finite": true,
+    "s1_scale_finite": true,
+    "s1_not_worse_than_s0": true
+  }
+}
