@@ -9,9 +9,33 @@ Related docs:
 - [GGUF / bitnet.cpp Export Scoping Plan](./bitnet_cpp_export_scoping.md)
 - [Research Signal Note](./research_signal_note.md)
 
+## Gate Result (2026-06-24): strong form REFUTED
+
+The native per-tensor gate below settled this. The strong hypothesis ("groupwise
+local scale is the *source* of the quality gain, so per-tensor must lose") is
+**refuted**. A per-tensor b1.58 model trained natively with CE-only STE matches
+groupwise scaled-STE within +-1% PPL on Wikitext (seeds 31/32/33), stays on the
+Pareto frontier 2/3 (and wins outright on seed 33), and keeps low KL-to-fp16.
+
+```text
+PPL (Wikitext), per_tensor_native vs groupwise scaled-STE:
+  seed 31: 6.28 vs 6.34   (-0.9%)
+  seed 32: 6.01 vs 5.95   (+1.0%)
+  seed 33: 6.71 vs 6.71   ( 0.0%)
+post-hoc per-tensor export of the groupwise model: 9.85 / 10.55 / 11.31 (broken)
+```
+
+So the earlier +18.4% (fixture) and +67% (real-text) per-tensor losses were a
+**post-hoc conversion artifact (hypothesis B)**, not evidence that per-tensor is
+inherently weak (hypothesis A). Trained per-tensor from the start, the model
+recovers fully. Practical consequence: **direct bitnet.cpp/I2_S export is viable
+via per-tensor-native training** — no groupwise GGUF extension or custom kernel
+is required for the export path. Groupwise alpha remains a legitimate format with
+slightly better reconstruction, but it is not necessary for deployable quality.
+
 ## Short Version
 
-The current working hypothesis is:
+The original working hypothesis (now refined by the gate above) was:
 
 ```text
 The quality gain is mostly from preserving local weight scale.
@@ -188,7 +212,9 @@ and can that metadata still be served efficiently on-device?
 
 The hypothesis should be treated as provisional until these tests run:
 
-1. `per_tensor_b158` real-text quality gate on Wikitext seeds `31/32/33`.
+1. ~~`per_tensor_b158` real-text quality gate on Wikitext seeds `31/32/33`.~~
+   **DONE (2026-06-24): refuted the strong hypothesis — native per-tensor matches
+   groupwise within +-1% PPL. See Gate Result at the top.**
 2. Scale granularity sweep: per-tensor, per-row, groupwise `G=32/64/128`.
 3. Ternary rule ablation: BitNet round/clamp with groupwise scale vs thresholded
    sign selection with per-tensor scale.

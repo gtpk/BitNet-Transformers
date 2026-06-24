@@ -285,6 +285,40 @@ per-tensor export int4    : acc 0.274, loss 2.472
 
 The authoritative gate is Colab Wikitext real text, seeds `31/32/33`.
 
+## Per-Tensor Native Gate Result (decisive)
+
+Date: 2026-06-24
+
+The authoritative Colab Wikitext gate (seeds 31/32/33) compared the groupwise
+baseline, a post-hoc per-tensor export of the groupwise model, and a per-tensor
+b1.58 model trained natively with CE-only STE (`per_tensor_ste_native`).
+
+| Seed | groupwise PPL | post-hoc export PPL | native per-tensor PPL | native acc | native KL | native Pareto |
+| ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| `31` | `6.34` | `9.85` | `6.28` | `0.451` | `0.175` | No* |
+| `32` | `5.95` | `10.55` | `6.01` | `0.468` | `0.165` | Yes |
+| `33` | `6.71` | `11.31` | `6.71` | `0.439` | `0.149` | Yes (q+r winner) |
+
+*seed 31 native per-tensor has lower PPL than groupwise but falls off the
+frontier on a tiny fitness/RAM tie-break.
+
+Decision:
+
+```text
+PASS -> direct I2_S export is viable via per-tensor-native training.
+```
+
+- Native per-tensor PPL is within +-1% of groupwise on all three seeds
+  (-0.9% / +1.0% / 0.0%), far inside the +5-10% pass threshold.
+- It stays on the Pareto frontier 2/3 (outright quality+resource winner on seed 33).
+- KL-to-fp16 (~0.15-0.18) matches groupwise; nothing like the 0.55+ of post-hoc export.
+- Generation smoke finite + non-degenerate on all three (decodes to English).
+- Native per-tensor (PPL ~6) crushes post-hoc export (PPL ~10), which proves the
+  earlier export loss was a post-hoc conversion artifact, not a per-tensor weakness.
+
+Consequence: the export track does not need a groupwise GGUF extension or a custom
+kernel. Train per-tensor b1.58 native, then export to bitnet.cpp I2_S.
+
 ## Artifact Note
 
 The seed sweep JSON files were generated inside the Colab session:

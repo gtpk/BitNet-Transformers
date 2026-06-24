@@ -200,7 +200,40 @@ metrics   : CE loss, PPL, token accuracy, KL-to-fp16, generation smoke, Pareto
 decision  : small CE/PPL delta -> continue I2_S export; large delta -> avoid direct lossy export
 ```
 
+### Step 2 Result (2026-06-24): post-hoc export is lossy, NATIVE per-tensor is not
+
+The Colab Wikitext gate (seeds 31/32/33) split the question cleanly. Post-hoc
+per-tensor export of the groupwise scaled-STE model is badly lossy (PPL +55/77/69%),
+but a per-tensor b1.58 model trained natively with CE-only STE
+(`per_tensor_ste_native`, added in commit `8d35350`) matches groupwise within +-1% PPL.
+
+| seed | groupwise PPL | post-hoc export PPL | native per-tensor PPL |
+| ---: | ---: | ---: | ---: |
+| 31 | 6.34 | 9.85 | 6.28 |
+| 32 | 5.95 | 10.55 | 6.01 |
+| 33 | 6.71 | 11.31 | 6.71 |
+
+Native per-tensor stayed on the Pareto frontier 2/3 (quality+resource winner on
+seed 33), KL-to-fp16 ~= groupwise (0.149-0.175, not the 0.55+ of post-hoc), and
+generation smoke was finite/non-degenerate on all three (decodes to English).
+
+Decision:
+
+```text
+DIRECT I2_S EXPORT IS VIABLE -- via per-tensor-native training, not post-hoc conversion.
+```
+
+The mapping is "lossy" only if you convert a groupwise-trained model after the
+fact. If the model is trained per-tensor (BitNet b1.58 native) from the start,
+its scale granularity already matches I2_S, so export becomes lossless and quality
+is preserved. No groupwise GGUF extension or custom kernel is needed for the
+export track. See [Groupwise Alpha Hypothesis](./groupwise_alpha_hypothesis.md)
+Gate Result (strong form refuted).
+
 ### Step 3: Minimal Export Artifact
+
+Use a `per_tensor_ste_native`-trained model (I2_S-compatible scale) as the source,
+not a groupwise model.
 
 Start with a tiny Llama-shaped fixture model before pretrained models.
 

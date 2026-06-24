@@ -18,13 +18,17 @@ logit error 0.0으로 통과했다. blocked dequant matmul reference는 dense we
 materialization 없이 8.0x 작은 transient working set으로 동일 출력을 냈지만,
 Python loop라 latency는 아직 느리다.
 
+**Export 판별 완료(2026-06-24):** post-hoc per-tensor export는 lossy(PPL +55~77%)지만,
+**처음부터 per-tensor b1.58로 native STE 학습하면 groupwise와 ±1% PPL로 동급**이다
+(Wikitext seed 31/32/33, frontier 2/3, KL 정상, generation 정상). 즉 groupwise는
+품질의 본질이 아니라 사후 변환이 문제였고, **직접 bitnet.cpp/I2_S export가 viable**하다 —
+groupwise GGUF 확장이나 custom kernel 없이 갈 수 있다.
+
 ## 지금 바로 할 일
 
-real-text 검증과 packed ternary reference ladder(Phase 1-4)가 끝났고,
-GGUF/bitnet.cpp export Step 0/1도 완료됐다. 결론은 직접 I2_S-style export가
-`alpha*T` groupwise scale을 per-tensor scale로 무너뜨리는 **lossy re-quantization**
-이라는 것이다. `per_tensor_b158` export-gate 후보는 arena에 추가됐고, 다음은
-Colab Wikitext seed sweep으로 PPL 손실이 감당 가능한지 확인하는 quality gate다.
+판별 게이트가 끝났다. 다음은 **I2_S export 트랙**: `per_tensor_ste_native`로 학습한
+모델(per-tensor scale = I2_S 호환)을 실제 bitnet.cpp/GGUF artifact로 내보내고
+(scoping doc Step 3-5), 최적화 런타임에서 logit 동일성·storage·latency를 측정한다.
 
 packed format Phase 1/2/3/4 검증(로컬):
 
@@ -213,17 +217,23 @@ flowchart TD
 - export mapping gap 측정: per-tensor b1.58 output error가 groupwise S1보다 `+18.4%` 나쁨, 14/14 target linears
 - export-gate arena 후보 추가: `s1_scaled_ste_export_pt_int8_kv`, `s1_scaled_ste_export_pt_int4_kv`
 - local fixture smoke 신호: groupwise `loss 2.400/acc 0.311`, per-tensor export `loss 2.472/acc 0.274`; 참고용이며 판정은 Colab Wikitext에서 수행
+- `per_tensor_ste_native` 후보 추가(`PerTensorBitLinear`, b1.58 absmean, 단일 γ, STE) — I2_S와 동일 scale granularity
+- **Per-tensor native 판별 게이트 통과(Colab Wikitext seed 31/32/33)**: native per-tensor PPL이 groupwise 대비 `-0.9% / +1.0% / 0.0%`(±1% 이내), frontier `2/3`(seed 33은 quality+resource winner), KL `0.149~0.175`(정상), generation 정상
+- **결정**: post-hoc export(PPL +55~77%)는 lossy지만 native per-tensor는 동급 → **direct I2_S export viable**, groupwise는 품질의 본질 아님(가설 B 입증)
 
 다음:
 
-1. Colab real-text JSON을 `reports/`로 회수하거나 재실행해 raw evidence를 보존한다.
-2. Colab Wikitext seed `31/32/33`에서 `per_tensor_b158` export quality gate를 실행한다.
-3. 손실이 작으면 I2_S-style export artifact/logit/storage/latency TC를 설계한다.
-4. 손실이 크면 groupwise GGUF 확장 또는 Phase 4b CPU/Metal/CUDA fused kernel을 별도 스코핑한다.
+1. Colab JSON(`reports/tiny_real_text_per_tensor_seed*.json`)을 회수/보존(휘발성).
+2. I2_S export 트랙: `per_tensor_ste_native` 학습 모델을 bitnet.cpp/GGUF artifact로 내보낸다(scoping Step 3).
+3. Correctness gate: exported-runtime logits vs Python reference 동일성(Step 4).
+4. Runtime gate: storage/load memory/per-token latency/KV 상호작용 측정(Step 5).
 
-이전 보류 항목 중 packed reference ladder는 완료됐다. 남은 다음 축:
+이전 보류 항목 중 packed reference ladder는 완료됐고, export 경로도 판별됐다
+(per-tensor-native → I2_S 직행). 남은 다음 축:
 
-- GGUF/bitnet.cpp export
+- bitnet.cpp/I2_S export artifact 구현 (per-tensor-native 모델 기준)
+- groupwise GGUF 확장 / custom kernel: export 트랙이면 불필요. groupwise의 약간 더 나은
+  reconstruction을 살리려는 연구용으로만 선택적
 - TurboQuant KV cache 구현
 
 단, raw Colab JSON이 현재 local workspace에 없으므로 논문식 정량 주장 전에는
