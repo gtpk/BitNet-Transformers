@@ -26,9 +26,12 @@ groupwise GGUF 확장이나 custom kernel 없이 갈 수 있다.
 
 ## 지금 바로 할 일
 
-판별 게이트가 끝났다. 다음은 **I2_S export 트랙**: `per_tensor_ste_native`로 학습한
-모델(per-tensor scale = I2_S 호환)을 실제 bitnet.cpp/GGUF artifact로 내보내고
-(scoping doc Step 3-5), 최적화 런타임에서 logit 동일성·storage·latency를 측정한다.
+I2_S export **Python PoC가 통과**했다(`per_tensor_ste_native` → I2_S artifact →
+import, logit/PPL 동일, target 8x; PTX-101~105, commit 5df98bf). 이제 milestone으로
+문서에 고정됐고, 다음은 **bitnet.cpp/GGUF runtime gate**다: 실제 I2_S block layout을
+upstream에서 재확인 → reference artifact와 RT-101 매핑표 작성 → GGUF writer →
+bitnet.cpp 빌드 후 RT-102~107(logit/PPL/storage/latency/generation) 검증. 여기서부터
+C++/runtime 트랙이다. 자세한 TC는 [I2_S Export PoC Plan](./i2s_export_poc_plan.md).
 
 packed format Phase 1/2/3/4 검증(로컬):
 
@@ -43,6 +46,8 @@ packed format Phase 1/2/3/4 검증(로컬):
   --json-out reports/packed_matmul_tc.json --strict
 .venv/bin/python scripts/check_export_mapping.py \
   --json-out reports/export_mapping_gap.json --strict
+.venv/bin/python scripts/check_i2s_export.py \
+  --json-out reports/i2s_export_tc.json --strict
 ```
 
 real-text fixture smoke(로컬, harness 확인용):
@@ -93,6 +98,10 @@ real-text fixture smoke(로컬, harness 확인용):
    - synthetic arena 이후 실제 토큰 분포 검증의 계획, 결과, 재현 경로다.
 8. [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md)
    - real-text 통과 후 첫 storage 산출물. b1.58을 실제 byte로 바꾸는 format/TC다.
+8b. [GGUF / bitnet.cpp Export Scoping Plan](./bitnet_cpp_export_scoping.md)
+   - groupwise→I2_S 매핑 판정과 per-tensor-native export 결정.
+8c. [I2_S Export PoC Plan](./i2s_export_poc_plan.md)
+   - per-tensor-native → I2_S artifact → import logit 동일성(PTX-101~105)과 다음 runtime gate TC.
 9. [GGUF / bitnet.cpp Export Scoping Plan](./bitnet_cpp_export_scoping.md)
    - reference ladder 이후 기존 ternary runtime으로 내보낼 수 있는지 확인하는 다음 트랙이다.
 10. [Groupwise Alpha Hypothesis](./groupwise_alpha_hypothesis.md)
@@ -142,6 +151,8 @@ flowchart TD
 | [colab_validation_summary.md](./colab_validation_summary.md) | Colab moderate run과 seed sweep milestone 기록 | Colab 결과가 다음 단계 조건을 충족했는지 확인할 때 |
 | [real_tiny_text_validation_plan.md](./real_tiny_text_validation_plan.md) | synthetic task 이후 실제 토큰 분포 검증 계획과 통과 결과 | packed/export 전에 품질 위험을 줄일 때 |
 | [packed_ternary_format_plan.md](./packed_ternary_format_plan.md) | packed ternary weight format, 2-bit/trit layout, storage TC | b1.58을 실제 byte로 저장/검증할 때 |
+| [bitnet_cpp_export_scoping.md](./bitnet_cpp_export_scoping.md) | groupwise→I2_S 매핑 판정, per-tensor-native export 결정 | bitnet.cpp export 가능성을 판단할 때 |
+| [i2s_export_poc_plan.md](./i2s_export_poc_plan.md) | I2_S Python export PoC(PTX-101~105), runtime gate TC | export 정확성/다음 C++ gate를 볼 때 |
 | [bitnet_cpp_export_scoping.md](./bitnet_cpp_export_scoping.md) | GGUF/bitnet.cpp export 가능성, format mapping, export TC 초안 | Python reference 이후 실제 runtime으로 넘어갈 때 |
 | [groupwise_alpha_hypothesis.md](./groupwise_alpha_hypothesis.md) | groupwise scale이 품질을 보존하는 이유와 검증할 ablation | 알고리즘 우위의 원인을 설명하거나 반증할 때 |
 | [research_signal_note.md](./research_signal_note.md) | 현재 결과가 연구 신호로서 왜 의미 있는지 해석 | 논문화 가능성과 다음 방향을 판단할 때 |
@@ -159,6 +170,8 @@ flowchart TD
 | [scripts/estimate_memory_traffic.py](../scripts/estimate_memory_traffic.py) | [Memory-Traffic-First BitNet Plan](./memory_traffic_first_plan.md) | bytes/token 추정 |
 | [bitnet_llama/packing.py](../bitnet_llama/packing.py) | [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) | two_bit/trit pack·unpack, groupwise alpha, model export/import, storage |
 | [scripts/check_packed_ternary.py](../scripts/check_packed_ternary.py) | [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) | PACK-001..006 storage TC |
+| [bitnet_llama/i2s_export.py](../bitnet_llama/i2s_export.py) | [I2_S Export PoC Plan](./i2s_export_poc_plan.md) | per-tensor b1.58 I2_S export/import reference |
+| [scripts/check_i2s_export.py](../scripts/check_i2s_export.py) | [I2_S Export PoC Plan](./i2s_export_poc_plan.md) | PTX-101..105 export 정확성 TC |
 | [scripts/check_packed_model.py](../scripts/check_packed_model.py) | [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) | PACK-101..103 model export/import TC |
 | [scripts/check_packed_runtime.py](../scripts/check_packed_runtime.py) | [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) | PACK-201..204 packed runtime module TC |
 | [scripts/check_packed_matmul.py](../scripts/check_packed_matmul.py) | [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) | PACK-301..304 blocked dequant matmul reference TC |
@@ -174,6 +187,7 @@ flowchart TD
 | [tiny_real_arena_qat_smoke.json](../reports/tiny_real_arena_qat_smoke.json) | projected-QAT smoke | scaled-STE의 비교 기준 |
 | [memory_traffic_bitllama_512x4.json](../reports/memory_traffic_bitllama_512x4.json) | `scripts/estimate_memory_traffic.py` | weight/KV policy별 bytes/token 추정 |
 | [packed_ternary_tc.json](../reports/packed_ternary_tc.json) | `scripts/check_packed_ternary.py` | trit/two_bit pack round-trip, dense 일치, storage 압축률 확인 |
+| [i2s_export_tc.json](../reports/i2s_export_tc.json) | `scripts/check_i2s_export.py` | I2_S export/import logit·PPL 동일성, storage 8x 확인 |
 | [packed_model_tc.json](../reports/packed_model_tc.json) | `scripts/check_packed_model.py` | 모델 단위 pack/unpack logit 동일성, save/load, whole-model storage 확인 |
 | [packed_runtime_tc.json](../reports/packed_runtime_tc.json) | `scripts/check_packed_runtime.py` | `PackedTernaryLinear` forward/logit/state round-trip, no dense weight 확인 |
 | [packed_matmul_tc.json](../reports/packed_matmul_tc.json) | `scripts/check_packed_matmul.py` | dense materialize 없는 blocked dequant matmul 정확성, working-set, latency honesty 확인 |
@@ -220,13 +234,14 @@ flowchart TD
 - `per_tensor_ste_native` 후보 추가(`PerTensorBitLinear`, b1.58 absmean, 단일 γ, STE) — I2_S와 동일 scale granularity
 - **Per-tensor native 판별 게이트 통과(Colab Wikitext seed 31/32/33)**: native per-tensor PPL이 groupwise 대비 `-0.9% / +1.0% / 0.0%`(±1% 이내), frontier `2/3`(seed 33은 quality+resource winner), KL `0.149~0.175`(정상), generation 정상
 - **결정**: post-hoc export(PPL +55~77%)는 lossy지만 native per-tensor는 동급 → **direct I2_S export viable**, groupwise는 품질의 본질 아님(가설 B 입증)
+- **I2_S export Python PoC 통과(commit 5df98bf)**: `bitnet_llama/i2s_export.py`(gamma+2-bit codes), `scripts/check_i2s_export.py` PTX-101~105 — native→artifact→import logit/PPL 동일(err 3.6e-7), target 8x vs fp16. Python reference는 정확성 증명이며 runtime speed는 아직 아님
 
 다음:
 
 1. Colab JSON(`reports/tiny_real_text_per_tensor_seed*.json`)을 회수/보존(휘발성).
-2. I2_S export 트랙: `per_tensor_ste_native` 학습 모델을 bitnet.cpp/GGUF artifact로 내보낸다(scoping Step 3).
-3. Correctness gate: exported-runtime logits vs Python reference 동일성(Step 4).
-4. Runtime gate: storage/load memory/per-token latency/KV 상호작용 측정(Step 5).
+2. bitnet.cpp/GGUF I2_S block layout upstream 재확인 + reference artifact 매핑표(RT-101).
+3. per-tensor-native 모델용 GGUF writer 작성(또는 convert-hf-to-gguf-bitnet 적응), I2_S 타겟.
+4. bitnet.cpp 빌드 후 RT-102~107(loader/logit/PPL/storage/latency/generation)을 Python reference 대비 검증.
 
 이전 보류 항목 중 packed reference ladder는 완료됐고, export 경로도 판별됐다
 (per-tensor-native → I2_S 직행). 남은 다음 축:

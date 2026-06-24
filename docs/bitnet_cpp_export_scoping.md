@@ -250,6 +250,14 @@ Gate Result (strong form refuted).
 Use a `per_tensor_ste_native`-trained model (I2_S-compatible scale) as the source,
 not a groupwise model.
 
+A Python reference of this artifact is now implemented and PASSED (see
+[I2_S Export PoC Plan](./i2s_export_poc_plan.md), commit `5df98bf`):
+`bitnet_llama/i2s_export.py` writes `gamma + 2-bit codes` and re-imports with
+`gamma*T` reproducing the model logits/PPL exactly (PTX-101..105, target `8x` vs
+fp16). The remaining Step 3-5 work is mapping this reference onto the actual GGUF
+I2_S on-disk layout and validating in the bitnet.cpp runtime (RT-101..107 in the
+PoC doc).
+
 Start with a tiny Llama-shaped fixture model before pretrained models.
 
 Pass criteria:

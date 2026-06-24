@@ -320,6 +320,27 @@ PASS -> direct I2_S export is viable via per-tensor-native training.
 Consequence: the export track does not need a groupwise GGUF extension or a custom
 kernel. Train per-tensor b1.58 native, then export to bitnet.cpp I2_S.
 
+## I2_S Export PoC Milestone (local)
+
+Date: 2026-06-24
+
+After the per-tensor native gate, the Python export reference landed (commit
+`5df98bf`): `bitnet_llama/i2s_export.py` + `scripts/check_i2s_export.py`. A
+per-tensor-native model exports to I2_S-style artifacts (per-tensor `gamma` +
+2-bit ternary codes) and re-imports with `gamma*T` reproducing the model exactly.
+
+```text
+PTX-101 layer round-trip   : max_err 0.00e+00
+PTX-102 model round-trip   : max_logit_err 3.58e-07
+PTX-103 save/load          : max_logit_err 3.58e-07
+PTX-104 storage            : target 8.00x (2.0 bits/elem), whole-model 3.68x vs fp16
+PTX-105 tiny-text PPL       : native == imported (CE delta 0.0)
+```
+
+This is export correctness only; runtime speed needs the bitnet.cpp I2_S kernel.
+See [I2_S Export PoC Plan](./i2s_export_poc_plan.md) for the next runtime gate
+(RT-101..107).
+
 ## Artifact Note
 
 The seed sweep JSON files were generated inside the Colab session:
