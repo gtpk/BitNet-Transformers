@@ -477,6 +477,15 @@ impractical to compile on this exact toolchain. Tractable options:
 Unchanged: our quantization/weights are export-ready (f16 parity); only the local
 ternary runtime is blocked by this toolchain.
 
+Patience test (does it just need longer?): re-ran the tiny-kernel `-O1` build and
+let `ggml-bitnet-lut.cpp` compile for **~50 minutes of CPU on a single TU** — still
+0% progress, no `.o`. So it is a genuine clang-21/M5 compile blowup on the
+codegen'd LUT, NOT mere slowness; waiting does not help. Both Mac ternary paths
+(I2_S kernel + TL1 LUT) are dead on this toolchain. Verification moved to x86
+(Colab): clone @ pinned commit, **patch `src/ggml-bitnet-mad.cpp:811`
+`int8_t* y_col` -> `const int8_t*`** (x86 clang-14 const error, not hit on ARM
+where that branch is #if'd out), then setup_env -q i2_s + perplexity f32 vs i2_s.
+
 Use a `per_tensor_ste_native`-trained model (I2_S-compatible scale) as the source,
 not a groupwise model.
 
