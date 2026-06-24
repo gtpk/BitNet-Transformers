@@ -125,8 +125,16 @@ for bits in [0, 8]:
     !SCALED_STE_ACTIVATION_BITS={bits} ARENA_JSON_OUT=reports/tiny_real_arena_scaled_ste_colab_act{bits}.json bash scripts/run_colab_scaled_ste_arena.sh
 ```
 
-Recommended next sweep. Pause packed-kernel/export work if `bits=8` collapses
-quality or drops scaled-STE from the frontier.
+Seed `31` result: no quality collapse, but `bits=8` dropped scaled-STE from the
+frontier by a tiny accuracy/RAM tie-break. Use seed `32/33` as the tiebreaker:
+
+```python
+for seed in [32, 33]:
+    !SEED={seed} SCALED_STE_ACTIVATION_BITS=8 ARENA_JSON_OUT=reports/tiny_real_arena_scaled_ste_colab_act8_seed{seed}.json bash scripts/run_colab_scaled_ste_arena.sh
+```
+
+Pause packed-kernel/export work only if act8 shows real quality collapse or
+falls off frontier across the tiebreaker seeds as well.
 
 ## Reading The Result
 
@@ -182,6 +190,6 @@ decision           : PROCEED
 Next decision gate:
 
 ```text
-activation fake-quant sweep should confirm whether the scaled-STE recipe still
-holds when the runtime path starts resembling a low-bit deployment path.
+act8 seed 32/33 should decide whether the seed31 frontier miss was noise around
+a tiny Pareto margin or a real activation-quantization issue.
 ```

@@ -16,8 +16,8 @@ BitLinear-style 후보다.
 Colab에서 다음 sweep을 돌린다:
 
 ```bash
-SCALED_STE_ACTIVATION_BITS=0 ARENA_JSON_OUT=reports/tiny_real_arena_scaled_ste_colab_act0.json bash scripts/run_colab_scaled_ste_arena.sh
-SCALED_STE_ACTIVATION_BITS=8 ARENA_JSON_OUT=reports/tiny_real_arena_scaled_ste_colab_act8.json bash scripts/run_colab_scaled_ste_arena.sh
+SEED=32 SCALED_STE_ACTIVATION_BITS=8 ARENA_JSON_OUT=reports/tiny_real_arena_scaled_ste_colab_act8_seed32.json bash scripts/run_colab_scaled_ste_arena.sh
+SEED=33 SCALED_STE_ACTIVATION_BITS=8 ARENA_JSON_OUT=reports/tiny_real_arena_scaled_ste_colab_act8_seed33.json bash scripts/run_colab_scaled_ste_arena.sh
 ```
 
 자세한 실행법:
@@ -116,12 +116,14 @@ flowchart TD
 - scaled-STE quality winner `3/3`, Pareto frontier 조건 충족
 - group-size sweep `32/64/128` 통과
 - group-size별 scaled-STE quality winner `3/3`, frontier `3/3`, loss band `0.2875-0.2996`
+- activation fake-quant seed `31`은 collapse 없이 borderline frontier 이탈
+- act8 seed `31`: acc `0.906`, loss `0.286`, KL `0.083`, projected-QAT에 RAM/accuracy tie-break로 dominate
 
 다음:
 
-1. `SCALED_STE_ACTIVATION_BITS` sweep: `0`, `8`.
+1. `SCALED_STE_ACTIVATION_BITS=8` tiebreaker: seeds `32`, `33`.
 2. Colab sweep JSON을 `reports/`로 회수해 commit.
-3. 결과가 안정적이면 synthetic patterned data에서 tiny real text subset으로 이동.
+3. act8이 collapse하지 않으면 synthetic patterned data에서 tiny real text subset으로 이동.
 4. 이후 packed ternary kernel, export, TurboQuant 중 우선순위를 고른다.
 
 이전 보류 항목에서 진입 조건을 충족한 다음 phase 후보:

@@ -124,6 +124,8 @@ Summary:
 - group-size sweep over `32`, `64`, `128` passed `3/3`
 - scaled-STE stayed quality winner `3/3` and frontier `3/3` with loss in
   `0.2875-0.2996`
+- activation fake-quant seed `31` did not collapse quality but missed the
+  frontier by a tiny accuracy/RAM tie-break
 
 Updated interpretation:
 
@@ -134,6 +136,8 @@ Packed kernels should still wait until group-size and activation fake-quant
 sweeps confirm that the conversion recipe is not brittle.
 Group-size is now checked; activation fake-quant is the remaining deployment
 adjacent sensitivity gate.
+Seed 31 act8 is a borderline miss, not a collapse, so seeds 32/33 should decide
+whether the frontier miss is noise or a repeatable activation-quant issue.
 ```
 
 ## Kill Criteria Before Bigger Runs
@@ -147,7 +151,7 @@ Do not spend Colab budget if any of these fail locally:
 
 ## Next Experiments
 
-1. Activation fake-quant sweep: off vs 8-bit.
+1. Activation fake-quant tiebreaker: 8-bit on seeds `32`, `33`.
 2. Archive Colab JSON reports into `reports/`.
 3. If stable, move from synthetic patterned data to a tiny real text subset.
 4. Then scope packed ternary kernels, GGUF/bitnet.cpp export, or TurboQuant KV.

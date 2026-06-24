@@ -271,6 +271,8 @@ Colab validation:
 - scaled-STE was quality winner `3/3`
 - group-size sweep `32/64/128` passed with scaled-STE quality winner `3/3`
   and frontier `3/3`
+- activation fake-quant seed `31` showed no quality collapse, but act8 missed
+  the frontier by a tiny accuracy/RAM tie-break
 - milestone: [Colab Validation Summary](./colab_validation_summary.md)
 
 Interpretation:
@@ -290,12 +292,15 @@ quality winner in all three seeds, so the arena can proceed to sensitivity
 sweeps before runtime kernel work.
 The group-size sweep narrows risk around S1 scale granularity; activation
 fake-quant is the remaining near-runtime sensitivity check.
+Seed 31 act8 is inconclusive rather than failing: the quality metrics remain
+healthy, while Pareto status flips because projected-QAT keeps a slightly lower
+RAM proxy. Use seed 32/33 as the tiebreaker.
 ```
 
 Next step:
 
 ```text
-Run activation fake-quant sweep from docs/colab_arena_runbook.md, archive raw
-JSON reports, then decide whether packed kernels or real-text data should be
-the next branch.
+Run act8 seed 32/33 tiebreaker from docs/colab_arena_runbook.md, archive raw
+JSON reports, then decide whether real-text data or activation quant tuning
+should be the next branch.
 ```
