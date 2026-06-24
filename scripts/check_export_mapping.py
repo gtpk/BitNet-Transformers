@@ -46,14 +46,6 @@ def build_tiny_model(seed: int):
     return LlamaForCausalLM(config).eval(), config
 
 
-def per_tensor_b158(weight: torch.Tensor) -> torch.Tensor:
-    """bitnet.cpp / BitNet b1.58 absmean weight quant: single per-tensor scale."""
-    w = weight.detach().float()
-    gamma = w.abs().mean().clamp(min=1e-12)
-    ternary = torch.clamp(torch.round(w / gamma), -1, 1)
-    return gamma * ternary
-
-
 @torch.no_grad()
 def capture_activations(model, input_ids):
     acts: dict[str, torch.Tensor] = {}
@@ -86,7 +78,7 @@ def run(seed: int = 7):
         w = sd[key]
         x = acts.get(key)
         _, gw_approx, _ = C.quantize_weight(w, C.S1)        # groupwise (ours)
-        pt_approx = per_tensor_b158(w)                       # per-tensor b1.58 (I2_S)
+        pt_approx = C.per_tensor_b158_approx(w)              # per-tensor b1.58 (I2_S)
         row = {
             "key": key,
             "groupwise_out_err": C.output_error(w, gw_approx, x) if x is not None else None,

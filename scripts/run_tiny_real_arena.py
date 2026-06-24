@@ -415,12 +415,22 @@ def evaluate_candidates(
     scaled_model, scaled_losses, scaled_replacements = recover_s1_with_scaled_ste(model, args, source)
     scaled_loss, scaled_acc, scaled_logits = evaluate_model(scaled_model, eval_ids)
 
+    # bitnet.cpp / I2_S export gate: re-quantize the trained scaled-STE model with
+    # a single per-tensor b1.58 scale (what an I2_S export would force, collapsing
+    # the groupwise alpha). The PPL delta vs s1_scaled_ste is the export quality gate.
+    export_state = {key: value.clone() for key, value in scaled_model.state_dict().items()}
+    for key in C.find_target_keys(export_state):
+        export_state[key] = C.per_tensor_b158_approx(export_state[key])
+    export_model = clone_with_state(model, export_state)
+    export_loss, export_acc, export_logits = evaluate_model(export_model, eval_ids)
+
     # generation smoke (watch metric): finite logits + non-degenerate decode
     prompt = eval_ids[:1, : min(8, eval_ids.shape[1])]
     gen_smoke = {
         "fp16_dense": generation_smoke(model, prompt),
         "s1_projected_qat": generation_smoke(qat_model, prompt),
         "s1_scaled_ste": generation_smoke(scaled_model, prompt),
+        "s1_scaled_ste_export_pt": generation_smoke(export_model, prompt),
     }
 
     traffic = traffic_by_policy(config, args.seq_len)
@@ -523,6 +533,24 @@ def evaluate_candidates(
             "accuracy": scaled_acc,
             "kl": logit_kl(fp_logits, scaled_logits),
             "ram_factor": 0.24,
+        },
+        {
+            "name": "s1_scaled_ste_export_pt_int8_kv",
+            "quality_source": "S1_scaled_STE_export_per_tensor",
+            "runtime_policy": "packed_b1_58_weight_int8_kv",
+            "loss": export_loss,
+            "accuracy": export_acc,
+            "kl": logit_kl(fp_logits, export_logits),
+            "ram_factor": 0.28,
+        },
+        {
+            "name": "s1_scaled_ste_export_pt_int4_kv",
+            "quality_source": "S1_scaled_STE_export_per_tensor",
+            "runtime_policy": "packed_b1_58_weight_int4_kv",
+            "loss": export_loss,
+            "accuracy": export_acc,
+            "kl": logit_kl(fp_logits, export_logits),
+            "ram_factor": 0.23,
         },
     ]
     max_bytes = max(traffic[item["runtime_policy"]][0] for item in raw)

@@ -23,8 +23,8 @@ Python loop라 latency는 아직 느리다.
 real-text 검증과 packed ternary reference ladder(Phase 1-4)가 끝났고,
 GGUF/bitnet.cpp export Step 0/1도 완료됐다. 결론은 직접 I2_S-style export가
 `alpha*T` groupwise scale을 per-tensor scale로 무너뜨리는 **lossy re-quantization**
-이라는 것이다. 다음은 per-tensor b1.58 후보를 real-text arena에 넣어 PPL 손실이
-감당 가능한지 확인하는 quality gate다.
+이라는 것이다. `per_tensor_b158` export-gate 후보는 arena에 추가됐고, 다음은
+Colab Wikitext seed sweep으로 PPL 손실이 감당 가능한지 확인하는 quality gate다.
 
 packed format Phase 1/2/3/4 검증(로컬):
 
@@ -206,11 +206,13 @@ flowchart TD
 - GGUF/bitnet.cpp export Step 0/1 완료: bit layout은 호환 가능성이 있으나 scale granularity가 불일치
 - direct I2_S-style mapping 판정: groupwise `alpha`를 per-tensor scale로 무너뜨려야 하므로 lossy
 - export mapping gap 측정: per-tensor b1.58 output error가 groupwise S1보다 `+18.4%` 나쁨, 14/14 target linears
+- export-gate arena 후보 추가: `s1_scaled_ste_export_pt_int8_kv`, `s1_scaled_ste_export_pt_int4_kv`
+- local fixture smoke 신호: groupwise `loss 2.400/acc 0.311`, per-tensor export `loss 2.472/acc 0.274`; 참고용이며 판정은 Colab Wikitext에서 수행
 
 다음:
 
 1. Colab real-text JSON을 `reports/`로 회수하거나 재실행해 raw evidence를 보존한다.
-2. arena에 `per_tensor_b158` 후보를 추가하고 real-text CE/PPL quality gate를 실행한다.
+2. Colab Wikitext seed `31/32/33`에서 `per_tensor_b158` export quality gate를 실행한다.
 3. 손실이 작으면 I2_S-style export artifact/logit/storage/latency TC를 설계한다.
 4. 손실이 크면 groupwise GGUF 확장 또는 Phase 4b CPU/Metal/CUDA fused kernel을 별도 스코핑한다.
 

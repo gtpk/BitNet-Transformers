@@ -134,7 +134,9 @@ trail honest.
 
 The first export result narrowed that move: direct I2_S-style export is lossy,
 so the next honest test is not an artifact writer yet. It is a real-text
-quality gate for a `per_tensor_b158` candidate.
+quality gate for a `per_tensor_b158` candidate. That candidate now exists in
+the arena; the next decision should be made on Colab Wikitext CE/PPL, not on the
+tiny local fixture.
 
 This thread is worth following because the positive results are not isolated.
 They line up with a plausible mechanism.

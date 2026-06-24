@@ -32,7 +32,8 @@ Date: 2026-06-24
 ```text
 Step 0/1 complete.
 Mapping decision: lossy re-quantization.
-Next gate: per-tensor b1.58 real-text quality test.
+Step 2 candidate implemented.
+Next gate: Colab Wikitext per-tensor b1.58 real-text quality test.
 ```
 
 The current bitnet.cpp/GGUF route is not blocked, but it is not lossless for
@@ -158,6 +159,29 @@ Candidate:
 per_tensor_b158_i2s_candidate
 ```
 
+Implementation status:
+
+```text
+implemented
+```
+
+Code:
+
+- `bitnet_llama/conversion.py`: `per_tensor_b158_approx`
+- `scripts/run_tiny_real_arena.py`: `s1_scaled_ste_export_pt_int8_kv`,
+  `s1_scaled_ste_export_pt_int4_kv`
+
+Local fixture smoke signal:
+
+| Candidate | Acc | Loss |
+| --- | ---: | ---: |
+| `s1_scaled_ste_int4` groupwise | `0.311` | `2.400` |
+| `s1_scaled_ste_export_pt_int4` per-tensor | `0.274` | `2.472` |
+
+Interpretation: the tiny fixture points in the same direction as EXPORT-002
+(per-tensor loses quality), but it is not authoritative. The fixture is only a
+few kilobytes. The decision must come from the Wikitext real-text sweep.
+
 Pass criteria:
 
 - CE/PPL degradation versus groupwise scaled-STE is small enough to justify
@@ -165,6 +189,16 @@ Pass criteria:
 - generation smoke remains finite and non-degenerate
 - KL/logit drift is recorded, not hidden
 - failure is accepted as a signal to avoid lossy export
+
+Colab gate:
+
+```text
+data      : Wikitext tiny real-text sample
+seeds     : 31, 32, 33
+compare   : s1_scaled_ste_int4_kv vs s1_scaled_ste_export_pt_int4_kv
+metrics   : CE loss, PPL, token accuracy, KL-to-fp16, generation smoke, Pareto
+decision  : small CE/PPL delta -> continue I2_S export; large delta -> avoid direct lossy export
+```
 
 ### Step 3: Minimal Export Artifact
 

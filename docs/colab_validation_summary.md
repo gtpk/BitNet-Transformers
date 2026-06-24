@@ -269,6 +269,22 @@ affected layers        : 14 / 14
 Decision: do not claim I2_S compatibility yet. Add a per-tensor b1.58 candidate
 to the real-text arena and measure CE/PPL first.
 
+The arena candidate now exists:
+
+```text
+s1_scaled_ste_export_pt_int8_kv
+s1_scaled_ste_export_pt_int4_kv
+```
+
+Local fixture smoke is directionally negative but not decisive:
+
+```text
+groupwise scaled-STE int4 : acc 0.311, loss 2.400
+per-tensor export int4    : acc 0.274, loss 2.472
+```
+
+The authoritative gate is Colab Wikitext real text, seeds `31/32/33`.
+
 ## Artifact Note
 
 The seed sweep JSON files were generated inside the Colab session:
@@ -320,8 +336,7 @@ Recommended order from here:
 
 1. Archive the real-text JSON reports from Colab back into `reports/` or rerun
    the sweep before paper-style quantitative claims.
-2. Add a `per_tensor_b158` candidate to the real-text arena and run the lossy
-   export quality gate.
+2. Run the lossy export quality gate on Colab Wikitext seeds `31/32/33`.
 3. If CE/PPL damage is small, define I2_S-style export TCs: logit equality,
    storage, PPL on tiny real text, and latency/memory against the Python
    reference path.

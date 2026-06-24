@@ -197,6 +197,17 @@ def output_error(weight: torch.Tensor, weight_approx: torch.Tensor, activations:
     return float(num / den)
 
 
+def per_tensor_b158_approx(weight: torch.Tensor) -> torch.Tensor:
+    """BitNet b1.58 / bitnet.cpp I2_S weight quant: a single per-tensor absmean
+    scale. ``gamma = mean(|W|)``, ``T = clamp(round(W/gamma), -1, 1)``,
+    reconstruction ``gamma * T``. Used to model what an I2_S export would force
+    (vs this project's groupwise alpha)."""
+    w = weight.detach().float()
+    gamma = w.abs().mean().clamp(min=EPS)
+    ternary = torch.clamp(torch.round(w / gamma), -1.0, 1.0)
+    return (gamma * ternary).to(dtype=weight.dtype, device=weight.device)
+
+
 def storage_bits(numel: int, scale_params: int, scale_dtype_bits: int = 16) -> tuple[float, float, float, float]:
     """Theoretical storage (MEM-001). Returns (ternary_bits, scale_bits, fp16_bits, compression)."""
     ternary_bits = TERNARY_BITS_PER_ELEM * numel
