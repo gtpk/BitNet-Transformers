@@ -1,0 +1,30 @@
+{
+  "results": [
+    {
+      "id": "PACK-101/logit-equality",
+      "pass": true,
+      "detail": "max_logit_err=0.00e+00"
+    },
+    {
+      "id": "PACK-102/save-load-model",
+      "pass": true,
+      "detail": "max_logit_err=0.00e+00"
+    },
+    {
+      "id": "PACK-103/model-storage",
+      "pass": true,
+      "detail": "14 layers packed, target_fraction=0.83, compression=3.78x (203.3KB vs fp16 769.2KB)"
+    }
+  ],
+  "storage": {
+    "packed_target_bytes": 75780,
+    "fp16_other_bytes": 132352,
+    "packed_total_bytes": 208132,
+    "fp16_total_bytes": 787712,
+    "model_compression_vs_fp16": 3.7846751100263294,
+    "target_numel": 327680,
+    "other_numel": 66176,
+    "target_fraction": 0.831979200519987,
+    "num_packed_layers": 14
+  }
+}

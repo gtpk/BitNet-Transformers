@@ -24,6 +24,9 @@ import math
 from dataclasses import dataclass
 
 import torch
+import torch.nn as nn
+
+from . import conversion as _conv  # single source for the target-layer policy
 
 TERNARY_BITS_PER_ELEM = math.log2(3.0)  # 1.585, the information bound
 SCHEMES = ("two_bit", "trit")
@@ -203,6 +206,79 @@ def pack_scaled_bitlinear(layer, scheme: str = "trit") -> PackedTernaryWeight:
         lambda_value=layer.lambda_value,
         scheme=scheme,
     )
+
+
+# --------------------------------------------------------------------------- #
+# Model-wide export/import (Phase 2).  Only target linears are packed; embedding,
+# lm_head, norms, and biases stay fp16.
+# --------------------------------------------------------------------------- #
+def _named_target_linears(model: nn.Module):
+    for name, module in model.named_modules():
+        if isinstance(module, nn.Linear) and _conv.is_target_weight_key(f"{name}.weight"):
+            yield name, module
+
+
+def pack_model(
+    model: nn.Module, group_size: int = 64, lambda_value: float = 0.7, scheme: str = "trit"
+) -> dict:
+    """Pack every target linear of ``model`` into a single artifact dict."""
+    layers = {
+        name: PackedTernaryWeight.from_weight(module.weight, group_size, lambda_value, scheme)
+        for name, module in _named_target_linears(model)
+    }
+    return {"scheme": scheme, "group_size": group_size, "lambda_value": lambda_value, "layers": layers}
+
+
+def _set_module_weight(model: nn.Module, name: str, weight: torch.Tensor) -> None:
+    module = model.get_submodule(name)
+    with torch.no_grad():
+        module.weight.copy_(weight.to(dtype=module.weight.dtype, device=module.weight.device))
+
+
+def unpack_into_model(model: nn.Module, artifact: dict) -> nn.Module:
+    """Reconstruct alpha*T into the target linears of ``model`` in place."""
+    for name, packed in artifact["layers"].items():
+        _set_module_weight(model, name, packed.to_dense())
+    return model
+
+
+def save_packed_model(artifact: dict, path) -> None:
+    serial = {key: artifact[key] for key in ("scheme", "group_size", "lambda_value")}
+    serial["layers"] = {name: packed.state() for name, packed in artifact["layers"].items()}
+    torch.save(serial, path)
+
+
+def load_packed_model(path) -> dict:
+    serial = torch.load(path, weights_only=False)
+    artifact = {key: serial[key] for key in ("scheme", "group_size", "lambda_value")}
+    artifact["layers"] = {name: PackedTernaryWeight.from_state(s) for name, s in serial["layers"].items()}
+    return artifact
+
+
+def model_storage_report(model: nn.Module, artifact: dict, scale_dtype_bits: int = 16) -> dict:
+    """Whole-model storage: packed target linears + fp16 for everything else.
+
+    The per-layer compression (~8.65x for a square linear) is diluted at the
+    model level because embedding/lm_head/norms stay fp16, so this reports the
+    honest end-to-end number.
+    """
+    packed_bytes = sum(packed.nbytes(scale_dtype_bits) for packed in artifact["layers"].values())
+    target_numel = sum(module.weight.numel() for _, module in _named_target_linears(model))
+    all_numel = sum(p.numel() for p in model.parameters())
+    other_bytes = (all_numel - target_numel) * 2  # fp16
+    total = packed_bytes + other_bytes
+    fp16_total = all_numel * 2
+    return {
+        "packed_target_bytes": packed_bytes,
+        "fp16_other_bytes": other_bytes,
+        "packed_total_bytes": total,
+        "fp16_total_bytes": fp16_total,
+        "model_compression_vs_fp16": fp16_total / max(total, 1),
+        "target_numel": target_numel,
+        "other_numel": all_numel - target_numel,
+        "target_fraction": target_numel / max(all_numel, 1),
+        "num_packed_layers": len(artifact["layers"]),
+    }
 
 
 def storage_report(

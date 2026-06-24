@@ -175,6 +175,25 @@ ScaledBitLinear export round-trip : max_err 7e-9
 TC PACK-001..006  : all pass
 ```
 
+## Packed Model Export/Import Milestone
+
+Date: 2026-06-24
+
+Phase 2 was verified locally because it is pure packing plus logit comparison
+and does not require GPU execution. This moves the claim from "each layer can
+round-trip" to "the whole model preserves output after export/import."
+
+```text
+PACK-101 logit equality      : max_logit_err=0.00e+00
+PACK-102 save/load artifact  : max_logit_err=0.00e+00
+PACK-103 whole-model storage : 14 layers packed, 3.78x vs fp16
+                               203.3 KB packed+fp16-others vs 769.2 KB fp16
+```
+
+The whole-model compression ratio is lower than the layer-only `8.65x` number
+because embedding, `lm_head`, norms, and biases remain fp16. That is the right
+number to track for end-to-end artifacts.
+
 ## Artifact Note
 
 The seed sweep JSON files were generated inside the Colab session:
@@ -221,16 +240,17 @@ archival. Re-run the sweep before making a paper-style quantitative claim.
 
 ## Next Actions
 
-Synthetic gates, real-text validation, and packed-format Phase 1 are all done.
+Synthetic gates, real-text validation, and packed-format Phase 1/2 are all done.
 Recommended order from here:
 
-1. Archive the real-text and packing JSON reports from Colab back into `reports/`.
-2. Packed format Phase 2: model-wide pack/unpack export with a forward
-   logit-equality TC against the dense model, and a whole-model storage report.
-3. Packed format Phase 3: reference matmul through the packed path (correctness,
-   not speed), checking logit equality with the dense path.
-4. Use the export/logit checks to watch the KL-to-fp16 item; only then scope a
-   real kernel target (CPU first, then Metal/CUDA/bitnet.cpp).
+1. Archive the real-text JSON reports from Colab back into `reports/` or rerun
+   the sweep before paper-style quantitative claims.
+2. Packed format Phase 3: implement `PackedTernaryLinear` as a reference
+   runtime module that holds packed weights and unpacks on-the-fly for
+   `F.linear`.
+3. Check packed-module model logits against the S1-unpacked model.
+4. Use the export/runtime logit checks to watch the KL-to-fp16 item; only then
+   scope a real kernel target (CPU first, then Metal/CUDA/bitnet.cpp).
 
 See [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) for the
 format spec and TC matrix.
