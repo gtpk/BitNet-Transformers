@@ -41,8 +41,21 @@ Date: 2026-06-24
 Step 0/1 complete.
 Mapping decision for groupwise -> I2_S: lossy re-quantization.
 Step 2 complete: native per-tensor b1.58 gate PASSED.
-Next gate: I2_S artifact export + runtime/logit/storage/latency checks.
+RT-101 layout audit + RT-102 build/verify complete.
+RT-103A/B/C complete: Path A holds END TO END for a plain-LLaMA model.
+Next: RT-104 logit/PPL parity (bitnet.cpp I2_S vs Python i2s_export reference).
 ```
+
+**RT-103C (I2_S quantize + runtime smoke): PASS. Path A is real.**
+`llama-quantize --token-embedding-type f16 ggml-model-f32.gguf ggml-model-i2_s.gguf I2_S 1 1`
+succeeded (36MB -> 16MB); each target linear logged "converting to i2_s",
+norms kept f32. Byte law holds (attn 256x256 -> 16416 B = 65536/4+32).
+`llama-cli` LOADS and GENERATES from the I2_S model (rc=0, `arch = llama`, no
+assert/unsupported) — so **a plain-LLaMA F32 GGUF can be I2_S-quantized and run by
+bitnet.cpp with zero architecture surgery (no SubLN / BitnetForCausalLM needed)**.
+Output is gibberish (random untrained tiny model; quality is RT-104). Note: the
+`llama-gguf` example tool reports "failed to read tensor data" on I2_S (its size
+calc doesn't know type 36) but the real `llama_model_loader` handles it fine.
 
 The current bitnet.cpp/GGUF route is viable only through the per-tensor-native
 training path. The bit-level ternary family is compatible, and the scale
