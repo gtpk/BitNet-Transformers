@@ -18,11 +18,19 @@ packed storage -> model export/import -> packed runtime module -> blocked dequan
 
 The remaining unsolved part is latency. The Python reference path proves that
 dense weight materialization can be avoided, but it is slower than dense matmul.
-The next high-leverage question is:
+The first export question was:
 
 ```text
 Can this project's groupwise alpha*T ternary format be exported into an
 existing optimized ternary runtime before writing a custom kernel?
+```
+
+That question has now been narrowed. Post-hoc export of a groupwise-trained
+model to per-tensor I2_S is lossy, but a model trained natively with per-tensor
+b1.58 STE matches groupwise quality. The active export path is therefore:
+
+```text
+train per-tensor-native b1.58 -> export directly to bitnet.cpp/GGUF I2_S
 ```
 
 ## Status
@@ -31,18 +39,21 @@ Date: 2026-06-24
 
 ```text
 Step 0/1 complete.
-Mapping decision: lossy re-quantization.
-Step 2 candidate implemented.
-Next gate: Colab Wikitext per-tensor b1.58 real-text quality test.
+Mapping decision for groupwise -> I2_S: lossy re-quantization.
+Step 2 complete: native per-tensor b1.58 gate PASSED.
+Next gate: I2_S artifact export + runtime/logit/storage/latency checks.
 ```
 
-The current bitnet.cpp/GGUF route is not blocked, but it is not lossless for
-this project. The bit-level ternary family is compatible enough to pursue, but
-the scale representation is different: this project keeps groupwise `alpha`,
-while the direct bitnet.cpp I2_S-style path collapses the weight scale to a
-per-tensor value. That destroys the exact mechanism that made scaled-STE strong,
-so compatibility must be treated as a quality question, not a formatting
-question.
+The current bitnet.cpp/GGUF route is viable only through the per-tensor-native
+training path. The bit-level ternary family is compatible, and the scale
+granularity matches I2_S when the model is trained with one per-tensor
+`gamma = mean(abs(W))` from the start. What remains is engineering validation:
+artifact writing, loader compatibility, logit/PPL preservation, storage, and
+runtime latency.
+
+Post-hoc conversion of the groupwise scaled-STE model to I2_S remains a failed
+path. It collapses groupwise `alpha` to one tensor scale after the model has
+already adapted to local scales, and the Wikitext gate showed large PPL damage.
 
 Source anchors used for this scoping:
 
@@ -178,9 +189,10 @@ Local fixture smoke signal:
 | `s1_scaled_ste_int4` groupwise | `0.311` | `2.400` |
 | `s1_scaled_ste_export_pt_int4` per-tensor | `0.274` | `2.472` |
 
-Interpretation: the tiny fixture points in the same direction as EXPORT-002
-(per-tensor loses quality), but it is not authoritative. The fixture is only a
-few kilobytes. The decision must come from the Wikitext real-text sweep.
+Interpretation: the tiny fixture points in the same direction as EXPORT-002 for
+**post-hoc** groupwise -> per-tensor conversion, but it is not authoritative.
+The fixture is only a few kilobytes. The decision must come from the Wikitext
+real-text sweep and must include a native per-tensor candidate.
 
 Pass criteria:
 
@@ -195,9 +207,12 @@ Colab gate:
 ```text
 data      : Wikitext tiny real-text sample
 seeds     : 31, 32, 33
-compare   : s1_scaled_ste_int4_kv vs s1_scaled_ste_export_pt_int4_kv
+compare   : s1_scaled_ste_int4_kv
+            vs s1_scaled_ste_export_pt_int4_kv
+            vs per_tensor_ste_native_int4_kv
 metrics   : CE loss, PPL, token accuracy, KL-to-fp16, generation smoke, Pareto
-decision  : small CE/PPL delta -> continue I2_S export; large delta -> avoid direct lossy export
+decision  : native per-tensor close to groupwise -> direct I2_S export
+            native per-tensor also fails -> groupwise export/kernel fallback
 ```
 
 ### Step 2 Result (2026-06-24): post-hoc export is lossy, NATIVE per-tensor is not
@@ -275,7 +290,7 @@ Only after correctness:
 | --- | --- | --- | --- |
 | EXPORT-001 | Format | current bitnet.cpp/GGUF format inspected | compatibility table exists |
 | EXPORT-002 | Mapping | `PackedTernaryWeight` -> target layout | direct/lossless/lossy/blocked decision |
-| EXPORT-003 | Lossy quality | per-tensor b1.58 arena candidate on real text | CE/PPL delta recorded |
+| EXPORT-003 | Quality gate | native per-tensor b1.58 arena candidate on real text | PASS: within +-1% PPL of groupwise |
 | EXPORT-004 | Tiny artifact | fixture model exports and loads | no loader error |
 | EXPORT-005 | Logits | exported runtime logits vs Python reference | max error threshold recorded |
 | EXPORT-006 | Storage | artifact size vs fp16 | report exact ratio |
@@ -283,11 +298,17 @@ Only after correctness:
 
 ## Decision Rule
 
-Proceed to export implementation if format mapping is direct or lossless.
+Proceed to export implementation when the source model is trained in the target
+scale format.
 
-Mapping requires lossy re-quantization, so the project is now in the quality
-gate branch. Do not claim I2_S compatibility until per-tensor b1.58 survives
-real-text CE/PPL.
+The groupwise -> I2_S mapping is lossy and should not be used for deployment.
+The per-tensor-native path has passed the real-text quality gate, so I2_S export
+can now be claimed as viable in this narrower sense:
+
+```text
+I2_S-compatible model = trained per-tensor-native from the start.
+Not I2_S-compatible model = groupwise-trained model converted post-hoc.
+```
 
 If mapping is blocked, split into:
 

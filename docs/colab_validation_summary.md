@@ -266,8 +266,9 @@ relative degradation   : +18.4%
 affected layers        : 14 / 14
 ```
 
-Decision: do not claim I2_S compatibility yet. Add a per-tensor b1.58 candidate
-to the real-text arena and measure CE/PPL first.
+This first mapping check only ruled out **post-hoc** groupwise -> per-tensor
+export. It did not prove that per-tensor b1.58 itself is weak. The follow-up
+gate therefore added a native per-tensor candidate and measured real-text CE/PPL.
 
 The arena candidate now exists:
 
@@ -283,7 +284,7 @@ groupwise scaled-STE int4 : acc 0.311, loss 2.400
 per-tensor export int4    : acc 0.274, loss 2.472
 ```
 
-The authoritative gate is Colab Wikitext real text, seeds `31/32/33`.
+The authoritative native per-tensor gate below is the decision record.
 
 ## Per-Tensor Native Gate Result (decisive)
 
@@ -370,12 +371,13 @@ Recommended order from here:
 
 1. Archive the real-text JSON reports from Colab back into `reports/` or rerun
    the sweep before paper-style quantitative claims.
-2. Run the lossy export quality gate on Colab Wikitext seeds `31/32/33`.
-3. If CE/PPL damage is small, define I2_S-style export TCs: logit equality,
-   storage, PPL on tiny real text, and latency/memory against the Python
-   reference path.
-4. If CE/PPL damage is large, split into groupwise GGUF extension or Phase 4b
-   CPU/Metal/CUDA fused-kernel scoping.
+2. Define I2_S-style export TCs for the per-tensor-native path: artifact
+   loadability, logit equality against the Python reference, storage ratio, PPL
+   on tiny real text, and latency/memory against the Python reference path.
+3. Implement the exporter from a `per_tensor_ste_native` state_dict to the target
+   bitnet.cpp/GGUF I2_S layout.
+4. Keep groupwise GGUF extension and custom fused kernels as fallback tracks only
+   if the direct I2_S artifact/runtime path fails.
 
 See [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) for the
 format spec and TC matrix.

@@ -52,12 +52,13 @@ uses CE-only STE recovery.
 Mechanism note:
 
 ```text
-The likely reason groupwise alpha*T is stronger than direct BitNet b1.58
-per-tensor export is local scale preservation.
+The decisive export result says the failure mode was not per-tensor b1.58
+itself. It was post-hoc conversion from a groupwise-trained model into a
+per-tensor runtime format.
 ```
 
 See [Groupwise Alpha Hypothesis](./groupwise_alpha_hypothesis.md) for the
-working explanation and falsification tests.
+refuted strong hypothesis and the remaining ablations.
 
 ## What Has Survived So Far
 
@@ -81,8 +82,8 @@ Important caveat:
 This is still early-stage evidence. The current validation is not yet a
 pretrained-model, benchmark-suite, packed-kernel, or optimized production-runtime result.
 The reference path proves storage and working-set reduction, not latency.
-The first export scoping result also says the cheap I2_S path may require
-quality sacrifice because it collapses groupwise alpha to a per-tensor scale.
+The cheap I2_S path is viable only for models trained per-tensor-native from the
+start; post-hoc groupwise -> I2_S conversion remains lossy.
 ```
 
 ## Why This Is Not Yet A Paper
@@ -138,16 +139,15 @@ The right move is not to overclaim. The right move is to keep closing gates:
 4. push runtime work only after separating reference modules from real kernels
 5. package the story if the signal keeps surviving
 
-The next practical research move is to scope GGUF/bitnet.cpp export before
-writing a custom kernel. That tests whether an existing runtime can provide the
-latency half of the story while this project keeps the conversion and validation
-trail honest.
+The next practical research move is to build the GGUF/bitnet.cpp I2_S export
+path for the per-tensor-native candidate before writing a custom kernel. That
+tests whether an existing runtime can provide the latency half of the story
+while this project keeps the conversion and validation trail honest.
 
-The first export result narrowed that move: direct I2_S-style export is lossy,
-so the next honest test is not an artifact writer yet. It is a real-text
-quality gate for a `per_tensor_b158` candidate. That candidate now exists in
-the arena; the next decision should be made on Colab Wikitext CE/PPL, not on the
-tiny local fixture.
+The first export result narrowed that move: post-hoc groupwise -> I2_S export is
+lossy, but per-tensor-native b1.58 matches groupwise within +-1% PPL on Wikitext.
+So the next honest test is now an artifact writer plus runtime checks: load,
+logit/PPL preservation, storage, and latency.
 
 This thread is worth following because the positive results are not isolated.
 They line up with a plausible mechanism.

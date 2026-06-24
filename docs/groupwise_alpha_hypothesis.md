@@ -210,7 +210,9 @@ and can that metadata still be served efficiently on-device?
 
 ## Falsification / Next Tests
 
-The hypothesis should be treated as provisional until these tests run:
+The strongest form of the hypothesis has already been falsified. Remaining tests
+are useful for understanding *why* per-tensor-native recovers, not for deciding
+whether direct I2_S export is allowed.
 
 1. ~~`per_tensor_b158` real-text quality gate on Wikitext seeds `31/32/33`.~~
    **DONE (2026-06-24): refuted the strong hypothesis — native per-tensor matches
@@ -223,10 +225,10 @@ The hypothesis should be treated as provisional until these tests run:
 6. Runtime path comparison: direct I2_S export vs groupwise GGUF extension vs
    custom fused kernel.
 
-Decision rule:
+Resolved decision:
 
 ```text
-If per-tensor b1.58 keeps PPL close enough, use bitnet.cpp-style export.
-If per-tensor b1.58 loses too much, preserve groupwise alpha and pay the
-engineering cost for groupwise export/kernel work.
+per-tensor-native b1.58 kept PPL close enough.
+Use bitnet.cpp-style I2_S export as the primary runtime path.
+Keep groupwise export/kernel work as fallback or ablation, not as the main path.
 ```
