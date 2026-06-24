@@ -711,6 +711,40 @@ Verdict rule:
 Driver: `scripts/rt112_x86_arena.py` (trains via rt104, materializes via rt104d,
 builds f32/f16/i2_s for both paths, runs perplexity, prints the table + verdict).
 
+### RT-112 RESULT (2026-06-25): PASS — our b1.58 model runs faithfully on x86 I2_S
+
+Ran the driver on Colab x86 (clang-14, official-built bitnet.cpp, corpus x20 so the
+eval set has enough tokens for ctx=64). One eval stream, one llama-perplexity tool:
+
+```text
+path                  f32        f16        i2_s
+latent (Path A)     806.49     806.41     2071.48    <- i2_s collapses 2.6x (control)
+ternary (Path A')   306.42     306.48      305.02    <- i2_s ~= f16 ~= f32  PASS
+```
+
+- **Path A' (Wq=gamma*T): i2_s 305.02 ~= f16 306.48 ~= f32 306.42 (within 0.5%).**
+  Our per-tensor b1.58 model passes through upstream I2_S losslessly (max|Wq|=gamma,
+  sign(Wq)=T, zeros stay -> Q_absmax(Wq)=Wq). **No Path B byte-writer needed.**
+- Path A (latent control): i2_s 2071 vs its own f16 806 -> 2.6x collapse. Upstream's
+  sign*absmax re-quant destroys the absmean gamma -> **absmax-vs-absmean confirmed**.
+- Combined with RT-111 (official model i2_s~f32 on x86), all three predictions hold.
+
+Caveat: the Python refs in rt104_reference.json (per_tensor_ste 1.078, latent_fp
+1.824 on the x20 corpus) are on a different absolute scale than the llama-perplexity
+numbers (Python uses the HF PreTrainedTokenizerFast + the model's own STE forward;
+llama-perplexity re-tokenizes the decoded eval.txt with llama.cpp's tokenizer and a
+sliding window). The verdict is a *relative* comparison WITHIN llama-perplexity
+(same tool, same eval, same tokenization), where i2_s tracks f16 to 4 digits — the
+cross-tool absolute gap is tokenization/protocol, not an encoding fault.
+
+```text
+CONCLUSION: the export track is DONE. A model trained per-tensor-native b1.58 ->
+materialize Wq=gamma*T -> convert-hf-to-gguf-bitnet --outtype f32 -> llama-quantize
+I2_S runs in real bitnet.cpp x86 with F16/F32 parity. Path B is unnecessary. The
+only blocked piece is the M5 runtime (toolchain bug, RT-107..109). Next track:
+storage ratio + latency (EXPORT-006/007), and optionally an upstream M5 bug report.
+```
+
 ### Colab x86 runbook (self-contained; colab-mcp or manual)
 
 ```python

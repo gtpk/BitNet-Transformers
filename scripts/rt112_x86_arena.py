@@ -93,6 +93,9 @@ def main():
     ap.add_argument("--corpus", type=Path, default=REPO_ROOT / "data/tiny_corpus.txt")
     ap.add_argument("--ctx", type=int, default=64)
     ap.add_argument("--threads", type=int, default=4)
+    ap.add_argument("--corpus-repeat", type=int, default=20,
+                    help="tile the corpus N times so the eval split is long enough "
+                         "for ctx perplexity + rt104d seq_len (parity-safe)")
     ap.add_argument("--train-steps", type=int, default=300)
     ap.add_argument("--json-out", type=Path, default=REPO_ROOT / "reports/rt112_x86_arena.json")
     args = ap.parse_args()
@@ -114,9 +117,21 @@ def main():
     ternary_dir = work / "tiny_pt_ternary"    # Path A' (gamma*T dense)
     ref_json = REPO_ROOT / "reports/rt104_reference.json"
 
+    # The bundled tiny_corpus is a few hundred tokens; its 15% eval split is then
+    # too short for ctx=64 perplexity AND for rt104d's seq_len=128 (-> a reshape
+    # [0,128,..] crash). Parity is a same-text comparison, so repeating the corpus
+    # is harmless (like RT-111's repeated eval). Repeat until >= a token floor.
+    corpus = args.corpus
+    if args.corpus_repeat > 1:
+        big = work / "rt112_corpus.txt"
+        big.write_text(args.corpus.read_text(encoding="utf-8") * args.corpus_repeat,
+                       encoding="utf-8")
+        corpus = big
+        print(f"corpus repeated x{args.corpus_repeat} -> {corpus} ({big.stat().st_size} bytes)")
+
     # 1) train tiny per-tensor model -> latent HF dir + eval.txt + Python refs
     run(f'{py} scripts/rt104_build_reference.py '
-        f'--tokenizer-src "{tok_src}" --corpus "{args.corpus}" '
+        f'--tokenizer-src "{tok_src}" --corpus "{corpus}" '
         f'--out-dir "{latent_dir}" --json-out "{ref_json}" --train-steps {args.train_steps}',
         cwd=REPO_ROOT)
     # 2) materialize gamma*T -> ternary-dense HF dir (Path A')
