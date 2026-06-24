@@ -295,6 +295,37 @@ ACTIVE quantizer's exact element order against a byte-diff of our writer vs a
 golden file (our decode currently matches ~50-62%, so finalize the order/rule
 before trusting the writer).
 
+### RT-105A investigation (layout cert): semantics confirmed, byte-order open
+
+Read the ACTIVE quantizer `src/ggml-bitnet-mad.cpp::quantize_i2_s` and the decode
+`ggml-quants.c::dequantize_row_i2_s`. Confirmed from source:
+
+```text
+i2_scale = max(|W|)                      # ABSMAX, per tensor (one fp32 at offset n/4)
+q8 = (|W|<1e-6) ? 0 : (W>0 ? +1 : -1)    # PURE SIGN (no zeros, no magnitude/round)
+pack: 128-elem blocks; byte gp gets elem (i*128 + g*32 + gp) in field g
+decode map2bit = {00:-1, 01:0, 10:+1, 11:0}; trailing = 1 fp32 scale + padding (NOT 8x)
+```
+
+Empirically confirmed on the golden file: scale == absmax exactly (ratio 1.0000);
+code histogram is pure {00,10} (i.e. sign, no zeros); trailing 32B = 1 scale +
+garbage. So bitnet.cpp I2_S = **sign(W) x absmax**, decisively cruder than our
+absmean+round b1.58 — which is exactly why Path A collapses our model's PPL.
+
+Open item (does NOT change the strategic verdict): a Python decode of the golden
+codes matches `sign(F32-GGUF)` only ~62.5% (should be ~100% given pure-sign source).
+Likely a row-chunk / element-read nuance in the verification harness (note the
+routing comment "each quantize a row, will put a scale in next row first 4B,
+will diminish by next quantize" — the per-row scale-overwrite scheme). This must
+be resolved (e.g. first-N side-by-side dump of f32 vs decoded codes) before a
+byte-exact Path B writer is trusted, but the quantizer SEMANTICS are settled.
+
+For Path B the encoder is the inverse of `dequantize_row_i2_s` (element e=i*128+j,
+byte i*32+(j%32), field j/32, code -1->00/0->01/+1->10, scale fp32 at n/4); we
+write OUR `round(W/mean|W|)` codes + `mean|W|` scale so the runtime reconstructs
+our gamma*T. Verify by loading in bitnet.cpp and dequantizing back, not by
+byte-diff against the (sign x absmax) golden.
+
 ### Step 3: Minimal Export Artifact
 
 Use a `per_tensor_ste_native`-trained model (I2_S-compatible scale) as the source,
