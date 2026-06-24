@@ -114,8 +114,10 @@ Logit/PPL drift large -> inspect tensor layout/transpose/scale dtype before kern
 ## Implementation Order From Here
 
 1. (this doc) fix the Python PoC as a milestone. DONE.
-2. Re-inspect the current bitnet.cpp/GGUF I2_S format from upstream source (do not
-   assume), produce the RT-101 field mapping table.
+2. RT-101: re-inspect the bitnet.cpp/GGUF I2_S format from upstream source and
+   produce the field mapping table. **DONE** -> [I2_S Layout Audit](./bitnet_cpp_i2s_layout_audit.md)
+   (byte layout differs: 128-block interleave, MSB fields, code remap, trailing
+   fp32 scale x8; I2_S is a separate quantize step, not the convert script).
 3. Write a GGUF writer for the per-tensor-native model (or adapt
    `convert-hf-to-gguf-bitnet`), targeting I2_S.
 4. Build bitnet.cpp, run RT-102..107 against the Python reference.

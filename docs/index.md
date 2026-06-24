@@ -26,12 +26,15 @@ groupwise GGUF 확장이나 custom kernel 없이 갈 수 있다.
 
 ## 지금 바로 할 일
 
-I2_S export **Python PoC가 통과**했다(`per_tensor_ste_native` → I2_S artifact →
-import, logit/PPL 동일, target 8x; PTX-101~105, commit 5df98bf). 이제 milestone으로
-문서에 고정됐고, 다음은 **bitnet.cpp/GGUF runtime gate**다: 실제 I2_S block layout을
-upstream에서 재확인 → reference artifact와 RT-101 매핑표 작성 → GGUF writer →
-bitnet.cpp 빌드 후 RT-102~107(logit/PPL/storage/latency/generation) 검증. 여기서부터
-C++/runtime 트랙이다. 자세한 TC는 [I2_S Export PoC Plan](./i2s_export_poc_plan.md).
+I2_S export Python PoC(PTX-101~105, commit 5df98bf)와 **RT-101 upstream layout 감사**가
+끝났다([I2_S Layout Audit](./bitnet_cpp_i2s_layout_audit.md)): 우리 artifact는 의미상
+동일하지만 byte-incompatible(128-block interleave, MSB 필드, code remap, trailing fp32
+scale x8)이고, I2_S는 convert 스크립트가 아니라 별도 quantize 단계 산출물이다.
+다음은 **RT-102**: bitnet.cpp를 pinned commit으로 빌드 → 공식 I2_S GGUF
+(`microsoft/bitnet-b1.58-2B-4T-gguf`) load smoke + 실제 I2_S tensor byte 덤프로 #412
+layout을 소스 대비 검증. 그다음 RT-103(Path A: F32 GGUF→I2_S quantize 우선) →
+RT-104 Python reference 대비 logit/PPL parity → RT-105~107. **여기부터 C++/runtime 트랙**이라
+로컬 MCP 없이 빌드 환경이 필요하다.
 
 packed format Phase 1/2/3/4 검증(로컬):
 
@@ -102,6 +105,8 @@ real-text fixture smoke(로컬, harness 확인용):
    - groupwise→I2_S 매핑 판정과 per-tensor-native export 결정.
 8c. [I2_S Export PoC Plan](./i2s_export_poc_plan.md)
    - per-tensor-native → I2_S artifact → import logit 동일성(PTX-101~105)과 다음 runtime gate TC.
+8d. [bitnet.cpp I2_S Layout Audit](./bitnet_cpp_i2s_layout_audit.md)
+   - RT-101 upstream I2_S byte layout 감사 + 우리 artifact 매핑표, 미확정 항목.
 9. [GGUF / bitnet.cpp Export Scoping Plan](./bitnet_cpp_export_scoping.md)
    - reference ladder 이후 기존 ternary runtime으로 내보낼 수 있는지 확인하는 다음 트랙이다.
 10. [Groupwise Alpha Hypothesis](./groupwise_alpha_hypothesis.md)
@@ -153,6 +158,7 @@ flowchart TD
 | [packed_ternary_format_plan.md](./packed_ternary_format_plan.md) | packed ternary weight format, 2-bit/trit layout, storage TC | b1.58을 실제 byte로 저장/검증할 때 |
 | [bitnet_cpp_export_scoping.md](./bitnet_cpp_export_scoping.md) | groupwise→I2_S 매핑 판정, per-tensor-native export 결정 | bitnet.cpp export 가능성을 판단할 때 |
 | [i2s_export_poc_plan.md](./i2s_export_poc_plan.md) | I2_S Python export PoC(PTX-101~105), runtime gate TC | export 정확성/다음 C++ gate를 볼 때 |
+| [bitnet_cpp_i2s_layout_audit.md](./bitnet_cpp_i2s_layout_audit.md) | RT-101 upstream I2_S byte layout 감사 + 매핑표 | GGUF writer 만들기 전 포맷 고정할 때 |
 | [bitnet_cpp_export_scoping.md](./bitnet_cpp_export_scoping.md) | GGUF/bitnet.cpp export 가능성, format mapping, export TC 초안 | Python reference 이후 실제 runtime으로 넘어갈 때 |
 | [groupwise_alpha_hypothesis.md](./groupwise_alpha_hypothesis.md) | groupwise scale이 품질을 보존하는 이유와 검증할 ablation | 알고리즘 우위의 원인을 설명하거나 반증할 때 |
 | [research_signal_note.md](./research_signal_note.md) | 현재 결과가 연구 신호로서 왜 의미 있는지 해석 | 논문화 가능성과 다음 방향을 판단할 때 |
