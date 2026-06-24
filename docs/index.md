@@ -7,20 +7,24 @@ scaled-STE, Colab 실험 준비 문서의 시작점이다.
 
 기존 모델을 teacher distillation 없이 BitNet-style ternary 영역으로 바로
 내리는 것은 단순 PTQ만으로는 약하지만, S1 `alpha*T` scale을 보존하는
-`ScaledBitLinear` + CE-only STE 후학습은 로컬 tiny arena에서 projected-QAT를
-이기는 첫 native BitLinear-style 후보가 되었다.
+`ScaledBitLinear` + CE-only STE 후학습은 로컬 tiny arena와 Colab seed sweep
+모두에서 projected-QAT와 동률~우위를 보이는 첫 native BitLinear-style
+후보다.
 
 ## 지금 바로 할 일
 
-Colab에서 다음 실험을 돌린다:
+Colab에서 다음 sweep을 돌린다:
 
 ```bash
-bash scripts/run_colab_scaled_ste_arena.sh
+SCALED_STE_GROUP_SIZE=32 ARENA_JSON_OUT=reports/tiny_real_arena_scaled_ste_colab_g32.json bash scripts/run_colab_scaled_ste_arena.sh
+SCALED_STE_GROUP_SIZE=64 ARENA_JSON_OUT=reports/tiny_real_arena_scaled_ste_colab_g64.json bash scripts/run_colab_scaled_ste_arena.sh
+SCALED_STE_GROUP_SIZE=128 ARENA_JSON_OUT=reports/tiny_real_arena_scaled_ste_colab_g128.json bash scripts/run_colab_scaled_ste_arena.sh
 ```
 
 자세한 실행법:
 
 - [Colab Arena Runbook](./colab_arena_runbook.md)
+- [Colab Validation Summary](./colab_validation_summary.md)
 
 로컬에서 사전 검정:
 
@@ -43,7 +47,9 @@ bash scripts/run_colab_scaled_ste_arena.sh
    - 후보들을 품질만이 아니라 memory/latency/RAM fitness로 비교하는 arena를 설명한다.
 5. [Colab Arena Runbook](./colab_arena_runbook.md)
    - 로컬 smoke 이후 Colab에서 크기를 키우는 실행 절차다.
-6. [TurboQuant + BitNet Implementation Plan](./turboquant_bitnet_implementation_plan.md)
+6. [Colab Validation Summary](./colab_validation_summary.md)
+   - Colab moderate run과 seed sweep 통과 결과를 기록한다.
+7. [TurboQuant + BitNet Implementation Plan](./turboquant_bitnet_implementation_plan.md)
    - weight 변환이 안정화된 뒤 KV cache 압축으로 확장하는 별도 축이다.
 
 ## 문서 그래프
@@ -55,6 +61,7 @@ flowchart TD
   C --> D["scaled_ste_bitlinear_experiment.md"]
   D --> E["evolutionary_llm_arena_plan.md"]
   E --> F["colab_arena_runbook.md"]
+  F --> J["colab_validation_summary.md"]
   B --> E
   B --> G["turboquant_bitnet_implementation_plan.md"]
   F --> H["reports/tiny_real_arena_scaled_ste_smoke.json"]
@@ -70,6 +77,7 @@ flowchart TD
 | [scaled_ste_bitlinear_experiment.md](./scaled_ste_bitlinear_experiment.md) | `ScaledBitLinear` 공식, TC, 로컬 결과 | 지금 구현한 핵심 후보를 볼 때 |
 | [evolutionary_llm_arena_plan.md](./evolutionary_llm_arena_plan.md) | 후보 선택 fitness, Pareto, arena 결과 | 어떤 후보가 이겼는지 볼 때 |
 | [colab_arena_runbook.md](./colab_arena_runbook.md) | Colab 실행 명령, sweep, 결과 해석 | 큰 run을 돌릴 때 |
+| [colab_validation_summary.md](./colab_validation_summary.md) | Colab moderate run과 seed sweep milestone 기록 | Colab 결과가 다음 단계 조건을 충족했는지 확인할 때 |
 | [turboquant_bitnet_implementation_plan.md](./turboquant_bitnet_implementation_plan.md) | KV cache 압축 계획과 TC | weight 변환 이후 긴 문맥으로 확장할 때 |
 
 ## 코드와 문서 연결
@@ -105,20 +113,22 @@ flowchart TD
 - S1 scale을 보존하는 `ScaledBitLinear` 구현
 - scaled-STE TC 및 local strict smoke 통과
 - Colab runner와 runbook 작성
+- Colab faster smoke, moderate arena, seed sweep `31/32/33` 통과
+- scaled-STE quality winner `3/3`, Pareto frontier 조건 충족
 
 다음:
 
-1. Colab moderate run: hidden `128`, layers `2`, seq `64`.
-2. Seed sweep: `31`, `32`, `33`.
-3. `SCALED_STE_GROUP_SIZE` sweep: `32`, `64`, `128`.
-4. `SCALED_STE_ACTIVATION_BITS` sweep: `0`, `8`.
-5. 결과가 안정적이면 synthetic patterned data에서 tiny real text subset으로 이동.
+1. `SCALED_STE_GROUP_SIZE` sweep: `32`, `64`, `128`.
+2. `SCALED_STE_ACTIVATION_BITS` sweep: `0`, `8`.
+3. Colab sweep JSON을 `reports/`로 회수해 commit.
+4. 결과가 안정적이면 synthetic patterned data에서 tiny real text subset으로 이동.
+5. 이후 packed ternary kernel, export, TurboQuant 중 우선순위를 고른다.
 
-보류:
+이전 보류 항목에서 진입 조건을 충족한 다음 phase 후보:
 
 - packed ternary kernel
 - GGUF/bitnet.cpp export
 - TurboQuant KV cache 구현
 
-이 셋은 scaled-STE가 Colab seed sweep에서 안정적으로 Pareto frontier에 남은 뒤에
-진행한다.
+단, raw Colab seed JSON이 현재 local workspace에 없으므로 논문식 정량 주장 전에는
+보고서를 회수하거나 sweep을 재실행한다.

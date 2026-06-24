@@ -7,11 +7,15 @@ Related docs:
 - [Scaled-STE BitLinear Experiment](./scaled_ste_bitlinear_experiment.md)
 - [Evolutionary LLM Arena Plan](./evolutionary_llm_arena_plan.md)
 - [Existing Model to BitNet Conversion Plan](./existing_model_to_bitnet_conversion_plan.md)
+- [Colab Validation Summary](./colab_validation_summary.md)
 
 ## Goal
 
 Run the teacher-free BitNet conversion arena at a size that is still cheap on
 Colab but large enough to be more informative than the local CPU smoke.
+
+Current status: the faster smoke, moderate arena, and seed sweep have passed.
+Use this runbook now for sensitivity sweeps and report archival.
 
 This run tests:
 
@@ -34,7 +38,9 @@ Use a GPU runtime, then run:
 !bash scripts/run_colab_scaled_ste_arena.sh
 ```
 
-If this commit is not pushed yet, use a local upload or push the branch first.
+Use a branch or commit that includes `ScaledBitLinear`, the Colab runner, and
+the documentation index. If you are running from a new local documentation
+commit, push it first or upload the workspace manually.
 
 ## Faster Smoke
 
@@ -99,12 +105,17 @@ for seed in [31, 32, 33]:
     !SEED={seed} ARENA_JSON_OUT=reports/tiny_real_arena_scaled_ste_colab_seed_{seed}.json bash scripts/run_colab_scaled_ste_arena.sh
 ```
 
+Status: completed once with `rc=0` for all three seeds; scaled-STE was quality
+winner `3/3`. Re-run when raw JSON reports need to be archived.
+
 Group-size sweep:
 
 ```python
 for group_size in [32, 64, 128]:
     !SCALED_STE_GROUP_SIZE={group_size} ARENA_JSON_OUT=reports/tiny_real_arena_scaled_ste_colab_g{group_size}.json bash scripts/run_colab_scaled_ste_arena.sh
 ```
+
+Recommended next sweep.
 
 Activation fake-quant sweep:
 
@@ -148,3 +159,24 @@ projected_qat_loss    : 2.9195 -> 2.6178
 
 This is enough to justify a Colab run. It is not enough to justify packed kernel
 work yet.
+
+## Current Colab Milestone
+
+See [Colab Validation Summary](./colab_validation_summary.md).
+
+Summary:
+
+```text
+faster smoke arena : pass
+moderate arena     : pass
+seed sweep 31/32/33: pass
+scaled-STE quality : winner 3/3
+decision           : PROCEED
+```
+
+Next decision gate:
+
+```text
+group-size sweep and activation fake-quant sweep should confirm whether the
+scaled-STE recipe is robust enough to justify packed-kernel or export work.
+```

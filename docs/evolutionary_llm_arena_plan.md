@@ -7,6 +7,7 @@ Related docs:
 - [Memory-Traffic-First BitNet Plan](./memory_traffic_first_plan.md)
 - [Scaled-STE BitLinear Experiment](./scaled_ste_bitlinear_experiment.md)
 - [Colab Arena Runbook](./colab_arena_runbook.md)
+- [Colab Validation Summary](./colab_validation_summary.md)
 
 ## Purpose
 
@@ -261,6 +262,15 @@ Scaled-STE BitLinear smoke:
 - reports: `reports/scaled_bitlinear_tc.json`,
   `reports/tiny_real_arena_scaled_ste_smoke.json`
 
+Colab validation:
+
+- faster smoke arena passed with `strict`
+- moderate arena with `800` train steps passed
+- scaled-STE and projected-QAT remained tied/competitive on the Pareto frontier
+- seed sweep `31/32/33` passed with `rc=0` for all runs
+- scaled-STE was quality winner `3/3`
+- milestone: [Colab Validation Summary](./colab_validation_summary.md)
+
 Interpretation:
 
 ```text
@@ -273,11 +283,15 @@ native BitLinear should preserve groupwise scales, or the arena should add a
 separate scaled-STE BitLinear candidate before spending Colab budget.
 Scaled-STE closes that gap in the tiny local arena and is now the first native
 BitLinear-style candidate worth scaling in Colab.
+The first Colab seed sweep keeps scaled-STE on the frontier and makes it the
+quality winner in all three seeds, so the arena can proceed to sensitivity
+sweeps before runtime kernel work.
 ```
 
 Next step:
 
 ```text
-Run the Colab moderate arena from docs/colab_arena_runbook.md, then seed-sweep
-scaled-STE against projected-QAT before touching packed kernels.
+Run group-size and activation fake-quant sweeps from docs/colab_arena_runbook.md,
+archive raw JSON reports, then decide whether packed kernels or real-text data
+should be the next branch.
 ```

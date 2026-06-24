@@ -7,6 +7,7 @@ Related docs:
 - [Existing Model to BitNet Conversion Plan](./existing_model_to_bitnet_conversion_plan.md)
 - [Evolutionary LLM Arena Plan](./evolutionary_llm_arena_plan.md)
 - [Colab Arena Runbook](./colab_arena_runbook.md)
+- [Colab Validation Summary](./colab_validation_summary.md)
 
 ## Purpose
 
@@ -108,6 +109,28 @@ The useful next scale-up is a Colab run with a larger tiny model and more
 recovery steps, not a packed kernel yet.
 ```
 
+## Colab Validation Result
+
+See [Colab Validation Summary](./colab_validation_summary.md).
+
+Summary:
+
+- faster smoke arena passed with `strict`
+- SSTE TC passed `3/3`
+- moderate arena with `800` train steps passed
+- scaled-STE and projected-QAT were tied/competitive on the Pareto frontier
+- seed sweep over `31`, `32`, `33` passed `3/3`
+- scaled-STE was quality winner `3/3`
+
+Updated interpretation:
+
+```text
+The Colab result satisfies the scale-up gate. ScaledBitLinear is now stable
+enough to justify sensitivity sweeps and the first runtime/export scoping work.
+Packed kernels should still wait until group-size and activation fake-quant
+sweeps confirm that the conversion recipe is not brittle.
+```
+
 ## Kill Criteria Before Bigger Runs
 
 Do not spend Colab budget if any of these fail locally:
@@ -119,8 +142,8 @@ Do not spend Colab budget if any of these fail locally:
 
 ## Next Experiments
 
-1. Colab moderate run with hidden `128`, layers `2`, sequence length `64`.
-2. Seed sweep over `seed in {31, 32, 33}`.
-3. Activation fake-quant sweep: off vs 8-bit.
-4. Group size sweep: `32`, `64`, `128`.
-5. If stable, move from synthetic patterned data to a tiny real text subset.
+1. Group size sweep: `32`, `64`, `128`.
+2. Activation fake-quant sweep: off vs 8-bit.
+3. Archive Colab JSON reports into `reports/`.
+4. If stable, move from synthetic patterned data to a tiny real text subset.
+5. Then scope packed ternary kernels, GGUF/bitnet.cpp export, or TurboQuant KV.
