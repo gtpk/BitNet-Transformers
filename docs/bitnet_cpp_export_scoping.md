@@ -452,7 +452,30 @@ Our deliverables stand: per-tensor b1.58 quantization validated (f16 parity
 1863~2012), HF/F32/F16 GGUF export works, scale-repack math confirmed. Only the
 ternary *runtime* on this specific local build is blocked.
 
-### Step 3: Minimal Export Artifact
+### RT-109 (TL1 ON rebuild): correct fix, but clang blows up on the LUT TU (M5)
+
+Root-cause for the TL1 segfault was confirmed correct: the arm64 default build sets
+`-DBITNET_ARM_TL1=OFF`, so RT-108's TL1 model ran against a binary WITHOUT the TL1
+kernel -> segfault. Also the `NEON=0` in system_info is likely a macOS sysctl
+(`hw.optional.AdvSIMD`) detection miss, not real (clang defines `__ARM_NEON`).
+
+Rebuilt a CPU-only TL1 binary (`build-tl1`, `-DBITNET_ARM_TL1=ON -DGGML_METAL=OFF`).
+Blocker: `ggml-bitnet-lut.cpp` (which includes the codegen'd LUT kernel for
+bitnet_b1_58-large) causes a **clang compile blowup** — 9.5 min CPU at `-O3
+-DGGML_NATIVE=ON`, still 3-8 min+ at `-O1 -DGGML_NATIVE=OFF`, never producing the
+`.o`. The generated header is only 626 lines but expands pathologically on this
+M5 / macOS 26 / clang 21. Build abandoned this round (no TL1 binary yet).
+
+Status: TL1 is the right direction, but the official-model LUT kernel is
+impractical to compile on this exact toolchain. Tractable options:
+1. **codegen TL1 for our TINY model dims** (hidden 256) -> small kernel -> fast
+   build -> test TL1 on `tiny_pt_*` directly vs its f16 (1863/1717). Best local path.
+2. let the large-model LUT TU finish (could be 10-20+ min; uncertain).
+3. defer to x86/Linux or an older Apple Silicon; the NEON-detect + LUT-compile
+   blowup are M5/macOS26/clang21-specific -> candidate upstream bug report.
+
+Unchanged: our quantization/weights are export-ready (f16 parity); only the local
+ternary runtime is blocked by this toolchain.
 
 Use a `per_tensor_ste_native`-trained model (I2_S-compatible scale) as the source,
 not a groupwise model.
