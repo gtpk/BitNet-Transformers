@@ -590,3 +590,83 @@ If mapping is blocked, split into:
 1. custom GGUF extension/export path
 2. custom CPU/Metal/CUDA fused kernel track
 3. bitnet.cpp contribution or adapter track
+
+## RT-110/111: x86 (Colab) I2_S verification — build saga
+
+Goal: settle whether bitnet.cpp's I2_S ternary runtime is broken *universally* or
+only on the M5/macOS26/clang21 toolchain (RT-107..109). If I2_S gives sane PPL on
+x86, the runtime block is Mac-only and our per-tensor export is fully vindicated
+end-to-end on a real runtime.
+
+Environment: Google Colab (Intel Xeon ~2GHz x86_64, Linux), driven via colab-mcp
+browser bridge. Reference model: official `1bitLLM/bitnet_b1_58-large` (sanity that
+I2_S works at all), not our tiny model — isolate "does I2_S run on x86" from "is our
+scale right" (the latter already PASS via f16 parity 1863~2012).
+
+### Operational friction (logged so it is reproducible)
+
+- **colab-mcp desync**: after a Colab session reset, MCP `run_code_cell` attaches to
+  a stale/!= kernel than the user's active tab — my cells stayed `execution_count:
+  null` (never executed) while the user's manual cells ran fine. Driving Colab
+  *for* the user via MCP is unreliable across resets; fall back to handing the user
+  one self-contained, idempotent cell and reading pasted output.
+- **session reset wipes the built env**: a Colab disconnect dropped the whole
+  `/content/bitnet.cpp` build + downloaded model. Re-run setup from scratch. The
+  "nothing prints" symptom the user hit was a `... | grep "Final estimate"` on a
+  perplexity binary that **did not exist** (build never completed in the fresh
+  session) -> grep silently matched nothing. Always check `os.path.exists(
+  build/bin/llama-perplexity)` before piping to grep.
+
+### The const patch is TWO occurrences, not one (RT-109's single-line fix was incomplete)
+
+`src/ggml-bitnet-mad.cpp` has **2** lines `int8_t * y_col = y + col * by;` (different
+`#if` branches). x86 clang errors on the one at line 811 (`cannot initialize
+'int8_t *' with an rvalue of type 'const int8_t *'`). RT-109 said "patch line 811",
+but a `grep -q 'const int8_t \* y_col' || sed ...` idempotency guard gives a **false
+positive**: once *either* occurrence is const, grep succeeds and the sed is skipped,
+leaving the *other* occurrence (line 811) non-const -> ggml TU fails to build ->
+`llama-perplexity` never produced -> downstream "no output".
+
+Correct, robust patch (replace ALL occurrences, const-idempotent, no double-const):
+
+```python
+import re
+p="src/ggml-bitnet-mad.cpp"; s=open(p).read()
+pat=re.compile(r'(?:const\s+)?int8_t\s*\*\s*y_col\s*=\s*y\s*\+\s*col\s*\*\s*by\s*;')
+open(p,"w").write(pat.sub('const int8_t * y_col = y + col * by;', s))   # occurrences: 2
+```
+
+After this, the ggml TU compiles clean on x86 and `build/bin/llama-perplexity` is
+produced. (clang ok, no NEON/LUT blowup like the Mac TL1 path — x86 I2_S uses the
+MAD kernel, which compiles fast.)
+
+### Reproducible x86 setup (self-contained, idempotent)
+
+```python
+# clang; const patch (both occurrences); build; convert+quant; then perplexity
+# 1) apt-get install -y clang   (Colab base may lack it)
+# 2) regex const patch above
+# 3) cmake -B build -DBITNET_X86_TL2=OFF -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+#    cmake --build build --config Release -j        # -> build/bin/llama-perplexity
+# 4) model: huggingface_hub.snapshot_download("1bitLLM/bitnet_b1_58-large", local_dir=models/bitnet_b1_58-large)
+# 5) python utils/convert-hf-to-gguf-bitnet.py models/bitnet_b1_58-large --outtype f32
+#    ./build/bin/llama-quantize --token-embedding-type f16 .../ggml-model-f32.gguf .../ggml-model-i2_s.gguf I2_S 1 1
+# 6) ./build/bin/llama-perplexity -m .../ggml-model-{f32,i2_s}.gguf -f eval.txt -c 64 -t 4
+```
+
+Notes: keep `-c` small (64) and eval.txt short — Colab CPU f32 perplexity on the
+large model is slow; an oversized eval.txt previously blocked the kernel. Compare
+i2_s PPL vs f32 PPL on the *same* short text.
+
+### Status
+
+- x86 build: **PASS** (const-both-occurrences patch + clang). `llama-perplexity` built.
+- Model download + convert + quant + the actual f32-vs-i2_s PPL number: **PENDING**
+  (running in the current Colab session; awaiting the two PPL values).
+- Decision pending on those numbers:
+  - i2_s PPL ~= f32 PPL  -> I2_S runtime is **fine on x86**; the RT-107..109 collapse
+    is **Mac-toolchain-only**; our per-tensor export is end-to-end validated on a real
+    ternary runtime. File the Mac issue upstream (NEON-detect + LUT clang blowup).
+  - i2_s PPL collapses on x86 too -> the problem is in the pinned commit / I2_S path
+    itself, independent of platform; revisit Path B (write I2_S bytes ourselves) or
+    the pinned-commit choice.
