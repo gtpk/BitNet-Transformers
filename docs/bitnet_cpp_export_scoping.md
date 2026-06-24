@@ -355,6 +355,38 @@ Net: the scale-repack insight is validated; weight-export via Path A' is promisi
 (scale exact), but a clean output-parity verdict needs the code-decode/order item
 resolved and activation int8 isolated.
 
+### RT-106 (activation/protocol isolation): I2_S runtime corrupts our ternary Wq
+
+Disambiguated the bitnet PPL gap (i2_s 21384 vs Python 2012) with two controls:
+
+- **activation int8 ruled out** (`scripts/rt106_activation_sweep.py`): adding
+  pre-linear int8 activation fake-quant (per-tensor / per-token) to the Python
+  reference barely moves PPL (2012 -> ~2010). Not the cause.
+- **PPL protocol ruled out**: an F16 GGUF of the SAME Wq run through the SAME
+  `llama-perplexity` gives **PPL 1863** ~= Python 2012. So the runtime/protocol
+  is faithful for f16.
+
+Therefore the I2_S path itself corrupts our weights: **f16 1863 -> i2_s 21384
+(11x)** on the same model. The quantizer math is `sign(W) x absmax`, which is
+provably lossless on `Wq=gamma*T` (signs preserve T, zeros<1e-6 -> code 0b01,
+scale=gamma — confirmed stored exactly). Yet the I2_S *runtime* output collapses.
+
+Leading hypothesis: **the zero code (0b01) is mishandled by the I2_S quantize/
+kernel on this Apple-Silicon/Metal build.** Official BitNet models are pure-sign
+(no zeros; the golden file histogram was {00,10} only), so the zero path is
+likely undertested. Our round-based b1.58 produces many zeros -> corruption. This
+also matches the parser's ~50% / break-at-17 (misalignment where zeros occur).
+
+Consequence: Path A' (upstream I2_S quantize) is **not faithful on this platform**
+for zero-bearing ternary weights, and Path B would hit the same runtime if it is
+a kernel/zero issue. The WEIGHTS are validated (f16 parity 1863~2012); the gap is
+I2_S-on-this-build fidelity, not our quantization.
+
+Next decisive (cheap) test: quantize a ZERO-FREE variant (pure sign x scale) to
+I2_S and check if PPL recovers toward its f16 value -> confirms the zero-code
+hypothesis. Then options: keep zeros + use a sound type (TL1 on ARM / verify I2_S
+on x86), or accept pure-sign for I2_S deployment (losing our sparsity).
+
 ### Step 3: Minimal Export Artifact
 
 Use a `per_tensor_ste_native`-trained model (I2_S-compatible scale) as the source,
