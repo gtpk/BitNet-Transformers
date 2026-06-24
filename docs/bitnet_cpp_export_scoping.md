@@ -387,6 +387,39 @@ I2_S and check if PPL recovers toward its f16 value -> confirms the zero-code
 hypothesis. Then options: keep zeros + use a sound type (TL1 on ARM / verify I2_S
 on x86), or accept pure-sign for I2_S deployment (losing our sparsity).
 
+### RT-107 verdict: I2_S is non-functional on this Apple-Silicon build (not our quantization)
+
+The zero-code hypothesis was REFUTED and the cause fully localized:
+
+| model | F16/F32 PPL | I2_S PPL | notes |
+| --- | ---: | ---: | --- |
+| ours, round b1.58 (Wq, has zeros) | 1863 (f16) | 21384 | RT-106 |
+| ours, pure-sign (zero-free, codes {00,10}) | 1717 (f16) | 25722 | RT-107 zero-free probe |
+| **official BitNet-b1.58-large** | **13.95** (f32) | **112791** | decisive control |
+
+Even the OFFICIAL pretrained model (arch `llama`, same as ours) collapses ~8000x
+through I2_S. And CPU-only (`-ngl 0`) I2_S **crashes** (exit 1, `NEON=0` build).
+So I2_S on this machine is broken on BOTH backends — Metal produces garbage, CPU
+crashes — independent of zeros, arch, activation, or PPL protocol (all ruled out;
+f16 parity 1863~2012 proves the weights + runtime/protocol are otherwise fine).
+
+```text
+CONCLUSION: bitnet.cpp's I2_S type is non-functional on this Apple-Silicon/Metal
+build. This is a platform/build limitation, NOT a flaw in our per-tensor b1.58
+quantization (validated by f16 GGUF parity). The earlier "gibberish" generation
+on the official I2_S model was this same corruption, not a weak model.
+```
+
+Path A / Path B via I2_S are both blocked here (it's a runtime kernel issue, not
+encoding). Redirect:
+
+- **TL1** is bitnet.cpp's ARM-recommended ternary type — the realistic on-device
+  path on this Mac. Needs per-dim codegen (`utils/codegen_tl1.py`) and a check of
+  how TL1 represents zeros.
+- Or verify I2_S on x86 (different kernel) — not available locally.
+- Our weights/quantization are export-ready (f16 parity holds); only the ternary
+  *runtime* needs a working type/platform.
+
 ### Step 3: Minimal Export Artifact
 
 Use a `per_tensor_ste_native`-trained model (I2_S-compatible scale) as the source,
