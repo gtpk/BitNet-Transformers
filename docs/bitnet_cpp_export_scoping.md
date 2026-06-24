@@ -658,15 +658,38 @@ Notes: keep `-c` small (64) and eval.txt short — Colab CPU f32 perplexity on t
 large model is slow; an oversized eval.txt previously blocked the kernel. Compare
 i2_s PPL vs f32 PPL on the *same* short text.
 
-### Status
+### Status: RESOLVED — I2_S runtime is fine on x86; the Mac collapse is toolchain-only
 
-- x86 build: **PASS** (const-both-occurrences patch + clang). `llama-perplexity` built.
-- Model download + convert + quant + the actual f32-vs-i2_s PPL number: **PENDING**
-  (running in the current Colab session; awaiting the two PPL values).
-- Decision pending on those numbers:
-  - i2_s PPL ~= f32 PPL  -> I2_S runtime is **fine on x86**; the RT-107..109 collapse
-    is **Mac-toolchain-only**; our per-tensor export is end-to-end validated on a real
-    ternary runtime. File the Mac issue upstream (NEON-detect + LUT clang blowup).
-  - i2_s PPL collapses on x86 too -> the problem is in the pinned commit / I2_S path
-    itself, independent of platform; revisit Path B (write I2_S bytes ourselves) or
-    the pinned-commit choice.
+Full x86 run completed on the official `1bitLLM/bitnet_b1_58-large` (same pinned
+commit + same llama-quantize I2_S path that collapsed on the M5):
+
+```text
+f32  GGUF (2.8 GB):  Final estimate: PPL = 1.8547 +/- 0.254
+i2_s GGUF (258 MB):  Final estimate: PPL = 1.8548 +/- 0.254   <- parity to 4 d.p.
+```
+
+(Low absolute PPL is because the eval text is short/repetitive — irrelevant; this
+is a *relative* f32-vs-i2_s parity check, and i2_s tracks f32 to the 4th decimal.)
+
+Contrast with the M5 (RT-107): official model f32 13.95 -> i2_s **112791** (~8000x),
+CPU `-ngl 0` crashes. **Same commit, same model, same quantize command — x86 PASS,
+Mac collapse. So bitnet.cpp I2_S is NOT broken upstream and our quantization is NOT
+the cause; the RT-107..109 failure is a build/toolchain bug specific to M5 / macOS26
+/ clang21 (NEON-detect miss + Metal MUL-MAT-MAT unimplemented + LUT clang blowup).**
+
+Consequences:
+- The whole I2_S/ternary-runtime investigation closes: runtime works on x86; weights
+  validated by f16 parity (1863~2012); scale-repack math confirmed (RT-104D).
+- For deployment, run the ternary runtime on **x86/Linux** (or any non-broken
+  toolchain), not this M5. File the Mac toolchain issue upstream if desired.
+- Build recipe that works on x86 Colab (clang-14): apt clang; clone @ pinned commit
+  `01eb415...` + submodules; **regex const-patch BOTH `int8_t * y_col = y + col *
+  by;` occurrences in `src/ggml-bitnet-mad.cpp`**; `cmake -B build
+  -DBITNET_X86_TL2=OFF -DCMAKE_C/CXX_COMPILER=clang/clang++` (configure must succeed
+  — do NOT pipe through `tail`, it masks the rc); `cmake --build build -j`;
+  snapshot_download the model; `convert-hf-to-gguf-bitnet.py --outtype f32`;
+  `llama-quantize --token-embedding-type f16 <f32> <i2s> I2_S 1 1`; `llama-perplexity`.
+  NOTE: a fresh `cmake -B build` needs `../../../../include/bitnet-lut-kernels.h` to
+  exist (codegen step) — if configure errors on a missing `bitnet-lut-kernels.h`,
+  run setup_env's codegen (or `python utils/codegen_*`) first, OR build via
+  `python setup_env.py -q i2_s` which wires codegen + cmake together.
