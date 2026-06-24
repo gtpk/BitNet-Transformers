@@ -258,6 +258,43 @@ is preserved. No groupwise GGUF extension or custom kernel is needed for the
 export track. See [Groupwise Alpha Hypothesis](./groupwise_alpha_hypothesis.md)
 Gate Result (strong form refuted).
 
+### RT-104 result: Path A is mechanically open but semantically UNFAITHFUL
+
+RT-104A built a trained tiny per-tensor-native model on Wikitext (SPM tokenizer,
+100k tokens, train CE 10.37 -> 2.39) and recorded the Python reference
+(`scripts/rt104_build_reference.py`, `reports/rt104_reference.json`):
+`i2s_export(gamma*T)` PPL `1998.6` == per-tensor-STE PPL (i2s_export reproduces
+the trained model exactly). RT-104B exported it via Path A (f32 -> I2_S) and it
+loaded/ran. RT-104C then measured parity:
+
+- `llama-perplexity` on the I2_S model: **PPL 62554** vs our reference **1998.6**
+  (confounded by tokenizer decode/re-encode + PPL protocol + int8 activations, so
+  not a clean number, but a >30x gap).
+- **Decisive weight-level check** (`scripts/rt104c_scale_check.py`, parses the
+  I2_S GGUF directly): bitnet's stored per-tensor scale **equals `max(|W|)`
+  exactly** (ratio 1.0000 across tensors), confirmed against `ggml-quants.c`
+  `quantize_i2_s` (`i2_scale = max(|src|)`). Our per-tensor-native / BitNet b1.58
+  uses `mean(|W|)` (absmean). Byte layout largely confirmed (law `ceil(numel/4)+32`,
+  128-block interleave, trailing fp32 scale, code map `0b00=-1/0b01=0/0b10=+1`).
+
+Verdict:
+
+```text
+Upstream I2_S quantize uses absmax scale (+ its own ternarization), NOT our
+absmean+round. So Path A re-quantizes with different semantics and does NOT carry
+our trained per-tensor quantization to the runtime (PPL collapses on this model).
+Path A is fine for models trained the bitnet.cpp way; it is unfaithful to ours.
+```
+
+Decision: to deploy OUR per-tensor b1.58 quantization faithfully, use **Path B** —
+write the I2_S bytes ourselves (our codes + our `mean|W|` scale) into bitnet's
+layout, which we now know: 32-byte/128-elem blocks, byte `gp` holds offsets
+`[gp,32+gp,64+gp,96+gp]` at bits `[7:6,5:4,3:2,1:0]`, code `0b00=-1/0b01=0/0b10=+1`,
+then a trailing fp32 scale (x8 = 32 bytes). Remaining for Path B: confirm the
+ACTIVE quantizer's exact element order against a byte-diff of our writer vs a
+golden file (our decode currently matches ~50-62%, so finalize the order/rule
+before trusting the writer).
+
 ### Step 3: Minimal Export Artifact
 
 Use a `per_tensor_ste_native`-trained model (I2_S-compatible scale) as the source,

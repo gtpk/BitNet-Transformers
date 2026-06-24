@@ -1,0 +1,27 @@
+{
+  "tokenizer": "llama_spm(borrowed)",
+  "vocab_size": 32002,
+  "config": {
+    "hidden": 256,
+    "intermediate": 512,
+    "layers": 2,
+    "heads": 4,
+    "seq_len": 128
+  },
+  "train_loss_start": 10.371451377868652,
+  "train_loss_end": 2.391996145248413,
+  "eval_tokens": 15144,
+  "ppl": {
+    "per_tensor_ste": 1998.6197517423236,
+    "latent_fp": 2702.916717785776,
+    "i2s_export_gamma_T": 1998.6187987263881
+  },
+  "loss": {
+    "per_tensor_ste": 7.600212097167969,
+    "latent_fp": 7.9020867347717285,
+    "i2s_export_gamma_T": 7.6002116203308105
+  },
+  "generation_nondegenerate": true,
+  "hf_roundtrip_max_err": 0.0,
+  "out_dir": "/Users/puka/repository/bitnet.cpp/models/tiny_pt_trained"
+}
