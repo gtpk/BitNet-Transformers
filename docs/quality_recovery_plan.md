@@ -333,3 +333,45 @@ LR schedule / +norms (QR-002b) could push past 0.905; 0.905 already clears the
 PASS bar (>0.3). The PTQ baseline 115,808 matches the "PTQ-broken by design" framing
 from RT-114/115 — that bad number was always a baseline to recover FROM, not a
 runtime failure.
+
+### QR-003 runtime preservation (PASS)
+
+Exported the adapted Wq=gamma*T model to GGUF (embedding+lm_head f16, only the 84
+adapted linears -> I2_S) and ran llama-perplexity on x86 (rebuilt bitnet.cpp on the
+GPU runtime's CPU), ctx 64:
+
+| adapted GGUF | PPL |
+| --- | ---: |
+| f32 | 134.83 |
+| f16 | 134.84 |
+| i2_s | 135.11 |
+
+```text
+adapted i2_s vs adapted f16 = +0.0020 nats  (PPL 1.002x)
+```
+
+The I2_S runtime preserves the recovered quality to **+0.002 nats** — even tighter
+than RT-114's PTQ model (+0.041 nats), because the adapted model sits at a much
+lower (non-degenerate) operating loss where the int8-activation residual matters
+less. (The cross-tool gap — f16 GGUF PPL 134.8 vs the PyTorch CE_adapted PPL 52 —
+is the usual tokenizer/windowing difference: PyTorch evaluated 64 seq-256 windows on
+the native token stream, llama-perplexity re-tokenizes a decoded 60k-token eval.txt
+at ctx 64. The QR-003 claim is the *within-tool* i2_s-vs-f16 delta, which is clean.)
+
+### RT-116 / TRAIN-001 conclusion
+
+```text
+QR-001  FP 23.3  ->  one-shot b1.58 PTQ 115,808            (collapse, expected)
+QR-002a 300-step teacher-free CE on 84 linears -> 52.0     recovered_fraction 0.905
+QR-003  adapted i2_s vs adapted f16 = +0.002 nats          runtime preserves recovery
+```
+
+The quality track's core claim is proven on Llama-160M: a one-shot ternary PTQ
+model is broken, but a SHORT, teacher-free, CE-only adaptation of just the target
+linears recovers ~90% of the loss, and that recovered quality survives the
+bitnet.cpp I2_S runtime essentially unchanged. Combined with the systems track
+(RT-112..115: small + fast + scale law), the three-sentence story is now closed on
+x86/Linux LLaMA: **small -> fast -> quality recovers cheaply, teacher-free**.
+
+Next: QR-002b (+norms) / longer budget to push past 0.905; TRAIN-002 repeat on
+TinyLlama-1.1B; then the gpt-oss-20b MoE audit (RT-117) before any 20B quality work.
