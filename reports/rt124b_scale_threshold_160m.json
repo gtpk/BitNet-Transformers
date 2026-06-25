@@ -1,0 +1,12 @@
+{
+  "model": "JackFram/llama-160m (FP, one-shot ternary, per-tensor, PyTorch screen)",
+  "ce_fp": 3.1466, "ppl_fp": 23.26,
+  "rows": [
+    {"method": "absmean", "ce": 11.6597, "ppl": 115808.28, "nonzero_frac": 0.686, "delta_ce_vs_absmean": 0.0},
+    {"method": "mse_scale", "ce": 11.9525, "ppl": 155202.84, "nonzero_frac": 0.686, "delta_ce_vs_absmean": -0.2928},
+    {"method": "thresh_search", "ce": 12.0665, "ppl": 173952.74, "nonzero_frac": 0.519, "delta_ce_vs_absmean": -0.4068},
+    {"method": "act_mse", "ce": 12.1180, "ppl": 183136.23, "nonzero_frac": 0.531, "delta_ce_vs_absmean": -0.4583}
+  ],
+  "best": "absmean",
+  "finding": "BitNet absmean is already near-optimal for per-tensor scale/threshold. MSE-optimal weight reconstruction HURTS CE (weight-MSE != output/CE), lower thresholds (more zeros) hurt (absmean's 0.69 nonzero beats 0.52), and a crude diagonal activation-MSE also hurts. The scale/threshold OBJECTIVE is not the bottleneck -> the bottleneck is the assignment / activation-awareness / inter-layer interaction (RT-124C AWQ/SmoothQuant, then RT-125 GPTQ/Hessian)."
+}

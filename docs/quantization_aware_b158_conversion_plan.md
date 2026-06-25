@@ -571,3 +571,28 @@ make one-shot b1.58 usable and the residual is codebook-dominated. Carry per-out
 channel scale forward as a cheap improvement; the main next probe is RT-124B (MSE/
 threshold objective) to attack the ~45% magnitude the ternary codebook deletes.
 ```
+
+## RT-124B RESULT (2026-06-25): absmean is already best; the objective is NOT the bottleneck
+
+PyTorch one-shot ternary screen, per-tensor (`scripts/rt124b_scale_threshold.py`,
+`reports/rt124b_scale_threshold_160m.json`). CE_fp = 3.15.
+
+| method | CE | PPL | nonzero frac | vs absmean |
+| --- | ---: | ---: | ---: | ---: |
+| absmean (BitNet rule) | 11.66 | 115,808 | 0.686 | — |
+| mse_scale (LS gamma) | 11.95 | 155,203 | 0.686 | -0.29 |
+| thresh_search (grid tau) | 12.07 | 173,953 | 0.519 | -0.41 |
+| act_mse (diag X^TX, crude) | 12.12 | 183,136 | 0.531 | -0.46 |
+
+Finding: **the native absmean rule is already near-optimal** for the per-tensor
+scale/threshold. Minimizing weight reconstruction ||W-gamma*T||^2 (mse_scale) actually
+HURTS CE — weight-MSE is not output/CE. Lowering the threshold to zero more weights
+hurts (absmean's 0.69 nonzero beats the sparser 0.52). A crude diagonal activation-MSE
+also hurts (a proper version is RT-124C/125).
+
+```text
+VERDICT (RT-124B): the scale/threshold OBJECTIVE is not the bottleneck — absmean wins.
+Per the decision tree, the bottleneck is the ASSIGNMENT / activation-awareness /
+inter-layer interaction. Next: RT-124C (AWQ/SmoothQuant diagonal equivalent scaling),
+then RT-125 (GPTQ/Hessian output-aware ternary projection).
+```
