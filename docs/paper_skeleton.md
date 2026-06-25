@@ -242,7 +242,7 @@ ladder to show the floor; conclude "wrong vehicle for ternary."
 | quality: generation usability | SOLVED w/ sane decoding | RT-129 (rep-penalty/sampling -> ok 12/12; greedy degenerates) |
 | quantizer design as the lever | RULED OUT | RT-124..127 (no PTQ trick rescues; adaptation/data is the lever) |
 | quality-per-bit vs Q2_K | NEGATIVE | RT-121 (OURS 114 vs Q2_K 98 PPL) |
-| factual parity vs FP/Q2_K | OPEN (the remaining gap) | G10; needs adaptation/data |
+| factual parity vs FP/Q2_K | MEASURED gap, fix OPEN | RT-130: adapted ~0.04 vs FP 0.81/Q2_K 0.74; i2_s==f16 -> data problem (WikiText-CE forgot facts), not bits/runtime -> FACT-002 |
 | gpt-oss / MoE | OUT OF SCOPE | RT-117/118 (MXFP4 already; ~0 ROI) |
 
 ## Quantization-aware track: CONCLUDED (not the next experiment)

@@ -153,6 +153,28 @@ adapted i2_s == adapted f16 at every decode; PTQ (no adaptation) stays collapsed
 any decode. So usability needs adaptation **and** a repetition penalty, and "1.58-bit
 is unusable" was a greedy-decoding artifact.
 
+### 5.5 The factual gap is large and is a data problem (RT-130 / FACT-001)
+
+A fixed 27-prompt factual panel (capitals/science/authors/reasoning/instruction;
+contains-match scoring) on the 1.1B variants, rep-penalty-1.2 decode:
+
+| variant | fact-hit rate | degeneration |
+| --- | ---: | --- |
+| FP f16 | 0.81 | all ok |
+| Q2_K | 0.74 | all ok |
+| PTQ i2_s (no train) | 0.00 | salad |
+| adapted f16 | 0.00 | ok (fluent) |
+| adapted i2_s | 0.04 | ok (fluent) |
+
+adapted i2_s vs adapted f16 hit-agreement: 26/27. Three things follow. (a) The base
+model knows these facts and **Q2_K keeps them (0.74)** — ternary *quantization* does not
+erase factual knowledge. (b) Our WikiText-CE-adapted model is **fluent but factually
+near-empty (≤0.04)**: the adaptation overwrote the base model's factual/instruction
+knowledge (catastrophic forgetting), so **PPL-recovery is not knowledge-recovery**.
+(c) adapted i2_s == adapted f16, so the runtime/quantizer is exonerated — the gap is a
+data/objective problem. This sets the factual claim at L0 (non-degenerate), not L1, and
+points the next work at adaptation data, not bits.
+
 ## 6. Negative Results (scoping)
 
 ### 6.1 We do not beat one-shot Q2_K on PPL (RT-121) — Figure 5
@@ -187,9 +209,13 @@ The recipe's value is dense FP-weight models, not already-low-bit MoE.
 
 ## 7. Limitations
 
-- **Factual parity (open).** "Usable-tier" means non-degenerate/diverse generation, not
-  correct facts; the WikiText-CE model is weaker than FP/Q2_K on factual content. This is
-  the main remaining gap and is a data/objective problem.
+- **Factual parity (measured gap, open fix).** RT-130: on a 27-prompt factual panel the
+  WikiText-CE-adapted model scores ~0.04 vs FP 0.81 / Q2_K 0.74 — fluent but factually
+  near-empty. The base model and its Q2_K keep the facts, and adapted i2_s == adapted f16,
+  so this is neither a quantization nor a runtime gap: our WikiText-CE adaptation traded
+  the base model's knowledge for WikiText fluency (catastrophic forgetting). The fix is
+  adaptation data/objective (instruction/mixed-data CE), not bits — the main remaining
+  work (FACT-002+).
 - **PPL-per-bit.** We do not beat Q2_K on PPL (Section 6.1).
 - **Statistics.** Recovery is reported at a single seed (G6 open).
 - **Cross-tool PPL.** PyTorch CE and llama.cpp perplexity differ in absolute value
