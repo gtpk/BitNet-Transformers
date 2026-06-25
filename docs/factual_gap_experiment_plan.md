@@ -484,3 +484,26 @@ FACT-002 (instruction/factual or MIXED WikiText+instruction adaptation), to reco
 fluency WITHOUT forgetting facts. Critically, an honest paper must state that the
 WikiText-CE recovery trades factual knowledge for fluency.
 ```
+
+## FACT-002 runbook (data-only adaptation; same recipe/budget as RT-120)
+
+rt116 now takes `--train-source {wikitext|instruction|mixed}` (instruction = Dolly-15k
+formatted `Q:..\nA:..`; eval CE stays WikiText; factual eval is the fixed RT-130 panel,
+never trained on). Arms, all at the RT-120 budget (800 steps, microbatch 4 x accum 6 =
+eff 24, fp32 + AdamW8bit + grad-ckpt, --bitnet to export f16+i2_s):
+
+```bash
+# A baseline = existing RT-120 adapted (wikitext) -> already have it.
+# C instruction-only:
+python scripts/rt116_quality_recovery.py --model-id TinyLlama/TinyLlama-1.1B-Chat-v1.0 \
+  --train-source instruction --steps 800 --seq-len 256 --batch 4 --grad-accum-steps 6 \
+  --lr 2e-4 --max-train-tokens 2000000 --dtype float32 --optim adamw8bit --grad-checkpointing \
+  --bitnet /content/bitnet.cpp --out-dir /content/bnt_runs/tinyllama_fact002_instr \
+  --json-out reports/rt131_fact002_instr.json --log-every 25
+# D mixed (instruction + wikitext): --train-source mixed --out-dir ..._mixed
+```
+
+Then score each adapted dir with the RT-130 panel (rep1.2) and compare fact_rate to
+A (0.04), Q2_K (0.74), FP (0.81). Decision: fact_rate >= 0.4 and low degeneration =>
+data-only recovery works; fluent-but-fact~0 => CE objective insufficient (FACT-003);
+adapted i2_s != f16 => runtime issue (not expected).

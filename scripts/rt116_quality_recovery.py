@@ -100,6 +100,37 @@ def load_wikitext(tokenizer, max_train_tokens, max_eval_tokens):
     return join_tok("train", max_train_tokens), join_tok("validation", max_eval_tokens)
 
 
+def _wikitext_train_eval(tokenizer, max_train_tokens, max_eval_tokens):
+    return load_wikitext(tokenizer, max_train_tokens, max_eval_tokens)
+
+
+def _instruction_text(max_examples=20000):
+    """Dolly-15k formatted as 'Q: instruction [context]\\nA: response' (license: CC BY-SA)."""
+    from datasets import load_dataset
+    ds = load_dataset("databricks/databricks-dolly-15k", split="train")
+    parts = []
+    for ex in ds.select(range(min(max_examples, len(ds)))):
+        ctx = (ex.get("context") or "").strip()
+        q = ex["instruction"].strip() + (("\n" + ctx) if ctx else "")
+        parts.append(f"Q: {q}\nA: {ex['response'].strip()}")
+    return "\n\n".join(parts)
+
+
+def load_corpus(source, tokenizer, max_train_tokens, max_eval_tokens):
+    """Returns (train_ids, eval_ids). eval is ALWAYS WikiText validation (fluency CE)."""
+    wt_train, wt_eval = _wikitext_train_eval(tokenizer, max_train_tokens, max_eval_tokens)
+    if source == "wikitext":
+        return wt_train, wt_eval
+    instr = torch.tensor(tokenizer(_instruction_text())["input_ids"], dtype=torch.long)
+    if source == "instruction":
+        return instr[:max_train_tokens], wt_eval
+    if source == "mixed":
+        half = max_train_tokens // 2
+        train = torch.cat([instr[:half], wt_train[:half]])
+        return train, wt_eval
+    raise ValueError(source)
+
+
 @torch.no_grad()
 def eval_ce(model, eval_ids, seq_len, device, max_windows=64):
     model.eval()
@@ -144,6 +175,8 @@ def main():
     ap.add_argument("--bitnet", type=Path, default=None, help="if set, run QR-003 export+perplexity")
     ap.add_argument("--json-out", type=Path, default=None)
     ap.add_argument("--log-every", type=int, default=50)
+    ap.add_argument("--train-source", choices=["wikitext", "instruction", "mixed"], default="wikitext",
+                    help="FACT-002: adaptation data (eval is always WikiText validation; factual eval is rt130)")
     args = ap.parse_args()
     if args.grad_accum_steps < 1:
         raise ValueError("--grad-accum-steps must be >= 1")
@@ -165,7 +198,8 @@ def main():
         model.gradient_checkpointing_enable()
         model.enable_input_require_grads()  # else ckpt warns: no input needs grad (embeds frozen)
 
-    train_ids, eval_ids = load_wikitext(tok, args.max_train_tokens, args.max_eval_tokens)
+    train_ids, eval_ids = load_corpus(args.train_source, tok, args.max_train_tokens, args.max_eval_tokens)
+    print(f"train-source={args.train_source}")
     print(f"train tokens={train_ids.numel():,}  eval tokens={eval_ids.numel():,}")
 
     # QR-001: FP baseline, then PTQ collapse
@@ -231,7 +265,7 @@ def main():
               "grad_accum_steps": args.grad_accum_steps,
               "effective_batch": args.batch * args.grad_accum_steps,
               "effective_tokens_per_step": args.batch * args.grad_accum_steps * args.seq_len,
-              "arm": arm, "train_norms": args.train_norms, "train_lm_head": args.train_lm_head,
+              "arm": arm, "train_source": args.train_source, "train_norms": args.train_norms, "train_lm_head": args.train_lm_head,
               "ce_fp": ce_fp, "ce_ptq": ce_ptq, "ce_adapted": ce_adapted,
               "ppl_fp": math.exp(ce_fp), "ppl_ptq": math.exp(ce_ptq), "ppl_adapted": math.exp(ce_adapted),
               "recovered_fraction": rec}
