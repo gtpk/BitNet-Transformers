@@ -409,3 +409,32 @@ bigger GPU). With systems (RT-112..115) + quality (RT-116/TRAIN-002) both shown 
 scale on LLaMA, the recipe is ready to take into the gpt-oss-20b MoE audit (RT-117) —
 architecture/tensor-map/router/expert first, no blind convert.
 ```
+
+## QR-005 / RT-116 ablation RESULT (2026-06-25): linears-only is the recipe
+
+Which params to adapt? Ran a/b/c on Llama-160M, identical budget (seed 0, 300 steps,
+seq 256, batch 8, lr 2e-4, WikiText-2), GPU T4. `scripts/rt116_quality_recovery.py`
+with `--train-norms` / `--train-lm-head`.
+
+| arm | trained | recovered_fraction | adapted PPL | wall |
+| --- | --- | ---: | ---: | ---: |
+| QR-002a | target linears only | 0.906 | 51.6 | 212 s |
+| QR-002b | + RMSNorm weights | 0.907 | 51.2 | 210 s |
+| QR-002c | + lm_head | 0.898 | 55.6 | 222 s |
+
+- **+norms does essentially nothing** (0.907 vs 0.906, within run noise; PPL 51.2 vs
+  51.6). RMSNorm scales are NOT the recovery bottleneck — adapting only the target
+  linears already captures the recoverable quality.
+- **+lm_head slightly HURTS** (0.898 < 0.906; PPL 55.6 > 51.6). At the same LR/budget,
+  the extra 8.2M lm_head params waste capacity / destabilize rather than help.
+
+```text
+DECISION (QR-005): default recovery recipe = TARGET LINEARS ONLY. The cheapest recipe
+is also the best at this budget; no norms, no lm_head. This resolves gap G2/G3 and
+means the 1.1B budget-scaling run (G1) should use linears-only — no recipe change,
+just more steps / bigger effective batch / fp32 Adam on a larger GPU.
+```
+
+Caveat: single seed; the a-vs-b gap (0.001) is within noise, so the claim is "norms
+don't help", not a precise ordering. lm_head's regression is larger (-0.008) and
+consistent in both recovered_fraction and PPL.

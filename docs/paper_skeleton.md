@@ -95,8 +95,8 @@ ladder to show the floor; conclude "wrong vehicle for ternary."
 | id | gap | severity | cheapest fix |
 | --- | --- | --- | --- |
 | G1 | 1.1B recovery is only 0.48 (fixed budget, batch 4, 8-bit Adam) | HIGH | budget-scaled 1.1B run on L4/A100 (fp32 Adam, batch↑, 500-800 steps) — AFTER G3 |
-| G2 | no recipe ablation: which params to adapt? | MED | **QR-002b (+norms), QR-002c (+lm_head)** on 160M — cheap, next |
-| G3 | recovery shown for target-linears-only; +norms may lift the fraction cheaply | MED | same as G2 |
+| G2 | ~~no recipe ablation~~ RESOLVED (QR-005): a/b/c on 160M -> +norms negligible (0.907 vs 0.906), +lm_head hurts (0.898). **Default = linears only.** | DONE | — |
+| G3 | ~~+norms may lift the fraction~~ RESOLVED: it does not (within noise). Cheapest recipe is best. | DONE | — |
 | G4 | quality is CE/PPL only; no user-facing prompt panel (QR-004) | MED | small deterministic prompt panel FP/PTQ/adapted/i2_s, saved side-by-side |
 | G5 | no baseline comparison (RTN / GPTQ / AWQ / QAT) | MED | add at least RTN + one QAT point on 160M |
 | G6 | single seed for recovery; no variance | LOW | 2-3 seeds on 160M QR-002a |
@@ -126,6 +126,10 @@ Design:
 
 Decision order: G2/G3 (QR-002b, cheap) -> if it helps, G1 (1.1B budget-scaled with the
 improved recipe) -> G4/G5 (prompt panel + baselines) for paper-grade quality claims.
+
+UPDATE (QR-005 done): G2/G3 resolved — +norms negligible, +lm_head hurts, so the
+**default recipe is target-linears-only**. Next is therefore G1 directly (1.1B
+budget-scaled, linears-only, fp32 Adam + bigger batch on an L4/A100), then G4/G5.
 
 ## What NOT to do next
 
