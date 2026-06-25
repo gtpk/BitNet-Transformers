@@ -235,6 +235,8 @@ def main():
     g = torch.Generator().manual_seed(args.seed)
     usable = train_ids.numel() - 1
     model.train()
+    import time
+    t_start = time.time()
     for step in range(args.steps):
         opt.zero_grad(set_to_none=True)
         train_ce_sum = 0.0
@@ -246,7 +248,13 @@ def main():
             (loss / args.grad_accum_steps).backward()
         opt.step()
         if step % args.log_every == 0 or step == args.steps - 1:
-            print(f"  step {step:4d}  train_ce={train_ce_sum / args.grad_accum_steps:.4f}")
+            done = step + 1
+            elapsed = time.time() - t_start
+            rate = elapsed / done                       # sec per optimizer step
+            eta = rate * (args.steps - done)
+            pct = 100.0 * done / args.steps
+            print(f"  step {step:4d}/{args.steps} ({pct:5.1f}%)  train_ce={train_ce_sum / args.grad_accum_steps:.4f}  "
+                  f"elapsed {elapsed/60:.1f}m  ETA {eta/60:.1f}m  ({rate:.1f}s/step)", flush=True)
     ce_adapted = eval_ce(model, eval_ids, args.seq_len, device)
     rec = (ce_ptq - ce_adapted) / max(ce_ptq - ce_fp, 1e-9)
     print(f"QR-002a CE_adapted={ce_adapted:.4f} (ppl {math.exp(ce_adapted):.2f})  "
