@@ -1,0 +1,15 @@
+{
+  "model": "JackFram/llama-160m",
+  "ctx": 64,
+  "threads": 2,
+  "n_ptq_target_linears": 84,
+  "rows": [
+    {"id": "B0", "method": "FP reference (f16)", "target_bits": "16", "trains": "no", "ppl": 43.2138, "ce_nats": 3.7661598886829957, "whole_mb": 357.3948059082031},
+    {"id": "B1", "method": "RTN ternary one-shot Wq=gamma*T (I2_S)", "target_bits": "1.58 logical / 2.0 stored", "trains": "no", "ppl": 135309.2847, "ce_nats": 11.815318434864292, "whole_mb": 121.52239990234375},
+    {"id": "B2", "method": "llama.cpp Q2_K one-shot", "target_bits": "~2.6", "trains": "no", "ppl": 97.8693, "ce_nats": 4.583632915067202, "whole_mb": 134.07064819335938},
+    {"id": "B3", "method": "llama.cpp Q3_K_M one-shot", "target_bits": "~3.4", "trains": "no", "ppl": 50.5111, "ce_nats": 3.922193114108596, "whole_mb": 146.44564819335938},
+    {"id": "B4", "method": "llama.cpp Q4_0 one-shot", "target_bits": "~4.5", "trains": "no", "ppl": 48.1703, "ce_nats": 3.8747426485654386, "whole_mb": 155.26986694335938},
+    {"id": "OURS", "method": "b1.58 + teacher-free CE (linears-only, I2_S)", "target_bits": "1.58 logical / 2.0 stored", "trains": "yes (cheap)", "ppl": 114.1409, "ce_nats": 4.737433650130918, "whole_mb": 121.52239990234375}
+  ],
+  "headline": {"ours_ppl": 114.1409, "q2k_ppl": 97.8693, "ours_vs_q2k_ppl_ratio": 1.166258469203315, "ours_beats_q2k": false, "verdict": "NEGATIVE_OR_REFRAME"}
+}

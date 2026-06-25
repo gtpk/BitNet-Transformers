@@ -136,3 +136,44 @@ python scripts/rt121_baseline_panel.py \
 
 Interpret only the same-tool table it emits. If `OURS <= B2/Q2_K`, the headline
 baseline passes. If not, do not force the claim; reframe before B5/A1.
+
+## RT-121 / BASE-001 RESULT (2026-06-25): honest negative on PPL-per-bit; reframe to speed/runtime
+
+`scripts/rt121_baseline_panel.py` on Llama-160M, one `llama-perplexity`, one eval.txt,
+ctx 64. (embd+lm_head kept f16 in EVERY row, so rows differ only in how the target
+linears are quantized — a fair comparison.)
+
+| id | method | target bits | trains? | PPL | whole MB |
+| --- | --- | ---: | --- | ---: | ---: |
+| B0 | FP reference (f16) | 16 | no | 43.21 | 357.4 |
+| B1 | RTN ternary one-shot (= PTQ, no recovery) | 1.58 | no | 135,309 | 121.5 |
+| B2 | llama.cpp Q2_K one-shot | ~2.6 | no | 97.87 | 134.1 |
+| B3 | llama.cpp Q3_K_M one-shot | ~3.4 | no | 50.51 | 146.4 |
+| B4 | llama.cpp Q4_0 one-shot | ~4.5 | no | 48.17 | 155.3 |
+| **OURS** | b1.58 + teacher-free CE (linears-only) | 1.58 | yes (cheap) | 114.14 | 121.5 |
+
+Headline metric: OURS / Q2_K PPL = **1.166 -> NEGATIVE**. At this budget, OURS does
+NOT beat one-shot Q2_K on perplexity.
+
+Honest reading (the baseline did its job — it disciplines the claim):
+- **OURS >> B1 confirmed and quantified**: teacher-free CE rescues ternary from
+  135,309 -> 114 PPL. The recovery story stands.
+- **OURS loses to Q2_K on PPL** (114 vs 98) — but OURS uses FEWER bits (1.58 vs ~2.6),
+  is SMALLER on disk (121.5 vs 134.1 MB), and runs on the **I2_S ternary runtime that
+  RT-113/114/115 measured ~5.7x faster token-gen than f32** (Q2_K runs the slower
+  standard k-quant kernel). So OURS trades a modest PPL gap for smaller + much faster.
+- **More bits win PPL** (B3/B4 at 3-4 bit reach ~50, near FP 43) — expected; OURS sits
+  at the low-bit end of the PPL-vs-bits curve.
+
+```text
+CONCLUSION (G5): do NOT headline "best PPL per bit" — at 160M, one-shot Q2_K beats
+OURS on PPL. The defensible claims are:
+  1. teacher-free CE makes ternary USABLE (135k -> 114), not just better-than-nothing;
+  2. OURS is the smallest + fastest artifact (1.58-bit, I2_S runtime ~5.7x tg), at a
+     modest PPL cost vs a higher-bit one-shot quant;
+  3. the value proposition is memory-traffic / tokens-per-second on commodity CPUs,
+     NOT quality-per-bit superiority over mature one-shot quantizers.
+This reframes the paper away from a quality-SOTA claim toward a speed/size-at-usable-
+quality claim. Open: does the gap close with more training budget (G1 showed budget
+helps) or at larger scale? Worth a 1.1B B2-vs-OURS point before final claims.
+```

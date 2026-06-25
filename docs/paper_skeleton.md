@@ -87,6 +87,36 @@ fixed-budget result was under-trained: ~16x more tokens -> recovery climbs towar
 Story: the recovered quality survives the int8-activation I2_S runtime essentially
 unchanged at every scale and budget (|delta| <= 0.015 nats; sign sometimes favorable).
 
+### Figure 5 — Baselines: why not just one-shot quantization? (G5 / RT-121, 160M)
+
+Same `llama-perplexity`, one eval.txt, ctx 64; embd+lm_head f16 in every row.
+
+| method | target bits | trains? | PPL | whole MB |
+| --- | ---: | --- | ---: | ---: |
+| FP (f16) | 16 | no | 43.21 | 357.4 |
+| RTN ternary one-shot (= PTQ) | 1.58 | no | 135,309 | 121.5 |
+| Q2_K one-shot | ~2.6 | no | 97.87 | 134.1 |
+| Q3_K_M one-shot | ~3.4 | no | 50.51 | 146.4 |
+| Q4_0 one-shot | ~4.5 | no | 48.17 | 155.3 |
+| **OURS (b1.58 + teacher-free CE)** | 1.58 | yes | 114.14 | 121.5 |
+
+**Honest result: OURS does NOT beat one-shot Q2_K on PPL (114 vs 98).** It does rescue
+the ternary collapse (135,309 -> 114) and is the smallest (121.5 MB) + fastest (I2_S
+runtime, ~5.7x tg vs f32 per Fig 2) artifact at the lowest bit budget. So the paper
+must NOT claim quality-per-bit superiority; see "Claim discipline" below.
+
+### Claim discipline (post-G5)
+
+```text
+DO claim:  - teacher-free CE makes ternary USABLE (135k -> 114 PPL), exports losslessly
+             to I2_S, and the artifact is smallest + fastest (memory-traffic/tok-per-sec).
+           - recovery + runtime-faithfulness + storage/speed all SCALE (160M -> 1.1B).
+DON'T claim: - best PPL-per-bit, or beating mature one-shot quantizers (Q2_K) on quality.
+             - user-facing quality from CE/PPL alone (only a 160M base-model panel so far).
+The spine is C2 (speed/memory-traffic scale law) + C3 (cheap teacher-free usability),
+NOT a quality-SOTA claim.
+```
+
 ### Appendix figure — Why not gpt-oss? (C4, negative)
 
 gpt-oss-20b is MXFP4 already: official mxfp4.gguf 12.11 GB, and Q2_K (2-bit) is 11.47 GB
@@ -101,7 +131,7 @@ ladder to show the floor; conclude "wrong vehicle for ternary."
 | G2 | ~~no recipe ablation~~ RESOLVED (QR-005): a/b/c on 160M -> +norms negligible (0.907 vs 0.906), +lm_head hurts (0.898). **Default = linears only.** | DONE | — |
 | G3 | ~~+norms may lift the fraction~~ RESOLVED: it does not (within noise). Cheapest recipe is best. | DONE | — |
 | G4 | ~~quality is CE/PPL only~~ RESOLVED (QR-004/RT-119): greedy panel shows PTQ token-salad -> adapted fluent English -> i2_s same tier as f16. Closed at 160M (base model: weak fluency/factuality — strengthen with G1 + better base) | DONE | — |
-| G5 | no baseline comparison (RTN / Q2_K / QAT) | MED | **[G5 baseline plan](./g5_baseline_plan.md)**: one-tool llama-perplexity panel (FP/RTN/Q2_K/Q3_K/Q4_0/ours/no-scale-QAT) on 160M — next |
+| G5 | ~~no baseline comparison~~ RESOLVED (RT-121, honest NEGATIVE): OURS 114 vs Q2_K 98 PPL — does NOT win quality-per-bit; OURS is smallest+fastest at lowest bits + rescues PTQ collapse (135k->114). Reframe to speed/usability, not quality-SOTA. See Fig 5 + Claim discipline. | DONE | (optional: 1.1B B2-vs-OURS; B5 no-scale QAT contrast) |
 | G6 | single seed for recovery; no variance | LOW | 2-3 seeds on 160M QR-002a |
 | G7 | cross-tool PPL gap (PyTorch CE vs llama.cpp perplexity) unexplained in-figure | LOW | one calibration note + measure both on identical tokens |
 | G8 | only LLaMA family; generality unproven beyond it | LOW | (scope it honestly; gpt-oss negative already bounds the claim) |
