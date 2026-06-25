@@ -114,3 +114,62 @@ Does mainline llama.cpp already run gpt-oss-20b (MXFP4) fast/small enough on x86
 the ternary-MoE effort is unnecessary? A metadata/runtime check of mainline llama.cpp's
 gpt-oss support (no bitnet.cpp) would tell us whether the value is in "ternary-MoE" or
 just "use the existing MXFP4 path". That is the cheapest, highest-information next step.
+
+## RT-118 / OSS-002: MXFP4 baseline runtime audit — DECISION: don't build ternary-MoE
+
+Goal (cheap decision experiment, NOT a conversion): is gpt-oss-20b's existing MXFP4
+runtime path already small/fast enough that a ternary-MoE effort has no ROI?
+
+### Stage 0 (decisive, metadata-only — no inference needed)
+
+A mainstream GGUF exists and the quant ladder reveals the floor:
+
+| repo / file | size |
+| --- | ---: |
+| ggml-org/gpt-oss-20b-GGUF — `gpt-oss-20b-mxfp4.gguf` (official) | **12.11 GB** |
+| unsloth `...-F16.gguf` | 13.79 GB |
+| unsloth `...-Q4_K_M.gguf` | 11.62 GB |
+| unsloth `...-Q2_K.gguf` (2-bit!) | **11.47 GB** |
+
+**The decisive fact: even Q2_K (2-bit) is 11.47 GB — only ~5% below MXFP4's 12.11 GB.**
+So every quantization scheme bottoms out at a **~11.5 GB floor**. Our ternary I2_S
+would land in that same band (it IS ~2-bit). The storage headroom our recipe could add
+over the existing MXFP4 path is **< 1 GB**, i.e. **ROI ≈ 0**. This empirically confirms
+the RT-117A math: the experts are already 4-bit, and embed/lm_head (2.3 GB) + the
+already-compressed experts dominate, so there is almost nothing left for ternary to
+remove. (mainline llama.cpp supports the arch — the GGUF exists — so "runtime
+unavailable" is no longer the blocker; "no win left" is.)
+
+### Stage 1 (speed) — argued, not measured this session
+
+Attempted a mainline llama.cpp CPU build + the 12 GB MXFP4 model on the 2-core Colab
+box; the full build exceeded ~25 min (impractical in-session) and the verdict does not
+depend on the absolute number. The speed ceiling is set by active-param traffic: top-4
+of 32 experts fire, so per token ≈ 3.6 B active params at 4-bit ≈ **~1.8 GB/token** of
+expert weight traffic (+ attn). Ternary would halve only the expert slice (4-bit→2-bit)
+→ a modest, not transformational, tg gain — and only AFTER building a ternary-MoE
+expert-gather + grouped-2-bit-GEMM kernel and a de-MXFP4 + b1.58 + CE-recovery path.
+Large effort, capped payoff. (If a precise CPU/GPU tok/s is ever wanted, use a prebuilt
+llama.cpp release binary or a faster build host; the 12 GB MXFP4 also fits a T4's 15 GB
+for a GPU baseline.)
+
+### Verdict
+
+```text
+MXFP4 baseline is already at the storage floor (Q2_K ~= MXFP4 ~= 11.5 GB) and runs on a
+mainstream runtime (llama.cpp). Ternary-MoE would add < 1 GB storage and only a partial
+expert-traffic speedup, at the cost of a large new runtime/kernel + de-MXFP4 + recovery
+track. ROI is low.
+
+DECISION:
+- gpt-oss-20b -> USE THE EXISTING MXFP4 / llama.cpp PATH. Do NOT build ternary-MoE for it.
+- The project's research main line stays the DENSE LLaMA b1.58 recipe (RT-112..116 /
+  TRAIN-002), where bf16/f32 linears -> I2_S gives the real 8-16x and the quality
+  recovery + runtime faithfulness all hold and scale.
+- Keep "ternary-MoE for natively-FP MoE models" as a separate, hypothetical future
+  research idea — but gpt-oss (already-MXFP4) is the wrong vehicle for it.
+```
+
+This closes the gpt-oss question cleanly: the audit (RT-117A) + the baseline (RT-118)
+together say the recipe's value is on dense models, and gpt-oss is best served by the
+runtime that already exists.
