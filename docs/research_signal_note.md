@@ -8,14 +8,16 @@ Related docs:
 - [Colab Validation Summary](./colab_validation_summary.md)
 - [Real Tiny Text Validation Plan](./real_tiny_text_validation_plan.md)
 - [Groupwise Alpha Hypothesis](./groupwise_alpha_hypothesis.md)
+- [Why Existing Models Resist b1.58 Conversion](./why_b158_conversion_is_hard.md)
 
 ## Short Version
 
-This is the kind of early signal researchers hope for.
+This began as the kind of early signal researchers hope for.
 
-It is not a finished answer yet. It is not a product claim, and it is not yet a
-paper-level proof. But it is a sequence of small hypotheses that kept surviving
-when the tests became less forgiving.
+It is not a product claim, and the later RT-121/122/123 results narrowed the claim
+substantially. But it is still a useful research thread: the experiments separated
+what works (I2_S systems/export, CE recovery) from what does not yet work (ordinary
+quantization-like conversion to usable generation).
 
 ```text
 T-only ternary is weak.
@@ -26,7 +28,14 @@ real text keeps the signal alive.
 ```
 
 That shape matters. A single lucky number is easy to distrust. A ladder of
-checks that explains both failure and recovery is a real research signal.
+checks that explains both failure and recovery is a real research signal. The newer
+problem statement is captured in [Why Existing Models Resist b1.58 Conversion](./why_b158_conversion_is_hard.md):
+
+```text
+BitNet b1.58 works when trained natively.
+Existing-model conversion is hard because it must rebuild a self-consistent
+ternary-lattice model, not merely quantize a high-precision one.
+```
 
 ## Why It Feels Like A Research Thread
 

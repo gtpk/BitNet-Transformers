@@ -32,6 +32,9 @@ Current modernization status:
   but does not beat Q2_K on PPL and 1.1B greedy generation is not yet usable. The
   next path is mixed-bit DP: keep I2_S for most weights and selectively upgrade the
   most sensitive groups to Q2/Q3.
+- Current problem statement: native BitNet b1.58 works because the model is trained
+  inside the ternary lattice; existing FP checkpoint conversion is harder than ordinary
+  quantization because it must rebuild that self-consistent ternary-lattice function.
 - The local Mac M5 build is currently blocked by bitnet.cpp toolchain/backend
   issues, so runtime validation targets x86/Linux first.
 - Next gate: RT-123 mixed-bit sensitivity scan, then DP selector and hybrid validation.
@@ -54,6 +57,7 @@ Core documents:
 - [G1 budget-scaling runbook](./docs/g1_budget_scaling_runbook.md)
 - [G5 baseline comparison plan](./docs/g5_baseline_plan.md)
 - [Mixed-bit DP plan](./docs/mixed_bit_dp_plan.md)
+- [Why existing models resist b1.58 conversion](./docs/why_b158_conversion_is_hard.md)
 - [Groupwise alpha hypothesis](./docs/groupwise_alpha_hypothesis.md)
 - [Research signal note](./docs/research_signal_note.md)
 - [TurboQuant + BitNet KV-cache plan](./docs/turboquant_bitnet_implementation_plan.md)

@@ -6,27 +6,28 @@ high-value reinforcing experiment (mixed-bit DP after G5/RT-122).
 
 Related: [bitnet_cpp_export_scoping.md](./bitnet_cpp_export_scoping.md) (systems),
 [quality_recovery_plan.md](./quality_recovery_plan.md) (quality),
-[oss_architecture_audit.md](./oss_architecture_audit.md) (negative result).
+[oss_architecture_audit.md](./oss_architecture_audit.md) (negative result),
+[why_b158_conversion_is_hard.md](./why_b158_conversion_is_hard.md) (problem statement).
 
 ## Working title
 
-> Teacher-Free Ternary Recovery: small, fast, and still useful b1.58 LLaMA on
-> commodity CPUs via per-tensor I2_S export
+> The Systems Promise and Quality Limits of Teacher-Free b1.58 Conversion for
+> Dense LLaMA Models
 
 ## Abstract (draft)
 
 On-device LLMs for low-resource users are bottlenecked by per-token memory traffic,
-not parameter count. We show that a dense LLaMA model materialized to per-tensor
-b1.58 weights (Wq = gamma·T, gamma = mean|W|, T in {-1,0,+1}) exports **losslessly**
-into the existing bitnet.cpp I2_S 2-bit runtime — no custom byte-writer and no custom
-kernel — and that the resulting artifact is both smaller and faster on x86 CPUs, with
-the benefit **growing with model size**. A one-shot ternary PTQ collapses quality, but
-a **short, teacher-free, CE-only** adaptation of just the target linears recovers most
-of the lost quality (90% at 160M), and that recovery is preserved through the I2_S
-runtime to within 0.002 nats. We confirm the storage, speed, runtime-faithfulness, and
-recovery results scale from ~10M to 1.1B parameters in the LLaMA family. Finally, we
-report a negative result: for natively-low-bit MoE models (gpt-oss-20b, MXFP4) the
-recipe adds essentially no storage benefit, scoping its value to dense FP-weight models.
+not parameter count. We study whether existing dense LLaMA checkpoints can be moved
+toward BitNet-style b1.58 weights as a post-training conversion procedure. We show
+that per-tensor b1.58 weights (Wq = gamma·T, gamma = mean|W|, T in {-1,0,+1}) export
+faithfully into the existing bitnet.cpp I2_S 2-bit runtime — no custom byte-writer and
+no custom kernel — and that the resulting artifact is smaller and faster on x86 CPUs,
+with the benefit growing with model size. However, quality conversion is harder than
+runtime conversion: one-shot ternary PTQ collapses, teacher-free CE adaptation recovers
+substantial loss, but the recovered model does not beat Q2_K on PPL and 1.1B greedy
+generation remains unusable. We therefore frame b1.58 conversion as a systems-strong
+but quality-limited path for existing FP checkpoints, and identify why native b1.58
+training is not equivalent to ordinary post-training quantization.
 
 ## Core claims (3 + 1 negative)
 

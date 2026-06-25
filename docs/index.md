@@ -188,6 +188,8 @@ python scripts/rt113_storage_latency.py \
    - 기존 one-shot quantization/QAT 대비 왜 이 방법이 필요한지 같은 eval/tool로 비교하는 baseline 계획.
 8i. [Mixed-Bit DP Plan](./mixed_bit_dp_plan.md)
    - all-I2_S b1.58의 품질 한계를 선택적 Q2/Q3 업그레이드와 DP selector로 푸는 다음 연구 축.
+8j. [Why Existing Models Resist b1.58 Conversion](./why_b158_conversion_is_hard.md)
+   - 왜 BitNet b1.58은 native 학습에선 좋지만 기존 모델 변환은 quantization처럼 쉽지 않은지 문제정의.
 9. [Groupwise Alpha Hypothesis](./groupwise_alpha_hypothesis.md)
    - 왜 groupwise `alpha*T`가 per-tensor BitNet b1.58보다 품질을 더 잘 보존할 수 있는지 설명한다.
 10. [Research Signal Note](./research_signal_note.md)
@@ -215,6 +217,7 @@ flowchart TD
   V --> W["g1_budget_scaling_runbook.md"]
   W --> X["g5_baseline_plan.md"]
   X --> Y["mixed_bit_dp_plan.md"]
+  Y --> Z["why_b158_conversion_is_hard.md"]
   R --> T["groupwise_alpha_hypothesis.md"]
   U --> T
   V --> L
@@ -251,6 +254,7 @@ flowchart TD
 | [g1_budget_scaling_runbook.md](./g1_budget_scaling_runbook.md) | RT-120 / TRAIN-003 사전 점검, A100/L4 one-shot 명령, 성공/실패 판정 | 1.1B 회복률 0.48을 GPU 업그레이드로 보강하기 직전 |
 | [g5_baseline_plan.md](./g5_baseline_plan.md) | B0/B1/Q2_K/Q3_K/Q4_0/OURS baseline panel 설계 | "왜 기존 quantization이 아니라 이 방법인가"를 답할 때 |
 | [mixed_bit_dp_plan.md](./mixed_bit_dp_plan.md) | RT-123 sensitivity scan, RT-124 DP selector, RT-125 hybrid artifact 검증 | all-I2_S의 생성 품질 한계를 selective higher-bit로 풀 때 |
+| [why_b158_conversion_is_hard.md](./why_b158_conversion_is_hard.md) | 기존 FP 모델을 b1.58로 변환하기 어려운 이유를 수학/통계/시스템 결과로 정리 | 프로젝트 질문을 다시 정의하고 claim을 좁힐 때 |
 | [groupwise_alpha_hypothesis.md](./groupwise_alpha_hypothesis.md) | groupwise scale이 품질을 보존하는 이유와 검증할 ablation | 알고리즘 우위의 원인을 설명하거나 반증할 때 |
 | [research_signal_note.md](./research_signal_note.md) | 현재 결과가 연구 신호로서 왜 의미 있는지 해석 | 논문화 가능성과 다음 방향을 판단할 때 |
 | [turboquant_bitnet_implementation_plan.md](./turboquant_bitnet_implementation_plan.md) | KV cache 압축 계획과 TC | weight 변환 이후 긴 문맥으로 확장할 때 |
