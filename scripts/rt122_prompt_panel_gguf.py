@@ -170,15 +170,21 @@ def main():
                 ("OURS adapted f16", ours_f16), ("OURS adapted i2_s", ours_i2s)]
     print("variants:", [(n, g.exists()) for n, g in variants])
 
+    import time
     gens = {n: {} for n, _ in variants}
     tagsum = {n: {} for n, _ in variants}
     for name, gguf in variants:
-        for p in PROMPTS:
+        t0 = time.time()
+        for i, p in enumerate(PROMPTS):
             t = llama_gen(bn, gguf, p, args.max_new, args.threads)
             gens[name][p] = t
             for tg in tags(t):
                 tagsum[name][tg] = tagsum[name].get(tg, 0) + 1
-        print(f"{name}: {tagsum[name]}")
+            if (i + 1) % 5 == 0 or i + 1 == len(PROMPTS):
+                el = time.time() - t0
+                print(f"    [{name}] {i+1}/{len(PROMPTS)} prompts  elapsed {el/60:.1f}m  "
+                      f"ETA {el/(i+1)*(len(PROMPTS)-i-1)/60:.1f}m", flush=True)
+        print(f"{name}: {tagsum[name]}", flush=True)
 
     lines = [f"# RT-122 GGUF prompt panel — {args.model_id} (RT-120 adapted)", "",
              f"Greedy ({args.max_new} new tokens), one llama-cli, --temp 0. NOTE: OURS was "

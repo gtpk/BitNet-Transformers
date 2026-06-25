@@ -52,9 +52,12 @@ EVAL_PARA = (
 
 
 def run(cmd, cwd=None):
-    print(f"\n$ {cmd}")
+    import time
+    print(f"\n$ {cmd}  [START]", flush=True)
+    _t = time.time()
     r = subprocess.run(cmd, shell=True, cwd=cwd, capture_output=True, text=True)
-    print((r.stdout + r.stderr)[-500:])
+    print(f"[done rc{r.returncode} in {time.time()-_t:.0f}s]", flush=True)
+    print((r.stdout + r.stderr)[-500:], flush=True)
     if r.returncode != 0:
         raise SystemExit(f"command failed (rc={r.returncode}): {cmd}")
     return r.stdout + r.stderr

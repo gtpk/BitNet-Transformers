@@ -49,10 +49,13 @@ PPL_RE = re.compile(r"Final estimate:\s*PPL\s*=\s*([0-9.]+)")
 
 
 def run(cmd: str, cwd: Path | None = None) -> str:
-    print(f"\n$ {cmd}")
+    import time
+    print(f"\n$ {cmd}  [START]", flush=True)
+    _t = time.time()
     r = subprocess.run(cmd, shell=True, cwd=cwd, capture_output=True, text=True)
     out = r.stdout + r.stderr
-    print(out[-800:])
+    print(f"[done rc{r.returncode} in {time.time()-_t:.0f}s]", flush=True)
+    print(out[-800:], flush=True)
     if r.returncode != 0:
         raise SystemExit(f"command failed rc={r.returncode}: {cmd}")
     return out

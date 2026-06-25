@@ -287,24 +287,30 @@ def main():
         f32, f16 = out_dir / "ggml-model-f32.gguf", out_dir / "ggml-model-f16.gguf"
         i2s = out_dir / "ggml-model-i2_s.gguf"
 
-        def sh(c):
-            print("$", c)
+        import time
+
+        def sh(c, label=""):
+            print(f">>> [QR-003] {label} START ...", flush=True)
+            t0 = time.time()
             r = subprocess.run(c, shell=True, capture_output=True, text=True)
-            print((r.stdout + r.stderr)[-300:])
+            print(f">>> [QR-003] {label} done rc{r.returncode} in {time.time()-t0:.0f}s", flush=True)
+            print((r.stdout + r.stderr)[-300:], flush=True)
             return r
 
-        sh(f'python "{conv}" "{out_dir}" --outtype f32')
-        sh(f'python "{conv}" "{out_dir}" --outtype f16')
-        sh(f'"{q}" --token-embedding-type f16 --output-tensor-type f16 "{f32}" "{i2s}" I2_S 1 1')
+        sh(f'python "{conv}" "{out_dir}" --outtype f32', "convert f32 (writes a multi-GB GGUF)")
+        sh(f'python "{conv}" "{out_dir}" --outtype f16', "convert f16")
+        sh(f'"{q}" --token-embedding-type f16 --output-tensor-type f16 "{f32}" "{i2s}" I2_S 1 1', "quantize i2_s")
         import re
         pr = re.compile(r"Final estimate:\s*PPL\s*=\s*([0-9.]+)")
         qr3 = {}
         for tag, g_ in [("f16", f16), ("i2_s", i2s)]:
+            print(f">>> [QR-003] perplexity {tag} START (CPU, ~per-token) ...", flush=True)
+            t0 = time.time()
             out = subprocess.run(f'"{ppx}" -m "{g_}" -f "{out_dir}/eval.txt" -c 64 -t 2',
                                  shell=True, capture_output=True, text=True)
             m = pr.search(out.stdout + out.stderr)
             qr3[tag] = float(m.group(1)) if m else None
-            print(f"QR-003 adapted {tag} PPL = {qr3[tag]}")
+            print(f"QR-003 adapted {tag} PPL = {qr3[tag]}  ({time.time()-t0:.0f}s)", flush=True)
         if qr3.get("f16") and qr3.get("i2_s"):
             d = math.log(qr3["i2_s"]) - math.log(qr3["f16"])
             print(f"QR-003 adapted i2_s vs f16 = {d:+.4f} nats")

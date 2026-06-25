@@ -56,9 +56,13 @@ def fmt_bytes(elems, ntensors, fmt):
 
 
 def llama_bench(bitnet, gguf, threads, pp, tg, reps):
+    import time as _time
+    print(f"  [llama-bench] {Path(gguf).name} START (pp{pp}/tg{tg} r{reps}) ...", flush=True)
+    _t0 = _time.time()
     cmd = (f'{bitnet}/build/bin/llama-bench -m "{gguf}" -t {threads} '
            f'-p {pp} -n {tg} -r {reps} 2>/dev/null')
     out = subprocess.run(cmd, shell=True, capture_output=True, text=True).stdout
+    print(f"  [llama-bench] {Path(gguf).name} done in {_time.time()-_t0:.0f}s", flush=True)
     res = {}
     for test, ts, sd in TS_RE.findall(out):
         res[test] = (float(ts), float(sd))

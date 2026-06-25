@@ -95,16 +95,22 @@ def main():
     results = {}   # (name,decode) -> {per-prompt}
     agg = {}
     raw = {}
+    import time
     for name, gguf, decs in variants:
         if not Path(gguf).exists():
             print(f"!! missing {name}: {gguf}"); continue
         for dec in decs:
             hits = 0; tags = {}
-            for p in panel:
+            t0 = time.time()
+            for i, p in enumerate(panel):
                 t = gen(bn, gguf, p["prompt"], DECODES[dec], args.max_new, args.threads)
                 h = hit(t, p["must_contain"]); hits += int(h)
                 tg = tag(t); tags[tg] = tags.get(tg, 0) + 1
                 raw[f"{name}|{dec}|{p['id']}"] = {"hit": h, "tag": tg, "text": t}
+                if (i + 1) % 5 == 0 or i + 1 == len(panel):
+                    el = time.time() - t0
+                    print(f"    [{name} {dec}] {i+1}/{len(panel)} prompts  elapsed {el/60:.1f}m  "
+                          f"ETA {el/(i+1)*(len(panel)-i-1)/60:.1f}m", flush=True)
             key = f"{name}|{dec}"
             agg[key] = {"fact_hit": hits, "n": len(panel), "fact_rate": round(hits / len(panel), 3), "tags": tags}
             print(f"{name:<14} {dec:<10} fact {hits}/{len(panel)} ({hits/len(panel):.2f})  tags {tags}")
