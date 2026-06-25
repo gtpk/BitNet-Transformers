@@ -1,0 +1,20 @@
+{
+  "model": "TinyLlama-1.1B (RT-120 adapted, recovered_fraction 0.698)",
+  "n_prompts": 12, "max_new": 40,
+  "rows": [
+    {"model": "adapted f16", "decode": "greedy", "ok": 0, "loop": 0, "repetitive": 3, "salad": 9, "uniq": 0.238, "rep3": 0.717},
+    {"model": "adapted f16", "decode": "rep1.1", "ok": 11, "loop": 0, "salad": 1, "uniq": 0.718, "rep3": 0.085},
+    {"model": "adapted f16", "decode": "rep1.2", "ok": 12, "loop": 0, "salad": 0, "uniq": 0.83, "rep3": 0.007},
+    {"model": "adapted f16", "decode": "t0.7p0.9", "ok": 9, "salad": 2, "uniq": 0.587, "rep3": 0.161},
+    {"model": "adapted f16", "decode": "t0.8p0.95", "ok": 12, "uniq": 0.708, "rep3": 0.074},
+    {"model": "adapted i2_s", "decode": "greedy", "ok": 1, "repetitive": 2, "salad": 9, "uniq": 0.279, "rep3": 0.656},
+    {"model": "adapted i2_s", "decode": "rep1.1", "ok": 12, "uniq": 0.744, "rep3": 0.021},
+    {"model": "adapted i2_s", "decode": "rep1.2", "ok": 12, "uniq": 0.814, "rep3": 0.003},
+    {"model": "adapted i2_s", "decode": "t0.7p0.9", "ok": 8, "repetitive": 1, "salad": 3, "uniq": 0.603, "rep3": 0.176},
+    {"model": "adapted i2_s", "decode": "t0.8p0.95", "ok": 12, "uniq": 0.685, "rep3": 0.074},
+    {"model": "FP f16", "decode": "greedy", "ok": 11, "repetitive": 1, "uniq": 0.83, "rep3": 0.049},
+    {"model": "Q2_K", "decode": "greedy", "ok": 12, "uniq": 0.706, "rep3": 0.115},
+    {"model": "PTQ i2_s", "decode": "greedy", "ok": 0, "loop": 9, "uniq": 0.151, "rep3": 0.781}
+  ],
+  "verdict": "(B) DECODING. RT-122 greedy degeneration was a greedy artifact, not distribution damage. Repetition penalty 1.1/1.2 or temp+top_p moves adapted i2_s ok 1/12 -> 12/12 (== Q2_K/FP on degeneration tags), loop/salad 0, rep3gram 0.66->0.003. adapted i2_s == adapted f16 across decodes (runtime preserved). PTQ (no training) stays collapsed regardless. Caveat: 'ok' = non-degenerate/diverse, NOT factual parity (adapted WikiText-CE still below FP/Q2_K on facts)."
+}

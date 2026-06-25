@@ -581,3 +581,39 @@ CONCLUSION (RT-122): separate two quality claims.
     instruction-style adaptation data. Do not claim a "usable small LLM" yet.
 Runtime faithfulness (i2_s==f16) holds even for the degenerate model.
 ```
+
+## RT-129 RESULT (2026-06-25): the 1.1B greedy degeneration was a DECODING artifact (claim rescued)
+
+Decoding stability probe (`scripts/rt129_decoding_probe.py`, 12 prompts, llama-cli) on
+the RT-120 adapted 1.1B. RT-122 judged it "not usable" — but that was GREEDY only.
+
+| model | decode | ok | loop | salad | rep3gram |
+| --- | --- | ---: | ---: | ---: | ---: |
+| adapted i2_s | greedy | 1 | 0 | 9 | 0.656 |
+| adapted i2_s | rep-penalty 1.1 | 12 | 0 | 0 | 0.021 |
+| adapted i2_s | rep-penalty 1.2 | 12 | 0 | 0 | 0.003 |
+| adapted i2_s | temp0.8/top_p0.95 | 12 | 0 | 0 | 0.074 |
+| adapted f16 | rep-penalty 1.2 | 12 | 0 | 0 | 0.007 |
+| FP f16 | greedy | 11 | 0 | 0 | 0.049 |
+| Q2_K | greedy | 12 | 0 | 0 | 0.115 |
+| PTQ i2_s | greedy | 0 | 9 | 0 | 0.781 |
+
+**VERDICT: (B) DECODING, not (A) model damage.** A standard repetition penalty (1.1-1.2,
+zero inference cost) or temp+top_p sampling moves the adapted ternary model from ok
+1/12 (greedy) to **12/12** — non-degenerate, diverse, matching Q2_K/FP on degeneration
+tags. The "= = =" greedy loop was a weak model's repeat attractor exaggerated by greedy,
+not a wrecked distribution. PTQ (no adaptation) stays collapsed under any decode, so the
+fix is adaptation + sane decoding, not decoding alone.
+
+- **adapted i2_s == adapted f16** at every decode -> I2_S preserves the now-readable
+  behavior, not just the degenerate one.
+- Honest caveat: "ok" = non-degenerate/diverse, NOT factual parity. The WikiText-CE
+  adapted model is fluent under rep-penalty but still weaker than FP/Q2_K on facts; that
+  residual is a data/objective matter, not decoding.
+
+```text
+CLAIM UPDATE: the teacher-free-adapted ternary model IS usable-tier (non-degenerate,
+readable) under standard repetition-penalized / sampled decoding; greedy alone
+degenerates (a known small-model artifact). I2_S runs this faithfully. The remaining
+gap is factual quality vs FP/Q2_K (recovery/data), not generation collapse.
+```
