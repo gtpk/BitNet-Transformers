@@ -217,7 +217,9 @@ python scripts/rt113_storage_latency.py \
 8l. [Colab Quantization-Aware Conversion Prompt](./colab_quantization_aware_prompt.md)
    - Colab을 실행할 수 있는 AI에게 그대로 줄 handoff prompt.
 8m. [Complex / Phase Rotation Probe Plan](./complex_phase_rotation_plan.md)
-   - `e^{iθ}` pairwise phase rotation이 b1.58 ternary 변환을 더 쉽게 만드는지 검증하는 좁은 RT-126B 계획.
+   - `e^{iθ}` pairwise phase rotation이 b1.58 ternary 변환을 더 쉽게 만드는지 나중에 볼 수 있는 후속 분석/후보 아이디어.
+8n. [Factual Gap Experiment Plan](./factual_gap_experiment_plan.md)
+   - RT-129 이후 남은 유일한 open gap인 factual quality를 FACT-001 평가패널과 adaptation/data 실험으로 검증하는 계획.
 9. [Groupwise Alpha Hypothesis](./groupwise_alpha_hypothesis.md)
    - 왜 groupwise `alpha*T`가 per-tensor BitNet b1.58보다 품질을 더 잘 보존할 수 있는지 설명한다.
 10. [Research Signal Note](./research_signal_note.md)
@@ -249,6 +251,8 @@ flowchart TD
   Z --> QA["quantization_aware_b158_conversion_plan.md"]
   QA --> QP["colab_quantization_aware_prompt.md"]
   QA --> PR["complex_phase_rotation_plan.md"]
+  V --> FG["factual_gap_experiment_plan.md"]
+  PD["paper_draft.md"] --> FG
   R --> T["groupwise_alpha_hypothesis.md"]
   U --> T
   V --> L
@@ -288,7 +292,8 @@ flowchart TD
 | [why_b158_conversion_is_hard.md](./why_b158_conversion_is_hard.md) | 기존 FP 모델을 b1.58로 변환하기 어려운 이유를 수학/통계/시스템 결과로 정리 | 프로젝트 질문을 다시 정의하고 claim을 좁힐 때 |
 | [quantization_aware_b158_conversion_plan.md](./quantization_aware_b158_conversion_plan.md) | quantization 기법을 b1.58 변환에 적용하는 RT-124..128 전체 실험계획, 가지치기, 결론 도달 규칙 | 다음 Colab 실험을 설계하거나 결과를 해석할 때 |
 | [colab_quantization_aware_prompt.md](./colab_quantization_aware_prompt.md) | Colab 실행 가능한 AI에게 줄 copy-paste prompt와 결과 템플릿 | 다른 실행자에게 RT-124를 넘길 때 |
-| [complex_phase_rotation_plan.md](./complex_phase_rotation_plan.md) | 복소수 위상 `e^{iθ}`를 pairwise real rotation으로 구현해 cheap rotation loophole을 검증하는 계획 | RT-126 rotation을 다시 열지 말지 판단할 때 |
+| [complex_phase_rotation_plan.md](./complex_phase_rotation_plan.md) | 복소수 위상 `e^{iθ}`를 pairwise real rotation으로 구현하는 후속 분석/후보 아이디어 | factual gap 이후 rotation 후보를 다시 볼지 판단할 때 |
+| [factual_gap_experiment_plan.md](./factual_gap_experiment_plan.md) | FACT-001 current factual gap panel과 FACT-002..004 adaptation/data 개선 실험 설계 | RT-129 이후 factual quality gap을 다룰 때 |
 | [groupwise_alpha_hypothesis.md](./groupwise_alpha_hypothesis.md) | groupwise scale이 품질을 보존하는 이유와 검증할 ablation | 알고리즘 우위의 원인을 설명하거나 반증할 때 |
 | [research_signal_note.md](./research_signal_note.md) | 현재 결과가 연구 신호로서 왜 의미 있는지 해석 | 논문화 가능성과 다음 방향을 판단할 때 |
 | [turboquant_bitnet_implementation_plan.md](./turboquant_bitnet_implementation_plan.md) | KV cache 압축 계획과 TC | weight 변환 이후 긴 문맥으로 확장할 때 |
@@ -383,26 +388,27 @@ flowchart TD
 
 다음:
 
-1. **RT-124A/B / scale granularity + threshold objective sweep:** per-tensor만 보던
-   b1.58 변환을 per-row/per-column/groupwise/blockwise, MSE/activation-MSE/learned
-   threshold로 공정하게 다시 본다.
-2. **RT-124C / activation-aware diagonal scaling:** AWQ/SmoothQuant식 `XW=(XD)(D^-1W)`
-   변환으로 runtime 비용 없이 ternary-friendly weight를 만들 수 있는지 확인한다.
-3. **RT-125 / GPTQ-style output-aware ternary projection:** `||W-gamma*T||`가 아니라
-   `||XW-Xgamma*T||`를 최소화하는 ternary assignment를 테스트한다.
-4. **RT-126 / rotation preconditioning:** QuIP/QuaRot/SpinQuant류 rotation이 ternary
-   변환을 쉽게 만드는지 확인한다.
-5. **RT-127/128 / signed-epsilon 2-bit + 1D ternary gate:** pure b1.58가 계속 약하면
-   `{ -1, -epsilon, +epsilon, +1 }`와 1D gate로 2-bit 타협점을 찾는다.
-6. **G6 seed variance:** 후보가 정해진 뒤 160M/1.1B seed 반복으로 논문 hygiene를 보강한다.
-7. Mac M5 I2_S/TL1은 보류한다. 필요하면 upstream bug report용 최소 재현으로 분리한다.
+1. **FACT-001 / RT-130 factual gap panel:** FP/Q2_K/PTQ/adapted-F16/adapted-I2_S를
+   같은 factual prompt panel과 RT-129 표준 decoding으로 비교해 현재 factual gap을
+   먼저 측정한다.
+2. **FACT-002 / adaptation-data ablation:** FACT-001 결과를 본 뒤 longer WikiText CE,
+   instruction/factual CE, mixed CE를 같은 budget으로 비교한다.
+3. **FACT-003 / repetition-aware objective:** 필요할 때만 unlikelihood/repetition-aware
+   objective를 테스트해 decode-time repetition penalty 의존도를 줄일 수 있는지 본다.
+4. **G6 seed variance:** factual 방향이 정리된 뒤 160M/1.1B seed 반복으로 논문 hygiene를
+   보강한다.
+5. **Complex/phase rotation:** 메인 트랙이 아니라 후속 분석/후보 아이디어로 둔다.
+   factual gap 이후에도 cheap phase-rotation loophole을 닫고 싶을 때만 PHASE-001A를
+   실행한다.
+6. Mac M5 I2_S/TL1은 보류한다. 필요하면 upstream bug report용 최소 재현으로 분리한다.
 
 이전 보류 항목 중 packed reference ladder는 완료됐고, export 경로도 판별됐다
 (per-tensor-native → I2_S 직행). 남은 다음 축:
 
 - G1 quality budget scaling: TinyLlama-1.1B에서 회복률 `0.480`이 예산 한계였는지 확인
-- quantization-aware b1.58 conversion: scale/threshold/activation/Hessian/rotation 기법을 적용해 단순 ternary PTQ가 너무 조잡했던 것인지 검증
-- complex/phase rotation probe: arbitrary rotation이 아니라 sign/swap·Hadamard-like cheap phase만 좁게 검증하는 RT-126B 보조축
+- factual gap: FACT-001 current panel로 FP/Q2_K 대비 factual quality 차이를 먼저 측정하고, 그 결과에 따라 adaptation/data를 개선
+- quantization-aware b1.58 conversion: RT-124~127로 종결. quantizer는 병목이 아님
+- complex/phase rotation probe: 메인 트랙이 아니라 후속 분석/후보 아이디어. arbitrary rotation이 아니라 sign/swap·Hadamard-like cheap phase만 나중에 좁게 검증
 - mixed-bit DP: all-I2_S의 품질/생성 한계를 selective Q2/Q3 업그레이드로 보완하는 보조축. RT-123 결과상 full additive DP는 보류
 - variance: 논문용 설득력을 위해 seed 반복 추가
 - groupwise GGUF 확장 / custom kernel: export 트랙이면 불필요. groupwise의 약간 더 나은

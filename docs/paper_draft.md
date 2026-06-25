@@ -202,9 +202,11 @@ The recipe's value is dense FP-weight models, not already-low-bit MoE.
 
 The locked conclusion points the next effort at adaptation/data, not quantizer/codebook:
 
-1. **Factual recovery (G10):** instruction-style adaptation data, longer/better-data CE,
-   repetition-aware / free-run objectives to close the factual gap and reduce reliance on
-   a decode-time repetition penalty.
+1. **Factual recovery (G10):** run the
+   [Factual Gap Experiment Plan](./factual_gap_experiment_plan.md): first measure the
+   current FP/Q2_K/adapted-I2_S factual gap (FACT-001), then test instruction-style
+   adaptation data, longer/better-data CE, and repetition-aware / free-run objectives to
+   close the gap and reduce reliance on a decode-time repetition penalty.
 2. **Cheap carry-forward:** per-output-channel (row) scale is a foldable one-shot init
    improvement (+1.84 nats) worth folding into the adaptation init.
 3. **Scale-up:** confirm storage/speed/recovery on a stronger small base model.
@@ -246,7 +248,9 @@ Result JSONs live in `reports/rt1xx_*.json`. The G1 budget-scaled run uses the
 ## Appendix C: Missing-evidence list (A3)
 
 - **Factual eval** (G10): no instruction/QA benchmark yet — only WikiText CE + degeneration
-  tags. Needed before any "usable assistant" wording.
+  tags. Needed before any "usable assistant" wording. Planned in
+  [Factual Gap Experiment Plan](./factual_gap_experiment_plan.md), starting with
+  FACT-001 current factual gap panel.
 - **Seeds** (G6): single-seed recovery; add 2–3 seeds on 160M for variance bars.
 - **1.1B baseline panel**: RT-121 is 160M-only; a 1.1B OURS-vs-Q2_K PPL point would
   strengthen Figure 5's generality.

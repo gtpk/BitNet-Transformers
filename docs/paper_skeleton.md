@@ -12,7 +12,8 @@ Related: [bitnet_cpp_export_scoping.md](./bitnet_cpp_export_scoping.md) (systems
 [why_b158_conversion_is_hard.md](./why_b158_conversion_is_hard.md) (problem statement),
 [quantization_aware_b158_conversion_plan.md](./quantization_aware_b158_conversion_plan.md)
 (next experiment), [complex_phase_rotation_plan.md](./complex_phase_rotation_plan.md)
-(RT-126B diagnostic loophole).
+(RT-126B later candidate), [factual_gap_experiment_plan.md](./factual_gap_experiment_plan.md)
+(G10 factual gap).
 
 ## Working title
 
@@ -223,7 +224,7 @@ ladder to show the floor; conclude "wrong vehicle for ternary."
 | G2 | ~~no recipe ablation~~ RESOLVED (QR-005): a/b/c on 160M -> +norms negligible (0.907 vs 0.906), +lm_head hurts (0.898). **Default = linears only.** | DONE | — |
 | G3 | ~~+norms may lift the fraction~~ RESOLVED: it does not (within noise). Cheapest recipe is best. | DONE | — |
 | G4 | ~~quality is CE/PPL only~~ RESOLVED (QR-004/RT-119 + RT-129): generation panel + decoding sweep -> adapted is non-degenerate/usable-tier under rep-penalty/sampling at BOTH 160M and 1.1B (greedy degenerates, RT-122, but that is a greedy artifact). i2_s == f16. | DONE | — |
-| G10 | FACTUAL quality below FP/Q2_K (the real remaining limit; "usable-tier" != correct facts) | MED | adaptation/data: instruction data, longer/better-data CE, repetition-aware objective |
+| G10 | FACTUAL quality below FP/Q2_K (the real remaining limit; "usable-tier" != correct facts) | MED | [FACT-001 current factual panel](./factual_gap_experiment_plan.md), then instruction data / longer CE / repetition-aware objective |
 | G5 | ~~no baseline comparison~~ RESOLVED (RT-121, honest NEGATIVE): OURS 114 vs Q2_K 98 PPL — does NOT win quality-per-bit; OURS is smallest+fastest at lowest bits + rescues PTQ collapse (135k->114). Reframe to speed/usability, not quality-SOTA. See Fig 5 + Claim discipline. | DONE | (optional: 1.1B B2-vs-OURS; B5 no-scale QAT contrast) |
 | G6 | single seed for recovery; no variance | LOW | 2-3 seeds on 160M QR-002a |
 | G7 | cross-tool PPL gap (PyTorch CE vs llama.cpp perplexity) unexplained in-figure | LOW | one calibration note + measure both on identical tokens |
@@ -265,7 +266,7 @@ The experimental picture is closed enough to write up. Priority order:
 2. Draft the paper/report from Figures 1-7 + the claim table + the gpt-oss appendix.
 3. THEN the only remaining quality lever (G10, factual parity): adaptation/data, NOT
    quantizer engineering — instruction data, longer/better-data CE, repetition-aware
-   or free-run objectives. Optional cheap diagnostic: a pairwise phase-rotation probe.
+   or free-run objectives. Optional later candidate: a pairwise phase-rotation probe.
 ```
 
 ## What NOT to do next
@@ -277,7 +278,7 @@ The experimental picture is closed enough to write up. Priority order:
   small CE-adapted models (RT-122). Use a repetition penalty (~1.2) or sampling (RT-129);
   report the decode.
 - Do not reopen quantizer/codebook/rotation engineering as a main track — RT-124..127
-  ruled it out; the lever is adaptation/data. (A cheap pairwise phase-rotation probe is
-  allowed only as an optional diagnostic, not the main path.)
+  ruled it out; the lever is adaptation/data. Keep cheap pairwise phase rotation only
+  as a later candidate idea, not the main path.
 - Do not run more experiments before consolidating the docs/claim table; the risk now is
   losing a closed result, not lacking a new one.

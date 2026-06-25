@@ -8,6 +8,7 @@ Related:
 - [Quality Recovery Plan](./quality_recovery_plan.md)
 - [G5 Baseline Comparison Plan](./g5_baseline_plan.md)
 - [Mixed-Bit DP Plan](./mixed_bit_dp_plan.md)
+- [Complex / Phase Rotation Probe Plan](./complex_phase_rotation_plan.md)
 - [Paper Skeleton](./paper_skeleton.md)
 
 ## Purpose
@@ -375,6 +376,22 @@ If only learned online rotations help:
   classify as quality research, but likely not the low-resource runtime path.
 ```
 
+### RT-126B: complex/phase rotation specialization
+
+The general RT-126 rotation branch was skipped in the RT-125 synthesis because GPTQ
+assignment recovered only 6% of the nearest->FP gap. A narrower loophole remains:
+cheap complex-phase rotations over paired hidden dimensions:
+
+```text
+z = a + ib
+z' = z * e^{i theta}
+```
+
+This is preserved separately as a later follow-up candidate in
+[Complex / Phase Rotation Candidate Note](./complex_phase_rotation_plan.md). The key
+rule: only sign/swap and Hadamard-like phase rotations are deployment-relevant;
+arbitrary learned complex rotations are upper bounds only.
+
 ## Phase 6: RT-127 Signed-Epsilon 2-Bit Codebook
 
 Question:
@@ -647,6 +664,11 @@ epsilon 2-bit): is the zero-heavy ternary codebook deleting too many small signe
 connections? (RT-126 rotation skipped for now — a stronger assignment method, GPTQ,
 already gained only 6%, so outlier/incoherence is unlikely to be the rescue.)
 ```
+
+Note: RT-126B/PHASE-001 is not the next track. It is a later candidate idea for testing
+cheap complex/phase rotations as a diagnostic loophole. It should not overturn the
+synthesis unless cheap phase rotations improve CE beyond RT-125 and survive
+QAT/runtime-cost checks.
 
 ## RT-127 RESULT + TRACK SYNTHESIS (2026-06-25): the quantizer is not the bottleneck; adaptation/data is
 
