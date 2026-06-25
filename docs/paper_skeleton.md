@@ -139,21 +139,33 @@ runtime fault. (160M at recovered 0.905 was word-like in RT-119; 1.1B at 0.698 i
 generation usability tracks recovery fraction, which the 1.1B budget did not push far
 enough.)
 
-### Claim discipline (post-G5 + RT-122)
+### Claim discipline (post-G5 + RT-122 + RT-129)
+
+RT-129 update: the RT-122 "1.1B degenerates" finding was GREEDY-only. Under a standard
+repetition penalty (1.1-1.2, zero inference cost) or temp+top_p sampling, the adapted
+ternary model goes from ok 1/12 to **12/12** non-degenerate — matching Q2_K/FP on
+loop/salad/empty tags. So generation usability is RESCUED (with the right decode), not
+unproven. The quantization-aware track (RT-124..127) separately concluded the quantizer
+is not the bottleneck; adaptation/data is.
 
 ```text
 DO claim:  - one-shot ternary PTQ COLLAPSES (token salad); teacher-free CE substantially
              recovers CE/PPL (135k->114 @160M; 0.698 @1.1B) — recovery is real and scales.
            - the artifact is the smallest + fastest (1.58-bit, I2_S runtime ~5.7x tg);
              storage/speed/runtime-faithfulness all SCALE 160M->1.1B.
-           - I2_S faithfully preserves the adapted model (incl. its degeneracy) at every scale.
+           - the adapted ternary model is USABLE-TIER (non-degenerate, diverse, no loops)
+             under standard repetition-penalized/sampled decoding; greedy alone degenerates
+             (a known small-model artifact). I2_S runs this faithfully (i2_s == f16 at
+             every decode).
+           - the quantizer is not the lever: scale/objective/activation/GPTQ/2-bit-codebook
+             one-shot tricks do not rescue conversion (RT-124..127); adaptation/data is.
 DON'T claim: - best PPL-per-bit or beating Q2_K on quality (RT-121).
-             - that the adapted model GENERATES usable text at 1.1B — at 0.698 recovery,
-               greedy output degenerates (RT-122). Generation usability is unproven and
-               needs higher recovery / repetition penalty / more (or instruction) data.
+             - FACTUAL parity with FP/Q2_K. "Usable-tier" here = non-degenerate/diverse
+               generation, NOT correct facts; the WikiText-CE model is still weaker on
+               facts (a data/objective gap, not decoding or runtime).
 The honest spine: a SYSTEMS result (speed/memory-traffic scale law + faithful I2_S
-export) plus a PARTIAL quality result (CE/PPL recovery scales; generation usability is
-future work). Not a quality-SOTA or "usable small LLM" claim yet.
+export) + a quality result (teacher-free CE recovery scales AND yields non-degenerate
+generation under sane decoding), with factual parity as the remaining data/objective gap.
 ```
 
 ### Appendix figure — Why not gpt-oss? (C4, negative)
