@@ -1173,6 +1173,306 @@ Deliver:
    checklist answers.
 ```
 
+## Copy-Paste Command Prompt
+
+Use this when the operator is not going to read the whole document interactively. It is
+intentionally verbose and self-checking. Paste it into a Colab/Linux shell after
+selecting a GPU runtime.
+
+It runs:
+
+```text
+preflight -> bitnet.cpp check/build -> reference prep -> WikiText baseline score ->
+instruction adaptation -> instruction score -> mixed adaptation -> mixed score ->
+summary table -> decision hint
+```
+
+It does **not** implement S2/S3 code branches automatically. If the final decision is
+S2 or S3, return to the Work Packet section above and implement the named packet first.
+
+```bash
+set -euo pipefail
+
+echo "== FACT-002 / RT-131 single-flight command prompt =="
+echo "This run trains instruction and mixed b1.58 adaptations, then scores the fixed factual panel."
+echo "Never train on data/factual_panel_v1.jsonl."
+
+export BNT=/content/bnt
+export BITNET=/content/bitnet.cpp
+export RUNS=/content/bnt_runs
+export PANEL=data/factual_panel_v1.jsonl
+export REFS=$BITNET/models/rt122_panel/fp
+export PTQ=$BITNET/models/rt122_panel/ptq/ggml-model-i2_s.gguf
+export BASE=$RUNS/tinyllama_g1_l4_s800_b4x6
+export INSTR=$RUNS/tinyllama_fact002_instr
+export MIXED=$RUNS/tinyllama_fact002_mixed
+
+mkdir -p "$RUNS"
+
+echo "== Stage 0: repo + dependencies =="
+cd /content
+if [ ! -d "$BNT/.git" ]; then
+  git clone https://github.com/gtpk/BitNet-Transformers "$BNT"
+fi
+cd "$BNT"
+git fetch origin
+git reset --hard origin/main
+
+pip install -q transformers datasets safetensors sentencepiece accelerate bitsandbytes huggingface_hub cmake
+
+python - <<'PY'
+import torch, sys
+print("python", sys.version)
+print("cuda", torch.cuda.is_available())
+if torch.cuda.is_available():
+    print("gpu", torch.cuda.get_device_name(0))
+    print("mem", torch.cuda.mem_get_info())
+assert torch.cuda.is_available(), "FACT-002 training needs a GPU runtime"
+PY
+
+python - <<'PY'
+from pathlib import Path
+need = [
+    "scripts/rt116_quality_recovery.py",
+    "scripts/rt122_prompt_panel_gguf.py",
+    "scripts/rt130_factual_gap_panel.py",
+    "data/factual_panel_v1.jsonl",
+]
+missing = [p for p in need if not Path(p).exists()]
+print("repo required files missing:", missing)
+assert not missing
+PY
+
+echo "== Stage 0B: bitnet.cpp check/build =="
+if [ ! -x "$BITNET/build/bin/llama-cli" ] || \
+   [ ! -x "$BITNET/build/bin/llama-quantize" ] || \
+   [ ! -x "$BITNET/build/bin/llama-perplexity" ] || \
+   [ ! -f "$BITNET/utils/convert-hf-to-gguf-bitnet.py" ]; then
+  echo "bitnet.cpp binaries missing; building known-good x86 path"
+  cd /content
+  rm -rf "$BITNET"
+  git clone https://github.com/microsoft/BitNet.git "$BITNET"
+  cd "$BITNET"
+  git checkout 01eb415772c342d9f20dc42772f1583ae1e5b102
+  git submodule update --init --recursive
+  python setup_env.py -hr 1bitLLM/bitnet_b1_58-large -q i2_s
+fi
+
+test -x "$BITNET/build/bin/llama-cli"
+test -x "$BITNET/build/bin/llama-quantize"
+test -x "$BITNET/build/bin/llama-perplexity"
+test -f "$BITNET/utils/convert-hf-to-gguf-bitnet.py"
+
+cd "$BNT"
+
+echo "== Stage 1: ensure/rebuild WikiText baseline if missing =="
+if [ ! -f "$BASE/config.json" ]; then
+  python scripts/rt116_quality_recovery.py \
+    --model-id TinyLlama/TinyLlama-1.1B-Chat-v1.0 \
+    --train-source wikitext \
+    --steps 800 \
+    --seq-len 256 \
+    --batch 4 \
+    --grad-accum-steps 6 \
+    --lr 2e-4 \
+    --max-train-tokens 2000000 \
+    --max-eval-tokens 60000 \
+    --ppl-eval-tokens 3000 \
+    --dtype float32 \
+    --optim adamw8bit \
+    --grad-checkpointing \
+    --bitnet "$BITNET" \
+    --out-dir "$BASE" \
+    --json-out reports/rt131_fact002_wikitext_train.json \
+    --log-every 25
+fi
+
+echo "== Stage 1B: build/reuse FP, Q2_K, PTQ references =="
+python scripts/rt122_prompt_panel_gguf.py \
+  --bitnet "$BITNET" \
+  --model-id TinyLlama/TinyLlama-1.1B-Chat-v1.0 \
+  --adapted-dir "$BASE" \
+  --work "$BITNET/models/rt122_panel" \
+  --out reports/rt131_refprep_prompt_panel.md \
+  --threads 8
+
+echo "== Stage 1C: score WikiText baseline =="
+python scripts/rt130_factual_gap_panel.py \
+  --bitnet "$BITNET" \
+  --adapted-dir "$BASE" \
+  --refs-dir "$REFS" \
+  --ptq-gguf "$PTQ" \
+  --prompt-file "$PANEL" \
+  --threads 8 \
+  --json-out reports/rt131_fact002_wikitext_fact.json \
+  --markdown-out reports/rt131_fact002_wikitext_fact.md
+
+echo "== Stage 2C: instruction-only adaptation =="
+python scripts/rt116_quality_recovery.py \
+  --model-id TinyLlama/TinyLlama-1.1B-Chat-v1.0 \
+  --train-source instruction \
+  --steps 800 \
+  --seq-len 256 \
+  --batch 4 \
+  --grad-accum-steps 6 \
+  --lr 2e-4 \
+  --max-train-tokens 2000000 \
+  --max-eval-tokens 60000 \
+  --ppl-eval-tokens 3000 \
+  --dtype float32 \
+  --optim adamw8bit \
+  --grad-checkpointing \
+  --bitnet "$BITNET" \
+  --out-dir "$INSTR" \
+  --json-out reports/rt131_fact002_instr_train.json \
+  --log-every 25
+
+echo "== Stage 3C: score instruction-only =="
+python scripts/rt130_factual_gap_panel.py \
+  --bitnet "$BITNET" \
+  --adapted-dir "$INSTR" \
+  --refs-dir "$REFS" \
+  --ptq-gguf "$PTQ" \
+  --prompt-file "$PANEL" \
+  --threads 8 \
+  --json-out reports/rt131_fact002_instr_fact.json \
+  --markdown-out reports/rt131_fact002_instr_fact.md
+
+echo "== Stage 2D: mixed adaptation =="
+python scripts/rt116_quality_recovery.py \
+  --model-id TinyLlama/TinyLlama-1.1B-Chat-v1.0 \
+  --train-source mixed \
+  --steps 800 \
+  --seq-len 256 \
+  --batch 4 \
+  --grad-accum-steps 6 \
+  --lr 2e-4 \
+  --max-train-tokens 2000000 \
+  --max-eval-tokens 60000 \
+  --ppl-eval-tokens 3000 \
+  --dtype float32 \
+  --optim adamw8bit \
+  --grad-checkpointing \
+  --bitnet "$BITNET" \
+  --out-dir "$MIXED" \
+  --json-out reports/rt131_fact002_mixed_train.json \
+  --log-every 25
+
+echo "== Stage 3D: score mixed =="
+python scripts/rt130_factual_gap_panel.py \
+  --bitnet "$BITNET" \
+  --adapted-dir "$MIXED" \
+  --refs-dir "$REFS" \
+  --ptq-gguf "$PTQ" \
+  --prompt-file "$PANEL" \
+  --threads 8 \
+  --json-out reports/rt131_fact002_mixed_fact.json \
+  --markdown-out reports/rt131_fact002_mixed_fact.md
+
+echo "== Stage 4: summarize and decide =="
+python - <<'PY'
+import json
+from pathlib import Path
+
+def load(path):
+    p = Path(path)
+    return json.loads(p.read_text()) if p.exists() else None
+
+rows = []
+for arm in ["wikitext", "instr", "mixed"]:
+    fact = load(f"reports/rt131_fact002_{arm}_fact.json")
+    train = load(f"reports/rt131_fact002_{arm}_train.json")
+    if not fact:
+        continue
+    agg = fact.get("agg", {})
+    ai = agg.get("adapted i2_s|rep1.2", {})
+    af = agg.get("adapted f16|rep1.2", {})
+    q2 = agg.get("Q2_K|rep1.2", {})
+    fp = agg.get("FP f16|rep1.2", {})
+    qr3 = (train or {}).get("qr003", {})
+    rows.append({
+        "arm": arm,
+        "fact_i2s": ai.get("fact_rate", 0.0),
+        "fact_f16": af.get("fact_rate", 0.0),
+        "agreement": fact.get("agreement"),
+        "tags": ai.get("tags", {}),
+        "fp_fact": fp.get("fact_rate"),
+        "q2_fact": q2.get("fact_rate"),
+        "ppl_adapted": (train or {}).get("ppl_adapted"),
+        "recovered": (train or {}).get("recovered_fraction"),
+        "qr003_delta": qr3.get("i2s_vs_f16_nats"),
+    })
+
+best = max(rows, key=lambda r: r["fact_i2s"]) if rows else None
+
+lines = []
+lines.append("# RT-131 / FACT-002 Summary")
+lines.append("")
+lines.append("| arm | fact_i2s | fact_f16 | agreement | adapted PPL | recovered | qr003 delta | tags |")
+lines.append("| --- | ---: | ---: | --- | ---: | ---: | ---: | --- |")
+for r in rows:
+    lines.append(
+        f"| {r['arm']} | {r['fact_i2s']} | {r['fact_f16']} | {r['agreement']} | "
+        f"{r['ppl_adapted']} | {r['recovered']} | {r['qr003_delta']} | {r['tags']} |"
+    )
+
+verdict = "NO_ROWS"
+next_proc = "debug missing reports"
+if best:
+    agree = str(best.get("agreement") or "0/1").split("/")
+    try:
+        agree_rate = int(agree[0]) / max(1, int(agree[1]))
+    except Exception:
+        agree_rate = 0.0
+    tags = best.get("tags", {})
+    bad = tags.get("salad", 0) + tags.get("empty", 0)
+    if agree_rate < 0.80:
+        verdict = "S4 runtime/export divergence"
+        next_proc = "stop training; regenerate GGUF and rerun QR-003/RT-130"
+    elif best["fact_i2s"] >= 0.40 and bad < 10:
+        verdict = "S1 data-only recovery succeeds"
+        next_proc = "freeze winning recipe; run seed-1 confirmation; update docs"
+    elif best["fact_i2s"] >= 0.15:
+        verdict = "S2 partial recovery"
+        next_proc = "inspect winner; implement I1 ratio arms or run D-long"
+    else:
+        verdict = "S3 objective gap"
+        next_proc = "write S3 verdict; implement I2 objective branch"
+
+lines.append("")
+lines.append(f"Best arm: {best['arm'] if best else 'n/a'}")
+lines.append(f"Decision: {verdict}")
+lines.append(f"Next procedure: {next_proc}")
+lines.append("")
+lines.append("Review checklist:")
+lines.append("- what improved:")
+lines.append("- what did not:")
+lines.append("- F16/I2_S agreement:")
+lines.append("- no eval leakage: data/factual_panel_v1.jsonl was eval-only")
+lines.append("- claim level:")
+lines.append("")
+
+Path("reports/rt131_fact002_summary.md").write_text("\n".join(lines), encoding="utf-8")
+print("\n".join(lines))
+PY
+
+echo "== Required outputs =="
+ls -lh reports/rt131_fact002_* || true
+echo "Summary: reports/rt131_fact002_summary.md"
+echo "Now apply the Stage 4B next procedure from docs/factual_recovery_master_runbook.md."
+```
+
+Completion criteria for the command prompt:
+
+```text
+reports/rt131_fact002_instr_train.json exists
+reports/rt131_fact002_instr_fact.json exists
+reports/rt131_fact002_mixed_train.json exists
+reports/rt131_fact002_mixed_fact.json exists
+reports/rt131_fact002_summary.md names S1/S2/S3/S4
+the operator knows the next Stage 4B procedure
+```
+
 ## Why This Is the Correct Next Run
 
 The project is no longer asking:
