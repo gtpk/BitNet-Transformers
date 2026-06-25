@@ -126,6 +126,12 @@ def main():
                     help="tokens written to eval.txt for the GGUF llama-perplexity (QR-003); "
                          "keep small, CPU perplexity is ~per-token")
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--dtype", choices=["float32", "bfloat16", "float16"], default="float32",
+                    help="model compute dtype (bfloat16 saves memory for 1B+ on a 16GB GPU)")
+    ap.add_argument("--optim", choices=["adamw", "adamw8bit"], default="adamw",
+                    help="adamw8bit (bitsandbytes) cuts optimizer-state memory ~4x for 1B+")
+    ap.add_argument("--grad-checkpointing", action="store_true",
+                    help="trade compute for activation memory (needed for 1B+ on a 16GB GPU)")
     ap.add_argument("--bitnet", type=Path, default=None, help="if set, run QR-003 export+perplexity")
     ap.add_argument("--json-out", type=Path, default=None)
     args = ap.parse_args()
@@ -136,9 +142,14 @@ def main():
     out_dir = args.out_dir or args.work / f"{slug}_adapted"
     print(f"device={device}  model={args.model_id}")
 
+    tdtype = {"float32": torch.float32, "bfloat16": torch.bfloat16, "float16": torch.float16}[args.dtype]
     from transformers import AutoModelForCausalLM, AutoTokenizer
     tok = AutoTokenizer.from_pretrained(args.model_id)
-    model = AutoModelForCausalLM.from_pretrained(args.model_id, dtype=torch.float32).to(device)
+    model = AutoModelForCausalLM.from_pretrained(args.model_id, dtype=tdtype).to(device)
+    if args.grad_checkpointing:
+        model.config.use_cache = False
+        model.gradient_checkpointing_enable()
+        model.enable_input_require_grads()  # else ckpt warns: no input needs grad (embeds frozen)
 
     train_ids, eval_ids = load_wikitext(tok, args.max_train_tokens, args.max_eval_tokens)
     print(f"train tokens={train_ids.numel():,}  eval tokens={eval_ids.numel():,}")
@@ -146,7 +157,7 @@ def main():
     # QR-001: FP baseline, then PTQ collapse
     ce_fp = eval_ce(model, eval_ids, args.seq_len, device)
     n_lin = replace_targets(model)
-    model.to(device)
+    model.to(device=device, dtype=tdtype)  # new PerTensorBitLinear modules -> model dtype
     ce_ptq = eval_ce(model, eval_ids, args.seq_len, device)
     print(f"QR-001  CE_fp={ce_fp:.4f} (ppl {math.exp(ce_fp):.2f})  "
           f"CE_ptq={ce_ptq:.4f} (ppl {math.exp(ce_ptq):.2f})  [{n_lin} target linears]")
@@ -157,7 +168,11 @@ def main():
     tparams = [m.weight for m in model.modules() if isinstance(m, PerTensorBitLinear)]
     for p in tparams:
         p.requires_grad_(True)
-    opt = torch.optim.AdamW(tparams, lr=args.lr)
+    if args.optim == "adamw8bit":
+        import bitsandbytes as bnb
+        opt = bnb.optim.AdamW8bit(tparams, lr=args.lr)
+    else:
+        opt = torch.optim.AdamW(tparams, lr=args.lr)
     g = torch.Generator().manual_seed(args.seed)
     usable = train_ids.numel() - 1
     model.train()
