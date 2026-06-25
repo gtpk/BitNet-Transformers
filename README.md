@@ -49,6 +49,7 @@ Core documents:
 - [Scale-up target roadmap](./docs/scaleup_target_roadmap.md)
 - [Quality recovery plan](./docs/quality_recovery_plan.md)
 - [G1 budget-scaling runbook](./docs/g1_budget_scaling_runbook.md)
+- [G5 baseline comparison plan](./docs/g5_baseline_plan.md)
 - [Groupwise alpha hypothesis](./docs/groupwise_alpha_hypothesis.md)
 - [Research signal note](./docs/research_signal_note.md)
 - [TurboQuant + BitNet KV-cache plan](./docs/turboquant_bitnet_implementation_plan.md)

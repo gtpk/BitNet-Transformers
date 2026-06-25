@@ -106,3 +106,33 @@ OURS << B5
   `scripts/rt121_baseline_panel.py` can orchestrate: build FP f32/f16, quantize to the
   K-quants, reuse the adapted/PTQ I2_S GGUFs, run perplexity, emit the table.
 - B5: add a quantizer-policy switch to `PerTensorBitLinear` / the recovery driver.
+
+## Driver status (RT-121 cheap panel)
+
+`scripts/rt121_baseline_panel.py` implements only step 1 above. It intentionally does
+not train B5 and does not run GPTQ/AWQ. Pass the already-adapted 160M HF directory
+from RT-116/QR-005 as `--adapted-dir`; the script then:
+
+- downloads/reuses FP `JackFram/llama-160m`
+- materializes B1 PTQ `Wq=gamma*T`
+- converts FP/PTQ/adapted HF dirs to GGUF
+- quantizes FP f32 to `Q2_K`, `Q3_K_M`, and `Q4_0`
+- quantizes PTQ/adapted `Wq` to `I2_S`
+- runs one `llama-perplexity` binary on one shared `eval.txt`
+- writes JSON and markdown tables
+
+Example L4/x86 command:
+
+```bash
+python scripts/rt121_baseline_panel.py \
+  --bitnet /content/bitnet.cpp \
+  --model-id JackFram/llama-160m \
+  --adapted-dir /content/bnt/reports/llama-160m_adapted \
+  --ctx 64 \
+  --threads 2 \
+  --json-out reports/rt121_baseline_panel.json \
+  --markdown-out reports/rt121_baseline_panel.md
+```
+
+Interpret only the same-tool table it emits. If `OURS <= B2/Q2_K`, the headline
+baseline passes. If not, do not force the claim; reframe before B5/A1.

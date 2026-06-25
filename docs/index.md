@@ -178,6 +178,8 @@ python scripts/rt113_storage_latency.py \
    - PTQ 붕괴, teacher-free adaptation, I2_S runtime 보존, 실제 답변 품질 평가 계획.
 8g. [G1 Budget-Scaling Runbook](./g1_budget_scaling_runbook.md)
    - GPU 업그레이드 전 TinyLlama-1.1B 회복 budget-scaling을 한 번에 돌리기 위한 사전 점검/명령/판정 기준.
+8h. [G5 Baseline Comparison Plan](./g5_baseline_plan.md)
+   - 기존 one-shot quantization/QAT 대비 왜 이 방법이 필요한지 같은 eval/tool로 비교하는 baseline 계획.
 9. [Groupwise Alpha Hypothesis](./groupwise_alpha_hypothesis.md)
    - 왜 groupwise `alpha*T`가 per-tensor BitNet b1.58보다 품질을 더 잘 보존할 수 있는지 설명한다.
 10. [Research Signal Note](./research_signal_note.md)
@@ -203,6 +205,7 @@ flowchart TD
   R --> U["scaleup_target_roadmap.md"]
   U --> V["quality_recovery_plan.md"]
   V --> W["g1_budget_scaling_runbook.md"]
+  W --> X["g5_baseline_plan.md"]
   R --> T["groupwise_alpha_hypothesis.md"]
   U --> T
   V --> L
@@ -237,6 +240,7 @@ flowchart TD
 | [scaleup_target_roadmap.md](./scaleup_target_roadmap.md) | Llama-160M -> gpt-oss-20b scale-up 순서와 gate | 어떤 공개 모델을 다음 목표로 삼을지 정할 때 |
 | [quality_recovery_plan.md](./quality_recovery_plan.md) | PTQ 붕괴 측정, CE-only recovery, I2_S 품질 보존, prompt 품질 평가 | 작고 빠른 모델이 실제로 쓸 만한지 판단할 때 |
 | [g1_budget_scaling_runbook.md](./g1_budget_scaling_runbook.md) | RT-120 / TRAIN-003 사전 점검, A100/L4 one-shot 명령, 성공/실패 판정 | 1.1B 회복률 0.48을 GPU 업그레이드로 보강하기 직전 |
+| [g5_baseline_plan.md](./g5_baseline_plan.md) | B0/B1/Q2_K/Q3_K/Q4_0/OURS baseline panel 설계 | "왜 기존 quantization이 아니라 이 방법인가"를 답할 때 |
 | [groupwise_alpha_hypothesis.md](./groupwise_alpha_hypothesis.md) | groupwise scale이 품질을 보존하는 이유와 검증할 ablation | 알고리즘 우위의 원인을 설명하거나 반증할 때 |
 | [research_signal_note.md](./research_signal_note.md) | 현재 결과가 연구 신호로서 왜 의미 있는지 해석 | 논문화 가능성과 다음 방향을 판단할 때 |
 | [turboquant_bitnet_implementation_plan.md](./turboquant_bitnet_implementation_plan.md) | KV cache 압축 계획과 TC | weight 변환 이후 긴 문맥으로 확장할 때 |
@@ -258,6 +262,7 @@ flowchart TD
 | [scripts/rt112_x86_arena.py](../scripts/rt112_x86_arena.py) | [GGUF / bitnet.cpp Export Scoping Plan](./bitnet_cpp_export_scoping.md) | x86 I2_S artifact parity: latent Path A vs ternary-dense Path A' |
 | [scripts/rt113_storage_latency.py](../scripts/rt113_storage_latency.py) | [GGUF / bitnet.cpp Export Scoping Plan](./bitnet_cpp_export_scoping.md) | EXPORT-006/007 target-linear storage and llama-bench latency metrics |
 | [scripts/rt114_scaleup.py](../scripts/rt114_scaleup.py) | [Scale-Up Target Roadmap](./scaleup_target_roadmap.md) | Llama-160M SCALE-001 export/runtime scale-up driver |
+| [scripts/rt121_baseline_panel.py](../scripts/rt121_baseline_panel.py) | [G5 Baseline Comparison Plan](./g5_baseline_plan.md) | B0/B1/Q2_K/Q3_K/Q4_0/OURS same-tool baseline panel |
 | [scripts/check_packed_model.py](../scripts/check_packed_model.py) | [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) | PACK-101..103 model export/import TC |
 | [scripts/check_packed_runtime.py](../scripts/check_packed_runtime.py) | [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) | PACK-201..204 packed runtime module TC |
 | [scripts/check_packed_matmul.py](../scripts/check_packed_matmul.py) | [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) | PACK-301..304 blocked dequant matmul reference TC |
@@ -335,7 +340,8 @@ flowchart TD
    one-shot 명령을 고정한 뒤, TinyLlama-1.1B 회복률 `0.480`을 budget-scaled
    linears-only run으로 끌어올린다.
 2. **G5 baseline:** G1 이후에도 논문화 구멍으로 남는 RTN/GPTQ/AWQ/QAT 1점을
-   Llama-160M에서 추가한다.
+   Llama-160M에서 추가한다. Cheap panel driver는
+   [scripts/rt121_baseline_panel.py](../scripts/rt121_baseline_panel.py)로 준비됐다.
 3. **G6 seed variance:** 160M QR-002a를 2~3 seed로 반복해 회복률 분산을 확인한다.
 4. Mac M5 I2_S/TL1은 보류한다. 필요하면 upstream bug report용 최소 재현으로 분리한다.
 
