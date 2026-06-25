@@ -132,6 +132,10 @@ def main():
                     help="adamw8bit (bitsandbytes) cuts optimizer-state memory ~4x for 1B+")
     ap.add_argument("--grad-checkpointing", action="store_true",
                     help="trade compute for activation memory (needed for 1B+ on a 16GB GPU)")
+    ap.add_argument("--train-norms", action="store_true",
+                    help="QR-002b: also adapt RMSNorm weights (may absorb quantization drift)")
+    ap.add_argument("--train-lm-head", action="store_true",
+                    help="QR-002c: also adapt lm_head (output distribution retune)")
     ap.add_argument("--bitnet", type=Path, default=None, help="if set, run QR-003 export+perplexity")
     ap.add_argument("--json-out", type=Path, default=None)
     args = ap.parse_args()
@@ -162,12 +166,21 @@ def main():
     print(f"QR-001  CE_fp={ce_fp:.4f} (ppl {math.exp(ce_fp):.2f})  "
           f"CE_ptq={ce_ptq:.4f} (ppl {math.exp(ce_ptq):.2f})  [{n_lin} target linears]")
 
-    # QR-002a: freeze all but target linears, CE-only adaptation
+    # QR-002a/b/c: freeze all, then unfreeze target linears (+ optional norms / lm_head)
     for p in model.parameters():
         p.requires_grad_(False)
     tparams = [m.weight for m in model.modules() if isinstance(m, PerTensorBitLinear)]
+    if args.train_norms:
+        tparams += [p for n, p in model.named_parameters() if "norm" in n.lower() and p.dim() == 1]
+    if args.train_lm_head:
+        tparams += [p for n, p in model.named_parameters() if n.endswith("lm_head.weight")]
+    seen, uniq = set(), []
     for p in tparams:
-        p.requires_grad_(True)
+        if id(p) not in seen:
+            seen.add(id(p)); p.requires_grad_(True); uniq.append(p)
+    tparams = uniq
+    arm = "QR-002a(linears)" + ("+norms" if args.train_norms else "") + ("+lmhead" if args.train_lm_head else "")
+    print(f"adapting {sum(p.numel() for p in tparams)/1e6:.1f}M params across {len(tparams)} tensors [{arm}]")
     if args.optim == "adamw8bit":
         import bitsandbytes as bnb
         opt = bnb.optim.AdamW8bit(tparams, lr=args.lr)
@@ -200,6 +213,7 @@ def main():
 
     result = {"model": args.model_id, "device": device, "n_target_linears": n_lin,
               "steps": args.steps, "seq_len": args.seq_len, "batch": args.batch, "lr": args.lr,
+              "arm": arm, "train_norms": args.train_norms, "train_lm_head": args.train_lm_head,
               "ce_fp": ce_fp, "ce_ptq": ce_ptq, "ce_adapted": ce_adapted,
               "ppl_fp": math.exp(ce_fp), "ppl_ptq": math.exp(ce_ptq), "ppl_adapted": math.exp(ce_adapted),
               "recovered_fraction": rec}
