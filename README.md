@@ -28,10 +28,13 @@ Current modernization status:
 - RT-116/TRAIN-002/QR-004/QR-005 confirmed teacher-free CE recovery: 160M recovers
   ~90%, 1.1B recovers directionally under a constrained budget, adapted I2_S
   preserves adapted F16 to ~+0.002 nats, and linears-only is the default recipe.
+- RT-121/122 honestly reframed the quality claim: all-I2_S b1.58 is smallest/fastest
+  but does not beat Q2_K on PPL and 1.1B greedy generation is not yet usable. The
+  next path is mixed-bit DP: keep I2_S for most weights and selectively upgrade the
+  most sensitive groups to Q2/Q3.
 - The local Mac M5 build is currently blocked by bitnet.cpp toolchain/backend
   issues, so runtime validation targets x86/Linux first.
-- Next gate: G1 budget scaling — run the prepared TinyLlama-1.1B linears-only
-  budget-scaled recovery on L4/A100 before making paper-grade 1B quality claims.
+- Next gate: RT-123 mixed-bit sensitivity scan, then DP selector and hybrid validation.
 
 Core documents:
 
@@ -50,6 +53,7 @@ Core documents:
 - [Quality recovery plan](./docs/quality_recovery_plan.md)
 - [G1 budget-scaling runbook](./docs/g1_budget_scaling_runbook.md)
 - [G5 baseline comparison plan](./docs/g5_baseline_plan.md)
+- [Mixed-bit DP plan](./docs/mixed_bit_dp_plan.md)
 - [Groupwise alpha hypothesis](./docs/groupwise_alpha_hypothesis.md)
 - [Research signal note](./docs/research_signal_note.md)
 - [TurboQuant + BitNet KV-cache plan](./docs/turboquant_bitnet_implementation_plan.md)

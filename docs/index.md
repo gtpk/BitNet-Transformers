@@ -89,8 +89,14 @@ adapted I2_S가 adapted F16을 `+0.002` nats 수준으로 보존했다. QR-005 a
 salad가 adapted fluent text로 회복됨을 사람 눈으로 확인했다.
 
 **RT-117/118 gpt-oss 감사도 완료:** gpt-oss-20b는 이미 MXFP4 MoE라 ternary-MoE 투자
-ROI가 거의 없으므로 현재 연구 메인은 dense LLaMA family로 고정한다. 남은 큰 gap은
-TinyLlama-1.1B의 회복률 `0.480`이 예산 한계였는지 확인하는 **G1 budget scaling**이다.
+ROI가 거의 없으므로 현재 연구 메인은 dense LLaMA family로 고정한다.
+
+**RT-120/121/122도 완료:** G1 budget scaling은 TinyLlama-1.1B 회복률을 `0.480`에서
+`0.698`로 올려 budget artifact 가설을 지지했지만, RT-121 baseline은 OURS가 Q2_K를
+PPL에서 이기지 못함을 보였고(RT-121, `114` vs `98`), RT-122 prompt panel은 1.1B
+all-I2_S adapted greedy generation이 아직 usable하지 않음을 보였다. 따라서 다음 큰
+축은 pure all-I2_S가 아니라 **mixed-bit DP**: 대부분은 I2_S로 두고 민감한 `attn/mlp`
+그룹만 Q2/Q3로 올려 Q2_K보다 작고 빠르면서 all-I2_S보다 덜 깨지는 지점을 찾는 것이다.
 
 packed format Phase 1/2/3/4 검증(로컬):
 
@@ -180,6 +186,8 @@ python scripts/rt113_storage_latency.py \
    - GPU 업그레이드 전 TinyLlama-1.1B 회복 budget-scaling을 한 번에 돌리기 위한 사전 점검/명령/판정 기준.
 8h. [G5 Baseline Comparison Plan](./g5_baseline_plan.md)
    - 기존 one-shot quantization/QAT 대비 왜 이 방법이 필요한지 같은 eval/tool로 비교하는 baseline 계획.
+8i. [Mixed-Bit DP Plan](./mixed_bit_dp_plan.md)
+   - all-I2_S b1.58의 품질 한계를 선택적 Q2/Q3 업그레이드와 DP selector로 푸는 다음 연구 축.
 9. [Groupwise Alpha Hypothesis](./groupwise_alpha_hypothesis.md)
    - 왜 groupwise `alpha*T`가 per-tensor BitNet b1.58보다 품질을 더 잘 보존할 수 있는지 설명한다.
 10. [Research Signal Note](./research_signal_note.md)
@@ -206,6 +214,7 @@ flowchart TD
   U --> V["quality_recovery_plan.md"]
   V --> W["g1_budget_scaling_runbook.md"]
   W --> X["g5_baseline_plan.md"]
+  X --> Y["mixed_bit_dp_plan.md"]
   R --> T["groupwise_alpha_hypothesis.md"]
   U --> T
   V --> L
@@ -241,6 +250,7 @@ flowchart TD
 | [quality_recovery_plan.md](./quality_recovery_plan.md) | PTQ 붕괴 측정, CE-only recovery, I2_S 품질 보존, prompt 품질 평가 | 작고 빠른 모델이 실제로 쓸 만한지 판단할 때 |
 | [g1_budget_scaling_runbook.md](./g1_budget_scaling_runbook.md) | RT-120 / TRAIN-003 사전 점검, A100/L4 one-shot 명령, 성공/실패 판정 | 1.1B 회복률 0.48을 GPU 업그레이드로 보강하기 직전 |
 | [g5_baseline_plan.md](./g5_baseline_plan.md) | B0/B1/Q2_K/Q3_K/Q4_0/OURS baseline panel 설계 | "왜 기존 quantization이 아니라 이 방법인가"를 답할 때 |
+| [mixed_bit_dp_plan.md](./mixed_bit_dp_plan.md) | RT-123 sensitivity scan, RT-124 DP selector, RT-125 hybrid artifact 검증 | all-I2_S의 생성 품질 한계를 selective higher-bit로 풀 때 |
 | [groupwise_alpha_hypothesis.md](./groupwise_alpha_hypothesis.md) | groupwise scale이 품질을 보존하는 이유와 검증할 ablation | 알고리즘 우위의 원인을 설명하거나 반증할 때 |
 | [research_signal_note.md](./research_signal_note.md) | 현재 결과가 연구 신호로서 왜 의미 있는지 해석 | 논문화 가능성과 다음 방향을 판단할 때 |
 | [turboquant_bitnet_implementation_plan.md](./turboquant_bitnet_implementation_plan.md) | KV cache 압축 계획과 TC | weight 변환 이후 긴 문맥으로 확장할 때 |
@@ -335,21 +345,22 @@ flowchart TD
 
 다음:
 
-1. **RT-120 / TRAIN-003 (G1):** GPU 업그레이드 전에
-   [G1 Budget-Scaling Runbook](./g1_budget_scaling_runbook.md)으로 smoke와
-   one-shot 명령을 고정한 뒤, TinyLlama-1.1B 회복률 `0.480`을 budget-scaled
-   linears-only run으로 끌어올린다.
-2. **G5 baseline:** G1 이후에도 논문화 구멍으로 남는 RTN/GPTQ/AWQ/QAT 1점을
-   Llama-160M에서 추가한다. Cheap panel driver는
-   [scripts/rt121_baseline_panel.py](../scripts/rt121_baseline_panel.py)로 준비됐다.
-3. **G6 seed variance:** 160M QR-002a를 2~3 seed로 반복해 회복률 분산을 확인한다.
-4. Mac M5 I2_S/TL1은 보류한다. 필요하면 upstream bug report용 최소 재현으로 분리한다.
+1. **RT-123 / mixed-bit sensitivity scan:** all-I2_S가 Q2_K보다 품질이 낮고
+   1.1B greedy generation이 깨졌으므로, [Mixed-Bit DP Plan](./mixed_bit_dp_plan.md)에
+   따라 `attn/mlp` group별 Q2/Q3 업그레이드의 CE gain per MB를 측정한다.
+2. **RT-124 / DP selector:** sensitivity 결과를 multiple-choice knapsack DP로 풀어
+   `tiny-fast`, `balanced`, `quality-heavy` 후보를 만든다.
+3. **RT-125 / hybrid validation:** 실제 hybrid artifact의 PPL, loop rate, MB,
+   token-gen t/s를 측정해 Q2_K보다 작고 빠르면서 all-I2_S보다 덜 깨지는 지점을 찾는다.
+4. **G6 seed variance:** mixed-bit 방향성이 확인된 뒤 160M/1.1B seed 반복으로 논문 hygiene를 보강한다.
+5. Mac M5 I2_S/TL1은 보류한다. 필요하면 upstream bug report용 최소 재현으로 분리한다.
 
 이전 보류 항목 중 packed reference ladder는 완료됐고, export 경로도 판별됐다
 (per-tensor-native → I2_S 직행). 남은 다음 축:
 
 - G1 quality budget scaling: TinyLlama-1.1B에서 회복률 `0.480`이 예산 한계였는지 확인
-- baseline/variance: 논문용 설득력을 위해 160M baseline과 seed 반복 추가
+- mixed-bit DP: all-I2_S의 품질/생성 한계를 selective Q2/Q3 업그레이드로 보완
+- variance: 논문용 설득력을 위해 seed 반복 추가
 - groupwise GGUF 확장 / custom kernel: export 트랙이면 불필요. groupwise의 약간 더 나은
   reconstruction을 살리려는 연구용으로만 선택적
 - TurboQuant KV cache 구현

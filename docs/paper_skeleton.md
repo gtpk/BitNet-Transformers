@@ -2,7 +2,7 @@
 
 Document position: [Index](./index.md) -> synthesis of RT-112..118. Pulls the
 finished tracks into a paper outline, audits the gaps, and scopes the next
-high-value reinforcing experiment (G1 budget scaling).
+high-value reinforcing experiment (mixed-bit DP after G5/RT-122).
 
 Related: [bitnet_cpp_export_scoping.md](./bitnet_cpp_export_scoping.md) (systems),
 [quality_recovery_plan.md](./quality_recovery_plan.md) (quality),
@@ -172,32 +172,34 @@ ladder to show the floor; conclude "wrong vehicle for ternary."
 | G8 | only LLaMA family; generality unproven beyond it | LOW | (scope it honestly; gpt-oss negative already bounds the claim) |
 | G9 | some raw Colab JSON volatile / not all archived in repo `reports/` | LOW | commit the rt11x_*.json artifacts |
 
-## Next reinforcing experiment: G1 budget scaling (RT-120 / TRAIN-003)
+## Next reinforcing experiment: mixed-bit DP (RT-123..125)
 
-Rationale: the cheap gaps are closed. QR-005 showed that the simplest recipe
-(`target linears only`) is the default, and QR-004 showed human-visible recovery at
-160M. The only high-severity gap left in the main figure is whether the 1.1B
-recovery fraction `0.480` was merely under-budgeted.
+Rationale: G1/G5/RT-122 are now resolved and they narrow the claim honestly. Pure
+all-I2_S is excellent as a systems substrate, but it does not beat Q2_K on PPL and
+does not yet generate usable 1.1B text. The next useful question is not "train the
+same all-I2_S recipe longer" but:
 
-Design:
+```text
+Can we spend a small extra bit budget only on sensitive groups and keep most of the
+I2_S memory-traffic win?
+```
 
-- Model: `TinyLlama/TinyLlama-1.1B-Chat-v1.0`.
-- Recipe: target linears only; no norms; no lm_head.
-- Budget: raise effective training tokens from TRAIN-002's `0.31M` to about `4.9M`
-  using gradient accumulation (`800` steps, effective batch `24`, seq `256`).
-- Preferred hardware: A100 with fp32 AdamW; fallback: L4 with AdamW8bit.
-- Primary metric: recovered_fraction.
-- Runtime gate: adapted I2_S vs adapted F16 should stay near `+0.002` nats and pass
-  if `<= +0.010` nats.
+Plan:
 
-See [G1 Budget-Scaling Runbook](./g1_budget_scaling_runbook.md) for smoke commands,
-one-shot A100/L4 commands, fallback rules, and result interpretation.
+- RT-123: scan layer-group sensitivity (`attn`, `mlp`) by upgrading one group at a
+  time from I2_S to Q2_K/Q3_K_M and measuring same-tool CE gain per MB.
+- RT-124: solve a multiple-choice knapsack DP over the scan results to produce
+  `tiny-fast`, `balanced`, and `quality-heavy` hybrid policies.
+- RT-125: build and validate real hybrid artifacts with PPL, residual gap, loop rate,
+  MB, and token-gen t/s.
 
-Decision order now: **G1 budget scaling -> G5 baseline -> G6 seed variance**.
+See [Mixed-Bit DP Plan](./mixed_bit_dp_plan.md). Decision order now:
+**RT-123 sensitivity scan -> RT-124 DP selector -> RT-125 hybrid validation -> G6 seed variance**.
 
 ## What NOT to do next
 
 - Do not start a ternary-MoE / gpt-oss build (RT-118: ROI ~0).
-- Do not spend L4/A100 without the G1 smoke and one-shot runbook.
-- Do not claim user-facing quality from CE/PPL alone; QR-004 closes this only at
-  160M, so 1.1B qualitative examples should follow a successful G1 run.
+- Do not claim quality-per-bit superiority over Q2_K (RT-121 says no).
+- Do not claim 1.1B generation usability for all-I2_S (RT-122 says no).
+- Do not run seed variance before deciding whether mixed-bit can fix the current
+  usability bottleneck; G6 is paper hygiene, not the scientific blocker.
