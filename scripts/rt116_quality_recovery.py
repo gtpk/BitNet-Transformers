@@ -122,6 +122,9 @@ def main():
     ap.add_argument("--lr", type=float, default=2e-4)
     ap.add_argument("--max-train-tokens", type=int, default=600_000)
     ap.add_argument("--max-eval-tokens", type=int, default=60_000)
+    ap.add_argument("--ppl-eval-tokens", type=int, default=3_000,
+                    help="tokens written to eval.txt for the GGUF llama-perplexity (QR-003); "
+                         "keep small, CPU perplexity is ~per-token")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--bitnet", type=Path, default=None, help="if set, run QR-003 export+perplexity")
     ap.add_argument("--json-out", type=Path, default=None)
@@ -172,9 +175,11 @@ def main():
     print(f"QR-002a CE_adapted={ce_adapted:.4f} (ppl {math.exp(ce_adapted):.2f})  "
           f"recovered_fraction={rec:.3f}")
 
-    # save adapted materialized model for QR-003
+    # save adapted materialized model for QR-003. NOTE: keep eval.txt SHORT — the
+    # GGUF llama-perplexity processes every token and 60k tokens is ~13 min/format
+    # on a 2-core CPU; a few thousand tokens is plenty for the f16-vs-i2_s parity.
     materialize_and_save(model, out_dir, tok)
-    (out_dir / "eval.txt").write_text(tok.decode(eval_ids[: args.max_eval_tokens].tolist()),
+    (out_dir / "eval.txt").write_text(tok.decode(eval_ids[: args.ppl_eval_tokens].tolist()),
                                       encoding="utf-8")
     print(f"saved adapted ternary HF dir -> {out_dir}")
 

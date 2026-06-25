@@ -300,3 +300,36 @@ quality track : QR-001..004 on Llama-160M, then TinyLlama
 This keeps the project honest: it can say both "small and fast" and, only after
 QR passes, "still useful."
 
+
+## RT-116 / TRAIN-001 RESULT (2026-06-25): teacher-free CE recovers 90% on Llama-160M
+
+Ran `scripts/rt116_quality_recovery.py` on JackFram/llama-160m, GPU T4, WikiText-2
+(Salesforce/wikitext, 600k train / 60k eval tokens), 300 steps, seq 256, batch 8,
+lr 2e-4, target linears only (QR-002a). All-PyTorch on one held-out eval set
+(apples-to-apples, no cross-tool noise):
+
+### QR-001 collapse baseline + QR-002a recovery
+
+| stage | CE (nats) | PPL |
+| --- | ---: | ---: |
+| FP original | 3.1466 | 23.3 |
+| one-shot b1.58 PTQ (Wq=gamma*T, no train) | 11.6597 | 115,808 |
+| **adapted (300-step teacher-free CE)** | **3.9519** | **52.0** |
+
+```text
+recovered_fraction = (CE_ptq - CE_adapted) / (CE_ptq - CE_fp)
+                   = (11.660 - 3.952) / (11.660 - 3.147) = 0.905
+```
+
+**QR-002 PASS, decisively.** A short, teacher-free, CE-only adaptation of ONLY the
+84 target linears (everything else frozen) recovers **90.5%** of the catastrophic
+FP->PTQ loss: PPL 115,808 -> 52.0 (FP is 23.3, so adapted is ~2.2x FP). This is the
+missing third sentence: the model is small, fast, AND — after a cheap teacher-free
+recovery step — back to usable text-modeling quality. No teacher, no distillation,
+no touching embeddings/norms/lm_head.
+
+Notes: train CE was a touch noisy (5.03 -> 3.70 over 300 steps), so more steps / an
+LR schedule / +norms (QR-002b) could push past 0.905; 0.905 already clears the
+PASS bar (>0.3). The PTQ baseline 115,808 matches the "PTQ-broken by design" framing
+from RT-114/115 — that bad number was always a baseline to recover FROM, not a
+runtime failure.
