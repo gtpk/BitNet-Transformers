@@ -41,10 +41,11 @@ Date: 2026-06-25
 Step 0/1 complete.
 Mapping decision for groupwise -> I2_S: lossy re-quantization.
 Step 2 complete: native per-tensor b1.58 gate PASSED.
-RT-101..111 complete.
+RT-101..112 complete.
 x86 official I2_S sanity: PASS (f32 PPL 1.8547 vs i2_s PPL 1.8548).
 Mac M5 I2_S/TL1: BROKEN local toolchain/backend, not algorithm.
-Next: RT-112 our tiny model on x86 I2_S (Python/F16/F32/I2_S PPL parity).
+Our tiny model on x86 I2_S: PASS via ternary-dense Path A' (RT-112).
+Next: RT-113 / EXPORT-006/007 storage and latency metrics on x86/Linux.
 ```
 
 **RT-103C (I2_S quantize + runtime smoke): PASS as plumbing, not final parity.**
@@ -253,9 +254,10 @@ PER-TENSOR-NATIVE EXPORT IS VIABLE -- but runtime deployment is platform-scoped.
 The mapping is "lossy" only if you convert a groupwise-trained model after the
 fact. If the model is trained per-tensor (BitNet b1.58 native) from the start,
 its scale granularity matches the I2_S target. Python/F16/F32 references preserve
-quality, and official bitnet.cpp I2_S is faithful on x86. The remaining claim to
-close is our own tiny model on x86 I2_S (RT-112). Groupwise GGUF/custom kernels
-remain fallback/research options, not the default path.
+quality, official bitnet.cpp I2_S is faithful on x86, and RT-112 showed that our
+own tiny model reaches F16/F32 parity on x86 I2_S through ternary-dense Path A'.
+Groupwise GGUF/custom kernels remain fallback/research options, not the default
+path.
 
 ### RT-104 result: Path A is mechanically open but semantically UNFAITHFUL
 
@@ -575,11 +577,11 @@ deployment is now platform-scoped:
 ```text
 x86/Linux I2_S official runtime = verified healthy (RT-111).
 Mac M5 local I2_S/TL1 runtime = blocked by build/backend issues.
-Our model on x86 I2_S = RT-112 pending.
+Our model on x86 I2_S = verified healthy via Path A' (RT-112).
 ```
 
-If RT-112 passes, continue with x86 storage/latency/generation. If RT-112 fails,
-inspect our artifact/metadata or implement a direct Path B writer. Mac M5 work is
+Continue with x86 storage/latency/generation (RT-113 / EXPORT-006/007). Path B
+direct writer is unnecessary unless a future larger model drifts. Mac M5 work is
 now a separate upstream/toolchain issue, not the main research path.
 
 ## RT-110/111: x86 (Colab) I2_S verification — build saga
@@ -745,7 +747,53 @@ only blocked piece is the M5 runtime (toolchain bug, RT-107..109). Next track:
 storage ratio + latency (EXPORT-006/007), and optionally an upstream M5 bug report.
 ```
 
-### Colab x86 runbook (self-contained; colab-mcp or manual)
+## RT-113 / EXPORT-006-007: x86 storage and latency metrics
+
+Purpose: convert the RT-112 "it runs faithfully" result into the memory-traffic
+question this project actually cares about.
+
+```text
+Question: does I2_S reduce artifact bytes and runtime token latency relative to
+F16/F32 under the same bitnet.cpp build, prompt, context, and thread settings?
+```
+
+Driver: `scripts/rt113_x86_runtime_metrics.py`.
+
+Expected inputs are the GGUF files created by RT-112:
+
+```text
+<bitnet>/models/tiny_pt_ternary/ggml-model-f32.gguf
+<bitnet>/models/tiny_pt_ternary/ggml-model-f16.gguf
+<bitnet>/models/tiny_pt_ternary/ggml-model-i2_s.gguf
+<bitnet>/models/tiny_pt_trained/eval.txt
+```
+
+Run:
+
+```bash
+python scripts/rt113_x86_runtime_metrics.py \
+  --bitnet /content/bitnet.cpp \
+  --json-out reports/rt113_x86_runtime_metrics.json \
+  --strict
+```
+
+TC:
+
+| ID | Check | Pass/report rule |
+| --- | --- | --- |
+| EXPORT-006 | storage | exact F32/F16/I2_S artifact sizes and I2_S-vs-F16 ratio |
+| EXPORT-007a | PPL guard | I2_S PPL within 5% of F16 under `--strict` |
+| EXPORT-007b | generation latency | median decode tok/s and wall tok/s, report-only |
+| EXPORT-007c | interpretation | no latency overclaim on tiny models; overhead can dominate |
+
+Decision rule:
+
+- I2_S storage smaller + PPL guard passes -> runtime path remains valid.
+- I2_S latency better or comparable -> move to a larger pretrained/small model.
+- I2_S latency worse -> do not abandon the algorithm; first separate tiny-model
+  overhead, thread count, context regime, and kernel maturity.
+
+### Colab/Linux x86 runbook (self-contained; manual shell)
 
 ```python
 # Stage A — build bitnet.cpp (binaries + official control + tokenizer dir)
@@ -779,3 +827,66 @@ print((r.stdout+r.stderr)[-3000:])
 
 NOTE: Stage B clones `origin` — the driver `scripts/rt112_x86_arena.py` must be
 pushed there first (rt104/rt104d/conversion/data are already on origin).
+
+## RT-113 / EXPORT-006/007 RESULT (2026-06-25): storage + latency on x86
+
+Measured on Colab x86 (2 cores) with the RT-112 ternary Path A' artifact
+(`tiny_pt_ternary`). Driver: `scripts/rt113_storage_latency.py`. Identical
+conditions across f32/f16/i2_s.
+
+### EXPORT-006 Storage
+
+Tiny model: hidden 256, inter 512, 2 layers, vocab 32002 (tie-embed). Target
+linears (attn q/k/v/o + ffn gate/up/down) = 1,310,720 elems / 14 tensors;
+embedding = 8,192,512 elems (dominates the artifact).
+
+| fmt | target-linear bytes | whole-file bytes |
+| --- | ---: | ---: |
+| f32 | 5,242,880 | 38,743,232 |
+| f16 | 2,621,440 | 36,121,792 |
+| i2_s | 328,128 | 17,443,520 |
+
+| ratio vs f32 | target-linear-only | whole artifact |
+| --- | ---: | ---: |
+| f16 | 0.500 | 0.932 |
+| **i2_s** | **0.0626 (16x)** | 0.450 |
+| i2_s vs f16 | 0.125 (8x) | — |
+
+The target-linear-only ratio is the true I2_S compression: **16x vs f32, 8x vs
+f16** (2-bit codes + a 32-byte per-tensor scale). The whole-file ratio (0.45) is
+diluted by the f16 embedding floor (8.2M of 9.5M params on this tiny model); on a
+real model where linears dominate the params, the whole-file ratio converges
+toward the target-linear ratio.
+
+### EXPORT-007 Latency (llama-bench, t=2, pp64/tg64, r=5)
+
+| fmt | prompt pp64 (t/s) | token-gen tg64 (t/s) |
+| --- | ---: | ---: |
+| f32 | 6765.66 ± 105 | 318.19 ± 21 |
+| f16 | 8796.74 ± 97 | 276.39 ± 68 |
+| **i2_s** | **11431.77 ± 296** | **627.88 ± 27** |
+
+I2_S is the fastest format on BOTH phases:
+- prompt-processing: **1.69x vs f32**, 1.30x vs f16
+- token-generation:  **1.97x vs f32**, **2.27x vs f16** (tg is memory-bandwidth-
+  bound, so the 2-bit weight-traffic reduction shows up most here — exactly the
+  memory-traffic-first thesis)
+
+Even on a tiny model whose params are embedding-dominated (so the linear speedup
+is partly masked), I2_S already wins ~2x on token-gen. f16 token-gen is noisy
+(±68) and not reliably faster than f32 on this CPU (f16 weights still expand to
+f32 for compute); I2_S avoids that and moves the least weight bytes.
+
+Peak RSS is NOT a useful discriminator here: llama.cpp mmaps the model, so
+touched-page RSS was ~equal (5632 KB) across all three formats. The memory story
+is carried by on-disk bytes (EXPORT-006) and the tg tokens/sec (EXPORT-007).
+
+```text
+CONCLUSION (EXPORT-006/007): the per-tensor-native -> I2_S export is not just
+correct (RT-112) but efficient on x86 — 16x linear-weight compression and ~2x
+token-gen throughput vs f32, no custom kernel. The original "before a custom
+kernel" question is answered: an existing optimized ternary runtime (bitnet.cpp
+I2_S) delivers both the size and the speed, so a bespoke kernel is unnecessary
+for the x86/Linux deployment target. Remaining: confirm the ratios scale up on a
+real (linear-dominated) model; the M5 runtime stays a separate toolchain issue.
+```

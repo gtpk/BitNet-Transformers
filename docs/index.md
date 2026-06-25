@@ -1,7 +1,23 @@
 # BitNet-Transformers Research Index
 
 이 문서는 현재 fork에서 진행 중인 BitNet 변환, memory-traffic 최적화,
-scaled-STE, Colab 실험 준비 문서의 시작점이다.
+scaled-STE, x86 I2_S runtime 검증 문서의 시작점이다.
+
+## 프로젝트 목적 재정의
+
+이 프로젝트의 목적은 "모델 파라미터 수를 줄인다"보다 좁고 실용적이다.
+
+```text
+흙수저용 LLM을 위해,
+generated token 하나당 메모리에서 읽고 쓰는 bytes를 줄이는
+native b1.58 학습 -> export -> runtime 파이프라인을 만든다.
+```
+
+따라서 이제 핵심 질문은 세 가지다.
+
+1. teacher distillation 없이 b1.58-friendly 학습/후학습으로 품질을 유지할 수 있는가?
+2. 그 weight를 실제 ternary runtime에 충실히 옮길 수 있는가?
+3. 실제 runtime에서 storage, latency, tokens/sec가 개선되는가?
 
 ## 한 줄 현재 결론
 
@@ -22,13 +38,15 @@ Python loop라 latency는 아직 느리다.
 export는 lossy(PPL +55~77%)지만, **처음부터 per-tensor b1.58로 native STE
 학습하면 groupwise와 ±1% PPL로 동급**이다. Python I2_S reference와 HF/F16/F32
 GGUF export도 통과했다. bitnet.cpp I2_S는 **x86 Colab에서 공식 모델 f32
-PPL 1.8547 vs i2_s PPL 1.8548로 정상**임이 확인됐다. 반면 Mac M5/macOS26/clang21
-로컬 빌드는 I2_S/TL1 ternary runtime이 깨진 상태다. 따라서 알고리즘/포맷은
-유효하고, 현재 배포 검증 타겟은 **x86/Linux I2_S**다.
+PPL 1.8547 vs i2_s PPL 1.8548로 정상**임이 확인됐고, RT-112에서 **우리 tiny
+per-tensor-native b1.58 모델도 x86 I2_S에서 F16/F32 PPL parity**를 냈다.
+반면 Mac M5/macOS26/clang21 로컬 빌드는 I2_S/TL1 ternary runtime이 깨진
+상태다. 따라서 알고리즘/포맷은 유효하고, 현재 배포 검증 타겟은
+**x86/Linux I2_S storage/latency**다.
 
 ## 지금 바로 할 일
 
-RT-101~111까지의 runtime 조사는 완료됐다. 핵심 결론은:
+RT-101~112까지의 runtime 조사는 완료됐다. 핵심 결론은:
 
 - upstream I2_S quantizer는 latent fp weight에 대해 `sign(W) * absmax`라서
   우리 `mean(abs)` native quantization과 의미가 다르다.
@@ -39,10 +57,13 @@ RT-101~111까지의 runtime 조사는 완료됐다. 핵심 결론은:
   compile blowup으로 막힘.
 - x86 Colab에서는 같은 commit/모델/quantize 경로로 I2_S가 f32와 PPL parity를
   냈다.
+- RT-112에서 우리 tiny per-tensor-native 모델도 ternary-dense Path A'
+  (`Wq=gamma*T`)로 x86 I2_S F16/F32 parity를 냈다. latent FP를 바로 I2_S로
+  보내는 Path A는 의도대로 붕괴했고, absmax-vs-absmean 문제가 확정됐다.
 
-**지금 바로 할 일은 RT-112:** 우리 tiny per-tensor-native 모델을 x86/Linux
-I2_S에서 검증한다. 비교 축은 `Python reference`, `F16/F32 GGUF`, `I2_S GGUF`
-이며, latent Path A와 ternary-dense Path A'를 나눠 PPL을 확인한다.
+**지금 바로 할 일은 RT-113 / EXPORT-006/007:** x86/Linux bitnet.cpp에서
+RT-112 artifact의 storage, PPL parity, generation latency, tokens/sec를 잰다.
+이제 "돈다"는 닫혔고, "메모리 이동/지연에서 이득이 있나"를 숫자로 닫아야 한다.
 
 packed format Phase 1/2/3/4 검증(로컬):
 
@@ -81,6 +102,15 @@ real-text fixture smoke(로컬, harness 확인용):
 
 - [Colab Arena Runbook](./colab_arena_runbook.md)
 - [Colab Validation Summary](./colab_validation_summary.md)
+
+x86/Linux runtime metrics(수동 Colab/Linux shell, Colab MCP 불필요):
+
+```bash
+python scripts/rt113_x86_runtime_metrics.py \
+  --bitnet /content/bitnet.cpp \
+  --json-out reports/rt113_x86_runtime_metrics.json \
+  --strict
+```
 
 로컬에서 사전 검정:
 
@@ -184,6 +214,8 @@ flowchart TD
 | [scripts/check_packed_ternary.py](../scripts/check_packed_ternary.py) | [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) | PACK-001..006 storage TC |
 | [bitnet_llama/i2s_export.py](../bitnet_llama/i2s_export.py) | [I2_S Export PoC Plan](./i2s_export_poc_plan.md) | per-tensor b1.58 I2_S export/import reference |
 | [scripts/check_i2s_export.py](../scripts/check_i2s_export.py) | [I2_S Export PoC Plan](./i2s_export_poc_plan.md) | PTX-101..105 export 정확성 TC |
+| [scripts/rt112_x86_arena.py](../scripts/rt112_x86_arena.py) | [GGUF / bitnet.cpp Export Scoping Plan](./bitnet_cpp_export_scoping.md) | x86 I2_S artifact parity: latent Path A vs ternary-dense Path A' |
+| [scripts/rt113_x86_runtime_metrics.py](../scripts/rt113_x86_runtime_metrics.py) | [GGUF / bitnet.cpp Export Scoping Plan](./bitnet_cpp_export_scoping.md) | EXPORT-006/007 storage, PPL guard, generation latency metrics |
 | [scripts/check_packed_model.py](../scripts/check_packed_model.py) | [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) | PACK-101..103 model export/import TC |
 | [scripts/check_packed_runtime.py](../scripts/check_packed_runtime.py) | [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) | PACK-201..204 packed runtime module TC |
 | [scripts/check_packed_matmul.py](../scripts/check_packed_matmul.py) | [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) | PACK-301..304 blocked dequant matmul reference TC |
@@ -245,27 +277,27 @@ flowchart TD
 - local fixture smoke 신호: groupwise `loss 2.400/acc 0.311`, per-tensor export `loss 2.472/acc 0.274`; 참고용이며 판정은 Colab Wikitext에서 수행
 - `per_tensor_ste_native` 후보 추가(`PerTensorBitLinear`, b1.58 absmean, 단일 γ, STE) — I2_S와 동일 scale granularity
 - **Per-tensor native 판별 게이트 통과(Colab Wikitext seed 31/32/33)**: native per-tensor PPL이 groupwise 대비 `-0.9% / +1.0% / 0.0%`(±1% 이내), frontier `2/3`(seed 33은 quality+resource winner), KL `0.149~0.175`(정상), generation 정상
-- **결정**: post-hoc export(PPL +55~77%)는 lossy지만 native per-tensor는 동급 → per-tensor-native가 올바른 export source이며, groupwise는 품질의 본질 아님(가설 B 입증). Runtime은 x86 I2_S에서 검증 중.
+- **결정**: post-hoc export(PPL +55~77%)는 lossy지만 native per-tensor는 동급 → per-tensor-native가 올바른 export source이며, groupwise는 품질의 본질 아님(가설 B 입증).
 - **I2_S export Python PoC 통과(commit 5df98bf)**: `bitnet_llama/i2s_export.py`(gamma+2-bit codes), `scripts/check_i2s_export.py` PTX-101~105 — native→artifact→import logit/PPL 동일(err 3.6e-7), target 8x vs fp16. Python reference는 정확성 증명이며 runtime speed는 아직 아님
 - **RT-101~103 통과**: bitnet.cpp I2_S layout 감사, official/tiny F32 GGUF 변환, I2_S quantize/load smoke 완료. plain LLaMA arch도 converter/runtime loader가 받음.
 - **RT-104~106 판정**: latent FP를 upstream I2_S로 바로 quantize하면 semantics가 달라져 붕괴한다(`absmax/sign` vs 우리 `mean(abs)/round`). ternary-dense `Wq=gamma*T`를 넣으면 scale은 `gamma`로 보존되지만, Mac I2_S runtime에서는 PPL이 깨짐.
 - **RT-107~109 판정**: Mac M5/macOS26/clang21 로컬 ternary runtime은 신뢰 불가. official I2_S도 붕괴, TL1은 `BITNET_ARM_TL1=OFF` 기본 빌드와 clang LUT compile blowup으로 막힘.
 - **RT-111 판정**: x86 Colab에서 official `bitnet_b1_58-large` f32 PPL `1.8547`, i2_s PPL `1.8548`로 parity. I2_S upstream/runtime은 정상이며 Mac 한정 빌드/툴체인 문제로 결론.
+- **RT-112 판정**: 우리 tiny per-tensor-native b1.58 모델도 x86 I2_S에서 통과. ternary-dense Path A'는 `i2_s 305.02 ~= f16 306.48 ~= f32 306.42`, latent Path A는 `i2_s 2071 vs f16 806`으로 붕괴. Path B byte-writer 불필요.
+- **RT-113 / EXPORT-006/007 판정**: x86에서 storage+latency 측정. target-linear i2_s는 f32 대비 **16x 압축**(0.0626), 전체 파일은 f16 임베딩 floor에 희석되어 0.45. llama-bench(t=2)에서 i2_s가 양쪽 다 最速 — token-gen `627.88 t/s`로 **f32 대비 1.97x, f16 대비 2.27x**, prompt `11432 t/s`로 f32 대비 1.69x. peak RSS는 mmap이라 무차별(파일 bytes+tg t/s가 메모리 지표). per-tensor-native→I2_S는 정확할 뿐 아니라 x86에서 효율적이며 custom kernel 불필요.
 
 다음:
 
-1. **RT-112:** x86/Linux에서 우리 tiny per-tensor-native 모델을 I2_S로 검증한다.
-   `Python reference`, `F16/F32 GGUF`, `I2_S GGUF` PPL을 비교하고, latent Path A와
-   ternary-dense Path A'를 분리한다.
-2. RT-112가 통과하면 storage/latency/generation을 x86에서 측정한다.
-3. RT-112가 깨지면 official x86 parity는 정상이라는 전제 아래 우리 artifact/metadata
-   또는 direct writer(Path B)를 다시 본다.
-4. Mac M5 I2_S/TL1은 보류한다. 필요하면 upstream bug report용 최소 재현으로 분리한다.
+1. **scale-up 확인**: 더 큰 pretrained/small 모델(linear가 params를 지배)에서
+   EXPORT-006/007 비율이 whole-file → target-linear 쪽으로 수렴하는지 확인한다.
+2. 큰 모델에서 latency가 약하면 원인 분리: CPU thread, KV/context regime,
+   I2_S kernel 특성.
+3. Mac M5 I2_S/TL1은 보류한다. 필요하면 upstream bug report용 최소 재현으로 분리한다.
 
 이전 보류 항목 중 packed reference ladder는 완료됐고, export 경로도 판별됐다
 (per-tensor-native → I2_S 직행). 남은 다음 축:
 
-- bitnet.cpp/I2_S export artifact 검증 (x86/Linux, per-tensor-native 모델 기준)
+- bitnet.cpp/I2_S runtime storage/latency 검증 (x86/Linux, per-tensor-native 모델 기준)
 - groupwise GGUF 확장 / custom kernel: export 트랙이면 불필요. groupwise의 약간 더 나은
   reconstruction을 살리려는 연구용으로만 선택적
 - TurboQuant KV cache 구현

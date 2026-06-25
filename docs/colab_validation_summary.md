@@ -411,20 +411,71 @@ Interpretation:
   the weights and protocol are sound.
 - Runtime validation should continue on x86/Linux first.
 
+## Our x86 I2_S Artifact Resolution (RT-112)
+
+Date: 2026-06-25
+
+RT-112 tested this repo's tiny per-tensor-native b1.58 model on the same healthy
+x86 bitnet.cpp I2_S runtime. Two export paths were compared with one
+`llama-perplexity` tool and one eval stream.
+
+| Path | F32 PPL | F16 PPL | I2_S PPL | Verdict |
+| --- | ---: | ---: | ---: | --- |
+| latent Path A | `806.49` | `806.41` | `2071.48` | collapses, expected control |
+| ternary-dense Path A' (`Wq=gamma*T`) | `306.42` | `306.48` | `305.02` | PASS, I2_S ~= F16/F32 |
+
+Interpretation:
+
+- Our per-tensor-native b1.58 model runs faithfully in real bitnet.cpp x86 I2_S
+  when exported through ternary-dense Path A'.
+- Path A confirms the math: upstream latent-FP I2_S quantize uses
+  `sign(W)*absmax`, which breaks our `mean(abs)` gamma.
+- Path B direct byte writer is unnecessary for now.
+- This result is a runtime/export correctness milestone, not yet a latency claim.
+
+## RT-113 / EXPORT-006/007: storage + latency on x86 (DONE, 2026-06-25)
+
+Measured on Colab x86 (2 cores) with the RT-112 ternary Path A' artifact
+(`tiny_pt_ternary`), identical conditions across f32/f16/i2_s. Driver:
+`scripts/rt113_storage_latency.py` (-> `reports/rt113_storage_latency.json`).
+
+**Storage** — target-linear-only is the true I2_S compression; whole-file is
+diluted by the f16 embedding floor on this tiny model:
+
+| ratio vs f32 | target-linear-only | whole artifact |
+| --- | ---: | ---: |
+| f16 | 0.500 | 0.932 |
+| i2_s | **0.0626 (16x)** | 0.450 |
+
+**Latency** (llama-bench, t=2, pp64/tg64, r=5) — i2_s fastest on both phases:
+
+| fmt | pp64 t/s | tg64 t/s |
+| --- | ---: | ---: |
+| f32 | 6765.66 ± 105 | 318.19 ± 21 |
+| f16 | 8796.74 ± 97 | 276.39 ± 68 |
+| i2_s | **11431.77 ± 296** | **627.88 ± 27** |
+
+i2_s token-gen = **1.97x vs f32, 2.27x vs f16** (memory-bandwidth-bound phase, the
+2-bit weight traffic wins). prompt-processing = 1.69x vs f32. Peak RSS is not a
+discriminator (mmap -> ~5632 KB for all three); on-disk bytes + tg t/s carry the
+memory story.
+
+Conclusion: per-tensor-native -> I2_S is correct (RT-112) AND efficient (16x linear
+compression, ~2x token-gen) on x86 with no custom kernel. The "before a custom
+kernel" question is answered for the x86/Linux target.
+
 ## Next Actions
 
-Synthetic gates, real-text validation, and packed-format Phase 1/2/3/4 reference are all done.
-Recommended order from here:
+Synthetic gates, real-text validation, packed-format Phase 1/2/3/4 reference, and
+RT-113 storage/latency are all done. Recommended order from here:
 
 1. Archive the real-text JSON reports from Colab back into `reports/` or rerun
    the sweep before paper-style quantitative claims.
-2. Run **RT-112** on x86/Linux: our tiny per-tensor-native model, comparing
-   Python reference, F16/F32 GGUF, and I2_S GGUF PPL. Test latent Path A and
-   ternary-dense Path A' separately.
-3. If RT-112 passes, measure storage, generation, and latency on x86/Linux.
-4. If RT-112 fails while official I2_S remains healthy, inspect our artifact/
-   metadata or implement a direct writer(Path B).
-5. Keep Mac M5 I2_S/TL1 work as a separate upstream/toolchain issue, not the main
+2. Confirm the EXPORT-006/007 ratios scale up on a larger pretrained/small model
+   (where linears dominate params, so whole-file -> target-linear ratio).
+3. If latency on the bigger model is weak, separate thread count, context regime,
+   and kernel limitations before changing the algorithm.
+4. Keep Mac M5 I2_S/TL1 work as a separate upstream/toolchain issue, not the main
    research path.
 
 See [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) for the
