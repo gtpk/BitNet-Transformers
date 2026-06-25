@@ -446,3 +446,41 @@ FACT-001 / RT-130: current factual gap panel
 ```
 
 Only after FACT-001 should we spend GPU on instruction or longer adaptation.
+
+## FACT-001 / RT-130 RESULT (2026-06-25): the factual gap is large and is a DATA problem (Outcome B)
+
+`scripts/rt130_factual_gap_panel.py` on `data/factual_panel_v1.jsonl` (27 prompts),
+TinyLlama-1.1B variants, rep-penalty 1.2 primary.
+
+| variant | fact_rate | tags |
+| --- | ---: | --- |
+| FP f16 | 0.81 (22/27) | all ok |
+| Q2_K | 0.74 (20/27) | all ok |
+| PTQ i2_s | 0.00 | salad 24 |
+| adapted f16 | 0.00 | ok 24 / salad 3 |
+| adapted i2_s | 0.04 (1/27) | all ok |
+| adapted i2_s (greedy) | 0.00 | salad 12 (greedy degenerates) |
+| adapted i2_s (t0.8/p0.95) | 0.07 | ok 26 |
+
+adapted i2_s vs f16 hit-agreement: **26/27**.
+
+Findings:
+1. **The base model knows the facts** (FP 0.81, Q2_K 0.74). Ternary *quantization* does
+   not erase factual knowledge — Q2_K of the same base keeps it.
+2. **Our adapted model is fluent but factually ~empty** (0.00-0.04), despite all-ok
+   degeneration tags under rep-penalty. The WikiText-CE adaptation produced a fluent
+   WikiText continuation model and **overwrote the base model's factual/instruction
+   knowledge (catastrophic forgetting).**
+3. **Runtime is exonerated**: adapted i2_s == adapted f16 (26/27); I2_S faithfully
+   preserves the (factually weak) adapted behavior. This is NOT a quantizer/runtime gap.
+4. **PPL-recovery != knowledge-recovery**: the RT-116/120 "recovery" recovered WikiText
+   modeling, not the model's knowledge.
+
+```text
+VERDICT (FACT-001): Outcome B — readable but factually weak vs Q2_K; runtime/quantizer
+exonerated. Claim level stays L0 (non-degenerate), L1 NOT achieved (facts far below
+Q2_K). The lever is adaptation DATA/objective, not bits/runtime: the next experiment is
+FACT-002 (instruction/factual or MIXED WikiText+instruction adaptation), to recover
+fluency WITHOUT forgetting facts. Critically, an honest paper must state that the
+WikiText-CE recovery trades factual knowledge for fluency.
+```

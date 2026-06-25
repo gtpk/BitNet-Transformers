@@ -1,0 +1,10 @@
+{
+  "model_family": "TinyLlama-1.1B (RT-120 adapted vs FP/Q2_K/PTQ)",
+  "panel": "data/factual_panel_v1.jsonl (27 prompts)", "decode_primary": "rep-penalty 1.2",
+  "fact_rate": {"FP f16": 0.815, "Q2_K": 0.741, "PTQ i2_s": 0.0, "adapted f16": 0.0, "adapted i2_s": 0.037,
+                "adapted i2_s greedy": 0.0, "adapted i2_s t0.8p0.95": 0.074},
+  "tags": {"FP f16": {"ok": 27}, "Q2_K": {"ok": 27}, "PTQ i2_s": {"salad": 24, "ok": 3},
+           "adapted f16": {"ok": 24, "salad": 3}, "adapted i2_s": {"ok": 27}},
+  "adapted_i2s_vs_f16_hit_agreement": "26/27",
+  "verdict": "Outcome B. FP 0.81 / Q2_K 0.74 know the facts; adapted f16 AND i2_s ~0 (readable but factually empty); PTQ collapsed. adapted i2_s==f16 (26/27) so runtime/quantizer is exonerated. The WikiText-CE adaptation made the ternary model FLUENT but overwrote the base model's factual/instruction knowledge (catastrophic forgetting). PPL-recovery != knowledge-recovery. Lever = adaptation DATA (instruction/mixed), not quantizer/runtime. -> FACT-002."
+}
