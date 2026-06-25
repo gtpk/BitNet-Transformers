@@ -689,14 +689,17 @@ This is no longer a bit/codebook problem.
 
 FACT-003 objective candidates, in order:
 
-| candidate | idea | why |
-| --- | --- | --- |
-| replay regularization | mix a small base-output KL on non-eval prompts | preserve base answer distribution without full distillation |
-| answer-only loss mask | loss mostly on answer tokens in instruction data | avoid overfitting prompt formatting |
-| repetition/free-run penalty | penalize repeated n-grams during short rollouts | reduce decoding-policy dependence |
-| protected factual replay | small training set of facts not overlapping FACT-001 | test whether facts can be retained without eval leakage |
+| candidate | idea | why | status |
+| --- | --- | --- | --- |
+| answer-only loss mask (FACT-003A) | CE on response tokens only in instruction data | avoid overfitting prompt formatting | **IMPLEMENTED** `rt116 --answer-loss-only` |
+| base-KL replay (FACT-003B) | mix a small base-output KL on non-eval prompts | preserve base answer distribution without full distillation | not yet (needs code) |
+| protected factual replay (FACT-003C) | small training set of facts not overlapping FACT-001 + leakage check | test whether facts can be retained without eval leakage | not yet (needs code) |
+| repetition/free-run penalty | penalize repeated n-grams during short rollouts | reduce decoding-policy dependence | not yet (needs code) |
 
-FACT-003 requires code changes. Do not pretend it is already supported by `rt116`.
+FACT-003A (answer-only loss mask) is now supported: `rt116 --answer-loss-only` tokenizes
+instruction data per example and masks prompt+separator tokens to `-100` so CE counts
+response tokens only (WikiText content always counts). Run it first. FACT-003B/C still
+require code changes — do not pretend they are supported by `rt116`.
 
 ### Branch S4: runtime divergence
 
@@ -921,12 +924,25 @@ Next procedure:
 
    Priority order:
 
-   | order | objective | reason |
-   | ---: | --- | --- |
-   | 1 | answer-only loss mask | cheapest; may stop prompt-format overfitting |
-   | 2 | base-KL replay on non-eval prompts | preserve base answer distribution |
-   | 3 | protected factual replay set | test factual retention without FACT-001 leakage |
-   | 4 | repetition/free-run penalty | only if degeneration returns under sane decoding |
+   | order | objective | reason | status |
+   | ---: | --- | --- | --- |
+   | 1 | answer-only loss mask (FACT-003A) | cheapest; may stop prompt-format overfitting | **DONE** `--answer-loss-only` |
+   | 2 | base-KL replay on non-eval prompts (FACT-003B) | preserve base answer distribution | TODO |
+   | 3 | protected factual replay set (FACT-003C) | test factual retention without FACT-001 leakage | TODO |
+   | 4 | repetition/free-run penalty | only if degeneration returns under sane decoding | TODO |
+
+   FACT-003A run (instruction + mixed, same RT-120 budget; score with rt130 panel,
+   compare `fact_rate` to FACT-002 instr 0.00 / mixed 0.07 / Q2_K 0.74 / FP 0.81):
+
+   ```bash
+   python scripts/rt116_quality_recovery.py --model-id TinyLlama/TinyLlama-1.1B-Chat-v1.0 \
+     --train-source instruction --answer-loss-only --steps 800 --seq-len 256 --batch 4 \
+     --grad-accum-steps 6 --lr 2e-4 --max-train-tokens 2000000 --dtype float32 \
+     --optim adamw8bit --grad-checkpointing --bitnet /content/bitnet.cpp \
+     --out-dir /content/bnt_runs/tinyllama_fact003a_instr \
+     --json-out reports/rt132_fact003a_instr_train.json --log-every 25
+   # mixed: --train-source mixed --out-dir ..._mixed
+   ```
 
 3. **Required code shape.**
 

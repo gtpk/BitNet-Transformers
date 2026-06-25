@@ -224,7 +224,7 @@ ladder to show the floor; conclude "wrong vehicle for ternary."
 | G2 | ~~no recipe ablation~~ RESOLVED (QR-005): a/b/c on 160M -> +norms negligible (0.907 vs 0.906), +lm_head hurts (0.898). **Default = linears only.** | DONE | — |
 | G3 | ~~+norms may lift the fraction~~ RESOLVED: it does not (within noise). Cheapest recipe is best. | DONE | — |
 | G4 | ~~quality is CE/PPL only~~ RESOLVED (QR-004/RT-119 + RT-129): generation panel + decoding sweep -> adapted is non-degenerate/usable-tier under rep-penalty/sampling at BOTH 160M and 1.1B (greedy degenerates, RT-122, but that is a greedy artifact). i2_s == f16. | DONE | — |
-| G10 | FACTUAL quality below FP/Q2_K (the real remaining limit; "usable-tier" != correct facts) | MED | [FACT-001 current factual panel](./factual_gap_experiment_plan.md), then instruction data / longer CE / repetition-aware objective |
+| G10 | FACTUAL quality below FP/Q2_K (the real remaining limit; "usable-tier" != correct facts) | MED | FACT-001 measured (RT-130); FACT-002 data swap closed to S3 (RT-131: fluency yes, facts no) -> now an objective problem: [FACT-003A answer-only loss mask](./factual_gap_experiment_plan.md) (`rt116 --answer-loss-only`) -> 003B base-KL replay -> 003C protected factual replay |
 | G5 | ~~no baseline comparison~~ RESOLVED (RT-121, honest NEGATIVE): OURS 114 vs Q2_K 98 PPL — does NOT win quality-per-bit; OURS is smallest+fastest at lowest bits + rescues PTQ collapse (135k->114). Reframe to speed/usability, not quality-SOTA. See Fig 5 + Claim discipline. | DONE | (optional: 1.1B B2-vs-OURS; B5 no-scale QAT contrast) |
 | G6 | single seed for recovery; no variance | LOW | 2-3 seeds on 160M QR-002a |
 | G7 | cross-tool PPL gap (PyTorch CE vs llama.cpp perplexity) unexplained in-figure | LOW | one calibration note + measure both on identical tokens |
@@ -242,7 +242,7 @@ ladder to show the floor; conclude "wrong vehicle for ternary."
 | quality: generation usability | SOLVED w/ sane decoding | RT-129 (rep-penalty/sampling -> ok 12/12; greedy degenerates) |
 | quantizer design as the lever | RULED OUT | RT-124..127 (no PTQ trick rescues; adaptation/data is the lever) |
 | quality-per-bit vs Q2_K | NEGATIVE | RT-121 (OURS 114 vs Q2_K 98 PPL) |
-| factual parity vs FP/Q2_K | MEASURED gap, fix OPEN | RT-130: adapted ~0.04 vs FP 0.81/Q2_K 0.74; i2_s==f16 -> data problem (WikiText-CE forgot facts), not bits/runtime -> FACT-002 |
+| factual parity vs FP/Q2_K | MEASURED gap, fix OPEN (now an OBJECTIVE problem) | RT-130: adapted ~0.04 vs FP 0.81/Q2_K 0.74, i2_s==f16. RT-131/FACT-002: data swap (instr/mixed) recovers fluency (mixed 0.81 CE) but NOT facts (0.07) -> S3, the lever is the training objective. Next: FACT-003A answer-only loss mask (`rt116 --answer-loss-only`). |
 | gpt-oss / MoE | OUT OF SCOPE | RT-117/118 (MXFP4 already; ~0 ROI) |
 
 ## Quantization-aware track: CONCLUDED (not the next experiment)
@@ -264,9 +264,12 @@ The experimental picture is closed enough to write up. Priority order:
 ```text
 1. Lock the docs to the post-RT-129 claim table (this file, index, quality docs).
 2. Draft the paper/report from Figures 1-7 + the claim table + the gpt-oss appendix.
-3. THEN the only remaining quality lever (G10, factual parity): adaptation/data, NOT
-   quantizer engineering — instruction data, longer/better-data CE, repetition-aware
-   or free-run objectives. Optional later candidate: a pairwise phase-rotation probe.
+3. THEN the only remaining quality lever (G10, factual parity). RT-131/FACT-002 closed
+   the DATA question (instruction/mixed recover fluency, not facts -> S3), so the lever is
+   the training OBJECTIVE, not data and not quantizer engineering. Ladder: FACT-003A
+   answer-only loss mask (`rt116 --answer-loss-only`, implemented) -> FACT-003B base-KL
+   replay -> FACT-003C protected factual replay + leakage check. Optional later candidate:
+   a pairwise phase-rotation probe.
 ```
 
 ## What NOT to do next

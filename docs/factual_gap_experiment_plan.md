@@ -290,24 +290,69 @@ If none improves:
   move to objective or capacity diagnostics.
 ```
 
-## FACT-003: Repetition-Aware / Free-Run Objective
+## FACT-003: Objective Branch (data was not the lever — FACT-002 closed to S3)
 
-Question:
+FACT-002 (RT-131) showed that swapping adaptation *data* (instruction/mixed) recovers
+fluency but not facts (mixed: 0.81 CE recovered, fact 0.07). So the lever is the training
+**objective**, not the data. FACT-003 is a cheap-to-expensive ladder; stop at the first
+arm that lifts `fact_rate` materially without regressing I2_S-vs-F16 parity.
+
+Order (cheapest/safest first):
 
 ```text
-Can training reduce reliance on decode-time repetition penalty?
+FACT-003A  answer-only loss mask     -- cheapest, no new loss term
+FACT-003B  base-KL replay            -- keep base answer distribution on non-eval prompts
+FACT-003C  protected factual replay  -- small fact set disjoint from FACT-001 + leakage check
 ```
 
-Candidate objectives:
+### FACT-003A: answer-only loss mask (do this first)
+
+Hypothesis: instruction-only collapsed to empty answers and mixed hallucinated because CE
+on the full `Q: ..\nA: ..` stream overfits the *prompt formatting* rather than the answer
+content. Computing CE on response tokens only should reduce formatting overfit and let more
+of the adapted capacity carry answer behaviour.
+
+Implemented in `scripts/rt116_quality_recovery.py` via `--answer-loss-only`:
 
 ```text
-CE + small repetition penalty on generated continuations
-CE + unlikelihood loss for repeated n-grams
+- instruction data is tokenized per example as prompt 'Q: ..\nA:' + answer ' <response>' + '\n\n'
+- an aligned answer-mask is True only on response tokens
+- training sets labels = -100 on prompt + separator tokens (CE counts answer tokens only)
+- WikiText content tokens always count (no prompt/answer split), so 'mixed' trains fluency
+  on WikiText and answer-content on instruction
+- arm tag becomes QR-002a(linears)+ansmask; result JSON carries answer_loss_only=true
+- when the flag is OFF the token stream is byte-identical to the FACT-002 runs (reproducible)
+```
+
+Arms (same RT-120 recipe/budget as FACT-002, factual panel still eval-only):
+
+```bash
+# instruction + answer-only mask
+python scripts/rt116_quality_recovery.py --model-id TinyLlama/TinyLlama-1.1B-Chat-v1.0 \
+  --train-source instruction --answer-loss-only --steps 800 --seq-len 256 --batch 4 \
+  --grad-accum-steps 6 --lr 2e-4 --max-train-tokens 2000000 --dtype float32 \
+  --optim adamw8bit --grad-checkpointing --bitnet /content/bitnet.cpp \
+  --out-dir /content/bnt_runs/tinyllama_fact003a_instr \
+  --json-out reports/rt132_fact003a_instr_train.json --log-every 25
+# mixed + answer-only mask: --train-source mixed --out-dir ..._mixed
+```
+
+Score with the RT-130 panel (rep1.2) and compare `fact_rate` to FACT-002 (instr 0.00,
+mixed 0.07), Q2_K 0.74, FP 0.81. Pass = `fact_rate` clearly up (e.g. >= 0.15) and no
+empty-collapse; if still ~0 but fluent, go to FACT-003B (base-KL replay).
+
+### FACT-003B / FACT-003C: objective regularizers (only if 003A insufficient)
+
+Candidate objectives, in order:
+
+```text
+CE(answer) + base-KL replay on non-eval prompts (keep base answer distribution)
+CE(answer) + protected factual replay (small fact set disjoint from FACT-001) + leakage check
+CE + small repetition penalty / unlikelihood for repeated n-grams (reduce decode-penalty reliance)
 CE + entropy floor / anti-collapse regularizer
 ```
 
-Do this only after FACT-001 and at least one FACT-002 arm, because objective work is
-more expensive and easier to overfit.
+Do these only after FACT-003A, because objective work is more expensive and easier to overfit.
 
 Pass rule:
 

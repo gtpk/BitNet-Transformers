@@ -114,8 +114,11 @@ i2_s==f16. **표준 decoding에선 usable-tier 생성 가능**(단 사실 정확
 
 **현재 결론(고정):** systems(faithful export + storage/speed scale law) 해결, CE/PPL
 recovery는 scales, generation usability는 sane decoding에서 회복, quantizer는 lever
-아님으로 판정. 남은 유일한 open gap은 **factual quality**(FP/Q2_K 미달) — 처방은
-quantizer가 아니라 adaptation/data(instruction/longer CE/repetition-aware objective).
+아님으로 판정. 남은 유일한 open gap은 **factual quality**(FP/Q2_K 미달) — RT-131/FACT-002에서
+adaptation/data 스왑(instruction/mixed)은 유창성만 회복하고 facts는 못 살림(mixed 0.81 CE,
+fact 0.07)으로 **S3 objective gap** 판정. 따라서 처방은 data가 아니라 **training objective**:
+FACT-003A answer-only loss mask(`rt116 --answer-loss-only`, 구현됨) → 003B base-KL replay →
+003C protected factual replay + leakage check.
 다음은 새 실험보다 **논문/리포트 정리**가 우선이다. 상세 claim table은
 [Paper Skeleton](./paper_skeleton.md) (claim table/figures)와 전체 초안
 [Paper Draft](./paper_draft.md) 참조.
@@ -221,7 +224,7 @@ python scripts/rt113_storage_latency.py \
 8n. [Factual Gap Experiment Plan](./factual_gap_experiment_plan.md)
    - RT-129 이후 남은 유일한 open gap인 factual quality를 FACT-001 평가패널과 adaptation/data 실험으로 검증하는 계획.
 8o. [Factual Recovery Master Runbook](./factual_recovery_master_runbook.md)
-   - RT-130 Outcome B 이후 FACT-002 instruction/mixed adaptation부터 FACT-003 objective 분기까지 한 번에 실행하는 single-flight runbook. 필요한 구현 파일/조건/문서화 체크포인트도 포함한다.
+   - RT-130 Outcome B 이후 FACT-002 instruction/mixed adaptation부터 FACT-003 objective 분기까지 한 번에 실행하는 single-flight runbook. 필요한 구현 파일/조건/문서화 체크포인트도 포함한다. **FACT-002 결과: S3 objective gap**(RT-131) — 다음은 FACT-003A answer-only loss mask(`rt116 --answer-loss-only`).
 9. [Groupwise Alpha Hypothesis](./groupwise_alpha_hypothesis.md)
    - 왜 groupwise `alpha*T`가 per-tensor BitNet b1.58보다 품질을 더 잘 보존할 수 있는지 설명한다.
 10. [Research Signal Note](./research_signal_note.md)
