@@ -101,7 +101,7 @@ ladder to show the floor; conclude "wrong vehicle for ternary."
 | G2 | ~~no recipe ablation~~ RESOLVED (QR-005): a/b/c on 160M -> +norms negligible (0.907 vs 0.906), +lm_head hurts (0.898). **Default = linears only.** | DONE | — |
 | G3 | ~~+norms may lift the fraction~~ RESOLVED: it does not (within noise). Cheapest recipe is best. | DONE | — |
 | G4 | ~~quality is CE/PPL only~~ RESOLVED (QR-004/RT-119): greedy panel shows PTQ token-salad -> adapted fluent English -> i2_s same tier as f16. Closed at 160M (base model: weak fluency/factuality — strengthen with G1 + better base) | DONE | — |
-| G5 | no baseline comparison (RTN / GPTQ / AWQ / QAT) | MED | add at least RTN + one QAT point on 160M |
+| G5 | no baseline comparison (RTN / Q2_K / QAT) | MED | **[G5 baseline plan](./g5_baseline_plan.md)**: one-tool llama-perplexity panel (FP/RTN/Q2_K/Q3_K/Q4_0/ours/no-scale-QAT) on 160M — next |
 | G6 | single seed for recovery; no variance | LOW | 2-3 seeds on 160M QR-002a |
 | G7 | cross-tool PPL gap (PyTorch CE vs llama.cpp perplexity) unexplained in-figure | LOW | one calibration note + measure both on identical tokens |
 | G8 | only LLaMA family; generality unproven beyond it | LOW | (scope it honestly; gpt-oss negative already bounds the claim) |
