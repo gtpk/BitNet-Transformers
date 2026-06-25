@@ -1,0 +1,14 @@
+{
+  "model": "JackFram/llama-160m (FP, one-shot, PyTorch screen)",
+  "ce_fp": 3.1466, "ppl_fp": 23.26, "ce_ternary": 11.6597,
+  "rows": [
+    {"codebook": "ternary {-1,0,1}", "eps": null, "ce": 11.6597, "ppl": 115808.28, "bits": 1.58},
+    {"codebook": "signed-eps", "eps": 0.125, "ce": 12.4685, "ppl": 260024.0, "bits": 2.0},
+    {"codebook": "signed-eps", "eps": 0.25, "ce": 11.7795, "ppl": 130546.67, "bits": 2.0},
+    {"codebook": "signed-eps", "eps": 0.3333, "ce": 12.0538, "ppl": 171742.34, "bits": 2.0},
+    {"codebook": "signed-eps", "eps": 0.5, "ce": 12.3766, "ppl": 237186.34, "bits": 2.0}
+  ],
+  "best": "ternary {-1,0,1}",
+  "delta_best_vs_ternary": 0.0,
+  "finding": "Signed-epsilon 2-bit (no zero) does NOT beat one-shot ternary - all eps are slightly WORSE. Replacing the zero level with small signed +/-eps does not help; the zero is fine. Codebook size is NOT the main blocker."
+}

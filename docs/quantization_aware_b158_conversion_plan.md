@@ -647,3 +647,51 @@ epsilon 2-bit): is the zero-heavy ternary codebook deleting too many small signe
 connections? (RT-126 rotation skipped for now — a stronger assignment method, GPTQ,
 already gained only 6%, so outlier/incoherence is unlikely to be the rescue.)
 ```
+
+## RT-127 RESULT + TRACK SYNTHESIS (2026-06-25): the quantizer is not the bottleneck; adaptation/data is
+
+RT-127 signed-epsilon 2-bit codebook ({-1,-eps,+eps,+1}, per-tensor gamma MSE-searched;
+`scripts/rt127_signed_epsilon.py`). CE_fp 3.15, ternary 11.66.
+
+| codebook | eps | CE | PPL |
+| --- | --- | ---: | ---: |
+| ternary {-1,0,1} | — | 11.66 | 115,808 |
+| signed-eps | 0.125 | 12.47 | 260,024 |
+| signed-eps | 0.25 | 11.78 | 130,547 |
+| signed-eps | 0.333 | 12.05 | 171,742 |
+| signed-eps | 0.5 | 12.38 | 237,186 |
+
+**No signed-epsilon variant beats one-shot ternary** — all are slightly worse.
+Replacing the zero with small signed +/-eps does not help; the zero level is fine and
+the codebook size is not the one-shot blocker.
+
+### Quantization-aware track synthesis (RT-124A/B/C, RT-125, RT-127)
+
+| lever | one-shot effect on Llama-160M |
+| --- | --- |
+| scale granularity (block/row) | +1.8 to +2.4 nats — partial lever, needs runtime; row is foldable |
+| scale/threshold objective | absmean already best (MSE/threshold HURT) |
+| activation diagonal (AWQ/SmoothQuant) | +0.14 nats — no rescue |
+| GPTQ/Hessian assignment | +0.51 nats — only 6% of the nearest->FP gap |
+| signed-epsilon 2-bit codebook | does NOT beat ternary |
+
+```text
+CONCLUSION (quantization-aware track = plan's Expected Conclusion #4):
+None of the PTQ toolbox levers — scale granularity, scale/threshold objective,
+activation-aware diagonal scaling, GPTQ/Hessian assignment, or a richer 2-bit codebook
+— rescues one-shot conversion of an existing FP LLaMA to ~2-bit. The best stack closes
+well under half the gap and stays at PPL in the thousands. The bottleneck is NOT the
+quantizer; it is ADAPTATION/DATA. Per-tensor absmean ternary + short teacher-free CE
+(RT-116) already beats every one-shot quantizer trick (adapted 160M PPL ~114 vs best
+one-shot ~10k), and the remaining usability gap (RT-122 generation degeneration) is a
+recovery/data/objective problem, not a quantizer-design problem.
+
+Implications:
+- Stop optimizing the one-shot quantizer; per-tensor absmean ternary is a fine init.
+- Carry forward only the cheap deployable lever: per-output-channel (row) scale (+1.8
+  nats one-shot, foldable) as an optional init improvement.
+- The next real lever for usability is on the ADAPTATION/DATA side: longer/better-data
+  CE, repetition-aware / free-run objectives, instruction data — NOT more bit/codebook
+  engineering. Runtime/export remains a solved substrate (systems track).
+- Mixed-bit (RT-123) and 2-bit codebook (RT-127) are both demoted: neither is the lever.
+```
