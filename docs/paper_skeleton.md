@@ -105,16 +105,51 @@ the ternary collapse (135,309 -> 114) and is the smallest (121.5 MB) + fastest (
 runtime, ~5.7x tg vs f32 per Fig 2) artifact at the lowest bit budget. So the paper
 must NOT claim quality-per-bit superiority; see "Claim discipline" below.
 
-### Claim discipline (post-G5)
+### Figure 6 — Generation panel: does the 1.1B adapted model stay readable? (RT-122)
+
+20 prompts, greedy (one llama-cli, --temp 0), failure tags:
+
+| variant | ok | repetitive | loop | salad | empty |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| FP f16 | 19 | 1 | 0 | 0 | 0 |
+| Q2_K | 20 | 0 | 0 | 0 | 0 |
+| PTQ ternary | 0 | 12 | 13 | 3 | 6 |
+| OURS adapted f16 | 0 | 18 | 0 | 14 | 0 |
+| OURS adapted i2_s | 1 | 19 | 0 | 14 | 0 |
 
 ```text
-DO claim:  - teacher-free CE makes ternary USABLE (135k -> 114 PPL), exports losslessly
-             to I2_S, and the artifact is smallest + fastest (memory-traffic/tok-per-sec).
-           - recovery + runtime-faithfulness + storage/speed all SCALE (160M -> 1.1B).
-DON'T claim: - best PPL-per-bit, or beating mature one-shot quantizers (Q2_K) on quality.
-             - user-facing quality from CE/PPL alone (only a 160M base-model panel so far).
-The spine is C2 (speed/memory-traffic scale law) + C3 (cheap teacher-free usability),
-NOT a quality-SOTA claim.
+FP   "the ancient Greeks, who were the first to develop a systematic approach ..."
+Q2_K "Paris. The capital of Germany is Berlin. ... Washington, D.C."
+PTQ  "regression regression regression ...  adenadenaden ..."        (pure salad)
+OURS "the 19th century . = = = = = = = ="                            (degenerate loop)
+```
+
+**HONEST NEGATIVE on generation usability at 1.1B.** The budget-scaled adapted model
+(recovered_fraction 0.698, PPL 162) learned WikiText token statistics — so CE/PPL
+dropped — but its greedy generation **degenerates into WikiText section-header loops
+("= = =")**. Low PPL != usable generation. OURS is better than PTQ (PTQ is pure
+salad/empty; OURS emits real words then loops) but far below FP/Q2_K (both coherent).
+i2_s == f16 on 8/20 exactly and the same degenerate style otherwise — the runtime
+faithfully reproduces the model's degeneracy, so this is a MODEL/recovery limit, not a
+runtime fault. (160M at recovered 0.905 was word-like in RT-119; 1.1B at 0.698 is not —
+generation usability tracks recovery fraction, which the 1.1B budget did not push far
+enough.)
+
+### Claim discipline (post-G5 + RT-122)
+
+```text
+DO claim:  - one-shot ternary PTQ COLLAPSES (token salad); teacher-free CE substantially
+             recovers CE/PPL (135k->114 @160M; 0.698 @1.1B) — recovery is real and scales.
+           - the artifact is the smallest + fastest (1.58-bit, I2_S runtime ~5.7x tg);
+             storage/speed/runtime-faithfulness all SCALE 160M->1.1B.
+           - I2_S faithfully preserves the adapted model (incl. its degeneracy) at every scale.
+DON'T claim: - best PPL-per-bit or beating Q2_K on quality (RT-121).
+             - that the adapted model GENERATES usable text at 1.1B — at 0.698 recovery,
+               greedy output degenerates (RT-122). Generation usability is unproven and
+               needs higher recovery / repetition penalty / more (or instruction) data.
+The honest spine: a SYSTEMS result (speed/memory-traffic scale law + faithful I2_S
+export) plus a PARTIAL quality result (CE/PPL recovery scales; generation usability is
+future work). Not a quality-SOTA or "usable small LLM" claim yet.
 ```
 
 ### Appendix figure — Why not gpt-oss? (C4, negative)

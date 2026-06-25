@@ -1,0 +1,29 @@
+{
+  "model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0 (RT-120 adapted, recovered_fraction 0.698)",
+  "decode": "greedy --temp 0, one llama-cli, 40 new tokens, 20 prompts",
+  "tag_summary": {
+    "FP f16":            {"ok": 19, "repetitive": 1},
+    "Q2_K":              {"ok": 20},
+    "PTQ ternary":       {"loop": 13, "salad": 3, "empty": 6, "repetitive": 12},
+    "OURS adapted f16":  {"repetitive": 18, "salad": 14},
+    "OURS adapted i2_s": {"ok": 1, "repetitive": 19, "salad": 14}
+  },
+  "ours_i2s_eq_f16_exact": "8/20",
+  "examples": {
+    "The history of science begins with": {
+      "FP": "the ancient Greeks, who were the first to develop a systematic approach to understanding the natural world.",
+      "Q2_K": "the ancient Greeks, who believed that the universe was created by gods.",
+      "PTQ": "regression regression regression ... >[>[>[>[ ...",
+      "OURS f16": "the 19th century . = = = = = = = = = =",
+      "OURS i2_s": "the 19th century , the series of the 2000s . = = = = ="
+    },
+    "The capital of France is": {
+      "FP": "Paris. The capital of Germany is Berlin. ... Washington, D.C.",
+      "Q2_K": "Paris. The capital of Germany is Berlin. ... Canada is Ottawa",
+      "PTQ": "adenadenaden persist persist persist ...",
+      "OURS f16": "the first of the 19th century . = = = = =",
+      "OURS i2_s": "the same of the 19th century . = = = = ="
+    }
+  },
+  "verdict": "USABILITY_NEGATIVE_at_1.1B: greedy generation degenerates to WikiText '= = =' loops; low PPL != usable generation. OURS > PTQ (not salad/empty) but << FP/Q2_K. i2_s faithfully reproduces the f16 degeneracy (runtime preservation holds)."
+}

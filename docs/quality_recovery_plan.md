@@ -545,3 +545,39 @@ runtime preservation stays intact. The Figure-3 1.1B point is now a budget-scale
 not the under-budgeted 0.48. Next budget step (1200 steps / LR schedule) could push
 toward the 160M 0.90 trend if a stronger claim is wanted.
 ```
+
+## RT-122 / QR-004 at 1.1B RESULT (2026-06-25): generation usability does NOT survive yet
+
+GGUF greedy panel (`scripts/rt122_prompt_panel_gguf.py`, 20 prompts, one llama-cli,
+--temp 0) on the RT-120 budget-scaled 1.1B adapted model (recovered_fraction 0.698):
+
+| variant | ok | repetitive | loop | salad | empty |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| FP f16 | 19 | 1 | 0 | 0 | 0 |
+| Q2_K | 20 | 0 | 0 | 0 | 0 |
+| PTQ ternary | 0 | 12 | 13 | 3 | 6 |
+| OURS adapted f16 | 0 | 18 | 0 | 14 | 0 |
+| OURS adapted i2_s | 1 | 19 | 0 | 14 | 0 |
+
+```text
+FP/Q2_K : coherent ("Paris. The capital of Germany is Berlin ...")
+PTQ     : pure salad ("regression regression ...", "adenadenaden ...")
+OURS    : degenerate loop ("the 19th century . = = = = = = =")
+```
+
+- **Usability NEGATIVE at 1.1B**: low PPL (162) did NOT yield usable greedy generation —
+  the WikiText-CE-adapted model collapses into "= = =" header loops. Low PPL != usable.
+- OURS > PTQ (no empty, no hard loops; emits real words) but << FP/Q2_K (both coherent).
+- OURS i2_s == f16 exact on 8/20 and same degenerate style otherwise -> **runtime
+  preservation holds even here**; the degeneracy is in the model/recovery, not I2_S.
+- Contrast with RT-119 (160M, recovered 0.905) which was word-like: **generation
+  usability tracks recovery fraction**; 1.1B's 0.698 is not high enough.
+
+```text
+CONCLUSION (RT-122): separate two quality claims.
+  CE/PPL recovery  -> REAL and scales (keep).
+  generation usability -> NOT supported at 1.1B/0.698 (greedy degenerates). Future work:
+    push recovery higher (more budget), add repetition penalty / sampling, or use more /
+    instruction-style adaptation data. Do not claim a "usable small LLM" yet.
+Runtime faithfulness (i2_s==f16) holds even for the degenerate model.
+```
