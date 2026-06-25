@@ -485,6 +485,22 @@ kept embd+lm_head f16, measured parity/storage/latency. All 4 TC PASS:
 Conclusion: the I2_S export gain is not a tiny-toy artifact — storage converges to
 the 16x linear floor and token-gen speedup grows at real scale.
 
+## RT-115 / SCALE-002: TinyLlama-1.1B confirms the scale law (DONE, 2026-06-25)
+
+Same driver, `--model-id TinyLlama/TinyLlama-1.1B-Chat-v1.0` (154 target linears).
+Three models over 100x params give two clean monotonic trends:
+
+| model | params | whole i2_s/f32 | i2_s tg speedup vs f32 |
+| --- | ---: | ---: | ---: |
+| tiny | ~10M | 0.450 | ~2x |
+| llama-160m | 160M | 0.196 | 5.69x |
+| TinyLlama-1.1B | 1.1B | **0.1149** | **7.51x** |
+
+whole-file ratio converges toward the scale-invariant 16x target-linear floor
+(0.0625); token-gen speedup grows (1.1B: f32 2.43 t/s -> i2_s 18.26 t/s). Parity
+even tighter: i2_s vs f16 = -0.0071 nats (essentially identical). The
+storage/latency/parity story is a confirmed SCALE LAW on a real 1.1B LLaMA.
+
 ## Next Actions
 
 Synthetic gates, real-text validation, packed-format Phase 1/2/3/4 reference,

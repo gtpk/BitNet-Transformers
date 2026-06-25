@@ -73,8 +73,15 @@ token-gen 속도는 **f32 대비 5.69x, f16 대비 3.0x**로 tiny(~2x)보다 오
 parity는 PPL상 1.043x로 보이지만 loss로는 +0.042 nats(0.3%)로, 잔차는 I2_S int8
 activation 양자화(RT-106) 효과이지 encoding 결함이 아니다. 절대 PPL(~493k)은
 ternary 학습 없는 PTQ라 망가진 게 당연하며 parity로만 판정했다. 즉 I2_S 이득은
-toy 구조 산물이 아니라 실모델에서 더 커지며 runtime도 충실하다. 다음은 (선택)
-1.1B 모델 확인과, 절대 품질 주장을 위한 small 모델 ternary 학습이다.
+toy 구조 산물이 아니라 실모델에서 더 커지며 runtime도 충실하다.
+
+**RT-115 / SCALE-002도 완료(2026-06-25):** TinyLlama-1.1B(154 linears)로 scale law를
+재확인했다. whole-file i2_s/f32가 tiny 0.450 → 160m 0.196 → **1.1B 0.1149**로 단조
+수렴(target-linear 0.0625/16x는 세 모델 전부 동일, scale-invariant), token-gen
+speedup은 **f32 대비 7.51x**로 더 커졌다(f32 2.43 → i2_s 18.26 t/s). parity는 i2_s
+vs f16 = −0.0071 nats로 사실상 동일. 즉 storage/latency/parity는 1.1B 실모델에서
+확인된 **scale law**다. 남은 축은 절대 품질(RT-116 ternary 학습)과 gpt-oss-20b
+(RT-117, MoE라 config/router/expert 감사 먼저)다.
 
 packed format Phase 1/2/3/4 검증(로컬):
 

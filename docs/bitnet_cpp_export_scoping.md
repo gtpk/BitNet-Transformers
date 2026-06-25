@@ -1022,3 +1022,42 @@ Optional next confirmations: a 1.1B model (TinyLlama) for an even lower whole-fi
 ratio, and a ternary-trained/adapted small model for absolute-quality PPL and
 prompt quality.
 ```
+
+## RT-115 / SCALE-002 RESULT (2026-06-25): TinyLlama-1.1B — the scale law continues
+
+Second invocation of `scripts/rt114_scaleup.py` (just `--model-id
+TinyLlama/TinyLlama-1.1B-Chat-v1.0`), x86 Colab 2 cores, 154 target linears (22
+layers x 7) materialized to Wq=gamma*T. Confirms RT-114 is a trend, not a point.
+
+### Scale law: whole-file i2_s/f32 converges to the target-linear floor
+
+| model | params | whole i2_s/f32 | target-linear i2_s/f32 | i2_s tg speedup vs f32 |
+| --- | ---: | ---: | ---: | ---: |
+| tiny (RT-113) | ~10M | 0.450 | 0.0625 | ~2x |
+| llama-160m (RT-114) | 160M | 0.196 | 0.0625 | 5.69x |
+| **TinyLlama-1.1B (RT-115)** | **1.1B** | **0.1149** | **0.0625** | **7.51x** |
+
+Two clean, monotonic trends across 3 models spanning 100x params:
+- **whole-file ratio -> the 16x target-linear floor** (0.450 -> 0.196 -> 0.1149) as
+  the fixed embedding/lm_head cost becomes a smaller fraction. target-linear ratio
+  is **scale-invariant at 0.0625 (16x)** — identical on all three.
+- **token-gen speedup GROWS with scale** (~2x -> 5.69x -> 7.51x vs f32): 1.1B f32 is
+  2.43 t/s (unusable on 2-core CPU) vs i2_s 18.26 t/s (usable). The memory-traffic
+  win compounds because larger models are more weight-bandwidth-bound per token.
+
+TinyLlama-1.1B raw numbers: storage whole f32 4400.9MB / f16 2332.1MB / **i2_s
+505.5MB**; llama-bench t=2 tg f32 2.43 / f16 4.32 / **i2_s 18.26 t/s** (pp i2_s 56.23
+= 10.43x vs f32). Parity: i2_s vs f16 = **-0.0071 nats** (i2_s marginally *lower* PPL
+93091 vs 93753 -> essentially identical, even tighter than llama-160m's +0.041 nats;
+the activation-quant residual washes out on the bigger model). Absolute PPL ~93k is
+PTQ-broken by design (quality needs ternary training).
+
+```text
+CONCLUSION (SCALE-002): the storage/latency/parity story is a SCALE LAW, confirmed
+on a real 1.1B LLaMA. whole-file compression deepens toward 16x as size grows, the
+token-gen speedup grows (7.5x at 1.1B), and the I2_S runtime stays faithful to the
+materialized weights at every scale. The x86/Linux "algorithm + export + runtime +
+efficiency + scale" story is closed. The only remaining axis is ABSOLUTE quality at
+scale, which requires ternary training (RT-116 / TRAIN-001), and the eventual real
+target gpt-oss-20b (RT-117, MoE — audit config/router/experts before converting).
+```
