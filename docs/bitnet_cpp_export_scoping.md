@@ -899,6 +899,11 @@ real (linear-dominated) model; the M5 runtime stays a separate toolchain issue.
 
 ## RT-114 / SCALE-001: pretrained small-model scale-up (plan)
 
+Target-order rationale lives in [Scale-Up Target Roadmap](./scaleup_target_roadmap.md).
+Short version: finish `JackFram/llama-160m` first because it is fast,
+LLaMA-shaped, and linear-dominated; then audit `gpt-oss-20b` as the practical
+public-model target.
+
 RT-112/113 closed the tiny artifact: the per-tensor-native -> I2_S path is correct
 AND efficient on x86. The open question for the project/paper claim:
 

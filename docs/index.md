@@ -46,7 +46,7 @@ per-tensor-native b1.58 모델도 x86 I2_S에서 F16/F32 PPL parity**를 냈다.
 
 ## 지금 바로 할 일
 
-RT-101~112까지의 runtime 조사는 완료됐다. 핵심 결론은:
+RT-101~113까지의 runtime 조사는 완료됐다. 핵심 결론은:
 
 - upstream I2_S quantizer는 latent fp weight에 대해 `sign(W) * absmax`라서
   우리 `mean(abs)` native quantization과 의미가 다르다.
@@ -147,6 +147,8 @@ python scripts/rt113_storage_latency.py \
    - per-tensor-native → I2_S artifact → import logit 동일성(PTX-101~105)과 다음 runtime gate TC.
 8d. [bitnet.cpp I2_S Layout Audit](./bitnet_cpp_i2s_layout_audit.md)
    - RT-101 upstream I2_S byte layout 감사 + RT-111 x86/Mac runtime 판정.
+8e. [Scale-Up Target Roadmap](./scaleup_target_roadmap.md)
+   - RT-114 Llama-160M을 먼저 닫고, 이후 gpt-oss-20b로 넘어가는 타겟 전략.
 9. [Groupwise Alpha Hypothesis](./groupwise_alpha_hypothesis.md)
    - 왜 groupwise `alpha*T`가 per-tensor BitNet b1.58보다 품질을 더 잘 보존할 수 있는지 설명한다.
 10. [Research Signal Note](./research_signal_note.md)
@@ -169,7 +171,9 @@ flowchart TD
   J --> M["packed_ternary_format_plan.md"]
   K --> M["packed_ternary_format_plan.md"]
   M --> R["bitnet_cpp_export_scoping.md"]
+  R --> U["scaleup_target_roadmap.md"]
   R --> T["groupwise_alpha_hypothesis.md"]
+  U --> T
   T --> L
   B --> E
   B --> G["turboquant_bitnet_implementation_plan.md"]
@@ -198,6 +202,7 @@ flowchart TD
 | [i2s_export_poc_plan.md](./i2s_export_poc_plan.md) | I2_S Python export PoC(PTX-101~105), runtime gate TC | export 정확성/다음 C++ gate를 볼 때 |
 | [bitnet_cpp_i2s_layout_audit.md](./bitnet_cpp_i2s_layout_audit.md) | RT-101 upstream I2_S byte layout 감사 + 매핑표 | GGUF writer 만들기 전 포맷 고정할 때 |
 | [bitnet_cpp_export_scoping.md](./bitnet_cpp_export_scoping.md) | GGUF/bitnet.cpp export 가능성, format mapping, export TC 초안 | Python reference 이후 실제 runtime으로 넘어갈 때 |
+| [scaleup_target_roadmap.md](./scaleup_target_roadmap.md) | Llama-160M -> gpt-oss-20b scale-up 순서와 gate | 어떤 공개 모델을 다음 목표로 삼을지 정할 때 |
 | [groupwise_alpha_hypothesis.md](./groupwise_alpha_hypothesis.md) | groupwise scale이 품질을 보존하는 이유와 검증할 ablation | 알고리즘 우위의 원인을 설명하거나 반증할 때 |
 | [research_signal_note.md](./research_signal_note.md) | 현재 결과가 연구 신호로서 왜 의미 있는지 해석 | 논문화 가능성과 다음 방향을 판단할 때 |
 | [turboquant_bitnet_implementation_plan.md](./turboquant_bitnet_implementation_plan.md) | KV cache 압축 계획과 TC | weight 변환 이후 긴 문맥으로 확장할 때 |
@@ -218,6 +223,7 @@ flowchart TD
 | [scripts/check_i2s_export.py](../scripts/check_i2s_export.py) | [I2_S Export PoC Plan](./i2s_export_poc_plan.md) | PTX-101..105 export 정확성 TC |
 | [scripts/rt112_x86_arena.py](../scripts/rt112_x86_arena.py) | [GGUF / bitnet.cpp Export Scoping Plan](./bitnet_cpp_export_scoping.md) | x86 I2_S artifact parity: latent Path A vs ternary-dense Path A' |
 | [scripts/rt113_storage_latency.py](../scripts/rt113_storage_latency.py) | [GGUF / bitnet.cpp Export Scoping Plan](./bitnet_cpp_export_scoping.md) | EXPORT-006/007 target-linear storage and llama-bench latency metrics |
+| [scripts/rt114_scaleup.py](../scripts/rt114_scaleup.py) | [Scale-Up Target Roadmap](./scaleup_target_roadmap.md) | Llama-160M SCALE-001 export/runtime scale-up driver |
 | [scripts/check_packed_model.py](../scripts/check_packed_model.py) | [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) | PACK-101..103 model export/import TC |
 | [scripts/check_packed_runtime.py](../scripts/check_packed_runtime.py) | [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) | PACK-201..204 packed runtime module TC |
 | [scripts/check_packed_matmul.py](../scripts/check_packed_matmul.py) | [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) | PACK-301..304 blocked dequant matmul reference TC |
@@ -290,11 +296,13 @@ flowchart TD
 
 다음:
 
-1. **scale-up 확인**: 더 큰 pretrained/small 모델(linear가 params를 지배)에서
-   EXPORT-006/007 비율이 whole-file → target-linear 쪽으로 수렴하는지 확인한다.
-2. 큰 모델에서 latency가 약하면 원인 분리: CPU thread, KV/context regime,
+1. **RT-114 / SCALE-001:** `JackFram/llama-160m`으로 whole-file ratio와 latency가
+   target-linear 방향으로 수렴하는지 확인한다.
+2. **RT-115 / OSS-001:** RT-114가 통과하면 `gpt-oss-20b` architecture/tensor-map
+   audit로 넘어간다. 바로 weight 변환부터 하지 않는다.
+3. 큰 모델에서 latency가 약하면 원인 분리: CPU thread, KV/context regime,
    I2_S kernel 특성.
-3. Mac M5 I2_S/TL1은 보류한다. 필요하면 upstream bug report용 최소 재현으로 분리한다.
+4. Mac M5 I2_S/TL1은 보류한다. 필요하면 upstream bug report용 최소 재현으로 분리한다.
 
 이전 보류 항목 중 packed reference ladder는 완료됐고, export 경로도 판별됐다
 (per-tensor-native → I2_S 직행). 남은 다음 축:

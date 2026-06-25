@@ -156,6 +156,9 @@ token-generation throughput: about 2x faster than f32/f16 in llama-bench
 So the next honest test is now scale, not basic feasibility: does the same
 per-tensor-native -> ternary-dense Path A' -> I2_S pipeline keep those ratios on
 a larger pretrained/small model where linear layers dominate the artifact?
+`JackFram/llama-160m` is the fast answer to that question. If it passes, the next
+research target is `gpt-oss-20b`, but only after an MoE architecture/tensor-map
+audit.
 
 This thread is worth following because the positive results are not isolated.
 They line up with a plausible mechanism.

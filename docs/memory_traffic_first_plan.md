@@ -209,11 +209,14 @@ context가 길어져 KV가 bottleneck이 되면 그때 KV cache를 본다.
 storage/latency 측정은 완료됐다. RT-113에서 x86 I2_S는 tiny artifact target
 linear 기준 f32 대비 16x 작고, llama-bench token-generation 기준 약 2x 빨랐다.
 
-1. 같은 Path A' export/runtime 측정을 pretrained small model로 스케일업한다.
+1. 같은 Path A' export/runtime 측정을 `JackFram/llama-160m`으로 스케일업한다.
 2. whole-file ratio가 target-linear ratio 쪽으로 수렴하는지 확인한다.
-3. 큰 모델에서 latency가 약하면 tiny-model overhead, thread count, context
+3. 그 다음 `gpt-oss-20b`는 바로 변환하지 말고 architecture/tensor-map audit부터
+   진행한다. MoE라서 resident weights, active experts, router, KV/cache traffic을
+   분리해야 한다.
+4. 큰 모델에서 latency가 약하면 tiny-model overhead, thread count, context
    length, kernel maturity를 분리한다.
-4. 긴 context에서 weight traffic보다 KV traffic이 커지는 지점부터 TurboQuant/KV
+5. 긴 context에서 weight traffic보다 KV traffic이 커지는 지점부터 TurboQuant/KV
    cache compression을 다시 연다.
 
 ## Current Estimates

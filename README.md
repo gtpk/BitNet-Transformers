@@ -39,6 +39,7 @@ Core documents:
 - [GGUF / bitnet.cpp export scoping plan](./docs/bitnet_cpp_export_scoping.md)
 - [I2_S export PoC plan](./docs/i2s_export_poc_plan.md)
 - [bitnet.cpp I2_S layout audit](./docs/bitnet_cpp_i2s_layout_audit.md)
+- [Scale-up target roadmap](./docs/scaleup_target_roadmap.md)
 - [Groupwise alpha hypothesis](./docs/groupwise_alpha_hypothesis.md)
 - [Research signal note](./docs/research_signal_note.md)
 - [TurboQuant + BitNet KV-cache plan](./docs/turboquant_bitnet_implementation_plan.md)
