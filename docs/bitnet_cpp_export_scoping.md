@@ -896,3 +896,45 @@ I2_S) delivers both the size and the speed, so a bespoke kernel is unnecessary
 for the x86/Linux deployment target. Remaining: confirm the ratios scale up on a
 real (linear-dominated) model; the M5 runtime stays a separate toolchain issue.
 ```
+
+## RT-114 / SCALE-001: pretrained small-model scale-up (plan)
+
+RT-112/113 closed the tiny artifact: the per-tensor-native -> I2_S path is correct
+AND efficient on x86. The open question for the project/paper claim:
+
+```text
+Is the gain a tiny-toy artifact, or does it hold on a REAL LLM structure?
+```
+
+Target model: **JackFram/llama-160m** (LLaMA arch, hidden 768 / inter 3072 / 12
+layers / vocab 32000). Chosen because it is (a) real pretrained LLaMA structure
+that RT-103 proved converts with zero surgery, (b) **linear-dominated** — the 7
+target linears/layer total ~113M params vs ~24.6M embedding, the opposite of the
+tiny model where embedding dominated — so it directly tests whole->target
+convergence, and (c) small enough to build/convert/bench on x86 Colab in minutes.
+
+Method (no expensive ternary retrain): take the pretrained FP weights and
+**materialize Wq = gamma*T (per-tensor b1.58 PTQ)** on the 84 target linears, then
+run the same Path A' export. Absolute PPL will be poor (PTQ to ternary without any
+adaptation — RT-104 already showed post-hoc is lossy), so **quality is judged by
+f16-vs-i2_s PARITY, not absolute PPL**. Ternary *training* a 160M model for good
+absolute quality is a separate, later track; SCALE-001 isolates storage/latency/
+mechanics/runtime-faithfulness at real scale.
+
+### TC
+
+| ID | Question | Pass criterion |
+| --- | --- | --- |
+| SCALE-001a | whole-file ratio converges toward target-linear ratio | i2_s whole/f32 << tiny's 0.45 (expect ~0.14) |
+| SCALE-001b | I2_S token-gen throughput gain holds at scale | i2_s tg t/s > f32 and > f16 (same llama-bench cfg) |
+| SCALE-001c | Path A' converts + I2_S-quantizes + runs on a 160M LLaMA | convert+quantize+llama-cli/perplexity rc=0, all 84 linears -> i2_s |
+| SCALE-001d | runtime faithful at scale (the parity claim) | i2_s PPL ~= f16 PPL on eval text (within a few %) |
+
+Non-goal here: good absolute PPL (needs ternary training). If SCALE-001d shows
+i2_s != f16, that is a runtime/encoding issue at scale (investigate); a bad
+*absolute* PPL with i2_s~=f16 is expected and is a PASS for SCALE-001.
+
+Driver: `scripts/rt114_scaleup.py` (download -> materialize Wq=gamma*T on target
+linears -> build f32/f16/i2_s for latent control + ternary -> perplexity parity ->
+delegate storage/latency to `scripts/rt113_storage_latency.py`). Reuses the
+RT-112/113 plumbing; model-dir/config-driven so it is not tiny-specific.
