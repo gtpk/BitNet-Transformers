@@ -117,7 +117,8 @@ recovery는 scales, generation usability는 sane decoding에서 회복, quantize
 아님으로 판정. 남은 유일한 open gap은 **factual quality**(FP/Q2_K 미달) — 처방은
 quantizer가 아니라 adaptation/data(instruction/longer CE/repetition-aware objective).
 다음은 새 실험보다 **논문/리포트 정리**가 우선이다. 상세 claim table은
-[Paper Skeleton](./paper_skeleton.md) 참조.
+[Paper Skeleton](./paper_skeleton.md) (claim table/figures)와 전체 초안
+[Paper Draft](./paper_draft.md) 참조.
 
 packed format Phase 1/2/3/4 검증(로컬):
 
