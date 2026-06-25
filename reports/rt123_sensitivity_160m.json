@@ -1,0 +1,16 @@
+{
+  "model": "JackFram/llama-160m (FP, one-shot b1.58 PTQ baseline)",
+  "method": "PyTorch FP-restore per-group sensitivity (proxy; --tensor-type unavailable so no real hybrid GGUF here)",
+  "ce_fp": 3.1466, "ppl_fp": 23.26, "ce_allT": 11.6597, "ppl_allT": 115808.28,
+  "sensitivity_fp_restore_nats": {
+    "blk.00.attn": -1.43666, "blk.00.mlp": -0.51789, "blk.01.attn": -0.11947, "blk.01.mlp": 0.38761,
+    "blk.02.attn": -0.01055, "blk.02.mlp": 0.32141, "blk.03.attn": -0.13870, "blk.03.mlp": 0.06344,
+    "blk.04.attn": -1.05939, "blk.04.mlp": -0.32468, "blk.05.attn": -0.57434, "blk.05.mlp": -0.04331,
+    "blk.06.attn": -0.10672, "blk.06.mlp": -0.07090, "blk.07.attn": -0.27652, "blk.07.mlp": -0.23809,
+    "blk.08.attn": -0.20325, "blk.08.mlp": -0.78123, "blk.09.attn": -0.00618, "blk.09.mlp": -1.09503,
+    "blk.10.attn": 0.53107, "blk.10.mlp": -1.43024, "blk.11.attn": 1.07189, "blk.11.mlp": 0.95474
+  },
+  "positive_groups": 6, "total_groups": 24,
+  "finding": "Single-group FP-restore is interaction-dominated (18/24 negative) on the un-adapted PTQ model; the additive-knapsack premise is weak. Clean positives concentrate at output-proximal layers (blk.11, blk.10) + a few early MLPs. Even the best single group recovers ~1 of the ~8.5 nat PTQ->FP gap, so bit-allocation alone cannot approach FP.",
+  "caveat": "Proxy on the FP/PTQ model with FP-restore, not the ADAPTED model with real Q2_K. Faithful per-(group,choice) needs the adapted model + real hybrid GGUF (surgery)."
+}

@@ -338,3 +338,47 @@ then decide whether to promote the best policy to TinyLlama-1.1B
 Do not run G6 seed variance before RT-123 unless the goal is paper hygiene only.
 The scientific bottleneck is now usability under a memory budget, not variance of the
 old all-I2_S recipe.
+
+## RT-123 RESULT (2026-06-25): sensitivity is interaction-dominated; additive-DP premise is weak
+
+Gate finding: the pinned bitnet.cpp `llama-quantize` has **no `--tensor-type`** override,
+so real per-group hybrid GGUFs require byte surgery. Per the plan's fallback, RT-123 ran
+a PyTorch per-group **FP-restore** sensitivity scan on the FP/PTQ Llama-160M
+(`scripts/rt123_sensitivity_scan.py`, `reports/rt123_sensitivity_160m.json`).
+
+```text
+CE_fp = 3.147 (PPL 23)   CE_all-ternary(PTQ) = 11.66 (PPL 115,808)
+sensitivity(g) = CE_allT - CE(g restored to FP)   [FP upper bound]
+```
+
+| sign | groups |
+| --- | --- |
+| positive (FP-restore helps) | blk.11.attn +1.07, blk.11.mlp +0.95, blk.10.attn +0.53, blk.01.mlp +0.39, blk.02.mlp +0.32, blk.03.mlp +0.06 (6/24) |
+| negative (FP-restore HURTS) | the other 18/24 (e.g. blk.00.attn -1.44, blk.10.mlp -1.43, blk.09.mlp -1.10) |
+
+Honest findings:
+1. **Heavy non-additivity.** 18/24 single-group FP-restores make CE *worse* than
+   all-ternary: the all-ternary PTQ model is a self-consistent (bad) fixed point, and
+   perturbing one layer to FP mismatches the downstream ternary stack. The
+   additive-knapsack DP assumption is therefore unreliable on this baseline.
+2. **Clean signal is output-proximal.** Precision helps most at the last layers
+   (blk.11, blk.10) plus a few early MLPs — interpretable (final-layer error is not
+   averaged out by later layers).
+3. **Low ceiling.** The best single group recovers ~1 of the ~8.5-nat PTQ->FP gap; even
+   summing the positives (optimistic, non-additive) leaves PPL in the thousands.
+   **Bit-allocation alone cannot approach FP** on the PTQ model.
+
+Caveat: this is a proxy — FP-restore on the *un-adapted* PTQ model, not the ADAPTED
+model with real Q2_K. A faithful per-(group,choice) scan needs the adapted model + real
+hybrid GGUFs (surgery).
+
+```text
+VERDICT (by the plan's own rule): borderline-negative. A few positive groups exist
+(output layers), but 18/24 negatives break the additive premise, so a full RT-124
+knapsack DP on these deltas would be DP-on-noise. Bit allocation cannot close the
+PTQ->FP gap; usability remains recovery/data-bound (consistent with RT-122).
+RECOMMENDATION: do NOT build the full additive DP. Instead test ONE intuition-backed
+hybrid — last 1-2 layers higher-bit, rest I2_S — on the ADAPTED model via GGUF surgery
+(RT-125), and otherwise treat usability as a recovery/data problem, not a bit-allocation
+problem.
+```
