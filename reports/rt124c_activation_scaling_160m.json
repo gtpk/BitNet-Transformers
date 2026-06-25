@@ -1,0 +1,13 @@
+{
+  "model": "JackFram/llama-160m (FP, one-shot ternary, PyTorch screen)",
+  "ce_fp": 3.1466, "ppl_fp": 23.26,
+  "rows": [
+    {"alpha": 0.0, "ce": 11.6597, "ppl": 115808.28, "delta_ce_vs_alpha0": 0.0},
+    {"alpha": 0.25, "ce": 11.8106, "ppl": 134671.51, "delta_ce_vs_alpha0": -0.1509},
+    {"alpha": 0.5, "ce": 11.8028, "ppl": 133619.65, "delta_ce_vs_alpha0": -0.1431},
+    {"alpha": 0.75, "ce": 11.5170, "ppl": 100407.07, "delta_ce_vs_alpha0": 0.1427},
+    {"alpha": 1.0, "ce": 11.7658, "ppl": 128777.56, "delta_ce_vs_alpha0": -0.1061}
+  ],
+  "best_alpha": 0.75,
+  "finding": "AWQ/SmoothQuant-style diagonal activation scaling gives only +0.14 nats at best (alpha 0.75) - not a rescue (consistent with RT-124A col-scale being unhelpful; D is per-input-channel). Activation-outlier scaling is not the dominant cause of ternary difficulty here -> the remaining lever is output-aware ASSIGNMENT (RT-125 GPTQ/Hessian)."
+}

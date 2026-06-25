@@ -596,3 +596,28 @@ Per the decision tree, the bottleneck is the ASSIGNMENT / activation-awareness /
 inter-layer interaction. Next: RT-124C (AWQ/SmoothQuant diagonal equivalent scaling),
 then RT-125 (GPTQ/Hessian output-aware ternary projection).
 ```
+
+## RT-124C RESULT (2026-06-25): activation-aware diagonal scaling does NOT rescue
+
+PyTorch screen, XW=(XD)(D^-1 W), D_j = act_rms_j^alpha (`scripts/rt124c_activation_scaling.py`).
+
+| alpha | CE | PPL | vs alpha0 |
+| ---: | ---: | ---: | ---: |
+| 0.0 (baseline) | 11.66 | 115,808 | — |
+| 0.25 | 11.81 | 134,672 | -0.15 |
+| 0.5 | 11.80 | 133,620 | -0.14 |
+| 0.75 | 11.52 | 100,407 | +0.14 |
+| 1.0 | 11.77 | 128,778 | -0.11 |
+
+Best (alpha 0.75) recovers only +0.14 nats — marginal, below the 0.2 bar; consistent
+with RT-124A's col-scale being unhelpful (D is a per-input-channel scale). Activation-
+outlier migration is not the dominant cause of ternary difficulty here.
+
+```text
+VERDICT (RT-124C): activation-aware diagonal scaling is not the rescue. RT-124 as a
+whole: only scale GRANULARITY (block/row) is a real partial lever (+1.8-2.4 nats, needs
+runtime); the scale/threshold OBJECTIVE (absmean already best) and ACTIVATION diagonal
+scaling do not help. The remaining untested lever is output-aware ASSIGNMENT -> RT-125
+(GPTQ/Hessian ternary projection): minimize ||XW - X(gamma*T)||^2 with second-order
+error compensation, capturing inter-weight interactions diagonal methods miss.
+```
