@@ -8,6 +8,7 @@ Related:
 - [Quality Recovery Plan](./quality_recovery_plan.md)
 - [G5 Baseline Comparison Plan](./g5_baseline_plan.md)
 - [Mixed-Bit DP Plan](./mixed_bit_dp_plan.md)
+- [Quantization-Aware b1.58 Conversion Plan](./quantization_aware_b158_conversion_plan.md)
 
 ## The Better Question
 
@@ -262,6 +263,21 @@ A successful existing-model b1.58 conversion likely needs at least one of:
    Add data cleaning, repetition penalties during evaluation, or explicit loop-
    avoiding losses such as unlikelihood terms. CE alone can improve PPL while leaving
    greedy attractors intact.
+
+6. **quantization-aware conversion before codebook surrender**
+
+   The project should not conclude "b1.58 conversion is impossible" until it has
+   tried the standard quantization toolbox:
+
+   ```text
+   scale granularity
+   threshold/MSE objective
+   activation-aware diagonal scaling
+   Hessian/GPTQ-style assignment
+   rotation/incoherence preprocessing
+   ```
+
+   The concrete plan is [Quantization-Aware b1.58 Conversion Plan](./quantization_aware_b158_conversion_plan.md).
 
 ## Decision
 

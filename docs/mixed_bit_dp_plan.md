@@ -1,8 +1,14 @@
 # Mixed-Bit DP Plan (RT-123..125)
 
 Document position: [Index](./index.md) -> after [G5 Baseline Plan](./g5_baseline_plan.md)
-and [Paper Skeleton](./paper_skeleton.md). This is the next path after RT-121/122
-showed the honest limit of pure all-I2_S b1.58.
+and [Paper Skeleton](./paper_skeleton.md).
+
+Status note after RT-123: this is no longer the primary next path. The sensitivity
+scan showed strong layer interaction and a weak additive-DP premise, so this document
+is kept as a useful mixed-bit selector/reference. The primary next experiment is now
+[Quantization-Aware b1.58 Conversion Plan](./quantization_aware_b158_conversion_plan.md).
+The old "RT-124 DP selector" and "RT-125 hybrid artifact" labels below are therefore
+historical/frozen unless a future result revives mixed-bit allocation.
 
 ## Why This Exists
 

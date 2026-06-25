@@ -1,13 +1,16 @@
 # Paper / Report Skeleton — Teacher-Free b1.58 → I2_S on Dense LLaMA
 
-Document position: [Index](./index.md) -> synthesis of RT-112..118. Pulls the
+Document position: [Index](./index.md) -> synthesis of RT-112..123. Pulls the
 finished tracks into a paper outline, audits the gaps, and scopes the next
-high-value reinforcing experiment (mixed-bit DP after G5/RT-122).
+high-value reinforcing experiment (quantization-aware b1.58 conversion after
+G5/RT-122/RT-123).
 
 Related: [bitnet_cpp_export_scoping.md](./bitnet_cpp_export_scoping.md) (systems),
 [quality_recovery_plan.md](./quality_recovery_plan.md) (quality),
 [oss_architecture_audit.md](./oss_architecture_audit.md) (negative result),
-[why_b158_conversion_is_hard.md](./why_b158_conversion_is_hard.md) (problem statement).
+[why_b158_conversion_is_hard.md](./why_b158_conversion_is_hard.md) (problem statement),
+[quantization_aware_b158_conversion_plan.md](./quantization_aware_b158_conversion_plan.md)
+(next experiment).
 
 ## Working title
 
@@ -173,34 +176,39 @@ ladder to show the floor; conclude "wrong vehicle for ternary."
 | G8 | only LLaMA family; generality unproven beyond it | LOW | (scope it honestly; gpt-oss negative already bounds the claim) |
 | G9 | some raw Colab JSON volatile / not all archived in repo `reports/` | LOW | commit the rt11x_*.json artifacts |
 
-## Next reinforcing experiment: mixed-bit DP (RT-123..125)
+## Next reinforcing experiment: quantization-aware b1.58 conversion (RT-124..128)
 
-Rationale: G1/G5/RT-122 are now resolved and they narrow the claim honestly. Pure
-all-I2_S is excellent as a systems substrate, but it does not beat Q2_K on PPL and
-does not yet generate usable 1.1B text. The next useful question is not "train the
-same all-I2_S recipe longer" but:
+Rationale: G1/G5/RT-122/RT-123 are now resolved and they narrow the claim honestly.
+Pure all-I2_S is excellent as a systems substrate, but it does not beat Q2_K on PPL
+and does not yet generate usable 1.1B text. RT-123 also showed that additive
+mixed-bit DP is weak: single-group precision changes are interaction-dominated and
+often worsen CE. The next useful question is therefore:
 
 ```text
-Can we spend a small extra bit budget only on sensitive groups and keep most of the
-I2_S memory-traffic win?
+Did b1.58 conversion fail because we used a primitive quantizer, rather than the
+real PTQ/QAT toolbox used by GPTQ/AWQ/SmoothQuant/QuIP-style methods?
 ```
 
 Plan:
 
-- RT-123: scan layer-group sensitivity (`attn`, `mlp`) by upgrading one group at a
-  time from I2_S to Q2_K/Q3_K_M and measuring same-tool CE gain per MB.
-- RT-124: solve a multiple-choice knapsack DP over the scan results to produce
-  `tiny-fast`, `balanced`, and `quality-heavy` hybrid policies.
-- RT-125: build and validate real hybrid artifacts with PPL, residual gap, loop rate,
-  MB, and token-gen t/s.
+- RT-124A/B: scale granularity plus scale/threshold objective sweep
+  (`per-tensor`, `row-wise`, `groupwise`, MSE, activation-MSE, learned threshold).
+- RT-124C: AWQ/SmoothQuant-style diagonal activation-aware scaling.
+- RT-125: GPTQ-style output-aware ternary projection using calibration activations.
+- RT-126: rotation/incoherence preprocessing.
+- RT-127/128: signed-epsilon 2-bit and 1D ternary gate if pure b1.58 remains weak.
 
-See [Mixed-Bit DP Plan](./mixed_bit_dp_plan.md). Decision order now:
-**RT-123 sensitivity scan -> RT-124 DP selector -> RT-125 hybrid validation -> G6 seed variance**.
+See [Quantization-Aware b1.58 Conversion Plan](./quantization_aware_b158_conversion_plan.md).
+Decision order now:
+**RT-124A/B cheap sweep -> RT-124C activation scaling -> RT-125 GPTQ-style ternary ->
+RT-126 rotation -> RT-127/128 2-bit compromise -> G6 seed variance**.
 
 ## What NOT to do next
 
 - Do not start a ternary-MoE / gpt-oss build (RT-118: ROI ~0).
 - Do not claim quality-per-bit superiority over Q2_K (RT-121 says no).
 - Do not claim 1.1B generation usability for all-I2_S (RT-122 says no).
-- Do not run seed variance before deciding whether mixed-bit can fix the current
-  usability bottleneck; G6 is paper hygiene, not the scientific blocker.
+- Do not run seed variance before testing whether quantization-aware conversion can
+  fix the current quality bottleneck; G6 is paper hygiene, not the scientific blocker.
+- Do not build a custom runtime for signed-epsilon or groupwise scales until the
+  PyTorch quality probe shows a real PPL + generation signal.
