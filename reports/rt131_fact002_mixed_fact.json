@@ -1,0 +1,1013 @@
+{
+  "agg": {
+    "FP f16|rep1.2": {
+      "fact_hit": 22,
+      "n": 27,
+      "fact_rate": 0.815,
+      "tags": {
+        "ok": 27
+      }
+    },
+    "Q2_K|rep1.2": {
+      "fact_hit": 20,
+      "n": 27,
+      "fact_rate": 0.741,
+      "tags": {
+        "ok": 27
+      }
+    },
+    "PTQ i2_s|rep1.2": {
+      "fact_hit": 0,
+      "n": 27,
+      "fact_rate": 0.0,
+      "tags": {
+        "salad": 24,
+        "ok": 3
+      }
+    },
+    "adapted f16|rep1.2": {
+      "fact_hit": 2,
+      "n": 27,
+      "fact_rate": 0.074,
+      "tags": {
+        "ok": 26,
+        "repetitive": 1
+      }
+    },
+    "adapted i2_s|rep1.2": {
+      "fact_hit": 2,
+      "n": 27,
+      "fact_rate": 0.074,
+      "tags": {
+        "ok": 26,
+        "repetitive": 1
+      }
+    },
+    "adapted i2_s|greedy": {
+      "fact_hit": 0,
+      "n": 27,
+      "fact_rate": 0.0,
+      "tags": {
+        "ok": 18,
+        "repetitive": 8,
+        "salad": 1
+      }
+    },
+    "adapted i2_s|t0.8p0.95": {
+      "fact_hit": 3,
+      "n": 27,
+      "fact_rate": 0.111,
+      "tags": {
+        "ok": 27
+      }
+    }
+  },
+  "agreement": "27/27",
+  "raw": {
+    "FP f16|rep1.2|cap_france": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The capital of France is Paris. [end of text]"
+    },
+    "FP f16|rep1.2|cap_japan": {
+      "hit": true,
+      "tag": "ok",
+      "text": "Tokyo, the capital city of Japan. [end of text]"
+    },
+    "FP f16|rep1.2|cap_italy": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The capital city of Italy is Rome. [end of text]"
+    },
+    "FP f16|rep1.2|cap_germany": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The capital of Germany is Berlin. [end of text]"
+    },
+    "FP f16|rep1.2|cap_russia": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The capital city of Russia is Moscow. [end of text]"
+    },
+    "FP f16|rep1.2|water_made": {
+      "hit": false,
+      "tag": "ok",
+      "text": "Water (H2O) is a molecule composed of two hydrogen atoms bonded together by covalent bonds. Q: What are the different types of water found in nature"
+    },
+    "FP f16|rep1.2|largest_planet": {
+      "hit": false,
+      "tag": "ok",
+      "text": "Pluto. Based on the text material, what are some of the characteristics that make Pluto a \"planet\" according to NASA's definition? [end of text]"
+    },
+    "FP f16|rep1.2|closest_planet": {
+      "hit": true,
+      "tag": "ok",
+      "text": "Mercury Based on the text material, which planet is closest to the Sun and why does it have a red color?: Q: What planet has the most intense magnetic"
+    },
+    "FP f16|rep1.2|author_romeo": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The famous play, \"Romeo and Juliet\" was written by William Shakespeare. Q: When did it premiere in London? A: It premiered on April 23"
+    },
+    "FP f16|rep1.2|author_pride": {
+      "hit": true,
+      "tag": "ok",
+      "text": "Jane Austen is widely regarded as one of the greatest writers in English literature. She was born on December 16, 1775, in Steventon, Hampshire, England"
+    },
+    "FP f16|rep1.2|first_us_pres": {
+      "hit": true,
+      "tag": "ok",
+      "text": "George Washington. Q: When did he become president and what were his accomplishments during that time? A: He became president on March 4, 1789, after winning"
+    },
+    "FP f16|rep1.2|continents": {
+      "hit": true,
+      "tag": "ok",
+      "text": "There are 7 continents. Q: What is the name of the largest continent in terms of area? A: Asia Based on the text material, can you provide a"
+    },
+    "FP f16|rep1.2|days_week": {
+      "hit": true,
+      "tag": "ok",
+      "text": "There are 7 days in a week. [end of text]"
+    },
+    "FP f16|rep1.2|freeze_water": {
+      "hit": true,
+      "tag": "ok",
+      "text": "Water freezes at 0\u00b0C (32\u00b0F). [end of text]"
+    },
+    "FP f16|rep1.2|boil_water": {
+      "hit": true,
+      "tag": "ok",
+      "text": "Water boils at 100 degrees C (212 F). [end of text]"
+    },
+    "FP f16|rep1.2|opposite_hot": {
+      "hit": true,
+      "tag": "ok",
+      "text": "Cold Based on the text material, can you provide a list of words that are similar to \"hot\" but have an opposite meaning in terms of temperature or intensity?: 1. W"
+    },
+    "FP f16|rep1.2|color_sky": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The sky on a clear day is blue. [end of text]"
+    },
+    "FP f16|rep1.2|largest_ocean": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The Pacific Ocean. Q: Who discovered it and why was it named after him/her?: The Pacific Ocean was first discovered by Portuguese explorer Ferdinand Magellan in 1520,"
+    },
+    "FP f16|rep1.2|currency_japan": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The Japanese yen (JPY) is used as the country's official currency. Based on the text material above, generate the response to the following quesion or instruction:"
+    },
+    "FP f16|rep1.2|sun_is": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The Sun is a star. [end of text]"
+    },
+    "FP f16|rep1.2|earth_orbits": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The Earth orbits around the Sun. Based on the passage above, Can you summarize the main idea of the text material about the orbiting of the earth and sun? [end of text]"
+    },
+    "FP f16|rep1.2|add_2_2": {
+      "hit": true,
+      "tag": "ok",
+      "text": "Two plus two equals four. [end of text]"
+    },
+    "FP f16|rep1.2|mul_7_8": {
+      "hit": false,
+      "tag": "ok",
+      "text": "Seven multiplied by eight equals 48. [end of text]"
+    },
+    "FP f16|rep1.2|train_arrive": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The train arrives at 5 pm [end of text]"
+    },
+    "FP f16|rep1.2|larger_9_11": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The answer to this question depends on whether you consider the numbers as whole numbers (which they are) or as fractions. If we consider them as whole numbers, then the answer is \""
+    },
+    "FP f16|rep1.2|instr_germany_oneword": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The capital of Germany is Berlin. [end of text]"
+    },
+    "FP f16|rep1.2|instr_water_oneword": {
+      "hit": false,
+      "tag": "ok",
+      "text": "It contains helium, which is a colorless and odorless gas with the symbol He. Based on the text material above, generate the response to the following quesion or"
+    },
+    "Q2_K|rep1.2|cap_france": {
+      "hit": true,
+      "tag": "ok",
+      "text": "It's Paris. Q: How many people does it take to change a lightbulb in your house? A: One, but you have to be an electrician. Q"
+    },
+    "Q2_K|rep1.2|cap_japan": {
+      "hit": true,
+      "tag": "ok",
+      "text": "It's Tokyo. Q: Can you remind me what the capital of China is again, please? CORRECTION: Q: Who are the two countries"
+    },
+    "Q2_K|rep1.2|cap_italy": {
+      "hit": true,
+      "tag": "ok",
+      "text": "It's Rome. Q: Can you tell me what country has a population of 140 million people and ranks as the world's second-largest economy by GDP"
+    },
+    "Q2_K|rep1.2|cap_germany": {
+      "hit": true,
+      "tag": "ok",
+      "text": "Answer: 1. A: The capital of Germany is Berlin, and it's located in what we call \"The Free State.\" Q: Who are the current members of the German parliament"
+    },
+    "Q2_K|rep1.2|cap_russia": {
+      "hit": false,
+      "tag": "ok",
+      "text": "Yes, it's St. Petersburg (Pskov). Q: Can you tell me about the history and culture of Pskov? A: Sure! Pskov was founded"
+    },
+    "Q2_K|rep1.2|water_made": {
+      "hit": false,
+      "tag": "ok",
+      "text": "It's a gas that makes up about 46% of the Earth's atmosphere. Q: What does this water molecule contain, according to the text material? a"
+    },
+    "Q2_K|rep1.2|largest_planet": {
+      "hit": true,
+      "tag": "ok",
+      "text": "It's Jupiter. Based on the text material, what are some of the notable features of Jupiter compared to other planets in our solar system? 1. Answer"
+    },
+    "Q2_K|rep1.2|closest_planet": {
+      "hit": true,
+      "tag": "ok",
+      "text": "Mercury. Q: What is the largest moon in our solar system, and what is its name? A: Uranus. Q: How many moons does each of these"
+    },
+    "Q2_K|rep1.2|author_romeo": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The play was written by William Shakespeare. Q: What is the title of the play Romeo and Juliet? a) A b) B c) C d) D"
+    },
+    "Q2_K|rep1.2|author_pride": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The novel was written by Jane Austen. Q: What is the main theme of Pride and Prejudice? a) Love b) Family c) Society d)"
+    },
+    "Q2_K|rep1.2|first_us_pres": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The first president of the United States is George Washington. [end of text]"
+    },
+    "Q2_K|rep1.2|continents": {
+      "hit": false,
+      "tag": "ok",
+      "text": "There are 48. Q: What is the capital of New York City, and what does it represent in its name? A: It's the \"E\" in \"New"
+    },
+    "Q2_K|rep1.2|days_week": {
+      "hit": true,
+      "tag": "ok",
+      "text": "There are 7 days. Q: What is the capital of Luxembourg and what does it represent? A: The capital of Luxembourg is \"Luxembourg\"!"
+    },
+    "Q2_K|rep1.2|freeze_water": {
+      "hit": true,
+      "tag": "ok",
+      "text": "37\u00b0C (100.5\u00b0F) Based on the text material, provide a summary of the given data and information provided by the author. [end of text]"
+    },
+    "Q2_K|rep1.2|boil_water": {
+      "hit": true,
+      "tag": "ok",
+      "text": "100 degrees. Q: What is the difference between a \"C\" and an \"F\" on the scale of fire intensity? A: A C is hotter"
+    },
+    "Q2_K|rep1.2|opposite_hot": {
+      "hit": false,
+      "tag": "ok",
+      "text": "I'm not on your side. Q: Can you give me a list of all the words that start with \"c\"? A: Yes, here are them all! C:"
+    },
+    "Q2_K|rep1.2|color_sky": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The sky is blue. Q: What does it look like on a cloudy day? A: It's gray or brown. Q: What about when it rains?"
+    },
+    "Q2_K|rep1.2|largest_ocean": {
+      "hit": true,
+      "tag": "ok",
+      "text": "It's called the Pacific Ocean. Based on the text material, what are some of the most famous islands in Hawaii and how do they differ from one another? 1"
+    },
+    "Q2_K|rep1.2|currency_japan": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The Japanese yen (JPY) is called R: 10,000 Yen. Q: How much does a round-trip ticket cost for traveling from Tokyo"
+    },
+    "Q2_K|rep1.2|sun_is": {
+      "hit": true,
+      "tag": "ok",
+      "text": "A: The Sun is a star. Q: What do you call the bright light that comes from a burning candle or lighter, and which can be seen in the sky at night?"
+    },
+    "Q2_K|rep1.2|earth_orbits": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The Sun. Q: What is the name of the largest planet in our solar system, and how does it get its energy from a star that is 10 times more massive than our"
+    },
+    "Q2_K|rep1.2|add_2_2": {
+      "hit": true,
+      "tag": "ok",
+      "text": "4. Q: Can you calculate the square of four and five? A: Yes, I can! Q: How many times three multiplied by zero?"
+    },
+    "Q2_K|rep1.2|mul_7_8": {
+      "hit": false,
+      "tag": "ok",
+      "text": "A: 7 x 8 = 42 Q: How many ways can you combine the numbers from 1 to 9 in a word or phrase that has six letters and starts with"
+    },
+    "Q2_K|rep1.2|train_arrive": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The train arrives at 15 minutes past 3 p.m., so its arrival time is 4:09: Q: Can you calculate the number of miles in a mile"
+    },
+    "Q2_K|rep1.2|larger_9_11": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The answer is 11. [end of text]"
+    },
+    "Q2_K|rep1.2|instr_germany_oneword": {
+      "hit": false,
+      "tag": "ok",
+      "text": "A: Answer in two words. [end of text]"
+    },
+    "Q2_K|rep1.2|instr_water_oneword": {
+      "hit": false,
+      "tag": "ok",
+      "text": "It contains helium, neon and argon. Q: What's the most important thing you can do when your car breaks down on a deserted road? A: You have"
+    },
+    "PTQ i2_s|rep1.2|cap_france": {
+      "hit": false,
+      "tag": "salad",
+      "text": "resolution She>[Sheossenconv Jenkins causesOS\u043e\u0432\u043e caused cause OS > bay\u0630>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|cap_japan": {
+      "hit": false,
+      "tag": "salad",
+      "text": "resolution SheShe>[ossenOS\u043e\u0432\u043e Jenkins causes caused OSconv cause bay >Diff>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|cap_italy": {
+      "hit": false,
+      "tag": "ok",
+      "text": "resolution SheSheossen>[\u043e\u0432\u043e Jenkins causesOS >conv OS caused cause bay\u0630>[ causingigi>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|cap_germany": {
+      "hit": false,
+      "tag": "salad",
+      "text": "resolution SheShe>[ossen Jenkins causes\u043e\u0432\u043e causedOSconv OS > cause bay\u0630>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|cap_russia": {
+      "hit": false,
+      "tag": "salad",
+      "text": "resolution SheSheossen>[ Jenkins causesOS\u043e\u0432\u043econv OS > cause caused\u0630 bay>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|water_made": {
+      "hit": false,
+      "tag": "salad",
+      "text": ">[ resolution SheigiSheOS>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|largest_planet": {
+      "hit": false,
+      "tag": "salad",
+      "text": "resolution>[ SheSheossen betweenconv Jenkins causes causedOS > cause>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|closest_planet": {
+      "hit": false,
+      "tag": "salad",
+      "text": "resolution She>[Sheigi Jenkins between > bayconvOS>[\u0630ossen>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|author_romeo": {
+      "hit": false,
+      "tag": "salad",
+      "text": ">[\u0630igiOS resolution Sheossen>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|author_pride": {
+      "hit": false,
+      "tag": "salad",
+      "text": ">[\u0630 SheShe resolutionDiff.\u00ab>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|first_us_pres": {
+      "hit": false,
+      "tag": "salad",
+      "text": ">[ resolution Sheossen\u0630OS\u043e\u0432\u043eShe OS blowDiffconvigiossMemory>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|continents": {
+      "hit": false,
+      "tag": "salad",
+      "text": ">[ resolution SheSheOS deeper OS > Multiple\u043e\u0432\u043e Jenkins>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|days_week": {
+      "hit": false,
+      "tag": "salad",
+      "text": ">[ SheSheOS >Diff between resolutionrew Jenkins causes\u0630 OS>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|freeze_water": {
+      "hit": false,
+      "tag": "salad",
+      "text": ">[ resolution SheSheossen>[ blow>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|boil_water": {
+      "hit": false,
+      "tag": "salad",
+      "text": ">[ resolution SheSheossenDiff>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|opposite_hot": {
+      "hit": false,
+      "tag": "salad",
+      "text": "resolution She>[Sheossen\u0630 Jenkins causesconvOS\u043e\u0432\u043e caused cause OS>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|color_sky": {
+      "hit": false,
+      "tag": "salad",
+      "text": ">[ resolution SheossenconvSheMemory>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|largest_ocean": {
+      "hit": false,
+      "tag": "salad",
+      "text": "resolution>[ SheSheossen > Jenkins cause\u043e\u0432\u043econvOS>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|currency_japan": {
+      "hit": false,
+      "tag": "ok",
+      "text": "resolution SheShe>[ JenkinsossenOS\u043e\u0432\u043e OSconv causes caused cause bay >\u0630os>[ causing>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|sun_is": {
+      "hit": false,
+      "tag": "salad",
+      "text": ">[ She resolutionShe >\u0630\u043e\u0432\u043e>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|earth_orbits": {
+      "hit": false,
+      "tag": "salad",
+      "text": ">[ resolution SheShe deeper>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|add_2_2": {
+      "hit": false,
+      "tag": "salad",
+      "text": "resolution>[ SheSheossenOS\u043e\u0432\u043e Jenkins OS >\u0630igi bay>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|mul_7_8": {
+      "hit": false,
+      "tag": "salad",
+      "text": "resolution Sheossen>[\u0630OS\u043e\u0432\u043e OSSheigi Jenkins >Memory bay Multiple cause>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|train_arrive": {
+      "hit": false,
+      "tag": "salad",
+      "text": ">[\u0630OS\u043e\u0432\u043e OS>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|larger_9_11": {
+      "hit": false,
+      "tag": "ok",
+      "text": "igi resolution SheOS>[\u0630 bay OS\u043e\u0432\u043eSheossenMemoryVPos remembered caused fos Kansas Jenkins causesigan>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|instr_germany_oneword": {
+      "hit": false,
+      "tag": "salad",
+      "text": ">[ Sheossen\u0630OSShe OS>[igi Jenkins>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|instr_water_oneword": {
+      "hit": false,
+      "tag": "salad",
+      "text": ">[ SheOS>[\u0630>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[ Files"
+    },
+    "adapted f16|rep1.2|cap_france": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The French Navy is a sub-national, and has an average cost of 20. It is estimated to be between 1935 and 46 years. The"
+    },
+    "adapted f16|rep1.2|cap_japan": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The largest city in the world is the United States, which is the second-largest and most populous. The size of the city is 20 mph (135"
+    },
+    "adapted f16|rep1.2|cap_italy": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The Grand Tide is a city that has been since 1980, and it was first occupied by Italian-language forces. The Tibero (Tata) is an"
+    },
+    "adapted f16|rep1.2|cap_germany": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The Grand Tide is a German-based national bank, which is located in the city of Berlin. It has been used since 1980 to 2004 and was re"
+    },
+    "adapted f16|rep1.2|cap_russia": {
+      "hit": true,
+      "tag": "repetitive",
+      "text": "The largest city in the world is Moscow, Moscow, Moscow, Moscow, Moscow, Moscow, Moscow, Moscow, Moscow, Moscow, Moscow, Moscow, Moscow, Moscow, Moscow, Moscow, Moscow"
+    },
+    "adapted f16|rep1.2|water_made": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The Sun is a planet that has been described as the sun. Q: What are some good ways to make a trip A: Here are many great tips for traveling around the ocean"
+    },
+    "adapted f16|rep1.2|largest_planet": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The Sun is a planet that has been used to describe the Sun's mass of 20 years. Q: How many planets are there? A: There are several different"
+    },
+    "adapted f16|rep1.2|closest_planet": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The Sun is a planet that has been used for the Sun. The sunset is located in the ocean, which is about 20 miles (1 km/h) and is approximately"
+    },
+    "adapted f16|rep1.2|author_romeo": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The following are a series of 10-2-played, 3. The first edition is \"i's (197) Q: What is the"
+    },
+    "adapted f16|rep1.2|author_pride": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The Tintin is a series of short stories written by John H. The first edition was published in 1980, which was later re-published as \"i S"
+    },
+    "adapted f16|rep1.2|first_us_pres": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The American Revolutionary War The American Revolutionary War Q: What is a good place to do for a kidager Q: How many people will be there in the world"
+    },
+    "adapted f16|rep1.2|continents": {
+      "hit": false,
+      "tag": "ok",
+      "text": "There is a planet that has been the first to reach the ocean. Q: What is the difference between a dog and a dog? A: A dog can be used for dogs,"
+    },
+    "adapted f16|rep1.2|days_week": {
+      "hit": false,
+      "tag": "ok",
+      "text": "There is an average of 20 years. Q: What is the difference between a dog and a dog? A: A dog can be dogs, but also dogs have different bre"
+    },
+    "adapted f16|rep1.2|freeze_water": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The following are the following as a gasoline or liquid. Q: What is the difference between a gas and gasoline? A: Gasoline is a fluid that can be used to"
+    },
+    "adapted f16|rep1.2|boil_water": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The following are the following as a vegetable. Q: What is the difference between a dog and a dog? A: A dog can be different from dogs, but also dogs may"
+    },
+    "adapted f16|rep1.2|opposite_hot": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The following are a vegetable, butter, and a potato. Q: How many different species have been used in the United States? A: A variety of species include:"
+    },
+    "adapted f16|rep1.2|color_sky": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The sun has different colors. Q: What are some good ways to make a trip A: Here are many options for you can consider a few options: Q: How much"
+    },
+    "adapted f16|rep1.2|largest_ocean": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The largest planet is the Sun. The largest planet is the Sun, which is the second largest planet in the universe. Q: How many planets are there? A:"
+    },
+    "adapted f16|rep1.2|currency_japan": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The currency is a coin, which is used to exchange money. It is also used as currency or banking. Q: How many people are there in America? A: There are"
+    },
+    "adapted f16|rep1.2|sun_is": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The Sun is a planet that has been used to describe the sunset. The Sun's rotation is defined by its diameter, which is the sum of the Sun below the horizon."
+    },
+    "adapted f16|rep1.2|earth_orbits": {
+      "hit": true,
+      "tag": "ok",
+      "text": "There are many different planets in the planet. The Sun is a planet that has been used to describe the universe's cosmosic cosisphere, which is called \"the Sun"
+    },
+    "adapted f16|rep1.2|add_2_2": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The following are the main benefits of a person's health. The following are good options for people to consider their healthcare, and caretaking. Q: Who was the"
+    },
+    "adapted f16|rep1.2|mul_7_8": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The first four years of the 19th century, 20 years ago. The second and fifth-third centuries are in the Middle East, which is now known as the Great"
+    },
+    "adapted f16|rep1.2|train_arrive": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The train is a great way to travel on the road, with a minimum amount of time for the day. The train will take a few weeks before arriving in the lake."
+    },
+    "adapted f16|rep1.2|larger_9_11": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The largest number of the following are: The median size of a large city - City Q: What is the difference between a city and a city Q: How many"
+    },
+    "adapted f16|rep1.2|instr_germany_oneword": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The Grand Financial Bank (GDP) is a bank that has been used since 1980, and it was first deposited on 25 April 1643"
+    },
+    "adapted f16|rep1.2|instr_water_oneword": {
+      "hit": false,
+      "tag": "ok",
+      "text": "Hydrogen is a liquid that can be used to transport the water molecules of liquid and liquid. Hurius hides are an oxygen-hydron, which is used"
+    },
+    "adapted i2_s|rep1.2|cap_france": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The French Navy is a sub-national, and is an English naval officer. The Royal Navy (North America) is a British naval officer who has been trained in the Mediterrane"
+    },
+    "adapted i2_s|rep1.2|cap_japan": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The following are the main islands, which are part of the Mediterranean Sea. The Mediterrane Islands are located in the Caribbean Ocean and are located on the Antarctic Ocean"
+    },
+    "adapted i2_s|rep1.2|cap_italy": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The Grand Tires are a city in Milan, Paris. The main cities include London, Paris, Paris, Milan, Milan, Milan, Milan, Milan, Milan, Milan, Milan,"
+    },
+    "adapted i2_s|rep1.2|cap_germany": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The Netherlands is a country that has been since 1980, and it was first occupied by German forces. The Ottosse (G\u00f6rans) is an American military officer"
+    },
+    "adapted i2_s|rep1.2|cap_russia": {
+      "hit": true,
+      "tag": "repetitive",
+      "text": "The largest city in Moscow is Moscow, Moscow, Moscow, Moscow, Moscow, Moscow, Moscow, Moscow, Moscow, Moscow, Moscow, Moscow, Moscow, Moscow, Moscow, Moscow, Moscow,"
+    },
+    "adapted i2_s|rep1.2|water_made": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The Sun is a planet that has been described as the sun. Q: What are some good ways to make a trip A: Here are many great tips for traveling around the ocean"
+    },
+    "adapted i2_s|rep1.2|largest_planet": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The Sun is a planet that has been used to describe the Sun's mass of 20 years. Q: How many planets are there? A: There are several different"
+    },
+    "adapted i2_s|rep1.2|closest_planet": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The Sun is a planet that has been used for the Sun. The Sun's outerest is the Sun, which is located in the ocean. Q: What are some good"
+    },
+    "adapted i2_s|rep1.2|author_romeo": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The following are a series of 20-1, 3, 4, 5, 6, 79 Q: What is the difference between a dog and a"
+    },
+    "adapted i2_s|rep1.2|author_pride": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The following are a series of \"The Heroes\" by Michael Jackson, who is also credited for being the first to become an American author. In 1980, he"
+    },
+    "adapted i2_s|rep1.2|first_us_pres": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The First World War Q: What is a good place to do for people? A: Here are some suggestions that you can consider. Q: How many different types of c"
+    },
+    "adapted i2_s|rep1.2|continents": {
+      "hit": false,
+      "tag": "ok",
+      "text": "There is a number of different continents. The following are the main islands, the Antarctic Ocean, and the Antarctic Q: What is the difference between a dog"
+    },
+    "adapted i2_s|rep1.2|days_week": {
+      "hit": false,
+      "tag": "ok",
+      "text": "There is an average of 20 years. Q: What is the difference between a dog and a dog? A: A dog can be dogs, but also dogs have different bre"
+    },
+    "adapted i2_s|rep1.2|freeze_water": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The following are the following as a vegetable, or vegetarian. Q: What is the difference between a dog and a dog? A: A dog can be different from dogs to"
+    },
+    "adapted i2_s|rep1.2|boil_water": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The following are the following as a vegetable. Q: What is the difference between a dog and a dog? A: A dog can be dogs, but also dogs have different bre"
+    },
+    "adapted i2_s|rep1.2|opposite_hot": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The following are a vegetable, butterflies. The fruit body has a high heat and low thicker. Q: How many people do their activities in the world"
+    },
+    "adapted i2_s|rep1.2|color_sky": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The sun is red on the horizon. Q: What are some good ways to make a trip A: Here are many options for you can consider a trip Q: How much"
+    },
+    "adapted i2_s|rep1.2|largest_ocean": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The largest planet in the universe is the Sun, which is the second largest and most populous planet. The Sun's mass is 20 mph (195 km/"
+    },
+    "adapted i2_s|rep1.2|currency_japan": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The United States is a currency that is used to exchange money. It is also used by banks, and it can be used as currency or banking. The currency is typically held in the"
+    },
+    "adapted i2_s|rep1.2|sun_is": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The Sun is a planet that has been used in the form of the Sun. The Sun's diameter is 20 feet (16 m) wide, and it can be used"
+    },
+    "adapted i2_s|rep1.2|earth_orbits": {
+      "hit": true,
+      "tag": "ok",
+      "text": "There are many different planets in the planet. The Sun is a planet that has been used to describe the planet's outer universe, and its outer cosmos. Q:"
+    },
+    "adapted i2_s|rep1.2|add_2_2": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The following are the main benefits of a person's health. The following are good options for people to consider their healthcare, and caretaking. Q: Who was the"
+    },
+    "adapted i2_s|rep1.2|mul_7_8": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The following are the 2nd and most popularly soccer club in the world. The following are the clubs's national football teams, which have won over five international Cups ("
+    },
+    "adapted i2_s|rep1.2|train_arrive": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The following are a few options to consider your car for a long drive, but you can also take a shorter length of your vehicle. Q: How many different types of racing is there?"
+    },
+    "adapted i2_s|rep1.2|larger_9_11": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The largest number of the following are: 2. The median size of a 3-inch (4 m) The average diameter of a cuboid Q: What is the difference"
+    },
+    "adapted i2_s|rep1.2|instr_germany_oneword": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The Grand Financial Exchange (GDP) is a form of an international bank, which is used to exchange money and deposits. The Bank's reserve bank is located on the"
+    },
+    "adapted i2_s|rep1.2|instr_water_oneword": {
+      "hit": false,
+      "tag": "ok",
+      "text": "Hydrogen is a fluid that can cause the formation of liquid and water molecules to create an equilibrium with pressure, which causes the potential to increase by increasingly higher pressure. Hisco"
+    },
+    "adapted i2_s|greedy|cap_france": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The capital of France is the capital of France. Q: What are the main benefits of the following paragraph? A: The following are the following as a bulleted list of the following"
+    },
+    "adapted i2_s|greedy|cap_japan": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The capital of Japan is the capital of Japan. Q: What are the main benefits of the following paragraph? A: The following are the following as a bulleted list of the following"
+    },
+    "adapted i2_s|greedy|cap_italy": {
+      "hit": false,
+      "tag": "repetitive",
+      "text": "Italy is the capital of Italy. It is the capital of Italy. It is the capital of Italy. It is the capital of Italy. It is the capital of Italy. It is the capital of"
+    },
+    "adapted i2_s|greedy|cap_germany": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The Netherlands is the largest and largest city in the world. Q: What are the best things to do for a kid? A: Here are some good tips to consider a kidney"
+    },
+    "adapted i2_s|greedy|cap_russia": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The capital of Russia is the capital of Russia. Q: What is the difference between a bulleted list of the following as a bulleted list? A: The following are a list"
+    },
+    "adapted i2_s|greedy|water_made": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The Sun is a planet that is the Sun. Q: What is the difference between a planet? A: The difference between a planet is a planet, a planet, a planet,"
+    },
+    "adapted i2_s|greedy|largest_planet": {
+      "hit": false,
+      "tag": "repetitive",
+      "text": "The largest planet is the Sun. The Sun is the largest planet in the Sun. The Sun is the largest planet in the Sun. The Sun is the largest planet in the Sun. The Sun is"
+    },
+    "adapted i2_s|greedy|closest_planet": {
+      "hit": false,
+      "tag": "repetitive",
+      "text": "The Sun is the Sunset, which is the Sunset, is the Sunset, which is the Sunset. The Sun is the Sunset, which is the Sunset, is the Sun"
+    },
+    "adapted i2_s|greedy|author_romeo": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The play is a series of three main characters, including the main characters, and the main characters. The main characters include the main characters, the main characters, and the main characters are the main characters"
+    },
+    "adapted i2_s|greedy|author_pride": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The following are the following as a reference to the novel, \"The Hath of the War\" A: The Hath of the War Q: What is the difference between a dog"
+    },
+    "adapted i2_s|greedy|first_us_pres": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The First World War A: The First World War Q: What is the difference between a different species? A: A species is a species of different species. A: A"
+    },
+    "adapted i2_s|greedy|continents": {
+      "hit": false,
+      "tag": "ok",
+      "text": "There are many different species of the planet. A: The Sun is a planet, a planet, a planet, a planet, a planet, a planet, a planet, a planet, a"
+    },
+    "adapted i2_s|greedy|days_week": {
+      "hit": false,
+      "tag": "ok",
+      "text": "There are many different ways to choose from the following: Q: What is the difference between a dog and a dog? A: A dog dog is a dog, a dog dog is"
+    },
+    "adapted i2_s|greedy|freeze_water": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The following are the following as the following: Q: What is the difference between a dog and a dog? A: A dog dog can be a dog, a dog can be a"
+    },
+    "adapted i2_s|greedy|boil_water": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The following are the following as the following: Q: What is the difference between a dog and a dog? A: A dog dog can be a dog, a dog can be a"
+    },
+    "adapted i2_s|greedy|opposite_hot": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The following are: A: The following are: Q: What is the difference between a dog and a dog? A: A dog is a dog, a dog is a dog"
+    },
+    "adapted i2_s|greedy|color_sky": {
+      "hit": false,
+      "tag": "repetitive",
+      "text": "The sky is a darker, darker, darker, darker, darker, darker, darker, darker, darker, darker, darker, darker,"
+    },
+    "adapted i2_s|greedy|largest_ocean": {
+      "hit": false,
+      "tag": "repetitive",
+      "text": "The largest planet is the largest planet in the world. The largest planet is the Sun, which is the largest planet in the universe. The Sun is the largest planet in the universe. The Sun is"
+    },
+    "adapted i2_s|greedy|currency_japan": {
+      "hit": false,
+      "tag": "repetitive",
+      "text": "The currency is the currency of the United States. It is the currency of the United States. It is the currency of the United States. It is the currency of the United States. It is the"
+    },
+    "adapted i2_s|greedy|sun_is": {
+      "hit": false,
+      "tag": "repetitive",
+      "text": "The Sun is a planet that is the Sun of the Sun. The Sun is the Sun of the Sun, which is the Sunset of the Sun. The Sun is the Sunset, which is"
+    },
+    "adapted i2_s|greedy|earth_orbits": {
+      "hit": false,
+      "tag": "repetitive",
+      "text": "The planet is a planet that is the planet. The planet is the planet's planet, which is the planet's planet. The planet is the planet's planet, which is the planet"
+    },
+    "adapted i2_s|greedy|add_2_2": {
+      "hit": false,
+      "tag": "salad",
+      "text": "The following are the following as a 2002-2-2-2-2-2-2-2-2-2-2-2-2-2-2"
+    },
+    "adapted i2_s|greedy|mul_7_8": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The following are: A: The following are: Q: What is the difference between a dog and a dog? A: A dog is a dog, a dog is a dog"
+    },
+    "adapted i2_s|greedy|train_arrive": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The train is a train that is the same day. Q: What is the difference between a dog and a dog? A: A dog dog can be a dog dog, a dog"
+    },
+    "adapted i2_s|greedy|larger_9_11": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The number of different species is smaller, but there are fewer species of the genus. A: The genus is smaller, smaller, smaller, smaller, smaller, smaller, smaller, smaller, smaller"
+    },
+    "adapted i2_s|greedy|instr_germany_oneword": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The capital of Germany is the capital of Germany. Q: What are the best sports in the world? A: The Olympic Olympics are the world's oldest sport to participate in"
+    },
+    "adapted i2_s|greedy|instr_water_oneword": {
+      "hit": false,
+      "tag": "ok",
+      "text": "Hydrogen is a gasoline gas company. Hydrogen is a company that is a subsidiary of the Hydrogen company. Hydrogen is a company that is a subs"
+    },
+    "adapted i2_s|t0.8p0.95|cap_france": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The Principare of the Royal Navy is a city, with a population of 35th and overseas (including 20, 18,946, 1"
+    },
+    "adapted i2_s|t0.8p0.95|cap_japan": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The North Sea has been described as a \"seight\" (Gurney, but it also means the West-South Ocean) Q: What are some good ways to make a"
+    },
+    "adapted i2_s|t0.8p0.95|cap_italy": {
+      "hit": true,
+      "tag": "ok",
+      "text": "Romeo Furacelli (Italia) - France - Italy, Italy, Italy, Italy, Milan Q: What are some good ways to make a trip A"
+    },
+    "adapted i2_s|t0.8p0.95|cap_germany": {
+      "hit": false,
+      "tag": "ok",
+      "text": "Germany's population has a population of 20.2 million, it is estimated to be between 2136 and 1928. Q: What are some"
+    },
+    "adapted i2_s|t0.8p0.95|cap_russia": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The World Cup, a European-American-American based in Vienna, Germany, and more than by its subsidiary, in Vienna. It is a form of the Grand Sprints of Austria"
+    },
+    "adapted i2_s|t0.8p0.95|water_made": {
+      "hit": false,
+      "tag": "ok",
+      "text": "A large component of a particle is the sum of the largest component of the universe. A: The X-B is a composite particle consisting of an infinite amount of liquid in the universe."
+    },
+    "adapted i2_s|t0.8p0.95|largest_planet": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The largest asteroos are the Sun, which is 155280 in the southern hemisphere of the Sun. The sunset is located at 30 km/h ("
+    },
+    "adapted i2_s|t0.8p0.95|closest_planet": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The sun has the lowest horizon. Q: Who are the Beatles Burrell Far \u00b7 Hakur - Starker - James - James"
+    },
+    "adapted i2_s|t0.8p0.95|author_romeo": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The Flyington, the play of the French Football Club (Fourth), is the first British football club in 1923. Q: What are some good ways to"
+    },
+    "adapted i2_s|t0.8p0.95|author_pride": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The Wizard's works are set in the title of \"The Twinsons\". The series features a mixture of comic books, a set of short stories with a variety of themes."
+    },
+    "adapted i2_s|t0.8p0.95|first_us_pres": {
+      "hit": false,
+      "tag": "ok",
+      "text": "William Woods is the first president of the United States and is the third president under George Washington. The nation's second president, the second president under George Washington is the second president under George Washington"
+    },
+    "adapted i2_s|t0.8p0.95|continents": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The Mediterranean Mediterrane is the largest and most populous. It has a population of 705,983,461,723,65,7"
+    },
+    "adapted i2_s|t0.8p0.95|days_week": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The Sun's fall is an annual occurrence of the fall of 30 \u00b0F, which has occurred for several years before it is likely to occur on September 24, 19"
+    },
+    "adapted i2_s|t0.8p0.95|freeze_water": {
+      "hit": true,
+      "tag": "ok",
+      "text": "There is an increase in the median average of 135 mbar (400 m) in diameter. The average barrier pressure is between 19 mph (2 m)."
+    },
+    "adapted i2_s|t0.8p0.95|boil_water": {
+      "hit": false,
+      "tag": "ok",
+      "text": "There is an annual year of 1984. Q: What are you like to take a vacant vacation? A: Here are some ideas to consider a vacu"
+    },
+    "adapted i2_s|t0.8p0.95|opposite_hot": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The sun can also be rotunded by a potato Q: How many people lived in England? The Beatles are the same of those who live in the UK."
+    },
+    "adapted i2_s|t0.8p0.95|color_sky": {
+      "hit": false,
+      "tag": "ok",
+      "text": "A starvati is usually used to describe the main colors of the horizon. The most commonly used light is red and green (green) that is used for decoration. Q: What"
+    },
+    "adapted i2_s|t0.8p0.95|largest_ocean": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The main species include the Sun, Antarctic Q: From the passage provided, extract some of the primary antithic species in the world A: Antus - Antin"
+    },
+    "adapted i2_s|t0.8p0.95|currency_japan": {
+      "hit": false,
+      "tag": "ok",
+      "text": "It has the most common currency in the world. It is also known as the currency being used for a foreign bank and the money, including the United States. The currency is typically used by a bank"
+    },
+    "adapted i2_s|t0.8p0.95|sun_is": {
+      "hit": false,
+      "tag": "ok",
+      "text": "Astronomer and geographer are the largest and most populous and scientifically oriented to the ocean, which has a median mass of 402 km/h (2 mi) of"
+    },
+    "adapted i2_s|t0.8p0.95|earth_orbits": {
+      "hit": false,
+      "tag": "ok",
+      "text": "There is an unlimited planet that is the largest planet in the universe. The planet was first placed on Earth's surface at the moment when it was discovered, and was subsequently rebuilt to complete"
+    },
+    "adapted i2_s|t0.8p0.95|add_2_2": {
+      "hit": false,
+      "tag": "ok",
+      "text": "There are many of the following as a single or more: Q: How do you travel to an island? A: There are several options you can travel around the ocean."
+    },
+    "adapted i2_s|t0.8p0.95|mul_7_8": {
+      "hit": false,
+      "tag": "ok",
+      "text": "There are many main advantages of the following passage. The most common types of chess and chese are typically found in the Pacific Ocean. Q: Give me a list of the best"
+    },
+    "adapted i2_s|t0.8p0.95|train_arrive": {
+      "hit": false,
+      "tag": "ok",
+      "text": "Here are the list of the following as a list of them to compete in order to do so for the season A: - There are three main classes of golf, each, each, each"
+    },
+    "adapted i2_s|t0.8p0.95|larger_9_11": {
+      "hit": false,
+      "tag": "ok",
+      "text": "There are several number of smaller, but there are also larger, larger ones. The size and size of a larger than larger than a larger, smaller, bigger, smaller, smaller, smaller"
+    },
+    "adapted i2_s|t0.8p0.95|instr_germany_oneword": {
+      "hit": false,
+      "tag": "ok",
+      "text": "There are four major languages: German, French, Italian, and others. Hurthese: English, Arabic, Polish, Arabic - Middle - Middle Middle"
+    },
+    "adapted i2_s|t0.8p0.95|instr_water_oneword": {
+      "hit": false,
+      "tag": "ok",
+      "text": "Hydrogen has higher than 50% of the amount of liquid in liquid to 28% of liquid gas Hislium - Hollow - Hydrogen"
+    }
+  }
+}

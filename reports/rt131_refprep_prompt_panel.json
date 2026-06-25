@@ -1,0 +1,139 @@
+{
+  "model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+  "generations": {
+    "FP f16": {
+      "The history of science begins with": "the ancient Greeks, who were the first to develop a systematic approach to understanding the natural world. The Greeks were interested in the natural world for practical purposes, such as agriculture and medicine",
+      "Water boils at a temperature of": "100\u00b0C (212\u00b0F) at sea level. 2. The boiling point of water is 100\u00b0C (212\u00b0F",
+      "The capital of France is": "Paris. 2. B. The capital of Germany is Berlin. 3. C. The capital of the United States is Washington, D.C. 4. A.",
+      "Once upon a time, there was a small": "village in the countryside. The village was surrounded by a dense forest, and the only way to get to it was by walking through the forest. The villagers lived in small huts",
+      "The most important rule of cooking is": "to always use fresh ingredients. This is because fresh ingredients have the best flavor and tend to be more nutritious. 2. Use the right tools: The right",
+      "Artificial intelligence is a field that": "is constantly evolving, and it is expected that in the future, AI will play a significant role in the art world. AI can help artists to create more complex and realistic art,",
+      "The economy of a country depends on": "its natural resources, infrastructure, and human capital. Natural resources include minerals, oil, gas, and water. Infrastructure includes transportation, communication, and energy systems. Human capital",
+      "The sun rises in the east and sets in the": "west. 2. The sun sets in the west and rises in the east. 3. The sun rises in the east and sets in the west. 4.",
+      "A computer program is a set of": "instructions that a computer can execute to perform a specific task. A computer program is a set of instructions that a computer can execute to perform a specific task. A computer program is a set of instructions that",
+      "In 1969, the first humans landed on the": "moon. The Apollo 11 mission was the first to land on the moon and the first to bring back samples of lunar soil. The mission was led by Neil Armstrong and Buzz",
+      "Photosynthesis is the process by which plants": "and other organisms convert light energy into chemical energy in the form of glucose. This process is called photosynthesis. The process involves the following stages: 1. Light Energy:",
+      "The three primary colors are": "red, blue, and green. These colors are used to create the primary colors of the color wheel. 2. Secondary colors: The secondary colors are yellow, cyan, and mag",
+      "She opened the door and saw": "a man standing in the doorway. He was tall, with a rugged face and a scar on his cheek. He wore a leather jacket and jeans, and his eyes were",
+      "The internet is a global network that": "connects billions of people around the world. It is a platform for communication, entertainment, and commerce. The internet has revolutionized the way we live, work, and communicate. It has",
+      "To bake bread you need flour, water, and": "yeast. Mix the flour and water together until it forms a dough. Knead the dough for about 10 minutes until it becomes smooth and elastic. Cover the d",
+      "The largest planet in our solar system is": "Jupiter. It is 78 times larger than Earth and has a diameter of 12,700 miles. 2. Venus The second-largest planet in our",
+      "A good leader should always": "be prepared to take risks and make decisions that may not always be popular. They should be willing to take a chance on new ideas and approaches, even if they may not be immediately successful.",
+      "The French Revolution began in the year": "1789, and it lasted for 10 years. The revolution was led by the French people, who were dissatisfied with the government and the monarchy. The revolution",
+      "Music is often described as the language of": "the soul. It is a language that connects us to our deepest emotions and helps us express ourselves in a way that is authentic and true. In this song, the singer uses",
+      "Climate change is caused mainly by": "human activities, such as burning fossil fuels, deforestation, and industrial processes. 2. Carbon dioxide (CO2) Climate change is caused mainly by"
+    },
+    "Q2_K": {
+      "The history of science begins with": "the ancient Greeks, who believed that the universe was created by gods. The ancient Greeks believed that the universe was created by gods. 19. The history of science begins with the",
+      "Water boils at a temperature of": "100\u00b0C. 2. The chemical equation for the reaction is: 2C + 2H2O = 2H2 + 2CO",
+      "The capital of France is": "Paris. 1. The capital of Germany is Berlin. 2. The capital of the United States is Washington, D.C. 3. The capital of Canada is Ott",
+      "Once upon a time, there was a small": "town called \"Wonderland\". It was a place where magic and wonder were the norm. The town was home to a group of friends, who were known for their love for each other and their",
+      "The most important rule of cooking is": "to use the right tools for the job. 1. The most important rule of cooking is to use the right tools for the job. 2. The most important rule of cook",
+      "Artificial intelligence is a field that": "deals with the study and development of computer systems that can perform tasks that are similar to human intelligence. It is a branch of computer science that deals with the development of computer systems that can perform",
+      "The economy of a country depends on": "its natural resources, such as oil, coal, and timber. The government has a responsibility to protect these resources for the benefit of its citizens. The government also has a responsibility to promote economic development",
+      "The sun rises in the east and sets in the": "west. 2. The moon rises and sets in the sky. 3. The stars twinkle in the night sky. 4. The planets wander through",
+      "A computer program is a set of": "instructions or code that can be executed by a computer. It is a collection of instructions or code that can be put into a computer and which the computer understands. It is a set of instructions or",
+      "In 1969, the first humans landed on the": "moon. The Apollo 11 mission was the most significant mission in the history of the Apollo program. It was the first time humans had traveled to the moon. The mission was",
+      "Photosynthesis is the process by which plants": "convert light energy into chemical energy. 2. Phytohormesis: This is the process by which plants respond to nutrient availability. 3. Phyto",
+      "The three primary colors are": "red, blue, and green. Color Theory: Color theory is the study of how colors affect the human body. It is a branch of psychology that deals with the effects of",
+      "She opened the door and saw": "a man standing outside. He was tall and muscular, with a shaved head and a tattoo on his neck. He was wearing a black leather jacket and a black h",
+      "The internet is a global network that": "allows people to communicate and share information. 2. The internet is a global network that allows people to communicate and share information. 3. The internet is a global network that allows people",
+      "To bake bread you need flour, water, and": "a mixer. Mix the ingredients together and let the dough rise. 3. Bread Pizza Crust: To make a pizza crust, mix the ingred",
+      "The largest planet in our solar system is": "also the largest planet in our solar system. It is also the largest planet in our solar system because it is the largest of all the planets in our solar system. It is also the largest planet",
+      "A good leader should always": "be prepared to make tough decisions. 1. 1. 1. 1. 1. 1. 1. 1",
+      "The French Revolution began in the year": "1789. The revolutionary leaders were inspired by the ideas of the Enlightenment, which emphasized the importance of reason and the need for individual liberty and the rule of law",
+      "Music is often described as the language of": "the future, and it's easy to see why. The music is a blend of electronic and synth-pop, with a lot of emphasis on the synthesized, electronic-based",
+      "Climate change is caused mainly by": "the release of greenhouse gases into the atmosphere, such as carbon dioxide, methane, and other gases. These gases are released by human activities, such as the burning"
+    },
+    "PTQ ternary": {
+      "The history of science begins with": "regression regression regression regression>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[",
+      "Water boils at a temperature of": "ianaianaianaianaianaianaianaianaianaianaianaianaianaianaianaianaianaianaianaianaianaianaianaianaianaianaianaianaianaianaianaianaianaianaianaianaianaiana.\u00ab.\u00ab",
+      "The capital of France is": "adenadenaden persist persist persist persist persist persist persist persist persist persist persist persist persist persist persist persist persist persist persist persist persist persist persist persist persist persist persist persist persist persist persist persist persist persist persist persist persist",
+      "Once upon a time, there was a small": "lusslusslusslusslusslusslusslusslusslusslusslusslusslusslusslussluss recon recon recon recon recon recon recon recon recon recon recon recon recon recon recon recon recon recon recon recon recon recon recon",
+      "The most important rule of cooking is": "regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression>[ regression>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[",
+      "Artificial intelligence is a field that": "adenadenadenadenadenadenadenadenadenadenadenadenadenadenadenadenadenadenadenadenadenadenadenadenadenadenadenadenadenadenadenadenadenadenadenadenadenaden>[ Jenkins",
+      "The economy of a country depends on": "Jenkins Jenkins Jenkins Jenkins Jenkins Jenkins Jenkins Jenkins Jenkins Jenkins Jenkins Jenkins Jenkins Jenkins Jenkinsavyavyavyavyavyavyavyavyavyavyavyavyavyavyavyavyavyavyavyavyavyavyavyavyavy",
+      "The sun rises in the east and sets in the": ">[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[",
+      "A computer program is a set of": "regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regr",
+      "In 1969, the first humans landed on the": "resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution reso",
+      "Photosynthesis is the process by which plants": "adenadenadenadenadenadenadenadenadenadenadenadenadenadenadenadenaden.\u00ab.\u00ab.\u00ab.\u00ab.\u00ab.\u00ab.\u00ab.\u00ab.\u00ab.\u00ab.\u00ab.\u00ab.\u00ab.\u00ab.\u00ab.\u00ab.\u00ab.\u00ab.\u00ab.\u00ab.\u00ab.\u00ab.\u00ab",
+      "The three primary colors are": "resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolution resolutionVPVPVPVPVPVPVPVPVPVPVP",
+      "She opened the door and saw": "> > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > >",
+      "The internet is a global network that": "adenadenadenadenadenadenadeniceiceiceiceiceiceiceiceiceiceiceiceiceiceiceiceiceiceiceiceiceiceiceiceiceiceiceiceiceiceiceiceice",
+      "To bake bread you need flour, water, and": "\u0630\u0630\u0630\u0630\u0630\u0630\u0630\u0630\u0630\u0630\u0630\u0630\u0630\u0630\u0630\u0630\u0630\u0630\u0630\u0630\u0630\u0630\u0630\u0630\u0630\u0630\u0630\u0630\u0630\u0630\u0630\u0630\u0630\u0630\u0630\u0630\u0630\u0630\u0630\u0630",
+      "The largest planet in our solar system is": "regression regression regression>[ regression>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[",
+      "A good leader should always": "regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regr",
+      "The French Revolution began in the year": "Jenkins Jenkins Jenkins Jenkins Jenkins Jenkins Jenkins Jenkins Jenkins Jenkins Jenkins Jenkins Jenkins Jenkins Jenkins Jenkins Jenkins Jenkins Jenkins Jenkins Jenkinsgiagiagiagiagiagiagiagiagiagiagiagiagiagiagiagiagiagiagia",
+      "Music is often described as the language of": "bay bay bay bay bay bay bay bay bay bay bay bay bay bay bay bay bay bay bay bay bay bay bay bay bay bay bay bay bay bay bay bay bay bay bay bay bay bay bay bay",
+      "Climate change is caused mainly by": "regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regression regr"
+    },
+    "OURS adapted f16": {
+      "The history of science begins with": "the 19th century . = = = = = = = = = = = = = = = = =",
+      "Water boils at a temperature of": "the 19th century . = = = = = = = = = = = = = = = = =",
+      "The capital of France is": "the first of the 19th century . = = = = = = = = = = = = = =",
+      "Once upon a time, there was a small": "@-@ game game . = = = = = = = = = = = = = = = = = =",
+      "The most important rule of cooking is": "used to be used to the same . = = = = = = = = = = = = = = = =",
+      "Artificial intelligence is a field that": "the 19th century . = = = = = = = = = = = = = = = = =",
+      "The economy of a country depends on": "the 19th century . = = = = = = = = = = = = = = = = =",
+      "The sun rises in the east and sets in the": "19th century . = = = = = = = = = = = = = = = = = =",
+      "A computer program is a set of": "the 19th century . = = = = = = = = = = = = = = = = =",
+      "In 1969, the first humans landed on the": "19th century . = = = = = = = = = = = = = = = = = =",
+      "Photosynthesis is the process by which plants": ". = = = = = = = = = = = = = = = = = = =",
+      "The three primary colors are": "the first of the 19th century . = = = = = = = = = = = = = = =",
+      "She opened the door and saw": "the same time in the 1999 \u2013 2000 . = = = = = = = = = = =",
+      "The internet is a global network that": "the 19th century was the first of the 19th century . = = = = = = = = = = =",
+      "To bake bread you need flour, water, and": "the 1999 \u2013 2009 . = = = = = = = = = = = = = =",
+      "The largest planet in our solar system is": "the first of the 19th century . = = = = = = = = = = = = = =",
+      "A good leader should always": "be used to the 1999 \u2013 2000 . = = = = = = = = = = = =",
+      "The French Revolution began in the year": "1999 . = = = = = = = = = = = = = = = = = = = = = = = = = =",
+      "Music is often described as the language of": "the series of the series of the series of the series of the series of the game . = = = = = = = = = =",
+      "Climate change is caused mainly by": "the 19th century . = = = = = = = = = = = = = = = = ="
+    },
+    "OURS adapted i2_s": {
+      "The history of science begins with": "the 19th century , the series of the 2000s . = = = = = = = = = =",
+      "Water boils at a temperature of": "the 19th century . = = = = = = = = = = = = = = = = =",
+      "The capital of France is": "the same of the 19th century . = = = = = = = = = = = = = =",
+      "Once upon a time, there was a small": "of the 19th century . = = = = = = = = = = = = = = = =",
+      "The most important rule of cooking is": "a \" of the same \" . = = = = = = = = = = = = = = = = =",
+      "Artificial intelligence is a field that": "of the 1999s . = = = = = = = = = = = = = = =",
+      "The economy of a country depends on": "the 19th century . = = = = = = = = = = = = = = = = =",
+      "The sun rises in the east and sets in the": "19th century . = = = = = = = = = = = = = = = = = =",
+      "A computer program is a set of": "the 19th century . = = = = = = = = = = = = = = = = =",
+      "In 1969, the first humans landed on the": "2000s . = = = 2000 \u2013 = = = = = = = =",
+      "Photosynthesis is the process by which plants": ". = = = = = = = = = = = = = = = = = = =",
+      "The three primary colors are": "the first of the 19th century . = = = = = = = = = = = = = =",
+      "She opened the door and saw": "of the 19th century . = = = = = = = = = = = = = = = =",
+      "The internet is a global network that": "the 19th century was the first of the 19th century . = = = = = = = = = = =",
+      "To bake bread you need flour, water, and": "the 19th century , the 19th century , the 19th century , the 19th century , the 19th Battalion was the first time of the",
+      "The largest planet in our solar system is": "the first of the 19th century . = = = = = = = = = = = = = =",
+      "A good leader should always": "a new @-@ game game . = = = = = = = = = = = = = = = =",
+      "The French Revolution began in the year": "2000 . = = = = = = = = = = = = = = = = =",
+      "Music is often described as the language of": "the 19th century . = = = = = = = = = = = = = = = = =",
+      "Climate change is caused mainly by": "the 19th century . = = = = = = = = = = = = = = = = ="
+    }
+  },
+  "tag_summary": {
+    "FP f16": {
+      "ok": 19,
+      "repetitive": 1
+    },
+    "Q2_K": {
+      "ok": 20
+    },
+    "PTQ ternary": {
+      "loop": 13,
+      "salad": 3,
+      "empty": 6,
+      "repetitive": 12
+    },
+    "OURS adapted f16": {
+      "repetitive": 18,
+      "salad": 14
+    },
+    "OURS adapted i2_s": {
+      "ok": 1,
+      "repetitive": 19,
+      "salad": 14
+    }
+  }
+}
