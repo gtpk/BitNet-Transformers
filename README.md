@@ -15,9 +15,16 @@ Start here:
 Current modernization status:
 
 - Python-side per-tensor b1.58 export/import is verified.
-- Official bitnet.cpp I2_S is verified on x86/Linux; the local Mac M5 build is
-  currently blocked by toolchain/backend issues.
-- Next gate: run this repo's tiny per-tensor-native model on x86 I2_S (RT-112).
+- This repo's tiny per-tensor-native b1.58 model has been verified on x86/Linux
+  bitnet.cpp I2_S: ternary-dense `Wq=gamma*T` tracks F16/F32 PPL, while latent
+  FP -> I2_S collapses as expected.
+- x86/Linux RT-113 measured storage and latency: I2_S gives 16x target-linear
+  compression vs f32 and about 2x token-generation throughput on the tiny
+  artifact.
+- The local Mac M5 build is currently blocked by bitnet.cpp toolchain/backend
+  issues, so runtime validation targets x86/Linux first.
+- Next gate: scale the same pipeline to a larger pretrained/small model where
+  linear weights dominate the artifact.
 
 Core documents:
 
@@ -50,6 +57,9 @@ Core documents:
 .venv/bin/python scripts/check_packed_runtime.py --json-out reports/packed_runtime_tc.json --strict
 .venv/bin/python scripts/check_packed_matmul.py --json-out reports/packed_matmul_tc.json --strict
 .venv/bin/python scripts/check_export_mapping.py --json-out reports/export_mapping_gap.json --strict
+.venv/bin/python scripts/check_i2s_export.py --json-out reports/i2s_export_tc.json --strict
+# x86/Linux only, after scripts/rt112_x86_arena.py has produced GGUF artifacts:
+python scripts/rt113_storage_latency.py --bitnet /content/bitnet.cpp --model-dir /content/bitnet.cpp/models/tiny_pt_ternary
 ```
 
 ## Prepare Dev env

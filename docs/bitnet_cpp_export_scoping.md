@@ -41,11 +41,12 @@ Date: 2026-06-25
 Step 0/1 complete.
 Mapping decision for groupwise -> I2_S: lossy re-quantization.
 Step 2 complete: native per-tensor b1.58 gate PASSED.
-RT-101..112 complete.
+RT-101..113 complete.
 x86 official I2_S sanity: PASS (f32 PPL 1.8547 vs i2_s PPL 1.8548).
 Mac M5 I2_S/TL1: BROKEN local toolchain/backend, not algorithm.
 Our tiny model on x86 I2_S: PASS via ternary-dense Path A' (RT-112).
-Next: RT-113 / EXPORT-006/007 storage and latency metrics on x86/Linux.
+I2_S storage/latency on x86: PASS (RT-113, 16x target-linear compression, ~2x tg).
+Next: scale up to a larger pretrained/small model where linears dominate.
 ```
 
 **RT-103C (I2_S quantize + runtime smoke): PASS as plumbing, not final parity.**
@@ -757,7 +758,7 @@ Question: does I2_S reduce artifact bytes and runtime token latency relative to
 F16/F32 under the same bitnet.cpp build, prompt, context, and thread settings?
 ```
 
-Driver: `scripts/rt113_x86_runtime_metrics.py`.
+Driver: `scripts/rt113_storage_latency.py`.
 
 Expected inputs are the GGUF files created by RT-112:
 
@@ -765,16 +766,16 @@ Expected inputs are the GGUF files created by RT-112:
 <bitnet>/models/tiny_pt_ternary/ggml-model-f32.gguf
 <bitnet>/models/tiny_pt_ternary/ggml-model-f16.gguf
 <bitnet>/models/tiny_pt_ternary/ggml-model-i2_s.gguf
-<bitnet>/models/tiny_pt_trained/eval.txt
+<bitnet>/models/tiny_pt_ternary/config.json
 ```
 
 Run:
 
 ```bash
-python scripts/rt113_x86_runtime_metrics.py \
+python scripts/rt113_storage_latency.py \
   --bitnet /content/bitnet.cpp \
-  --json-out reports/rt113_x86_runtime_metrics.json \
-  --strict
+  --model-dir /content/bitnet.cpp/models/tiny_pt_ternary \
+  --json-out reports/rt113_storage_latency.json
 ```
 
 TC:
@@ -782,13 +783,13 @@ TC:
 | ID | Check | Pass/report rule |
 | --- | --- | --- |
 | EXPORT-006 | storage | exact F32/F16/I2_S artifact sizes and I2_S-vs-F16 ratio |
-| EXPORT-007a | PPL guard | I2_S PPL within 5% of F16 under `--strict` |
-| EXPORT-007b | generation latency | median decode tok/s and wall tok/s, report-only |
-| EXPORT-007c | interpretation | no latency overclaim on tiny models; overhead can dominate |
+| EXPORT-007a | prompt-processing latency | `llama-bench` pp throughput, report ratio |
+| EXPORT-007b | token-generation latency | `llama-bench` tg throughput, report ratio |
+| EXPORT-007c | interpretation | no single-run overclaim on noisy shared CPU; emphasize stable ratio |
 
-Decision rule:
+Decision rule / result interpretation:
 
-- I2_S storage smaller + PPL guard passes -> runtime path remains valid.
+- I2_S storage smaller + RT-112 PPL parity -> runtime path remains valid.
 - I2_S latency better or comparable -> move to a larger pretrained/small model.
 - I2_S latency worse -> do not abandon the algorithm; first separate tiny-model
   overhead, thread count, context regime, and kernel maturity.

@@ -205,9 +205,16 @@ context가 길어져 KV가 bottleneck이 되면 그때 KV cache를 본다.
 
 ## 다음 행동
 
-1. `estimate_memory_traffic.py`로 현재 config의 weight/KV traffic을 계산한다.
-2. "current PyTorch BitLinear", "fp16 baseline", "packed b1.58 target"을 비교한다.
-3. 결과를 보고 packed weight path가 먼저인지 KV compression이 먼저인지 정한다.
+이전 단계의 estimator, packed reference ladder, RT-112 correctness, RT-113
+storage/latency 측정은 완료됐다. RT-113에서 x86 I2_S는 tiny artifact target
+linear 기준 f32 대비 16x 작고, llama-bench token-generation 기준 약 2x 빨랐다.
+
+1. 같은 Path A' export/runtime 측정을 pretrained small model로 스케일업한다.
+2. whole-file ratio가 target-linear ratio 쪽으로 수렴하는지 확인한다.
+3. 큰 모델에서 latency가 약하면 tiny-model overhead, thread count, context
+   length, kernel maturity를 분리한다.
+4. 긴 context에서 weight traffic보다 KV traffic이 커지는 지점부터 TurboQuant/KV
+   cache compression을 다시 연다.
 
 ## Current Estimates
 

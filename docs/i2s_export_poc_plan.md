@@ -103,9 +103,11 @@ RT-111 verified that official bitnet.cpp I2_S is faithful on x86 Colab:
 `f32 PPL 1.8547` vs `i2_s PPL 1.8548`. The earlier Mac M5 collapse is a local
 M5/macOS26/clang21 build/backend problem, not an I2_S design or algorithm issue.
 
-The remaining project-specific runtime gate is therefore RT-112: run **our tiny
-per-tensor-native model** on x86/Linux I2_S and compare it against this Python
-reference plus F16/F32 GGUF.
+RT-112 then verified this project's own tiny per-tensor-native model on x86
+I2_S. The correct export path is **Path A'**: materialize `Wq=gamma*T`, convert
+to F32/F16 GGUF, then let upstream `llama-quantize I2_S` repack it. This keeps
+`max(|Wq|)=gamma` and gives I2_S/F16/F32 PPL parity. The direct latent-FP Path A
+collapses, as expected, because upstream I2_S uses `sign(W)*absmax`.
 
 ## bitnet.cpp / GGUF Runtime Gate Matrix
 
@@ -120,13 +122,16 @@ reference plus F16/F32 GGUF.
 | RT-107 | Local runtime | zero-free and official model on Mac I2_S | DONE: Mac runtime broken |
 | RT-108/109 | Mac TL1 | TL1 sanity/rebuild | DONE: local toolchain blocked |
 | RT-111 | x86 sanity | official f32 vs i2_s PPL on x86 | DONE: parity |
-| RT-112 | Our x86 runtime | our tiny Python/F16/F32/I2_S PPL | NEXT |
+| RT-112 | Our x86 runtime | our tiny Python/F16/F32/I2_S PPL | DONE: Path A' parity |
+| RT-113 / EXPORT-006 | Storage | x86 GGUF artifact sizes | DONE: 16x target-linear vs f32 |
+| RT-113 / EXPORT-007 | Latency | x86 llama-bench pp/tg metrics | DONE: ~2x token-gen |
 
 Decision rule:
 
 ```text
-RT-112 passes -> I2_S export is deployable on x86/Linux for our model.
-RT-112 fails but official I2_S remains healthy -> inspect our artifact/metadata or Path B.
+RT-112 passed -> I2_S export is deployable on x86/Linux for this tiny model.
+RT-113 passed -> I2_S is also efficient on the tiny x86 artifact.
+Path B direct byte writer is not needed unless future larger artifacts drift.
 Mac M5 failures do not block x86/Linux deployment; treat them as toolchain bugs.
 ```
 
@@ -137,6 +142,6 @@ Mac M5 failures do not block x86/Linux deployment; treat them as toolchain bugs.
    produce the field mapping table. **DONE** -> [I2_S Layout Audit](./bitnet_cpp_i2s_layout_audit.md)
    (byte layout differs: 128-block interleave, MSB fields, trailing fp32 scale
    plus padding; I2_S is a separate quantize step, not the convert script).
-3. RT-101..111 completed; see [GGUF / bitnet.cpp Export Scoping Plan](./bitnet_cpp_export_scoping.md).
-4. RT-112: run our tiny per-tensor-native model on x86/Linux I2_S. Compare latent
-   Path A and ternary-dense Path A' against Python/F16/F32 references.
+3. RT-101..113 completed; see [GGUF / bitnet.cpp Export Scoping Plan](./bitnet_cpp_export_scoping.md).
+4. Next: scale the same Path A' export/runtime measurement to a larger
+   pretrained/small model where linears dominate the artifact.

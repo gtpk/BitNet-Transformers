@@ -96,8 +96,9 @@ The active code path is `src/ggml-bitnet-mad.cpp::quantize_i2_s` and
   semantics.
 - If the F32 GGUF already contains materialized ternary-dense weights
   `Wq = gamma*T`, upstream `max(|Wq|)` stores `gamma`. This scale-repack theorem
-  was experimentally confirmed, but project-specific x86 PPL parity is still
-  pending RT-112.
+  was experimentally confirmed, and RT-112 showed project-specific x86 I2_S
+  F16/F32 PPL parity through this Path A' route. RT-113 then measured storage and
+  latency on the same artifact.
 
 ## Converter reality  [confirmed]
 
@@ -122,7 +123,7 @@ step** (`setup_env.py -q i2_s`, i.e. a `llama-quantize`-style pass to
 | 2-bit field order | LSB-first (`elem0` in bits[1:0]) | MSB-first (`offset0` in bits[7:6]) | **reorder fields** |
 | code mapping | `0b00=-1, 0b01=0, 0b10=+1` (shifted `T+1`) | `0b00=-1, 0b01=0, 0b10=+1`, `0b11=0` | no value remap; still repack fields/order |
 | scale storage | one fp32 scalar field | one fp32 scale at trailing region start + padding to 32B | **append 32-byte scale/pad region** |
-| scale value | `gamma = mean(|W|)`, dequant `gamma*T` | upstream quantize uses `absmax`; runtime multiplies by stored scale | keep `gamma` only via ternary-dense Path A' or direct writer |
+| scale value | `gamma = mean(|W|)`, dequant `gamma*T` | upstream quantize uses `absmax`; runtime multiplies by stored scale | keep `gamma` via ternary-dense Path A' (verified RT-112) or direct writer fallback |
 | tail padding | pad to multiple of 4 | pad to multiple of **128** per block | pad to 128 |
 | dtype/transpose | torch `[out, in]` | GGUF converter/runtime accepted the plain LLaMA shapes | no transpose issue observed in F16/F32 parity |
 | tensor names | `model.layers.N.self_attn.q_proj.weight` ... | GGUF `blk.N.attn_q/attn_k/attn_v/attn_output/ffn_gate/ffn_up/ffn_down.weight` (llama.cpp convention) | name map confirmed via converter/dump |
@@ -146,14 +147,13 @@ is obsolete.
   exact match to our Python reference, but we own every byte detail and must
   track upstream format changes.
 
-Decision update after RT-111:
+Decision update after RT-112:
 
 - Latent Path A is mechanically valid but semantically unfaithful for our model
   because upstream I2_S quantizes latent FP as `sign(W)*absmax`.
-- Ternary-dense Path A' preserves our scale and may avoid a direct writer; it is
-  the next path to test on x86 in RT-112.
+- Ternary-dense Path A' preserves our scale and passed on x86 in RT-112.
 - Path B remains the fallback if official I2_S is healthy but our Path A' artifact
-  still drifts.
+  drifts on a future larger model.
 
 ## Remaining confirmations / current exit criteria
 
@@ -161,9 +161,9 @@ Decision update after RT-111:
 2. **[DONE]** byte-size law `ceil(numel/4)+32`, 128-block interleave, MSB field
    order, code map, and scale location confirmed from source/real bytes.
 3. **[DONE]** scale is multiplicative and upstream I2_S quantize uses absmax.
-4. **[partial]** tensor element order is source-understood, but the local Python
-   parser still had an order bug. RT-112 can avoid this by comparing PPL/runtime
-   outputs on x86 first.
+4. **[partial, no longer blocking]** tensor element order is source-understood,
+   but the local Python parser still had an order bug. RT-112 avoided this by
+   comparing PPL/runtime outputs on x86.
 5. **[DONE]** GGUF tensor names confirmed via `llama-gguf` dump (`blk.*` convention
    + BitNet `attn_sub_norm`/`ffn_sub_norm`); `token_embd.weight` is F16.
 6. **[DONE]** official x86 I2_S runtime sanity passed: f32 PPL `1.8547`, i2_s PPL
@@ -171,9 +171,10 @@ Decision update after RT-111:
 
 ## Next steps
 
-- RT-112: run our tiny per-tensor-native model on x86/Linux I2_S. Compare
-  Python reference, F16/F32 GGUF, latent Path A I2_S, and ternary-dense Path A'
-  I2_S PPL.
-- If Path A' passes, proceed to x86 storage/latency/generation.
-- If Path A' fails while official x86 I2_S remains healthy, inspect metadata or
-  implement direct Path B writer.
+- RT-112: DONE. Our tiny per-tensor-native model passed x86/Linux I2_S through
+  ternary-dense Path A'; latent Path A collapsed as the absmax-vs-absmean control.
+- RT-113: DONE. x86 tiny artifact showed 16x target-linear compression and about
+  2x token-generation throughput.
+- Next: scale the same path to a larger pretrained/small model.
+- If a larger Path A' artifact later fails while official x86 I2_S remains
+  healthy, inspect metadata or implement direct Path B writer.

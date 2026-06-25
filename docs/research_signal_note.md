@@ -121,6 +121,7 @@ Track:
 - packed storage size, first at layer format level, then whole model, then runtime module
 - blocked/fused working set
 - real runtime latency
+- x86 bitnet.cpp I2_S storage ratio and decode tokens/sec
 
 ## Researcher's Framing
 
@@ -140,11 +141,21 @@ The right move is not to overclaim. The right move is to keep closing gates:
 5. package the story if the signal keeps surviving
 
 The next practical research move is narrower now. Python export correctness,
-HF/F16/F32 GGUF plumbing, and official x86 I2_S runtime sanity have all survived.
-The local Mac M5 ternary runtime failed, but x86 official I2_S matched f32 PPL to
-the fourth decimal. So the next honest test is not more Mac build debugging; it
-is RT-112: run this repo's tiny per-tensor-native model through x86 I2_S and
-compare Python/F16/F32/I2_S PPL before measuring latency.
+HF/F16/F32 GGUF plumbing, official x86 I2_S runtime sanity, and this repo's own
+tiny per-tensor-native x86 I2_S artifact have all survived. The local Mac M5
+ternary runtime failed, but x86 I2_S matched F16/F32 PPL for both the official
+control and our Path A' artifact.
+
+RT-113 answered the next efficiency question on the tiny x86 artifact:
+
+```text
+target-linear I2_S storage: 16x smaller than f32
+token-generation throughput: about 2x faster than f32/f16 in llama-bench
+```
+
+So the next honest test is now scale, not basic feasibility: does the same
+per-tensor-native -> ternary-dense Path A' -> I2_S pipeline keep those ratios on
+a larger pretrained/small model where linear layers dominate the artifact?
 
 This thread is worth following because the positive results are not isolated.
 They line up with a plausible mechanism.

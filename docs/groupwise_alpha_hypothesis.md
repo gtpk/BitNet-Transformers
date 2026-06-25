@@ -30,10 +30,9 @@ So the earlier +18.4% (fixture) and +67% (real-text) per-tensor losses were a
 inherently weak (hypothesis A). Trained per-tensor from the start, the model
 recovers fully. Practical consequence: per-tensor-native training is the right
 export source. Official bitnet.cpp I2_S has since been verified on x86, while the
-local Mac M5 build is broken; our own x86 I2_S artifact still needs RT-112 before
-we claim deployable end-to-end quality. Groupwise alpha remains a legitimate
-format with slightly better reconstruction, but it is not necessary for the
-current default path.
+local Mac M5 build is broken; our own x86 I2_S artifact also passed in RT-112 via
+ternary-dense Path A'. Groupwise alpha remains a legitimate format with slightly
+better reconstruction, but it is not necessary for the current default path.
 
 ## Short Version
 
@@ -226,6 +225,9 @@ whether direct I2_S export is allowed.
 5. Pretrained small-model conversion, not only tiny arena models.
 6. Runtime path comparison: direct I2_S export vs groupwise GGUF extension vs
    custom fused kernel.
+   **DONE for the default path:** per-tensor-native -> ternary-dense Path A' ->
+   upstream I2_S passed on x86 in RT-112. Groupwise GGUF and custom kernels are
+   fallback/ablation tracks.
 
 Resolved decision:
 
