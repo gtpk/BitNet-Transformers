@@ -536,3 +536,38 @@ This plan should produce one of four useful outcomes:
 
 For a copy-paste prompt to give another AI agent that can run Colab, see
 [Colab Quantization-Aware Conversion Prompt](./colab_quantization_aware_prompt.md).
+
+## RT-124A RESULT (2026-06-25): scale granularity is a real but PARTIAL lever; codebook dominates
+
+PyTorch one-shot ternary screen on Llama-160M (`scripts/rt124a_scale_granularity.py`,
+`reports/rt124a_scale_granularity_160m.json`). CE_fp = 3.15 (PPL 23).
+
+| granularity | CE | PPL | recon rel-L1 | vs per-tensor | runtime |
+| --- | ---: | ---: | ---: | ---: | --- |
+| per_tensor | 11.66 | 115,808 | 0.452 | — | I2_S-native |
+| row (per-output-ch) | 9.82 | 18,422 | 0.448 | +1.84 | foldable (scale ternary-matmul output) |
+| col (per-input-ch) | 11.73 | 124,839 | 0.451 | -0.08 | no help |
+| group128 (block) | 9.30 | 10,935 | 0.447 | **+2.36** | needs per-block-scale runtime |
+| group64 | 9.30 | 10,935 | 0.447 | +2.36 | custom runtime |
+
+Findings:
+1. **Finer scale helps, partially.** per-tensor -> group128 recovers +2.36 nats one-shot;
+   so per-tensor gamma did understate b1.58. Scale granularity is a genuine lever.
+2. **But it does not rescue.** The best (group128, PPL 10,935) is still catastrophic vs
+   FP (23) and far worse than the CE-ADAPTED all-I2_S per-tensor model (PPL ~114 at
+   160M). One-shot scale alone is not usable; **training is still the bigger lever.**
+3. **Residual is codebook-dominated.** recon rel-L1 is ~0.45 at EVERY granularity — the
+   ternary {-1,0,+1} codebook deletes ~45% of weight magnitude regardless of scale. So
+   the next probe is the codebook/threshold/objective (RT-124B), not finer scale.
+4. **Deployability split.** row = per-output-channel scale is FOLDABLE (scale the
+   ternary-matmul output vector) and cheap — a deployable +1.84-nat lever worth keeping.
+   group/block scale (+2.36) needs a per-block-scale runtime (I2_S stores one per-tensor
+   scale); col scale does not help.
+
+```text
+VERDICT (RT-124A): scale granularity is a real, partial lever (≈+1.8 nats deployable
+via per-output-channel scale; +2.4 with block scale + custom runtime), but it does NOT
+make one-shot b1.58 usable and the residual is codebook-dominated. Carry per-output-
+channel scale forward as a cheap improvement; the main next probe is RT-124B (MSE/
+threshold objective) to attack the ~45% magnitude the ternary codebook deletes.
+```

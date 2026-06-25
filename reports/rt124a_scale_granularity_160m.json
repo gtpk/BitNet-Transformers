@@ -1,0 +1,13 @@
+{
+  "model": "JackFram/llama-160m (FP, one-shot ternary, PyTorch screen)",
+  "ce_fp": 3.1466, "ppl_fp": 23.26,
+  "rows": [
+    {"granularity": "per_tensor", "ce": 11.6597, "ppl": 115808.28, "recon_rel_l1": 0.4516, "runtime_class": "I2_S-native", "delta_ce_vs_per_tensor": 0.0},
+    {"granularity": "row",        "ce": 9.8213,  "ppl": 18422.08,  "recon_rel_l1": 0.4483, "runtime_class": "per-output-channel (foldable: scale ternary-matmul output)", "delta_ce_vs_per_tensor": 1.8384},
+    {"granularity": "col",        "ce": 11.7348, "ppl": 124838.76, "recon_rel_l1": 0.4507, "runtime_class": "per-input-channel (no help)", "delta_ce_vs_per_tensor": -0.0751},
+    {"granularity": "group128",   "ce": 9.2997,  "ppl": 10934.92,  "recon_rel_l1": 0.4469, "runtime_class": "blockwise (I2_S-block aligned, needs per-block-scale runtime)", "delta_ce_vs_per_tensor": 2.3600},
+    {"granularity": "group64",    "ce": 9.2997,  "ppl": 10934.92,  "recon_rel_l1": 0.4469, "runtime_class": "groupwise (custom runtime)", "delta_ce_vs_per_tensor": 2.3600}
+  ],
+  "best": "group128",
+  "finding": "Finer scale is a REAL but PARTIAL lever: per-tensor -> group128 = +2.36 nats one-shot, row (per-output-channel, FOLDABLE) = +1.84. col does not help. BUT even the best is PPL ~11k (unusable one-shot) >> adapted all-I2_S PPL 114, so training remains the bigger lever. recon rel-L1 is ~0.45 across ALL granularities -> the dominant loss is the ternary codebook (deletes ~45% of weight magnitude), not the scale -> RT-124B (MSE scale + threshold) targets the codebook/threshold next."
+}
