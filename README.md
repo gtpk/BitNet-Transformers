@@ -23,10 +23,15 @@ Current modernization status:
   artifact.
 - RT-114 confirmed the gain on JackFram/llama-160m: whole-file ratio moved to
   0.196 and token-generation reached 5.69x vs f32.
+- RT-115 confirmed the scale law on TinyLlama-1.1B: whole-file ratio moved to
+  0.1149 and token-generation reached 7.51x vs f32.
+- RT-116/TRAIN-002/QR-004/QR-005 confirmed teacher-free CE recovery: 160M recovers
+  ~90%, 1.1B recovers directionally under a constrained budget, adapted I2_S
+  preserves adapted F16 to ~+0.002 nats, and linears-only is the default recipe.
 - The local Mac M5 build is currently blocked by bitnet.cpp toolchain/backend
   issues, so runtime validation targets x86/Linux first.
-- Next gate: quality recovery — measure PTQ collapse, run teacher-free CE
-  adaptation, and check whether adapted I2_S outputs stay useful.
+- Next gate: G1 budget scaling — run the prepared TinyLlama-1.1B linears-only
+  budget-scaled recovery on L4/A100 before making paper-grade 1B quality claims.
 
 Core documents:
 
@@ -43,6 +48,7 @@ Core documents:
 - [bitnet.cpp I2_S layout audit](./docs/bitnet_cpp_i2s_layout_audit.md)
 - [Scale-up target roadmap](./docs/scaleup_target_roadmap.md)
 - [Quality recovery plan](./docs/quality_recovery_plan.md)
+- [G1 budget-scaling runbook](./docs/g1_budget_scaling_runbook.md)
 - [Groupwise alpha hypothesis](./docs/groupwise_alpha_hypothesis.md)
 - [Research signal note](./docs/research_signal_note.md)
 - [TurboQuant + BitNet KV-cache plan](./docs/turboquant_bitnet_implementation_plan.md)

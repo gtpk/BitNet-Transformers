@@ -328,9 +328,10 @@ missing third sentence: the model is small, fast, AND — after a cheap teacher-
 recovery step — back to usable text-modeling quality. No teacher, no distillation,
 no touching embeddings/norms/lm_head.
 
-Notes: train CE was a touch noisy (5.03 -> 3.70 over 300 steps), so more steps / an
-LR schedule / +norms (QR-002b) could push past 0.905; 0.905 already clears the
-PASS bar (>0.3). The PTQ baseline 115,808 matches the "PTQ-broken by design" framing
+Notes: train CE was a touch noisy (5.03 -> 3.70 over 300 steps), so more steps or an
+LR schedule could push past 0.905; QR-005 later showed +norms are not the bottleneck.
+0.905 already clears the PASS bar (>0.3). The PTQ baseline 115,808 matches the
+"PTQ-broken by design" framing
 from RT-114/115 — that bad number was always a baseline to recover FROM, not a
 runtime failure.
 
@@ -373,8 +374,9 @@ bitnet.cpp I2_S runtime essentially unchanged. Combined with the systems track
 (RT-112..115: small + fast + scale law), the three-sentence story is now closed on
 x86/Linux LLaMA: **small -> fast -> quality recovers cheaply, teacher-free**.
 
-Next: QR-002b (+norms) / longer budget to push past 0.905; TRAIN-002 repeat on
-TinyLlama-1.1B; then the gpt-oss-20b MoE audit (RT-117) before any 20B quality work.
+Next from this historical point was QR-005 / TRAIN-002 / RT-117; those are now
+complete. The current next step is RT-120 / TRAIN-003 budget scaling for
+TinyLlama-1.1B.
 
 ## TRAIN-002 / TinyLlama-1.1B RESULT (2026-06-25): recovery direction + runtime preservation scale
 
@@ -484,3 +486,30 @@ Honest caveats: 160M base model so absolute fluency is low and outputs are repet
 narrow and correct: **teacher-free CE turns PTQ token-salad into fluent same-tier text,
 and the I2_S runtime preserves it** — gap G4 closed at 160M. Scale to 1.1B + a stronger
 base model (G1) for a stronger qualitative story.
+
+## RT-120 / TRAIN-003 PREP: G1 budget scaling before GPU upgrade
+
+G2/G3/G4 are now closed: linears-only is the default recipe, and the prompt panel
+shows the recovery is visible to humans at 160M. The remaining high-severity gap is
+G1: TinyLlama-1.1B recovered only `0.480` under a deliberately constrained fixed
+budget.
+
+Before spending an L4/A100 run, use the dedicated runbook:
+
+- [G1 Budget-Scaling Runbook](./g1_budget_scaling_runbook.md)
+
+It fixes:
+
+- the exact hypothesis (`0.480` was budget-limited, not a scale failure)
+- smoke requirements before the paid/large run
+- A100 and L4 one-shot commands
+- recovered_fraction success tiers
+- QR-003 runtime-preservation pass/fail criteria
+- fallback rules for OOM or slow runs
+
+The next expensive run should not change the recipe. It should scale only the budget:
+
+```text
+TinyLlama-1.1B, target linears only, teacher-free CE, effective batch ~24,
+800 steps, QR-003 f16-vs-i2_s parity at the end.
+```

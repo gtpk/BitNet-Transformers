@@ -24,6 +24,9 @@ USAGE (GPU strongly recommended for the training step):
   python scripts/rt116_quality_recovery.py --model-id JackFram/llama-160m \
     --steps 300 --seq-len 256 --batch 8 --lr 2e-4 \
     --bitnet /content/bitnet.cpp     # add --bitnet to also run QR-003 export
+
+For the 1.1B budget-scaling run, keep `--batch` as the per-microbatch size that
+fits in GPU memory and use `--grad-accum-steps` to raise the effective batch.
 """
 
 from __future__ import annotations
@@ -119,6 +122,8 @@ def main():
     ap.add_argument("--steps", type=int, default=300)
     ap.add_argument("--seq-len", type=int, default=256)
     ap.add_argument("--batch", type=int, default=8)
+    ap.add_argument("--grad-accum-steps", type=int, default=1,
+                    help="number of microbatches per optimizer step; effective batch = batch * grad_accum_steps")
     ap.add_argument("--lr", type=float, default=2e-4)
     ap.add_argument("--max-train-tokens", type=int, default=600_000)
     ap.add_argument("--max-eval-tokens", type=int, default=60_000)
@@ -138,7 +143,12 @@ def main():
                     help="QR-002c: also adapt lm_head (output distribution retune)")
     ap.add_argument("--bitnet", type=Path, default=None, help="if set, run QR-003 export+perplexity")
     ap.add_argument("--json-out", type=Path, default=None)
+    ap.add_argument("--log-every", type=int, default=50)
     args = ap.parse_args()
+    if args.grad_accum_steps < 1:
+        raise ValueError("--grad-accum-steps must be >= 1")
+    if args.log_every < 1:
+        raise ValueError("--log-every must be >= 1")
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     torch.manual_seed(args.seed)
@@ -181,6 +191,8 @@ def main():
     tparams = uniq
     arm = "QR-002a(linears)" + ("+norms" if args.train_norms else "") + ("+lmhead" if args.train_lm_head else "")
     print(f"adapting {sum(p.numel() for p in tparams)/1e6:.1f}M params across {len(tparams)} tensors [{arm}]")
+    print(f"microbatch={args.batch}  grad_accum={args.grad_accum_steps}  "
+          f"effective_batch={args.batch * args.grad_accum_steps}")
     if args.optim == "adamw8bit":
         import bitsandbytes as bnb
         opt = bnb.optim.AdamW8bit(tparams, lr=args.lr)
@@ -190,14 +202,17 @@ def main():
     usable = train_ids.numel() - 1
     model.train()
     for step in range(args.steps):
-        starts = torch.randint(0, max(1, usable - args.seq_len), (args.batch,), generator=g)
-        x = torch.stack([train_ids[s : s + args.seq_len] for s in starts.tolist()]).to(device)
-        loss = model(input_ids=x, labels=x).loss
         opt.zero_grad(set_to_none=True)
-        loss.backward()
+        train_ce_sum = 0.0
+        for _ in range(args.grad_accum_steps):
+            starts = torch.randint(0, max(1, usable - args.seq_len), (args.batch,), generator=g)
+            x = torch.stack([train_ids[s : s + args.seq_len] for s in starts.tolist()]).to(device)
+            loss = model(input_ids=x, labels=x).loss
+            train_ce_sum += float(loss)
+            (loss / args.grad_accum_steps).backward()
         opt.step()
-        if step % 50 == 0 or step == args.steps - 1:
-            print(f"  step {step:4d}  train_ce={float(loss):.4f}")
+        if step % args.log_every == 0 or step == args.steps - 1:
+            print(f"  step {step:4d}  train_ce={train_ce_sum / args.grad_accum_steps:.4f}")
     ce_adapted = eval_ce(model, eval_ids, args.seq_len, device)
     rec = (ce_ptq - ce_adapted) / max(ce_ptq - ce_fp, 1e-9)
     print(f"QR-002a CE_adapted={ce_adapted:.4f} (ppl {math.exp(ce_adapted):.2f})  "
@@ -213,6 +228,9 @@ def main():
 
     result = {"model": args.model_id, "device": device, "n_target_linears": n_lin,
               "steps": args.steps, "seq_len": args.seq_len, "batch": args.batch, "lr": args.lr,
+              "grad_accum_steps": args.grad_accum_steps,
+              "effective_batch": args.batch * args.grad_accum_steps,
+              "effective_tokens_per_step": args.batch * args.grad_accum_steps * args.seq_len,
               "arm": arm, "train_norms": args.train_norms, "train_lm_head": args.train_lm_head,
               "ce_fp": ce_fp, "ce_ptq": ce_ptq, "ce_adapted": ce_adapted,
               "ppl_fp": math.exp(ce_fp), "ppl_ptq": math.exp(ce_ptq), "ppl_adapted": math.exp(ce_adapted),

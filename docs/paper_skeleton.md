@@ -1,8 +1,8 @@
 # Paper / Report Skeleton — Teacher-Free b1.58 → I2_S on Dense LLaMA
 
 Document position: [Index](./index.md) -> synthesis of RT-112..118. Pulls the
-finished tracks into a paper outline, audits the gaps, and scopes the one cheap
-reinforcing experiment (QR-002b).
+finished tracks into a paper outline, audits the gaps, and scopes the next
+high-value reinforcing experiment (G1 budget scaling).
 
 Related: [bitnet_cpp_export_scoping.md](./bitnet_cpp_export_scoping.md) (systems),
 [quality_recovery_plan.md](./quality_recovery_plan.md) (quality),
@@ -94,7 +94,7 @@ ladder to show the floor; conclude "wrong vehicle for ternary."
 
 | id | gap | severity | cheapest fix |
 | --- | --- | --- | --- |
-| G1 | 1.1B recovery is only 0.48 (fixed budget, batch 4, 8-bit Adam) | HIGH | budget-scaled 1.1B run on L4/A100 (fp32 Adam, batch↑, 500-800 steps) — AFTER G3 |
+| G1 | 1.1B recovery is only 0.48 (fixed budget, batch 4, 8-bit Adam) | HIGH | RT-120 budget-scaled 1.1B run on L4/A100; see [G1 runbook](./g1_budget_scaling_runbook.md) |
 | G2 | ~~no recipe ablation~~ RESOLVED (QR-005): a/b/c on 160M -> +norms negligible (0.907 vs 0.906), +lm_head hurts (0.898). **Default = linears only.** | DONE | — |
 | G3 | ~~+norms may lift the fraction~~ RESOLVED: it does not (within noise). Cheapest recipe is best. | DONE | — |
 | G4 | ~~quality is CE/PPL only~~ RESOLVED (QR-004/RT-119): greedy panel shows PTQ token-salad -> adapted fluent English -> i2_s same tier as f16. Closed at 160M (base model: weak fluency/factuality — strengthen with G1 + better base) | DONE | — |
@@ -104,35 +104,32 @@ ladder to show the floor; conclude "wrong vehicle for ternary."
 | G8 | only LLaMA family; generality unproven beyond it | LOW | (scope it honestly; gpt-oss negative already bounds the claim) |
 | G9 | some raw Colab JSON volatile / not all archived in repo `reports/` | LOW | commit the rt11x_*.json artifacts |
 
-## Next reinforcing experiment: QR-002b (+norms) — design
+## Next reinforcing experiment: G1 budget scaling (RT-120 / TRAIN-003)
 
-Rationale: cheapest, highest-signal fix for G2/G3. Adapting only target linears leaves
-LayerNorm scales fixed at their FP values while the linear distributions shift under
-ternarization; letting norms move may absorb quantization drift and lift
-recovered_fraction at near-zero extra cost (norms are ~0.1M params).
+Rationale: the cheap gaps are closed. QR-005 showed that the simplest recipe
+(`target linears only`) is the default, and QR-004 showed human-visible recovery at
+160M. The only high-severity gap left in the main figure is whether the 1.1B
+recovery fraction `0.480` was merely under-budgeted.
 
 Design:
-- Model: Llama-160M (fast iteration; promote to 1.1B only if it helps).
-- Arms (same 300-step / seq256 / batch8 / lr2e-4 budget as RT-116):
-  - QR-002a: target linears only (baseline, recovered 0.905) — already have it.
-  - QR-002b: target linears + all RMSNorm weights (`*layernorm*`, `model.norm`).
-  - QR-002c: target linears + norms + lm_head (lm_head is 8.2M params — bigger).
-- Metric: recovered_fraction = (CE_ptq - CE_adapted)/(CE_ptq - CE_fp), same eval set.
-- Pass: QR-002b > QR-002a recovered_fraction by a clear margin -> adopt +norms as the
-  default recipe and re-run the 1.1B point (G1) with +norms before spending L4/A100.
-- Driver change: `scripts/rt116_quality_recovery.py` needs `--train-norms` /
-  `--train-lm-head` flags that add those parameters to the trainable set (currently it
-  freezes everything but PerTensorBitLinear weights). Small, additive change.
 
-Decision order: G2/G3 (QR-002b, cheap) -> if it helps, G1 (1.1B budget-scaled with the
-improved recipe) -> G4/G5 (prompt panel + baselines) for paper-grade quality claims.
+- Model: `TinyLlama/TinyLlama-1.1B-Chat-v1.0`.
+- Recipe: target linears only; no norms; no lm_head.
+- Budget: raise effective training tokens from TRAIN-002's `0.31M` to about `4.9M`
+  using gradient accumulation (`800` steps, effective batch `24`, seq `256`).
+- Preferred hardware: A100 with fp32 AdamW; fallback: L4 with AdamW8bit.
+- Primary metric: recovered_fraction.
+- Runtime gate: adapted I2_S vs adapted F16 should stay near `+0.002` nats and pass
+  if `<= +0.010` nats.
 
-UPDATE (QR-005 done): G2/G3 resolved — +norms negligible, +lm_head hurts, so the
-**default recipe is target-linears-only**. Next is therefore G1 directly (1.1B
-budget-scaled, linears-only, fp32 Adam + bigger batch on an L4/A100), then G4/G5.
+See [G1 Budget-Scaling Runbook](./g1_budget_scaling_runbook.md) for smoke commands,
+one-shot A100/L4 commands, fallback rules, and result interpretation.
+
+Decision order now: **G1 budget scaling -> G5 baseline -> G6 seed variance**.
 
 ## What NOT to do next
 
 - Do not start a ternary-MoE / gpt-oss build (RT-118: ROI ~0).
-- Do not spend L4/A100 on 1.1B budget scaling BEFORE QR-002b tells us the best recipe.
-- Do not claim user-facing quality from CE/PPL alone (needs G4).
+- Do not spend L4/A100 without the G1 smoke and one-shot runbook.
+- Do not claim user-facing quality from CE/PPL alone; QR-004 closes this only at
+  160M, so 1.1B qualitative examples should follow a successful G1 run.
