@@ -18,6 +18,7 @@ native b1.58 학습 -> export -> runtime 파이프라인을 만든다.
 1. teacher distillation 없이 b1.58-friendly 학습/후학습으로 품질을 유지할 수 있는가?
 2. 그 weight를 실제 ternary runtime에 충실히 옮길 수 있는가?
 3. 실제 runtime에서 storage, latency, tokens/sec가 개선되는가?
+4. 작고 빠른 runtime artifact가 실제 답변 품질도 회복할 수 있는가?
 
 ## 한 줄 현재 결론
 
@@ -157,6 +158,8 @@ python scripts/rt113_storage_latency.py \
    - RT-101 upstream I2_S byte layout 감사 + RT-111 x86/Mac runtime 판정.
 8e. [Scale-Up Target Roadmap](./scaleup_target_roadmap.md)
    - RT-114 Llama-160M을 먼저 닫고, 이후 gpt-oss-20b로 넘어가는 타겟 전략.
+8f. [Quality Recovery Plan](./quality_recovery_plan.md)
+   - PTQ 붕괴, teacher-free adaptation, I2_S runtime 보존, 실제 답변 품질 평가 계획.
 9. [Groupwise Alpha Hypothesis](./groupwise_alpha_hypothesis.md)
    - 왜 groupwise `alpha*T`가 per-tensor BitNet b1.58보다 품질을 더 잘 보존할 수 있는지 설명한다.
 10. [Research Signal Note](./research_signal_note.md)
@@ -180,8 +183,10 @@ flowchart TD
   K --> M["packed_ternary_format_plan.md"]
   M --> R["bitnet_cpp_export_scoping.md"]
   R --> U["scaleup_target_roadmap.md"]
+  U --> V["quality_recovery_plan.md"]
   R --> T["groupwise_alpha_hypothesis.md"]
   U --> T
+  V --> L
   T --> L
   B --> E
   B --> G["turboquant_bitnet_implementation_plan.md"]
@@ -211,6 +216,7 @@ flowchart TD
 | [bitnet_cpp_i2s_layout_audit.md](./bitnet_cpp_i2s_layout_audit.md) | RT-101 upstream I2_S byte layout 감사 + 매핑표 | GGUF writer 만들기 전 포맷 고정할 때 |
 | [bitnet_cpp_export_scoping.md](./bitnet_cpp_export_scoping.md) | GGUF/bitnet.cpp export 가능성, format mapping, export TC 초안 | Python reference 이후 실제 runtime으로 넘어갈 때 |
 | [scaleup_target_roadmap.md](./scaleup_target_roadmap.md) | Llama-160M -> gpt-oss-20b scale-up 순서와 gate | 어떤 공개 모델을 다음 목표로 삼을지 정할 때 |
+| [quality_recovery_plan.md](./quality_recovery_plan.md) | PTQ 붕괴 측정, CE-only recovery, I2_S 품질 보존, prompt 품질 평가 | 작고 빠른 모델이 실제로 쓸 만한지 판단할 때 |
 | [groupwise_alpha_hypothesis.md](./groupwise_alpha_hypothesis.md) | groupwise scale이 품질을 보존하는 이유와 검증할 ablation | 알고리즘 우위의 원인을 설명하거나 반증할 때 |
 | [research_signal_note.md](./research_signal_note.md) | 현재 결과가 연구 신호로서 왜 의미 있는지 해석 | 논문화 가능성과 다음 방향을 판단할 때 |
 | [turboquant_bitnet_implementation_plan.md](./turboquant_bitnet_implementation_plan.md) | KV cache 압축 계획과 TC | weight 변환 이후 긴 문맥으로 확장할 때 |
@@ -304,18 +310,22 @@ flowchart TD
 
 다음:
 
-1. **RT-114 / SCALE-001:** `JackFram/llama-160m`으로 whole-file ratio와 latency가
-   target-linear 방향으로 수렴하는지 확인한다.
-2. **RT-115 / OSS-001:** RT-114가 통과하면 `gpt-oss-20b` architecture/tensor-map
+1. **QR-001..004:** Llama-160M에서 PTQ 붕괴와 teacher-free quality recovery를
+   측정한다. 목표는 동일 문자열이 아니라 같은 급의 답변 품질이다.
+2. **SCALE-002 선택:** TinyLlama-1.1B로 RT-114의 storage/latency scale law가
+   1B급에서도 유지되는지 확인한다.
+3. **RT-115 / OSS-001:** `gpt-oss-20b` architecture/tensor-map
    audit로 넘어간다. 바로 weight 변환부터 하지 않는다.
-3. 큰 모델에서 latency가 약하면 원인 분리: CPU thread, KV/context regime,
+4. 큰 모델에서 latency가 약하면 원인 분리: CPU thread, KV/context regime,
    I2_S kernel 특성.
-4. Mac M5 I2_S/TL1은 보류한다. 필요하면 upstream bug report용 최소 재현으로 분리한다.
+5. Mac M5 I2_S/TL1은 보류한다. 필요하면 upstream bug report용 최소 재현으로 분리한다.
 
 이전 보류 항목 중 packed reference ladder는 완료됐고, export 경로도 판별됐다
 (per-tensor-native → I2_S 직행). 남은 다음 축:
 
-- bigger pretrained/small model에서 bitnet.cpp/I2_S storage/latency scale-up 검증
+- quality recovery: teacher-free CE adaptation으로 절대 품질이 회복되는지 확인
+- TinyLlama-1.1B scale-up: RT-114의 storage/latency 법칙이 1B급에서도 유지되는지 확인
+- gpt-oss-20b audit: MoE tensor map, expert weights, router, runtime support 분리
 - groupwise GGUF 확장 / custom kernel: export 트랙이면 불필요. groupwise의 약간 더 나은
   reconstruction을 살리려는 연구용으로만 선택적
 - TurboQuant KV cache 구현

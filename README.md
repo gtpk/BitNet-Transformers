@@ -21,10 +21,12 @@ Current modernization status:
 - x86/Linux RT-113 measured storage and latency: I2_S gives 16x target-linear
   compression vs f32 and about 2x token-generation throughput on the tiny
   artifact.
+- RT-114 confirmed the gain on JackFram/llama-160m: whole-file ratio moved to
+  0.196 and token-generation reached 5.69x vs f32.
 - The local Mac M5 build is currently blocked by bitnet.cpp toolchain/backend
   issues, so runtime validation targets x86/Linux first.
-- Next gate: scale the same pipeline to a larger pretrained/small model where
-  linear weights dominate the artifact.
+- Next gate: quality recovery — measure PTQ collapse, run teacher-free CE
+  adaptation, and check whether adapted I2_S outputs stay useful.
 
 Core documents:
 
@@ -40,6 +42,7 @@ Core documents:
 - [I2_S export PoC plan](./docs/i2s_export_poc_plan.md)
 - [bitnet.cpp I2_S layout audit](./docs/bitnet_cpp_i2s_layout_audit.md)
 - [Scale-up target roadmap](./docs/scaleup_target_roadmap.md)
+- [Quality recovery plan](./docs/quality_recovery_plan.md)
 - [Groupwise alpha hypothesis](./docs/groupwise_alpha_hypothesis.md)
 - [Research signal note](./docs/research_signal_note.md)
 - [TurboQuant + BitNet KV-cache plan](./docs/turboquant_bitnet_implementation_plan.md)

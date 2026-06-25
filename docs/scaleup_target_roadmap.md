@@ -24,8 +24,9 @@ This roadmap fixes the order:
 
 ```text
 1. Llama-160M first  -> fast, LLaMA-shaped, linear-dominated scale-up demo
-2. gpt-oss-20b next -> socially useful public target, MoE/runtime audit required
-3. gpt-oss-120b     -> projection only until 20b is understood
+2. Quality Recovery -> prove the small/fast artifact can regain useful answers
+3. gpt-oss-20b next -> socially useful public target, MoE/runtime audit required
+4. gpt-oss-120b     -> projection only until 20b is understood
 ```
 
 The goal is not to chase the biggest model first. The goal is to keep the
@@ -100,6 +101,32 @@ Interpretation:
 - FAIL in latency but PASS in parity means the algorithm/export path is sound,
   but runtime/kernel/context settings need diagnosis.
 - Poor absolute PPL with I2_S ~= F16 is not a SCALE-001 failure.
+
+## Quality Recovery Track
+
+See [Quality Recovery Plan](./quality_recovery_plan.md).
+
+RT-114 shows the systems claim scales: storage improves and token-generation
+speedup grows on a pretrained LLaMA-shaped model. That still does not prove
+answer quality. One-shot PTQ quality is expected to be poor.
+
+The next quality question is:
+
+```text
+Can short, teacher-free CE adaptation recover enough quality while keeping the
+same b1.58 -> I2_S runtime path?
+```
+
+Run this before any gpt-oss quality claim:
+
+| ID | Target | Question |
+| --- | --- | --- |
+| QR-001 | Llama-160M | how bad is one-shot PTQ vs FP? |
+| QR-002 | Llama-160M | does CE-only STE adaptation recover loss? |
+| QR-003 | Llama-160M | does I2_S preserve adapted F16 Wq quality? |
+| QR-004 | Llama-160M | are outputs usable on a small prompt panel? |
+
+This track evaluates **same-quality output**, not identical strings.
 
 ## Why gpt-oss Later
 
@@ -247,8 +274,10 @@ gpt-oss audit blocked
 
 Execute in this order:
 
-1. Finish `JackFram/llama-160m` SCALE-001.
-2. If it passes, open `gpt-oss-20b` RT-115 architecture audit.
-3. Only after the audit, decide whether gpt-oss is executable now or should
+1. Treat `JackFram/llama-160m` SCALE-001 as the completed systems scale-up gate.
+2. Start QR-001..004 on Llama-160M to test useful quality recovery.
+3. Optionally run TinyLlama-1.1B as SCALE-002 to confirm storage/latency scaling
+   at 1B before MoE.
+4. Open `gpt-oss-20b` RT-115 architecture audit.
+5. Only after the audit, decide whether gpt-oss is executable now or should
    remain a projection/north-star target.
-

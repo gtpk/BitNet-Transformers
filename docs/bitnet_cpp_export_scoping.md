@@ -1016,7 +1016,9 @@ CONCLUSION (SCALE-001): the I2_S export gain is NOT a tiny-toy artifact. On a re
 runtime faithful to the materialized weights (parity tight in CE; the residual is
 int8 activation quant). The algorithm + export + runtime + efficiency + scale story
 is now closed on x86/Linux. The one thing SCALE-001 deliberately does NOT show is
-good absolute quality at scale — that needs ternary *training* of the larger model,
-a separate track. Optional next confirmations: a 1.1B model (TinyLlama) for an even
-lower whole-file ratio, and a ternary-trained small model for absolute-quality PPL.
+good absolute quality at scale — that needs ternary *training* or adaptation of
+the larger model. See [Quality Recovery Plan](./quality_recovery_plan.md).
+Optional next confirmations: a 1.1B model (TinyLlama) for an even lower whole-file
+ratio, and a ternary-trained/adapted small model for absolute-quality PPL and
+prompt quality.
 ```

@@ -492,9 +492,12 @@ RT-113 storage/latency, and RT-114 scale-up are all done. Recommended from here:
 
 1. Archive the real-text JSON reports from Colab back into `reports/` or rerun
    the sweep before paper-style quantitative claims.
-2. (Optional) confirm on a 1.1B model (TinyLlama) for an even lower whole-file
-   ratio, and ternary-TRAIN a small model for an absolute-quality PPL claim.
-3. Keep Mac M5 I2_S/TL1 work as a separate upstream/toolchain issue, not the main
+2. Start [Quality Recovery Plan](./quality_recovery_plan.md): QR-001 PTQ collapse,
+   QR-002 teacher-free CE adaptation, QR-003 adapted F16-vs-I2_S preservation,
+   QR-004 prompt quality.
+3. (Optional) confirm on a 1.1B model (TinyLlama) for an even lower whole-file
+   ratio after or alongside QR.
+4. Keep Mac M5 I2_S/TL1 work as a separate upstream/toolchain issue, not the main
    research path.
 
 See [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) for the
