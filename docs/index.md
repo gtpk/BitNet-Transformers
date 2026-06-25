@@ -98,11 +98,26 @@ all-I2_S adapted greedy generation이 아직 usable하지 않음을 보였다.
 
 **RT-123도 완료:** mixed-bit DP의 첫 단계인 single-group sensitivity scan은 18/24
 그룹에서 FP-restore가 오히려 CE를 악화시켜 additive-DP 전제가 약함을 보였다. 따라서
-DP는 "문제를 푸는 도구"라기보다 후보 색인/selector로 격하한다. 다음 큰 축은
-**quantization-aware b1.58 conversion**이다: symmetric/per-channel/per-group scale,
-threshold/MSE objective, AWQ/SmoothQuant식 activation-aware scaling, GPTQ식 output-aware
-assignment, rotation, signed-epsilon 2-bit를 순서대로 검증해 "왜 BitNet 변환이
-어려운지"를 결론까지 몰고 간다.
+DP는 후보 selector로 격하했다.
+
+**RT-124~127 (quantization-aware track) 종결:** scale granularity(RT-124A, block +2.36
+nats 부분 lever지만 runtime 필요)·scale/threshold objective(RT-124B, absmean이 이미
+최적)·AWQ/SmoothQuant diagonal(RT-124C, +0.14)·GPTQ/Hessian assignment(RT-125, +0.51 =
+gap의 6%)·signed-epsilon 2-bit codebook(RT-127, ternary 못 이김) — **어느 PTQ 기법도
+one-shot 변환을 살리지 못한다. 병목은 quantizer가 아니라 adaptation/data다**(짧은
+teacher-free CE가 모든 one-shot 트릭을 압도). plan의 Expected Conclusion #4 도달.
+
+**RT-129 (decoding probe) — usability 회복:** RT-122의 1.1B greedy degeneration은
+모델 손상이 아니라 **greedy artifact**였다. repetition penalty(1.2)/sampling이면
+adapted i2_s가 ok `1/12 → 12/12`로 Q2_K/FP급 non-degenerate tier 회복, adapted
+i2_s==f16. **표준 decoding에선 usable-tier 생성 가능**(단 사실 정확성 parity는 아님).
+
+**현재 결론(고정):** systems(faithful export + storage/speed scale law) 해결, CE/PPL
+recovery는 scales, generation usability는 sane decoding에서 회복, quantizer는 lever
+아님으로 판정. 남은 유일한 open gap은 **factual quality**(FP/Q2_K 미달) — 처방은
+quantizer가 아니라 adaptation/data(instruction/longer CE/repetition-aware objective).
+다음은 새 실험보다 **논문/리포트 정리**가 우선이다. 상세 claim table은
+[Paper Skeleton](./paper_skeleton.md) 참조.
 
 packed format Phase 1/2/3/4 검증(로컬):
 
@@ -200,6 +215,8 @@ python scripts/rt113_storage_latency.py \
    - 기존 quantization toolbox(scale granularity, threshold/MSE objective, activation-aware scaling, GPTQ/Hessian assignment, rotation, signed-epsilon)를 BitNet 변환에 적용하는 처음부터 끝까지의 실험/가지치기 계획.
 8l. [Colab Quantization-Aware Conversion Prompt](./colab_quantization_aware_prompt.md)
    - Colab을 실행할 수 있는 AI에게 그대로 줄 handoff prompt.
+8m. [Complex / Phase Rotation Probe Plan](./complex_phase_rotation_plan.md)
+   - `e^{iθ}` pairwise phase rotation이 b1.58 ternary 변환을 더 쉽게 만드는지 검증하는 좁은 RT-126B 계획.
 9. [Groupwise Alpha Hypothesis](./groupwise_alpha_hypothesis.md)
    - 왜 groupwise `alpha*T`가 per-tensor BitNet b1.58보다 품질을 더 잘 보존할 수 있는지 설명한다.
 10. [Research Signal Note](./research_signal_note.md)
@@ -230,6 +247,7 @@ flowchart TD
   Y --> Z["why_b158_conversion_is_hard.md"]
   Z --> QA["quantization_aware_b158_conversion_plan.md"]
   QA --> QP["colab_quantization_aware_prompt.md"]
+  QA --> PR["complex_phase_rotation_plan.md"]
   R --> T["groupwise_alpha_hypothesis.md"]
   U --> T
   V --> L
@@ -269,6 +287,7 @@ flowchart TD
 | [why_b158_conversion_is_hard.md](./why_b158_conversion_is_hard.md) | 기존 FP 모델을 b1.58로 변환하기 어려운 이유를 수학/통계/시스템 결과로 정리 | 프로젝트 질문을 다시 정의하고 claim을 좁힐 때 |
 | [quantization_aware_b158_conversion_plan.md](./quantization_aware_b158_conversion_plan.md) | quantization 기법을 b1.58 변환에 적용하는 RT-124..128 전체 실험계획, 가지치기, 결론 도달 규칙 | 다음 Colab 실험을 설계하거나 결과를 해석할 때 |
 | [colab_quantization_aware_prompt.md](./colab_quantization_aware_prompt.md) | Colab 실행 가능한 AI에게 줄 copy-paste prompt와 결과 템플릿 | 다른 실행자에게 RT-124를 넘길 때 |
+| [complex_phase_rotation_plan.md](./complex_phase_rotation_plan.md) | 복소수 위상 `e^{iθ}`를 pairwise real rotation으로 구현해 cheap rotation loophole을 검증하는 계획 | RT-126 rotation을 다시 열지 말지 판단할 때 |
 | [groupwise_alpha_hypothesis.md](./groupwise_alpha_hypothesis.md) | groupwise scale이 품질을 보존하는 이유와 검증할 ablation | 알고리즘 우위의 원인을 설명하거나 반증할 때 |
 | [research_signal_note.md](./research_signal_note.md) | 현재 결과가 연구 신호로서 왜 의미 있는지 해석 | 논문화 가능성과 다음 방향을 판단할 때 |
 | [turboquant_bitnet_implementation_plan.md](./turboquant_bitnet_implementation_plan.md) | KV cache 압축 계획과 TC | weight 변환 이후 긴 문맥으로 확장할 때 |
@@ -382,6 +401,7 @@ flowchart TD
 
 - G1 quality budget scaling: TinyLlama-1.1B에서 회복률 `0.480`이 예산 한계였는지 확인
 - quantization-aware b1.58 conversion: scale/threshold/activation/Hessian/rotation 기법을 적용해 단순 ternary PTQ가 너무 조잡했던 것인지 검증
+- complex/phase rotation probe: arbitrary rotation이 아니라 sign/swap·Hadamard-like cheap phase만 좁게 검증하는 RT-126B 보조축
 - mixed-bit DP: all-I2_S의 품질/생성 한계를 selective Q2/Q3 업그레이드로 보완하는 보조축. RT-123 결과상 full additive DP는 보류
 - variance: 논문용 설득력을 위해 seed 반복 추가
 - groupwise GGUF 확장 / custom kernel: export 트랙이면 불필요. groupwise의 약간 더 나은
