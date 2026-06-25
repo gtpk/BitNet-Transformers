@@ -515,3 +515,37 @@ Then score each adapted dir with the RT-130 panel (rep1.2) and compare fact_rate
 A (0.04), Q2_K (0.74), FP (0.81). Decision: fact_rate >= 0.4 and low degeneration =>
 data-only recovery works; fluent-but-fact~0 => CE objective insufficient (FACT-003);
 adapted i2_s != f16 => runtime issue (not expected).
+
+## FACT-002 / RT-131 RESULT (2026-06-26): data does NOT close the gap -> S3 objective gap
+
+Ran the master runbook end-to-end on Colab L4 (same recipe/budget as RT-120: 800 steps,
+eff-batch 24, fp32 + AdamW8bit + grad-ckpt; factual panel eval-only, never trained on).
+
+| arm | train_source | CE_adapted (FP 2.31 / PTQ 11.53) | recovered | adapted PPL (FP 10.1) | fact_i2s (rep1.2) | i2s vs f16 | degeneration |
+| --- | --- | ---: | ---: | ---: | ---: | --- | --- |
+| A wikitext | wikitext | — | (RT-120) | — | 0.037 (1/27) | 26/27 | canned WikiText boilerplate, every prompt |
+| C instruction | Dolly-15k Q/A | 7.82 | 0.40 | 2480 | 0.000 (0/27) | 27/27 | **empty 25/27** (early EOS) |
+| D mixed | wikitext+instr | 4.03 | **0.81** | 56.2 | 0.074 (2/27) | 27/27 | fluent, varied (ok 26/27) |
+
+References this run: FP 0.815, Q2_K 0.741, PTQ 0.0 (reproduced RT-130 exactly).
+
+Reads:
+- **Mixed is the clear best arm and recovers fluency strongly** (CE 0.81 recovered, PPL
+  2480->56, no empty/canned collapse, `ok` tags) — yet `fact_rate` stays at the floor
+  (0.074 vs Q2_K 0.74). The model speaks well and hallucinates: "The French Navy is a
+  sub-national... English naval officer", "The Grand Tires are a city in Milan, Paris",
+  "Moscow, Moscow, Moscow..." loops. See `reports/rt131_fact002_mixed_fact.md`.
+- **Instruction-only collapses** to empty answers (25/27) — Dolly Q/A formatting taught
+  early EOS; worst arm despite 0.40 CE recovery.
+- **WikiText-only** emits one canned passage for every prompt (degenerate), as in RT-130.
+- **Runtime fully exonerated** on all arms: adapted i2_s == adapted f16 (26-27/27
+  hit-agreement; |i2_s-f16| = 0.012 nats on mixed). The gap is not a bit/codebook problem.
+
+Decision (runbook Stage 4 tree): refs sane (FP>=0.7, Q2_K>=0.6) -> i2_s~f16 -> best
+fact_rate 0.074 < 0.15 -> outputs fluent/non-degenerate -> **S3: objective gap**.
+
+Conclusion: the CE-on-demonstrations objective recovers *fluency* but not *factual
+knowledge* at this scale/budget — the lever is the objective, not the data and not the
+runtime. Next is FACT-003 (objective branch: replay/KL regularization, answer-only loss
+mask, repetition penalty, or protected factual replay). FACT-003 requires code changes;
+it is NOT already supported by rt116. Artifacts: `reports/rt131_fact002_*`.

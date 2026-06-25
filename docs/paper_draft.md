@@ -175,6 +175,29 @@ knowledge (catastrophic forgetting), so **PPL-recovery is not knowledge-recovery
 data/objective problem. This sets the factual claim at L0 (non-degenerate), not L1, and
 points the next work at adaptation data, not bits.
 
+### 5.6 Data alone does not close the gap; the objective does (RT-131 / FACT-002)
+
+We re-ran the same teacher-free recipe/budget swapping only the adaptation *data*:
+instruction-only (Dolly-15k Q/A) and mixed (WikiText+instruction). The factual panel was
+held out (never trained on); references reproduced exactly (FP 0.815, Q2_K 0.741, PTQ 0).
+
+| arm | CE recovered | adapted PPL (FP 10.1) | fact-hit (rep1.2) | i2_s vs f16 | note |
+| --- | ---: | ---: | ---: | --- | --- |
+| wikitext | (RT-120) | — | 0.04 | 26/27 | one canned WikiText passage per prompt |
+| instruction | 0.40 | 2480 | 0.00 | 27/27 | empty 25/27 (Dolly Q/A taught early EOS) |
+| mixed | **0.81** | 56 | 0.07 | 27/27 | fluent, varied, but hallucinated facts |
+
+The mixed arm is decisive: it recovers fluency strongly (0.81 CE recovered, PPL 2480→56,
+no empty/canned collapse) yet `fact_rate` stays at the floor (0.07 vs Q2_K 0.74). It
+speaks well and confabulates ("The French Navy is… an English naval officer"; "The Grand
+Tires are a city in Milan, Paris"; "Moscow, Moscow, Moscow…"). adapted i2_s == adapted
+f16 on every arm (|Δ|=0.012 nats on mixed), so the runtime is exonerated a second time.
+**The CE-on-demonstrations objective recovers fluency but not factual knowledge** at this
+scale/budget — the lever is the objective, not the data and not the bits. This keeps the
+factual claim at L0 and points the next work (FACT-003) at the *training objective*
+(replay/KL regularization, answer-only loss masking, repetition penalty, protected
+factual replay) rather than more data.
+
 ## 6. Negative Results (scoping)
 
 ### 6.1 We do not beat one-shot Q2_K on PPL (RT-121) — Figure 5
@@ -213,9 +236,11 @@ The recipe's value is dense FP-weight models, not already-low-bit MoE.
   WikiText-CE-adapted model scores ~0.04 vs FP 0.81 / Q2_K 0.74 — fluent but factually
   near-empty. The base model and its Q2_K keep the facts, and adapted i2_s == adapted f16,
   so this is neither a quantization nor a runtime gap: our WikiText-CE adaptation traded
-  the base model's knowledge for WikiText fluency (catastrophic forgetting). The fix is
-  adaptation data/objective (instruction/mixed-data CE), not bits — the main remaining
-  work (FACT-002+).
+  the base model's knowledge for WikiText fluency (catastrophic forgetting). RT-131 then
+  showed that swapping the *data* (instruction/mixed CE) recovers fluency (mixed: 0.81 CE
+  recovered, PPL 56) but **not facts** (0.07) — so the fix is the training *objective*
+  (FACT-003: replay/KL, answer-only masking, protected factual replay), not more data or
+  fewer bits. This is the main remaining work.
 - **PPL-per-bit.** We do not beat Q2_K on PPL (Section 6.1).
 - **Statistics.** Recovery is reported at a single seed (G6 open).
 - **Cross-tool PPL.** PyTorch CE and llama.cpp perplexity differ in absolute value
