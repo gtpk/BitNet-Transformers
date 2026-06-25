@@ -61,9 +61,11 @@ RT-101~112까지의 runtime 조사는 완료됐다. 핵심 결론은:
   (`Wq=gamma*T`)로 x86 I2_S F16/F32 parity를 냈다. latent FP를 바로 I2_S로
   보내는 Path A는 의도대로 붕괴했고, absmax-vs-absmean 문제가 확정됐다.
 
-**지금 바로 할 일은 RT-113 / EXPORT-006/007:** x86/Linux bitnet.cpp에서
-RT-112 artifact의 storage, PPL parity, generation latency, tokens/sec를 잰다.
-이제 "돈다"는 닫혔고, "메모리 이동/지연에서 이득이 있나"를 숫자로 닫아야 한다.
+**RT-113 / EXPORT-006/007도 완료:** x86/Linux bitnet.cpp에서 RT-112 artifact의
+storage와 latency를 측정했다. target-linear I2_S는 f32 대비 16x 작고,
+token-generation은 f32 대비 약 1.97x 빠르다. 이제 tiny artifact의 "돈다"와
+"효율적이다"는 닫혔고, 다음은 더 큰 pretrained/small 모델에서 이 비율이
+유지되는지 확인하는 단계다.
 
 packed format Phase 1/2/3/4 검증(로컬):
 
@@ -103,13 +105,13 @@ real-text fixture smoke(로컬, harness 확인용):
 - [Colab Arena Runbook](./colab_arena_runbook.md)
 - [Colab Validation Summary](./colab_validation_summary.md)
 
-x86/Linux runtime metrics(수동 Colab/Linux shell, Colab MCP 불필요):
+x86/Linux runtime metrics 재현(수동 Colab/Linux shell, Colab MCP 불필요):
 
 ```bash
-python scripts/rt113_x86_runtime_metrics.py \
+python scripts/rt113_storage_latency.py \
   --bitnet /content/bitnet.cpp \
-  --json-out reports/rt113_x86_runtime_metrics.json \
-  --strict
+  --model-dir /content/bitnet.cpp/models/tiny_pt_ternary \
+  --json-out reports/rt113_storage_latency.json
 ```
 
 로컬에서 사전 검정:
@@ -215,7 +217,7 @@ flowchart TD
 | [bitnet_llama/i2s_export.py](../bitnet_llama/i2s_export.py) | [I2_S Export PoC Plan](./i2s_export_poc_plan.md) | per-tensor b1.58 I2_S export/import reference |
 | [scripts/check_i2s_export.py](../scripts/check_i2s_export.py) | [I2_S Export PoC Plan](./i2s_export_poc_plan.md) | PTX-101..105 export 정확성 TC |
 | [scripts/rt112_x86_arena.py](../scripts/rt112_x86_arena.py) | [GGUF / bitnet.cpp Export Scoping Plan](./bitnet_cpp_export_scoping.md) | x86 I2_S artifact parity: latent Path A vs ternary-dense Path A' |
-| [scripts/rt113_x86_runtime_metrics.py](../scripts/rt113_x86_runtime_metrics.py) | [GGUF / bitnet.cpp Export Scoping Plan](./bitnet_cpp_export_scoping.md) | EXPORT-006/007 storage, PPL guard, generation latency metrics |
+| [scripts/rt113_storage_latency.py](../scripts/rt113_storage_latency.py) | [GGUF / bitnet.cpp Export Scoping Plan](./bitnet_cpp_export_scoping.md) | EXPORT-006/007 target-linear storage and llama-bench latency metrics |
 | [scripts/check_packed_model.py](../scripts/check_packed_model.py) | [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) | PACK-101..103 model export/import TC |
 | [scripts/check_packed_runtime.py](../scripts/check_packed_runtime.py) | [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) | PACK-201..204 packed runtime module TC |
 | [scripts/check_packed_matmul.py](../scripts/check_packed_matmul.py) | [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) | PACK-301..304 blocked dequant matmul reference TC |
@@ -284,7 +286,7 @@ flowchart TD
 - **RT-107~109 판정**: Mac M5/macOS26/clang21 로컬 ternary runtime은 신뢰 불가. official I2_S도 붕괴, TL1은 `BITNET_ARM_TL1=OFF` 기본 빌드와 clang LUT compile blowup으로 막힘.
 - **RT-111 판정**: x86 Colab에서 official `bitnet_b1_58-large` f32 PPL `1.8547`, i2_s PPL `1.8548`로 parity. I2_S upstream/runtime은 정상이며 Mac 한정 빌드/툴체인 문제로 결론.
 - **RT-112 판정**: 우리 tiny per-tensor-native b1.58 모델도 x86 I2_S에서 통과. ternary-dense Path A'는 `i2_s 305.02 ~= f16 306.48 ~= f32 306.42`, latent Path A는 `i2_s 2071 vs f16 806`으로 붕괴. Path B byte-writer 불필요.
-- **RT-113 / EXPORT-006/007 판정**: x86에서 storage+latency 측정. target-linear i2_s는 f32 대비 **16x 압축**(0.0626), 전체 파일은 f16 임베딩 floor에 희석되어 0.45. llama-bench(t=2)에서 i2_s가 양쪽 다 最速 — token-gen `627.88 t/s`로 **f32 대비 1.97x, f16 대비 2.27x**, prompt `11432 t/s`로 f32 대비 1.69x. peak RSS는 mmap이라 무차별(파일 bytes+tg t/s가 메모리 지표). per-tensor-native→I2_S는 정확할 뿐 아니라 x86에서 효율적이며 custom kernel 불필요.
+- **RT-113 / EXPORT-006/007 판정**: x86에서 storage+latency 측정. target-linear i2_s는 f32 대비 **16x 압축**(0.0626), 전체 파일은 f16 임베딩 floor에 희석되어 0.45. llama-bench(t=2, 4~5 run)에서 i2_s가 양쪽 다 最速이며 i2_s 절대값이 안정적(pp ~11200, tg ~595 t/s) — 강건한 비율로 **prompt ~1.7x vs f32, token-gen ~2x vs f32/f16**(공유 CPU 노이즈로 f32/f16 tg가 흔들려 비율 1.8~3.5x 범위). peak RSS는 mmap이라 무차별(파일 bytes+tg t/s가 메모리 지표). per-tensor-native→I2_S는 정확할 뿐 아니라 x86에서 효율적이며 custom kernel 불필요.
 
 다음:
 
@@ -297,7 +299,7 @@ flowchart TD
 이전 보류 항목 중 packed reference ladder는 완료됐고, export 경로도 판별됐다
 (per-tensor-native → I2_S 직행). 남은 다음 축:
 
-- bitnet.cpp/I2_S runtime storage/latency 검증 (x86/Linux, per-tensor-native 모델 기준)
+- bigger pretrained/small model에서 bitnet.cpp/I2_S storage/latency scale-up 검증
 - groupwise GGUF 확장 / custom kernel: export 트랙이면 불필요. groupwise의 약간 더 나은
   reconstruction을 살리려는 연구용으로만 선택적
 - TurboQuant KV cache 구현

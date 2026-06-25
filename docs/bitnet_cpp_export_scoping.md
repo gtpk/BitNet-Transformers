@@ -858,24 +858,29 @@ diluted by the f16 embedding floor (8.2M of 9.5M params on this tiny model); on 
 real model where linears dominate the params, the whole-file ratio converges
 toward the target-linear ratio.
 
-### EXPORT-007 Latency (llama-bench, t=2, pp64/tg64, r=5)
+### EXPORT-007 Latency (llama-bench, t=2; 4-5 runs of pp64 + tg64/tg128)
 
-| fmt | prompt pp64 (t/s) | token-gen tg64 (t/s) |
-| --- | ---: | ---: |
-| f32 | 6765.66 ± 105 | 318.19 ± 21 |
-| f16 | 8796.74 ± 97 | 276.39 ± 68 |
-| **i2_s** | **11431.77 ± 296** | **627.88 ± 27** |
+The shared 2-core Colab CPU is noisy, so single-run absolutes wander (f32 pp64
+swung 2329-6825 t/s across runs; f32/f16 tg are the noisiest). **I2_S itself is
+very stable** and the **ratio is the robust claim**, not the f32/f16 absolutes:
 
-I2_S is the fastest format on BOTH phases:
-- prompt-processing: **1.69x vs f32**, 1.30x vs f16
-- token-generation:  **1.97x vs f32**, **2.27x vs f16** (tg is memory-bandwidth-
-  bound, so the 2-bit weight-traffic reduction shows up most here — exactly the
-  memory-traffic-first thesis)
+| fmt | prompt pp64 (t/s) | token-gen tg (t/s) | stability |
+| --- | ---: | ---: | --- |
+| f32 | ~6700 (6493-6825) | ~290 (169-318) | f32 noisy |
+| f16 | ~8400 (7739-8797) | ~300 (200-324) | f16 noisy |
+| **i2_s** | **~11200 (11072-11432)** | **~595 (560-628)** | **i2_s stable** |
+
+Robust signal across all runs — I2_S fastest on BOTH phases:
+- prompt-processing: **~1.7x vs f32** (4 runs: 1.64-1.74x), ~1.3x vs f16
+- token-generation:  **~2x vs f32 and vs f16** (tg is memory-bandwidth-bound, so
+  the 2-bit weight-traffic reduction shows up most here — the memory-traffic-first
+  thesis). i2_s tg is rock-steady ~595 t/s; the f32/f16 tg noise is why the ratio
+  ranges 1.8-3.5x rather than a single number.
 
 Even on a tiny model whose params are embedding-dominated (so the linear speedup
-is partly masked), I2_S already wins ~2x on token-gen. f16 token-gen is noisy
-(±68) and not reliably faster than f32 on this CPU (f16 weights still expand to
-f32 for compute); I2_S avoids that and moves the least weight bytes.
+is partly masked), I2_S already wins ~2x on token-gen. f16 token-gen is not
+reliably faster than f32 on this CPU (f16 weights still expand to f32 for compute);
+I2_S avoids that and moves the least weight bytes.
 
 Peak RSS is NOT a useful discriminator here: llama.cpp mmaps the model, so
 touched-page RSS was ~equal (5632 KB) across all three formats. The memory story

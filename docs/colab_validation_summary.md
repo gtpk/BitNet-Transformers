@@ -447,18 +447,20 @@ diluted by the f16 embedding floor on this tiny model:
 | f16 | 0.500 | 0.932 |
 | i2_s | **0.0626 (16x)** | 0.450 |
 
-**Latency** (llama-bench, t=2, pp64/tg64, r=5) — i2_s fastest on both phases:
+**Latency** (llama-bench, t=2; 4-5 runs). Shared 2-core Colab CPU is noisy so
+f32/f16 absolutes wander; i2_s is stable and the ratio is the robust claim:
 
-| fmt | pp64 t/s | tg64 t/s |
+| fmt | pp64 t/s | tg t/s |
 | --- | ---: | ---: |
-| f32 | 6765.66 ± 105 | 318.19 ± 21 |
-| f16 | 8796.74 ± 97 | 276.39 ± 68 |
-| i2_s | **11431.77 ± 296** | **627.88 ± 27** |
+| f32 | ~6700 | ~290 (noisy) |
+| f16 | ~8400 | ~300 (noisy) |
+| i2_s | **~11200 (stable)** | **~595 (stable)** |
 
-i2_s token-gen = **1.97x vs f32, 2.27x vs f16** (memory-bandwidth-bound phase, the
-2-bit weight traffic wins). prompt-processing = 1.69x vs f32. Peak RSS is not a
-discriminator (mmap -> ~5632 KB for all three); on-disk bytes + tg t/s carry the
-memory story.
+i2_s is fastest on both phases: prompt-processing **~1.7x vs f32**, token-gen
+**~2x vs f32 and vs f16** (memory-bandwidth-bound phase, the 2-bit weight traffic
+wins). i2_s tg is rock-steady ~595 t/s; f32/f16 tg noise makes the ratio range
+1.8-3.5x. Peak RSS is not a discriminator (mmap -> ~5632 KB for all three);
+on-disk bytes + tg t/s carry the memory story.
 
 Conclusion: per-tensor-native -> I2_S is correct (RT-112) AND efficient (16x linear
 compression, ~2x token-gen) on x86 with no custom kernel. The "before a custom
