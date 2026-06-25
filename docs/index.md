@@ -220,6 +220,8 @@ python scripts/rt113_storage_latency.py \
    - `e^{iθ}` pairwise phase rotation이 b1.58 ternary 변환을 더 쉽게 만드는지 나중에 볼 수 있는 후속 분석/후보 아이디어.
 8n. [Factual Gap Experiment Plan](./factual_gap_experiment_plan.md)
    - RT-129 이후 남은 유일한 open gap인 factual quality를 FACT-001 평가패널과 adaptation/data 실험으로 검증하는 계획.
+8o. [Factual Recovery Master Runbook](./factual_recovery_master_runbook.md)
+   - RT-130 Outcome B 이후 FACT-002 instruction/mixed adaptation부터 FACT-003 objective 분기까지 한 번에 실행하는 single-flight runbook. 필요한 구현 파일/조건/문서화 체크포인트도 포함한다.
 9. [Groupwise Alpha Hypothesis](./groupwise_alpha_hypothesis.md)
    - 왜 groupwise `alpha*T`가 per-tensor BitNet b1.58보다 품질을 더 잘 보존할 수 있는지 설명한다.
 10. [Research Signal Note](./research_signal_note.md)
@@ -252,7 +254,9 @@ flowchart TD
   QA --> QP["colab_quantization_aware_prompt.md"]
   QA --> PR["complex_phase_rotation_plan.md"]
   V --> FG["factual_gap_experiment_plan.md"]
+  FG --> FR["factual_recovery_master_runbook.md"]
   PD["paper_draft.md"] --> FG
+  PD --> FR
   R --> T["groupwise_alpha_hypothesis.md"]
   U --> T
   V --> L
@@ -294,6 +298,7 @@ flowchart TD
 | [colab_quantization_aware_prompt.md](./colab_quantization_aware_prompt.md) | Colab 실행 가능한 AI에게 줄 copy-paste prompt와 결과 템플릿 | 다른 실행자에게 RT-124를 넘길 때 |
 | [complex_phase_rotation_plan.md](./complex_phase_rotation_plan.md) | 복소수 위상 `e^{iθ}`를 pairwise real rotation으로 구현하는 후속 분석/후보 아이디어 | factual gap 이후 rotation 후보를 다시 볼지 판단할 때 |
 | [factual_gap_experiment_plan.md](./factual_gap_experiment_plan.md) | FACT-001 current factual gap panel과 FACT-002..004 adaptation/data 개선 실험 설계 | RT-129 이후 factual quality gap을 다룰 때 |
+| [factual_recovery_master_runbook.md](./factual_recovery_master_runbook.md) | RT-130 결과 이후 FACT-002 instruction/mixed adaptation, FACT-003 분기, 구현 패킷, 문서화 체크포인트, Colab handoff prompt를 한 번에 묶은 실행 문서 | 다음 factual recovery run을 다른 실행자/Colab에 넘길 때 |
 | [groupwise_alpha_hypothesis.md](./groupwise_alpha_hypothesis.md) | groupwise scale이 품질을 보존하는 이유와 검증할 ablation | 알고리즘 우위의 원인을 설명하거나 반증할 때 |
 | [research_signal_note.md](./research_signal_note.md) | 현재 결과가 연구 신호로서 왜 의미 있는지 해석 | 논문화 가능성과 다음 방향을 판단할 때 |
 | [turboquant_bitnet_implementation_plan.md](./turboquant_bitnet_implementation_plan.md) | KV cache 압축 계획과 TC | weight 변환 이후 긴 문맥으로 확장할 때 |
@@ -388,13 +393,14 @@ flowchart TD
 
 다음:
 
-1. **FACT-001 / RT-130 factual gap panel:** FP/Q2_K/PTQ/adapted-F16/adapted-I2_S를
-   같은 factual prompt panel과 RT-129 표준 decoding으로 비교해 현재 factual gap을
-   먼저 측정한다.
-2. **FACT-002 / adaptation-data ablation:** FACT-001 결과를 본 뒤 longer WikiText CE,
-   instruction/factual CE, mixed CE를 같은 budget으로 비교한다.
-3. **FACT-003 / repetition-aware objective:** 필요할 때만 unlikelihood/repetition-aware
-   objective를 테스트해 decode-time repetition penalty 의존도를 줄일 수 있는지 본다.
+1. **FACT-002 / RT-131 single-flight run:** [Factual Recovery Master Runbook](./factual_recovery_master_runbook.md)
+   그대로 instruction-only와 mixed-data adaptation을 실행하고, RT-130 panel로 같은 날
+   평가한다.
+2. **FACT-002 decision:** fact_rate, degeneration, adapted F16/I2_S agreement를 보고
+   S1(data-only recovery), S2(partial recovery), S3(objective gap), S4(runtime divergence)
+   중 하나로 확정한다.
+3. **FACT-003 / objective branch:** FACT-002가 S3로 끝날 때만 repetition/free-run/objective
+   작업을 시작한다. 그 전에는 새 quantizer나 rotation을 열지 않는다.
 4. **G6 seed variance:** factual 방향이 정리된 뒤 160M/1.1B seed 반복으로 논문 hygiene를
    보강한다.
 5. **Complex/phase rotation:** 메인 트랙이 아니라 후속 분석/후보 아이디어로 둔다.
@@ -406,7 +412,7 @@ flowchart TD
 (per-tensor-native → I2_S 직행). 남은 다음 축:
 
 - G1 quality budget scaling: TinyLlama-1.1B에서 회복률 `0.480`이 예산 한계였는지 확인
-- factual gap: FACT-001 current panel로 FP/Q2_K 대비 factual quality 차이를 먼저 측정하고, 그 결과에 따라 adaptation/data를 개선
+- factual gap: RT-130으로 measured gap이 확정됐다. 이제 FACT-002 single-flight runbook으로 instruction/mixed data adaptation을 비교하고 S1/S2/S3/S4 중 하나로 결론낸다
 - quantization-aware b1.58 conversion: RT-124~127로 종결. quantizer는 병목이 아님
 - complex/phase rotation probe: 메인 트랙이 아니라 후속 분석/후보 아이디어. arbitrary rotation이 아니라 sign/swap·Hadamard-like cheap phase만 나중에 좁게 검증
 - mixed-bit DP: all-I2_S의 품질/생성 한계를 selective Q2/Q3 업그레이드로 보완하는 보조축. RT-123 결과상 full additive DP는 보류

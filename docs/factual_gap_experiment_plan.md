@@ -487,6 +487,14 @@ WikiText-CE recovery trades factual knowledge for fluency.
 
 ## FACT-002 runbook (data-only adaptation; same recipe/budget as RT-120)
 
+For the complete single-flight execution path, including preflight, reference prep,
+instruction/mixed arms, scoring, decision tree, failure branches, archive checklist,
+and handoff prompt, use:
+
+- [Factual Recovery Master Runbook](./factual_recovery_master_runbook.md)
+
+The short commands below are kept as the minimal FACT-002 reminder.
+
 rt116 now takes `--train-source {wikitext|instruction|mixed}` (instruction = Dolly-15k
 formatted `Q:..\nA:..`; eval CE stays WikiText; factual eval is the fixed RT-130 panel,
 never trained on). Arms, all at the RT-120 budget (800 steps, microbatch 4 x accum 6 =
