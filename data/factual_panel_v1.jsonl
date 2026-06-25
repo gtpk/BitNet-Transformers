@@ -1,0 +1,27 @@
+{"id": "cap_france", "category": "simple_fact", "prompt": "Q: What is the capital of France?\nA:", "must_contain": ["paris"]}
+{"id": "cap_japan", "category": "simple_fact", "prompt": "Q: What is the capital of Japan?\nA:", "must_contain": ["tokyo"]}
+{"id": "cap_italy", "category": "simple_fact", "prompt": "Q: What is the capital of Italy?\nA:", "must_contain": ["rome"]}
+{"id": "cap_germany", "category": "simple_fact", "prompt": "Q: What is the capital of Germany?\nA:", "must_contain": ["berlin"]}
+{"id": "cap_russia", "category": "simple_fact", "prompt": "Q: What is the capital of Russia?\nA:", "must_contain": ["moscow"]}
+{"id": "water_made", "category": "simple_fact", "prompt": "Q: Water is made of hydrogen and what other element?\nA:", "must_contain": ["oxygen"]}
+{"id": "largest_planet", "category": "simple_fact", "prompt": "Q: What is the largest planet in our solar system?\nA:", "must_contain": ["jupiter"]}
+{"id": "closest_planet", "category": "simple_fact", "prompt": "Q: Which planet is closest to the Sun?\nA:", "must_contain": ["mercury"]}
+{"id": "author_romeo", "category": "entity_attr", "prompt": "Q: Who wrote the play Romeo and Juliet?\nA:", "must_contain": ["shakespeare"]}
+{"id": "author_pride", "category": "entity_attr", "prompt": "Q: Who wrote the novel Pride and Prejudice?\nA:", "must_contain": ["austen"]}
+{"id": "first_us_pres", "category": "entity_attr", "prompt": "Q: Who was the first president of the United States?\nA:", "must_contain": ["washington"]}
+{"id": "continents", "category": "simple_fact", "prompt": "Q: How many continents are there on Earth?\nA:", "must_contain": ["seven", "7"]}
+{"id": "days_week", "category": "simple_fact", "prompt": "Q: How many days are there in a week?\nA:", "must_contain": ["seven", "7"]}
+{"id": "freeze_water", "category": "simple_fact", "prompt": "Q: At what temperature in Celsius does water freeze?\nA:", "must_contain": ["0", "zero"]}
+{"id": "boil_water", "category": "simple_fact", "prompt": "Q: At what temperature in Celsius does water boil?\nA:", "must_contain": ["100"]}
+{"id": "opposite_hot", "category": "simple_fact", "prompt": "Q: What is the opposite of hot?\nA:", "must_contain": ["cold"]}
+{"id": "color_sky", "category": "simple_fact", "prompt": "Q: On a clear day, what color is the sky?\nA:", "must_contain": ["blue"]}
+{"id": "largest_ocean", "category": "simple_fact", "prompt": "Q: What is the largest ocean on Earth?\nA:", "must_contain": ["pacific"]}
+{"id": "currency_japan", "category": "entity_attr", "prompt": "Q: What is the currency of Japan?\nA:", "must_contain": ["yen"]}
+{"id": "sun_is", "category": "simple_fact", "prompt": "Q: The Sun is what type of astronomical object?\nA:", "must_contain": ["star"]}
+{"id": "earth_orbits", "category": "simple_fact", "prompt": "Q: The Earth orbits around what?\nA:", "must_contain": ["sun"]}
+{"id": "add_2_2", "category": "reasoning", "prompt": "Q: What is two plus two?\nA:", "must_contain": ["4", "four"]}
+{"id": "mul_7_8", "category": "reasoning", "prompt": "Q: What is seven times eight?\nA:", "must_contain": ["56", "fifty-six", "fifty six"]}
+{"id": "train_arrive", "category": "reasoning", "prompt": "Q: A train leaves at 3 pm and the trip takes 2 hours. What time does it arrive?\nA:", "must_contain": ["5", "five"]}
+{"id": "larger_9_11", "category": "reasoning", "prompt": "Q: Which number is larger, 9 or 11?\nA:", "must_contain": ["11", "eleven"]}
+{"id": "instr_germany_oneword", "category": "instruction", "prompt": "Q: Answer in one word. What is the capital of Germany?\nA:", "must_contain": ["berlin"]}
+{"id": "instr_water_oneword", "category": "instruction", "prompt": "Q: Answer in one word. Water is H2O; what gas does it contain besides hydrogen?\nA:", "must_contain": ["oxygen"]}
