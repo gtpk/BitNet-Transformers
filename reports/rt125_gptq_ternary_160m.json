@@ -1,0 +1,9 @@
+{
+  "model": "JackFram/llama-160m (FP, one-shot ternary, PyTorch screen)",
+  "ce_fp": 3.1466, "ppl_fp": 23.26,
+  "ce_nearest": 11.6597, "ppl_nearest": 115808.28,
+  "ce_gptq": 11.1494, "ppl_gptq": 69523.30,
+  "delta_ce_gptq_vs_nearest": 0.5103,
+  "frac_of_nearest_to_fp_gap_closed": 0.060,
+  "finding": "GPTQ/Hessian output-aware ternary beats nearest by +0.51 nats (PPL 115k->69k) - assignment matters - but closes only 6% of the nearest->FP gap. Combined with RT-124 (block-scale +2.4, objective/activation no help), one-shot PURE ternary is fundamentally too lossy regardless of the PTQ toolbox; even the best stack leaves PPL in the thousands, far from FP (23) or the CE-adapted model (114). Training remains the dominant lever. Per the decision tree, a small GPTQ gain -> pure ternary codebook likely too small -> RT-127 signed-epsilon."
+}

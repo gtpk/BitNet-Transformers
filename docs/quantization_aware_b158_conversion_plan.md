@@ -621,3 +621,29 @@ scaling do not help. The remaining untested lever is output-aware ASSIGNMENT -> 
 (GPTQ/Hessian ternary projection): minimize ||XW - X(gamma*T)||^2 with second-order
 error compensation, capturing inter-weight interactions diagonal methods miss.
 ```
+
+## RT-125 RESULT (2026-06-25): assignment matters a little; pure ternary one-shot is fundamentally too lossy
+
+PyTorch screening GPTQ (H from one FP pass, non-sequential, per-tensor gamma, ternary;
+`scripts/rt125_gptq_ternary.py`). CE_fp 3.15.
+
+| method | CE | PPL |
+| --- | ---: | ---: |
+| nearest (per-tensor absmean) | 11.66 | 115,808 |
+| GPTQ (Hessian output-aware) | 11.15 | 69,523 |
+
+GPTQ beats nearest by **+0.51 nats** (assignment is a real lever) but closes only
+**6%** of the nearest->FP gap. Combined with RT-124 (block-scale +2.4 nats; objective
+and activation-diagonal no help), the full one-shot PTQ toolbox cannot make PURE
+ternary usable — the best stack still leaves PPL in the thousands, vs FP 23 and the
+CE-adapted all-I2_S model 114. Training stays the dominant lever.
+
+```text
+VERDICT (RT-125 + RT-124 synthesis): one-shot PURE {-1,0,+1} ternary is fundamentally
+too lossy for conversion, regardless of scale granularity, scale/threshold objective,
+activation-aware scaling, or GPTQ/Hessian assignment. Assignment helps a little (+0.51),
+but the codebook is the wall. Per the decision tree this points to RT-127 (signed-
+epsilon 2-bit): is the zero-heavy ternary codebook deleting too many small signed
+connections? (RT-126 rotation skipped for now — a stronger assignment method, GPTQ,
+already gained only 6%, so outlier/incoherence is unlikely to be the rescue.)
+```
