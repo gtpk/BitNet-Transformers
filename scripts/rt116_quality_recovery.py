@@ -84,7 +84,10 @@ def materialize_and_save(model, out_dir, tokenizer):
 
 def load_wikitext(tokenizer, max_train_tokens, max_eval_tokens):
     from datasets import load_dataset
-    ds = load_dataset("wikitext", "wikitext-2-raw-v1")
+    try:
+        ds = load_dataset("Salesforce/wikitext", "wikitext-2-raw-v1")
+    except Exception:
+        ds = load_dataset("wikitext", "wikitext-2-raw-v1")
 
     def join_tok(split, cap):
         text = "\n\n".join(t for t in ds[split]["text"] if t.strip())
