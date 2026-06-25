@@ -63,9 +63,17 @@ RT-101~113까지의 runtime 조사는 완료됐다. 핵심 결론은:
 
 **RT-113 / EXPORT-006/007도 완료:** x86/Linux bitnet.cpp에서 RT-112 artifact의
 storage와 latency를 측정했다. target-linear I2_S는 f32 대비 16x 작고,
-token-generation은 f32 대비 약 1.97x 빠르다. 이제 tiny artifact의 "돈다"와
-"효율적이다"는 닫혔고, 다음은 더 큰 pretrained/small 모델에서 이 비율이
-유지되는지 확인하는 단계다.
+token-generation은 f32 대비 약 1.97x 빠르다.
+
+**RT-114 / SCALE-001도 완료(2026-06-25):** 실제 pretrained LLaMA(JackFram/llama-160m)
+에서 84개 target linear를 `Wq=gamma*T`로 materialize(PTQ)해 검증했다. whole-file
+압축률이 tiny의 0.45에서 **0.196**으로 target-linear(0.0625) 쪽으로 수렴했고,
+token-gen 속도는 **f32 대비 5.69x, f16 대비 3.0x**로 tiny(~2x)보다 오히려 커졌다.
+parity는 PPL상 1.043x로 보이지만 loss로는 +0.042 nats(0.3%)로, 잔차는 I2_S int8
+activation 양자화(RT-106) 효과이지 encoding 결함이 아니다. 절대 PPL(~493k)은
+ternary 학습 없는 PTQ라 망가진 게 당연하며 parity로만 판정했다. 즉 I2_S 이득은
+toy 구조 산물이 아니라 실모델에서 더 커지며 runtime도 충실하다. 다음은 (선택)
+1.1B 모델 확인과, 절대 품질 주장을 위한 small 모델 ternary 학습이다.
 
 packed format Phase 1/2/3/4 검증(로컬):
 

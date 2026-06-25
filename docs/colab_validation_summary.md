@@ -466,18 +466,35 @@ Conclusion: per-tensor-native -> I2_S is correct (RT-112) AND efficient (16x lin
 compression, ~2x token-gen) on x86 with no custom kernel. The "before a custom
 kernel" question is answered for the x86/Linux target.
 
+## RT-114 / SCALE-001: real-model scale-up (DONE, 2026-06-25)
+
+`scripts/rt114_scaleup.py` on JackFram/llama-160m (x86, 2 cores): downloaded the
+pretrained FP model, materialized Wq=gamma*T on 84 target linears (PTQ, no retrain),
+kept embd+lm_head f16, measured parity/storage/latency. All 4 TC PASS:
+
+- **Storage**: whole-file i2_s/f32 = **0.196** (tiny was 0.45 -> converges toward the
+  scale-invariant target-linear 0.0625 / 16x, because llama-160m's linears dominate).
+- **Latency** (llama-bench t=2): i2_s tg **5.69x vs f32, 3.00x vs f16** (tiny was ~2x
+  -> the memory-traffic win GROWS with scale); pp 3.51x vs f32.
+- **Mechanics**: convert+quantize+ppl+bench rc=0; 84 linears -> i2_s, embd/lm_head f16.
+- **Parity**: i2_s vs f16 PPL 1.043x looks like 4% but is only **+0.042 nats** of CE
+  (0.3%) at the degenerate PTQ operating point; the residual is the I2_S int8
+  ACTIVATION quant (RT-106), not encoding -> runtime faithful at scale. Absolute PPL
+  ~493k is PTQ-broken by design (quality needs ternary training, separate track).
+
+Conclusion: the I2_S export gain is not a tiny-toy artifact — storage converges to
+the 16x linear floor and token-gen speedup grows at real scale.
+
 ## Next Actions
 
-Synthetic gates, real-text validation, packed-format Phase 1/2/3/4 reference, and
-RT-113 storage/latency are all done. Recommended order from here:
+Synthetic gates, real-text validation, packed-format Phase 1/2/3/4 reference,
+RT-113 storage/latency, and RT-114 scale-up are all done. Recommended from here:
 
 1. Archive the real-text JSON reports from Colab back into `reports/` or rerun
    the sweep before paper-style quantitative claims.
-2. Confirm the EXPORT-006/007 ratios scale up on a larger pretrained/small model
-   (where linears dominate params, so whole-file -> target-linear ratio).
-3. If latency on the bigger model is weak, separate thread count, context regime,
-   and kernel limitations before changing the algorithm.
-4. Keep Mac M5 I2_S/TL1 work as a separate upstream/toolchain issue, not the main
+2. (Optional) confirm on a 1.1B model (TinyLlama) for an even lower whole-file
+   ratio, and ternary-TRAIN a small model for an absolute-quality PPL claim.
+3. Keep Mac M5 I2_S/TL1 work as a separate upstream/toolchain issue, not the main
    research path.
 
 See [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) for the

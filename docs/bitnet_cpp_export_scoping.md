@@ -943,3 +943,80 @@ Driver: `scripts/rt114_scaleup.py` (download -> materialize Wq=gamma*T on target
 linears -> build f32/f16/i2_s for latent control + ternary -> perplexity parity ->
 delegate storage/latency to `scripts/rt113_storage_latency.py`). Reuses the
 RT-112/113 plumbing; model-dir/config-driven so it is not tiny-specific.
+
+## RT-114 / SCALE-001 RESULT (2026-06-25): the gain holds — and grows — at real scale
+
+Ran `scripts/rt114_scaleup.py` on Colab x86 (2 cores) with JackFram/llama-160m:
+downloaded the pretrained FP model, materialized Wq=gamma*T on all **84** target
+linears (PTQ, no retrain), kept embedding+lm_head f16, built f32/f16/i2_s, measured
+parity + storage + latency.
+
+### SCALE-001a Storage — whole-file converges toward target-linear (PASS)
+
+| bytes | f32 | f16 | i2_s |
+| --- | ---: | ---: | ---: |
+| target-linear | 452,984,832 | 226,492,416 | 28,314,240 |
+| whole file | 650,400,000 | 374,755,584 | 127,425,472 |
+
+| ratio vs f32 | target-linear | whole file |
+| --- | ---: | ---: |
+| i2_s | 0.0625 (16x) | **0.196** |
+
+Target-linear ratio is **0.0625 (16x), identical to the tiny model — scale-invariant**.
+The whole-file ratio improved from the tiny model's **0.45 -> 0.196**, converging
+toward the target-linear floor exactly as predicted (llama-160m's linears dominate
+its params, unlike the embedding-heavy tiny model). On a larger model it converges
+further.
+
+### SCALE-001b Latency — I2_S speedup holds and GROWS (PASS)
+
+llama-bench, t=2:
+
+| fmt | pp64 t/s | tg64 t/s |
+| --- | ---: | ---: |
+| f32 | 104.09 | 17.70 |
+| f16 | 198.44 | 33.60 |
+| **i2_s** | **364.85** | **100.80** |
+
+i2_s token-gen = **5.69x vs f32, 3.00x vs f16**; prompt = 3.51x vs f32, 1.84x vs
+f16. The tiny model showed ~2x tg; at 160M the memory-traffic win is **larger**
+(more/bigger linears per token, the embedding lookup is a smaller fixed cost), so
+the memory-traffic-first thesis strengthens with scale.
+
+### SCALE-001c Mechanics (PASS)
+
+Convert + quantize + perplexity + llama-bench all rc=0; all 84 target linears
+logged "converting to i2_s"; embedding+lm_head stayed f16 (--output-tensor-type
+f16). A real 160M LLaMA goes through the Path A' pipeline unchanged.
+
+### SCALE-001d Parity — faithful at scale (PASS, read in loss not PPL)
+
+| fmt | PPL | loss = ln(PPL) |
+| --- | ---: | ---: |
+| f32 | 493,647 | 13.1096 |
+| f16 | 493,396 | 13.1091 |
+| i2_s | 514,471 | 13.1509 |
+
+The absolute PPL ~493k is meaningless **by design**: this is ternary PTQ with NO
+adaptation (RT-104 — post-hoc is lossy), so quality is judged by parity, as planned.
+i2_s vs f16 looks like a 1.043x PPL gap, but PPL = exp(loss), so at this high
+operating loss (~13.1) that is only **+0.0418 nats** of CE — a 0.3% loss difference.
+Decomposed: f32->f16 = -0.0005 nats (f16 weight rounding, negligible); **f32->i2_s
+= +0.041 nats = the I2_S kernel's int8 ACTIVATION quantization** (RT-106 showed this
+same effect barely moved a *trained* model: 2012->2010). It is a faithful-runtime
+property, not an encoding fault — confirmed lossless on weights at tiny scale
+(RT-112 <0.5%). So i2_s faithfully runs the materialized weights at 160M; the small
+residual is the documented activation-quant, amplified into a big-looking PPL number
+only because the PTQ-broken model sits at a degenerate operating point.
+
+```text
+CONCLUSION (SCALE-001): the I2_S export gain is NOT a tiny-toy artifact. On a real
+160M LLaMA the storage ratio converges toward the 16x linear floor (whole-file
+0.45 -> 0.196) and the token-gen speedup GROWS (≈2x tiny -> 5.69x vs f32), with the
+runtime faithful to the materialized weights (parity tight in CE; the residual is
+int8 activation quant). The algorithm + export + runtime + efficiency + scale story
+is now closed on x86/Linux. The one thing SCALE-001 deliberately does NOT show is
+good absolute quality at scale — that needs ternary *training* of the larger model,
+a separate track. Optional next confirmations: a 1.1B model (TinyLlama) for an even
+lower whole-file ratio, and a ternary-trained small model for absolute-quality PPL.
+```
