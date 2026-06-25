@@ -1,0 +1,27 @@
+{
+  "model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+  "device": "cuda",
+  "n_target_linears": 154,
+  "steps": 800,
+  "seq_len": 256,
+  "batch": 4,
+  "lr": 0.0002,
+  "grad_accum_steps": 6,
+  "effective_batch": 24,
+  "effective_tokens_per_step": 6144,
+  "arm": "QR-002a(linears)",
+  "train_norms": false,
+  "train_lm_head": false,
+  "ce_fp": 2.311574310064316,
+  "ce_ptq": 11.528299927711487,
+  "ce_adapted": 5.090759217739105,
+  "ppl_fp": 10.090297414184098,
+  "ppl_ptq": 101549.32578162335,
+  "ppl_adapted": 162.5131981309556,
+  "recovered_fraction": 0.698462879012747,
+  "qr003": {
+    "f16": 219.3454,
+    "i2_s": 216.1291,
+    "i2s_vs_f16_nats": -0.014771742014797695
+  }
+}

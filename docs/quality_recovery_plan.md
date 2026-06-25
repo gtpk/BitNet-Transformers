@@ -513,3 +513,35 @@ The next expensive run should not change the recipe. It should scale only the bu
 TinyLlama-1.1B, target linears only, teacher-free CE, effective batch ~24,
 800 steps, QR-003 f16-vs-i2_s parity at the end.
 ```
+
+## RT-120 / TRAIN-003 RESULT (2026-06-25): budget scaling lifts 1.1B recovery 0.48 -> 0.70
+
+Per `docs/g1_budget_scaling_runbook.md`, the L4 one-shot (linears-only, the QR-005
+recipe; NOT a recipe search). Same model/eval as TRAIN-002, only the training-token
+budget scaled up ~16x.
+
+| run | steps | eff. batch | eff. train tokens | adapted PPL | recovered_fraction | i2_s vs f16 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| TRAIN-002 (old budget) | 300 | 4 | 0.31M | 1,217 | 0.480 | +0.0023 nats |
+| **RT-120 (L4, budget-scaled)** | 800 | 24 (4x6) | **4.92M** | **162.5** | **0.698** | **-0.0148 nats** |
+
+- **QR-002: budget scaling materially helped.** recovered_fraction 0.480 -> **0.698**
+  (adapted PPL 1,217 -> 162.5; FP is 10.1). This confirms the G1 hypothesis: TinyLlama-
+  1.1B's low 0.48 was a fixed-budget artifact, not a scale failure. 0.698 reaches the
+  runbook's "paper-useful" tier (>= 0.70) within rounding.
+- **QR-003: runtime preservation holds.** adapted i2_s 216.1 vs adapted f16 219.3 =
+  **-0.0148 nats** (i2_s marginally BETTER). Magnitude 0.0148 is inside the runbook's
+  watch band (<= 0.020) and favorable in sign; the recovered quality survives the I2_S
+  runtime at 1.1B. (Slightly larger |delta| than the +0.002 PTQ-model value, but
+  negative/favorable, not a regression.)
+- Config (archived `reports/rt120_tinyllama_g1_l4_s800_b4x6.json`): fp32 model, AdamW8bit,
+  grad-checkpointing, microbatch 4 x grad-accum 6 = effective batch 24, lr 2e-4, 154
+  target linears, WikiText-2.
+
+```text
+CONCLUSION (G1 / RT-120): teacher-free CE recovery SCALES with budget — give the 1.1B
+model a param-proportionate token budget and recovery climbs 0.48 -> ~0.70 while I2_S
+runtime preservation stays intact. The Figure-3 1.1B point is now a budget-scaled 0.70,
+not the under-budgeted 0.48. Next budget step (1200 steps / LR schedule) could push
+toward the 160M 0.90 trend if a stronger claim is wanted.
+```

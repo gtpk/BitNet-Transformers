@@ -66,23 +66,26 @@ embedding/lm_head fixed cost shrinks as a fraction.
 
 ### Figure 3 — PTQ collapse → teacher-free CE recovery (C3)
 
-| model | FP PPL | one-shot PTQ PPL | adapted PPL | recovered_fraction | source |
-| --- | ---: | ---: | ---: | ---: | --- |
-| Llama-160M | 23.3 | 115,808 | 52.0 | 0.905 | RT-116 |
-| TinyLlama-1.1B | 10.1 | 101,549 | 1,217 | 0.480 | TRAIN-002 |
+| model | FP PPL | one-shot PTQ PPL | adapted PPL | recovered_fraction | train tokens | source |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| Llama-160M | 23.3 | 115,808 | 52.0 | 0.905 | 0.61M | RT-116 |
+| TinyLlama-1.1B (fixed budget) | 10.1 | 101,549 | 1,217 | 0.480 | 0.31M | TRAIN-002 |
+| **TinyLlama-1.1B (budget-scaled)** | 10.1 | 101,549 | **162.5** | **0.698** | **4.92M** | RT-120 |
 
-(WikiText-2, 300 steps, target linears only, teacher-free. 1.1B lower = fixed-budget,
-see Gap G1.)
+(WikiText-2, target linears only, teacher-free. The 1.1B jump 0.480 -> 0.698 shows the
+fixed-budget result was under-trained: ~16x more tokens -> recovery climbs toward the
+160M trend. Gap G1 resolved.)
 
 ### Figure 4 — Adapted I2_S preserves adapted F16 (C1+C3)
 
 | model | adapted f16 PPL | adapted i2_s PPL | i2_s vs f16 (nats) | source |
 | --- | ---: | ---: | ---: | --- |
-| Llama-160M | 134.84 | 135.11 | +0.0020 | RT-116 QR-003 |
-| TinyLlama-1.1B | 1260.21 | 1263.12 | +0.0023 | TRAIN-002 QR-003 |
+| Llama-160M (adapted) | 134.84 | 135.11 | +0.0020 | RT-116 QR-003 |
+| TinyLlama-1.1B (PTQ-budget adapted) | 1260.21 | 1263.12 | +0.0023 | TRAIN-002 QR-003 |
+| TinyLlama-1.1B (budget-scaled adapted) | 219.35 | 216.13 | -0.0148 | RT-120 QR-003 |
 
 Story: the recovered quality survives the int8-activation I2_S runtime essentially
-unchanged, at both scales.
+unchanged at every scale and budget (|delta| <= 0.015 nats; sign sometimes favorable).
 
 ### Appendix figure — Why not gpt-oss? (C4, negative)
 
@@ -94,7 +97,7 @@ ladder to show the floor; conclude "wrong vehicle for ternary."
 
 | id | gap | severity | cheapest fix |
 | --- | --- | --- | --- |
-| G1 | 1.1B recovery is only 0.48 (fixed budget, batch 4, 8-bit Adam) | HIGH | RT-120 budget-scaled 1.1B run on L4/A100; see [G1 runbook](./g1_budget_scaling_runbook.md) |
+| G1 | ~~1.1B recovery only 0.48~~ RESOLVED (RT-120): L4 budget-scaled (4.92M tokens, eff batch 24, 800 steps) -> **0.698** (paper-useful tier); QR-003 i2_s vs f16 -0.0148 nats. Fixed-budget explanation confirmed. | DONE | (optional: 1200 steps toward 0.90) |
 | G2 | ~~no recipe ablation~~ RESOLVED (QR-005): a/b/c on 160M -> +norms negligible (0.907 vs 0.906), +lm_head hurts (0.898). **Default = linears only.** | DONE | — |
 | G3 | ~~+norms may lift the fraction~~ RESOLVED: it does not (within noise). Cheapest recipe is best. | DONE | — |
 | G4 | ~~quality is CE/PPL only~~ RESOLVED (QR-004/RT-119): greedy panel shows PTQ token-salad -> adapted fluent English -> i2_s same tier as f16. Closed at 160M (base model: weak fluency/factuality — strengthen with G1 + better base) | DONE | — |

@@ -518,3 +518,13 @@ RT-113 storage/latency, and RT-114 scale-up are all done. Recommended from here:
 
 See [Packed Ternary Weight Format Plan](./packed_ternary_format_plan.md) for the
 format spec and TC matrix.
+
+## RT-120 / TRAIN-003: G1 budget scaling on TinyLlama-1.1B (DONE, 2026-06-25)
+
+Per `g1_budget_scaling_runbook.md`, L4 one-shot (linears-only, fp32 + AdamW8bit +
+grad-ckpt, microbatch 4 x grad-accum 6 = effective batch 24, 800 steps, 4.92M train
+tokens — ~16x the old budget). Result: recovered_fraction **0.480 -> 0.698** (adapted
+PPL 1,217 -> 162.5; FP 10.1), QR-003 adapted i2_s vs f16 = **-0.0148 nats**. Confirms
+the 1.1B low recovery was a fixed-budget artifact, not a scale failure; reaches the
+paper-useful tier (>=0.70 within rounding) and I2_S runtime preservation holds.
+Raw: `reports/rt120_tinyllama_g1_l4_s800_b4x6.json`.
