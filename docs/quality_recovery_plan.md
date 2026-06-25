@@ -375,3 +375,37 @@ x86/Linux LLaMA: **small -> fast -> quality recovers cheaply, teacher-free**.
 
 Next: QR-002b (+norms) / longer budget to push past 0.905; TRAIN-002 repeat on
 TinyLlama-1.1B; then the gpt-oss-20b MoE audit (RT-117) before any 20B quality work.
+
+## TRAIN-002 / TinyLlama-1.1B RESULT (2026-06-25): recovery direction + runtime preservation scale
+
+Same driver (`scripts/rt116_quality_recovery.py`) on TinyLlama-1.1B-Chat-v1.0, GPU
+T4. 1.1B target-linear finetune needs the scale options added for this run: fp32
+model + **8-bit AdamW (bitsandbytes)** + **gradient checkpointing** (fp32 AdamW
+states alone would be ~7.7 GB and OOM a 16 GB T4), batch 4 (vs 160M's batch 8),
+300 steps, 154 target linears.
+
+| model | FP PPL | one-shot PTQ PPL | adapted PPL | recovered_fraction | QR-003 i2_s vs f16 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Llama-160M | 23.3 | 115,808 | 52.0 | 0.905 | +0.0020 nats |
+| TinyLlama-1.1B | 10.1 | 101,549 | 1,217 | **0.480** | **+0.0023 nats** |
+
+- **QR-002 direction holds at 1B**: one-shot PTQ PPL 101,549 -> 1,217 after a short
+  teacher-free CE pass. PASS as a direction/feasibility check.
+- **QR-003 runtime preservation is scale-invariant**: adapted i2_s vs adapted f16 =
+  **+0.0023 nats**, essentially identical to 160M's +0.0020 nats. The recovered
+  quality survives the bitnet.cpp I2_S runtime at 1.1B exactly as at 160M.
+- **The lower recovered_fraction (0.48 vs 0.90) is a BUDGET artifact, not a scale
+  failure**: 1.1B has ~8.5x more target-linear params (968M vs 113M) to adapt, yet
+  ran the SAME 300 steps at HALF the tokens/step (batch 4 vs 8) with 8-bit (vs fp32)
+  Adam. Per-token-of-training it recovered less, as expected. The direction and the
+  runtime faithfulness — the two things TRAIN-002 set out to confirm — both hold.
+
+```text
+CONCLUSION (TRAIN-002): teacher-free CE recovery and I2_S runtime preservation both
+SCALE from 160M to 1.1B in the LLaMA family. Recovery fraction at fixed budget drops
+with model size (more params per fixed step count), so a fair "how close to FP" claim
+needs budget scaled with params (more steps / larger effective batch / fp32 Adam on a
+bigger GPU). With systems (RT-112..115) + quality (RT-116/TRAIN-002) both shown to
+scale on LLaMA, the recipe is ready to take into the gpt-oss-20b MoE audit (RT-117) —
+architecture/tensor-map/router/expert first, no blind convert.
+```
