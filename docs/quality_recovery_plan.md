@@ -438,3 +438,49 @@ just more steps / bigger effective batch / fp32 Adam on a larger GPU.
 Caveat: single seed; the a-vs-b gap (0.001) is within noise, so the claim is "norms
 don't help", not a precise ordering. lm_head's regression is larger (-0.008) and
 consistent in both recovered_fraction and PPL.
+
+## QR-004 / RT-119 prompt-quality panel RESULT (2026-06-25): recovery is human-visible
+
+`scripts/rt119_prompt_panel.py` greedy-decodes the same 12 completion prompts from
+FP / PTQ(Wq=gamma*T, no train) / adapted(300-step teacher-free CE, linears-only) and,
+via bitnet.cpp llama-cli, adapted-F16 + adapted-I2_S GGUF. Llama-160M is a small BASE
+LM, so prompts are completions and even FP is only so-so — the point is the RELATIVE
+jump. Heuristic failure tags over 12 prompts:
+
+| variant | ok | repetitive | loop | empty |
+| --- | ---: | ---: | ---: | ---: |
+| FP | 7 | 5 | 0 | 0 |
+| PTQ (no recovery) | 2 | 6 | 6 | 2 |
+| adapted (linears-only) | 5 | 7 | 1 | 0 |
+
+PTQ is degenerate (6 loops, 2 empty); adaptation removes the loops/empties (1 loop, 0
+empty) and lands near FP. Concrete examples (greedy):
+
+```text
+prompt: "The capital of France is"
+  FP      : "Paris. The city of Paris is the capital of France..."
+  PTQ     : "likely to proceed proceed proceed proceed proceed..."          <- collapse
+  adapted : "the largest in the United Kingdom, the largest in the..."      <- fluent, wrong fact
+
+prompt: "The most important rule of cooking is"
+  PTQ     : "andivHPothsay FacetivillivighengthIVILLKillUampigh..."         <- token salad
+  adapted : "the most common of the most important of the food industry..." <- recovered English
+```
+
+Runtime preservation (adapted I2_S vs adapted F16, both llama-cli greedy):
+
+```text
+prompt: "Water boils at a temperature of"
+  adapted f16 : "100 @,@ 000 m ( 1 @.@ 1 m ) of 12 @.@ 1 m ( 1 @.@ 1 m ) ."
+  adapted i2_s: "100 @,@ 000 m ( 1 @.@ 1 m ) of 12 @.@ 1 m ( 1 @.@ 1 m ) ."   <- identical
+```
+
+i2_s == f16 exact greedy match on 4/12 prompts; the other 8 are same-quality near-
+paraphrases (the int8-activation path flips an occasional argmax — different text,
+same tier, exactly the "comparable quality, not identical text" bar QR-004 set).
+Honest caveats: 160M base model so absolute fluency is low and outputs are repetitive
+(the @,@ tokens are WikiText artifacts the adaptation learned); factuality is weak
+(adapted says France's capital is "in the United Kingdom"). The CLAIM this supports is
+narrow and correct: **teacher-free CE turns PTQ token-salad into fluent same-tier text,
+and the I2_S runtime preserves it** — gap G4 closed at 160M. Scale to 1.1B + a stronger
+base model (G1) for a stronger qualitative story.

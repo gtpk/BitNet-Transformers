@@ -100,12 +100,13 @@ def tags(text):
 
 
 def llama_gen(bitnet, gguf, prompt, n=40):
+    # NOTE: the pinned bitnet.cpp llama-cli (2024) has NO `-no-cnv`; use `--simple-io`
+    # and rely on default non-interactive completion. It echoes the prompt, then gen.
     cmd = [f"{bitnet}/build/bin/llama-cli", "-m", str(gguf), "-p", prompt,
-           "-n", str(n), "-t", "2", "--temp", "0", "-no-cnv", "-st"]
-    r = subprocess.run(cmd, capture_output=True, text=True)
-    out = r.stdout
-    # llama-cli echoes the prompt then the continuation; strip the prompt prefix
-    return out.split(prompt, 1)[-1].strip()[:400] if prompt in out else out.strip()[-400:]
+           "-n", str(n), "-t", "2", "--temp", "0", "--simple-io"]
+    out = subprocess.run(cmd, capture_output=True, text=True).stdout
+    cont = out.split(prompt, 1)[-1] if prompt in out else out
+    return " ".join(cont.split())[:400]
 
 
 def main():

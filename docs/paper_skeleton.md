@@ -97,7 +97,7 @@ ladder to show the floor; conclude "wrong vehicle for ternary."
 | G1 | 1.1B recovery is only 0.48 (fixed budget, batch 4, 8-bit Adam) | HIGH | budget-scaled 1.1B run on L4/A100 (fp32 Adam, batch↑, 500-800 steps) — AFTER G3 |
 | G2 | ~~no recipe ablation~~ RESOLVED (QR-005): a/b/c on 160M -> +norms negligible (0.907 vs 0.906), +lm_head hurts (0.898). **Default = linears only.** | DONE | — |
 | G3 | ~~+norms may lift the fraction~~ RESOLVED: it does not (within noise). Cheapest recipe is best. | DONE | — |
-| G4 | quality is CE/PPL only; no user-facing prompt panel (QR-004) | MED | small deterministic prompt panel FP/PTQ/adapted/i2_s, saved side-by-side |
+| G4 | ~~quality is CE/PPL only~~ RESOLVED (QR-004/RT-119): greedy panel shows PTQ token-salad -> adapted fluent English -> i2_s same tier as f16. Closed at 160M (base model: weak fluency/factuality — strengthen with G1 + better base) | DONE | — |
 | G5 | no baseline comparison (RTN / GPTQ / AWQ / QAT) | MED | add at least RTN + one QAT point on 160M |
 | G6 | single seed for recovery; no variance | LOW | 2-3 seeds on 160M QR-002a |
 | G7 | cross-tool PPL gap (PyTorch CE vs llama.cpp perplexity) unexplained in-figure | LOW | one calibration note + measure both on identical tokens |
