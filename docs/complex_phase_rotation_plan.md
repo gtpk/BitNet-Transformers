@@ -21,7 +21,7 @@ GPTQ/Hessian assignment helps only modestly;
 signed-epsilon 2-bit does not beat ternary.
 ```
 
-The conclusion was: **the bottleneck is adaptation/data, not static quantizer design.**
+The conclusion was: **the bottleneck is adaptation/objective, not static quantizer design.**
 
 However, rotation/incoherence preprocessing was not directly tested. The user proposed
 a more specific version:
@@ -137,7 +137,7 @@ best cheap phase improvement < 0.2 nats
 ```
 
 If true, RT-124..127 synthesis stands unchanged: one-shot quantizer tricks are not
-the lever; adaptation/data remains the path.
+the lever; adaptation/objective remains the path.
 
 ## Experiment Ladder
 
@@ -290,7 +290,7 @@ Weak / fail:
 only learned/dense phase helps, or improvement is <0.2 nats.
 ```
 
-Then keep the current conclusion: adaptation/data is the main lever.
+Then keep the current conclusion: adaptation/objective is the main lever.
 
 ## Decision
 

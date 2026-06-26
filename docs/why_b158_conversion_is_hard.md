@@ -225,6 +225,38 @@ This project maps the systems promise and conversion limits of b1.58 for existin
 dense LLaMA checkpoints.
 ```
 
+## 2026-06-26 Update: The Next Solution Is Probably Not Another Quantizer
+
+RT-124..127 tried the standard PTQ toolbox and closed the strongest quantizer
+loopholes:
+
+```text
+scale granularity helps but is not enough;
+scale/threshold objective does not rescue;
+AWQ/SmoothQuant diagonal scaling barely helps;
+GPTQ/Hessian assignment recovers only a small fraction;
+signed-epsilon 2-bit does not beat ternary.
+```
+
+FACT-001..003 then showed a different limitation:
+
+```text
+the converted model can be fluent and runtime-faithful,
+but factual behavior remains far below FP/Q2_K.
+```
+
+So the product question has shifted again:
+
+```text
+Maybe 1.58-bit is viable only when the topology gives it enough room.
+The next branch should test variable/hybrid capacity, not another 1:1 quantizer.
+```
+
+See:
+
+- [Native BitNet Architecture Audit](./native_bitnet_architecture_audit.md)
+- [Hybrid / Variable BitNet Conversion Plan](./hybrid_variable_bitnet_conversion_plan.md)
+
 ## What A Real Solution Probably Needs
 
 A successful existing-model b1.58 conversion likely needs at least one of:
@@ -278,6 +310,18 @@ A successful existing-model b1.58 conversion likely needs at least one of:
    ```
 
    The concrete plan is [Quantization-Aware b1.58 Conversion Plan](./quantization_aware_b158_conversion_plan.md).
+
+7. **variable/hybrid capacity**
+
+   Do not force a 1:1 mapping if the ternary space cannot carry the function:
+
+   ```text
+   W_l in {gamma*T, Q2/Q3, F16, sum_r gamma_r*T_r, gamma*T + AB}
+   ```
+
+   This preserves the memory-traffic goal by spending capacity only where it
+   moves factual quality or free-run stability. The concrete plan is
+   [Hybrid / Variable BitNet Conversion Plan](./hybrid_variable_bitnet_conversion_plan.md).
 
 ## Decision
 

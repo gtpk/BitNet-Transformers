@@ -1,23 +1,26 @@
-# Paper / Report Skeleton — Teacher-Free b1.58 → I2_S on Dense LLaMA
+# Paper / Report Skeleton — Post-Training b1.58 → I2_S on Dense LLaMA
 
-Document position: [Index](./index.md) -> synthesis of RT-112..129. Pulls the
-finished tracks into a paper outline with a locked claim table. The experimental
-picture is closed (systems + recovery + decoding usability + quantizer-ruled-out);
-the only open axis is factual quality (adaptation/data). Next step is write-up, not
-more experiments.
+Document position: [Index](./index.md) -> synthesis of RT-112..129 plus the
+post-FACT product pivot. Pulls the finished tracks into a paper outline with a
+locked claim table. The paper picture is mostly closed (systems + recovery +
+decoding usability + quantizer-ruled-out); the product picture now focuses on
+FACT-003C content-KL because it is the first objective that moves factual quality
+without losing the I2_S systems win. Variable/hybrid capacity remains the fallback
+if content-KL plateaus below product quality.
 
 Related: [bitnet_cpp_export_scoping.md](./bitnet_cpp_export_scoping.md) (systems),
 [quality_recovery_plan.md](./quality_recovery_plan.md) (quality),
 [oss_architecture_audit.md](./oss_architecture_audit.md) (negative result),
 [why_b158_conversion_is_hard.md](./why_b158_conversion_is_hard.md) (problem statement),
-[quantization_aware_b158_conversion_plan.md](./quantization_aware_b158_conversion_plan.md)
-(next experiment), [complex_phase_rotation_plan.md](./complex_phase_rotation_plan.md)
-(RT-126B later candidate), [factual_gap_experiment_plan.md](./factual_gap_experiment_plan.md)
-(G10 factual gap).
+[quantization_aware_b158_conversion_plan.md](./quantization_aware_b158_conversion_plan.md),
+[native_bitnet_architecture_audit.md](./native_bitnet_architecture_audit.md),
+[hybrid_variable_bitnet_conversion_plan.md](./hybrid_variable_bitnet_conversion_plan.md),
+[complex_phase_rotation_plan.md](./complex_phase_rotation_plan.md),
+[factual_gap_experiment_plan.md](./factual_gap_experiment_plan.md).
 
 ## Working title
 
-> The Systems Promise and Quality Limits of Teacher-Free b1.58 Conversion for
+> The Systems Promise and Quality Limits of Post-Training b1.58 Conversion for
 > Dense LLaMA Models
 
 ## Abstract (draft)
@@ -37,10 +40,12 @@ degeneration profile of FP and Q2_K (greedy alone degenerates, a known small-mod
 artifact). We further show, via a full post-training-quantization toolbox sweep (scale
 granularity, scale/threshold objective, AWQ/SmoothQuant scaling, GPTQ/Hessian
 assignment, 2-bit codebook), that the conversion bottleneck is NOT the quantizer but
-adaptation/data: no one-shot quantizer trick rescues conversion, while a short CE pass
+adaptation/objective: no one-shot quantizer trick rescues conversion, while adaptation
 does. We frame b1.58 conversion as a systems-strong, decoding-usable path whose
-remaining limit is factual quality (it does not beat Q2_K on PPL or match FP on facts),
-pointing to adaptation/data, not bit/codebook engineering, as the next lever.
+remaining limit is factual quality (it does not beat Q2_K on PPL or match FP on facts).
+Post-draft FACT experiments further show that *which distribution the model copies*
+matters: raw KL copies EOS/empty behaviour and fails, while content-KL excluding
+EOS/special tokens is the current best factual lever.
 
 ## Core claims (3 + 1 negative)
 
@@ -59,8 +64,8 @@ C5 (decoding usability): the adapted ternary model is usable-tier (non-degenerat
    claim.
 C6 (quantizer is not the lever, negative): a full PTQ toolbox sweep (scale granularity,
    scale/threshold objective, AWQ/SmoothQuant, GPTQ/Hessian, 2-bit codebook) does not
-   rescue one-shot conversion (RT-124..127); per-tensor absmean + short CE beats them
-   all. The lever is adaptation/data.
+   rescue one-shot conversion (RT-124..127); per-tensor absmean + adaptation beats them
+   all. The lever is adaptation/objective, currently content-KL.
 ```
 
 ## Figures (numbers already in hand)
@@ -188,7 +193,7 @@ repetition penalty (1.1-1.2, zero inference cost) or temp+top_p sampling, the ad
 ternary model goes from ok 1/12 to **12/12** non-degenerate — matching Q2_K/FP on
 loop/salad/empty tags. So generation usability is RESCUED (with the right decode), not
 unproven. The quantization-aware track (RT-124..127) separately concluded the quantizer
-is not the bottleneck; adaptation/data is.
+is not the bottleneck; adaptation/objective is.
 
 ```text
 DO claim:  - one-shot ternary PTQ COLLAPSES (token salad); teacher-free CE substantially
@@ -200,7 +205,7 @@ DO claim:  - one-shot ternary PTQ COLLAPSES (token salad); teacher-free CE subst
              (a known small-model artifact). I2_S runs this faithfully (i2_s == f16 at
              every decode).
            - the quantizer is not the lever: scale/objective/activation/GPTQ/2-bit-codebook
-             one-shot tricks do not rescue conversion (RT-124..127); adaptation/data is.
+             one-shot tricks do not rescue conversion (RT-124..127); adaptation/objective is.
 DON'T claim: - best PPL-per-bit or beating Q2_K on quality (RT-121).
              - FACTUAL parity with FP/Q2_K. "Usable-tier" here = non-degenerate/diverse
                generation, NOT correct facts; the WikiText-CE model is still weaker on
@@ -224,7 +229,7 @@ ladder to show the floor; conclude "wrong vehicle for ternary."
 | G2 | ~~no recipe ablation~~ RESOLVED (QR-005): a/b/c on 160M -> +norms negligible (0.907 vs 0.906), +lm_head hurts (0.898). **Default = linears only.** | DONE | — |
 | G3 | ~~+norms may lift the fraction~~ RESOLVED: it does not (within noise). Cheapest recipe is best. | DONE | — |
 | G4 | ~~quality is CE/PPL only~~ RESOLVED (QR-004/RT-119 + RT-129): generation panel + decoding sweep -> adapted is non-degenerate/usable-tier under rep-penalty/sampling at BOTH 160M and 1.1B (greedy degenerates, RT-122, but that is a greedy artifact). i2_s == f16. | DONE | — |
-| G10 | FACTUAL quality below FP/Q2_K (the real remaining limit; "usable-tier" != correct facts) | MED | FACT-001 measured (RT-130); FACT-002 data swap closed to S3 (RT-131: fluency yes, facts no) -> now an objective problem: [FACT-003A answer-only loss mask](./factual_gap_experiment_plan.md) (`rt116 --answer-loss-only`) -> 003B base-KL replay -> 003C protected factual replay |
+| G10 | FACTUAL quality below FP/Q2_K (the real remaining limit; "usable-tier" != correct facts) | MED | FACT-001 measured; FACT-002 data swap closed to S3; FACT-003A answer-only mask moved facts to ~0.15; FACT-003B raw KL backfired via EOS/empty copying; FACT-003C content-KL lambda=0.2 is current best (fact 0.185, recovered 0.845, ok 27/27). Lambda=0.5 pending; HYBRID-001 if content-KL plateaus. |
 | G5 | ~~no baseline comparison~~ RESOLVED (RT-121, honest NEGATIVE): OURS 114 vs Q2_K 98 PPL — does NOT win quality-per-bit; OURS is smallest+fastest at lowest bits + rescues PTQ collapse (135k->114). Reframe to speed/usability, not quality-SOTA. See Fig 5 + Claim discipline. | DONE | (optional: 1.1B B2-vs-OURS; B5 no-scale QAT contrast) |
 | G6 | single seed for recovery; no variance | LOW | 2-3 seeds on 160M QR-002a |
 | G7 | cross-tool PPL gap (PyTorch CE vs llama.cpp perplexity) unexplained in-figure | LOW | one calibration note + measure both on identical tokens |
@@ -240,9 +245,10 @@ ladder to show the floor; conclude "wrong vehicle for ternary."
 | runtime faithfulness (i2_s == f16) | SOLVED | RT-116/120 QR-003 + RT-129 (|delta|<=0.015 nats; every decode) |
 | quality: CE/PPL recovery | SOLVED, scales | RT-116 0.905 @160M, RT-120 0.698 @1.1B |
 | quality: generation usability | SOLVED w/ sane decoding | RT-129 (rep-penalty/sampling -> ok 12/12; greedy degenerates) |
-| quantizer design as the lever | RULED OUT | RT-124..127 (no PTQ trick rescues; adaptation/data is the lever) |
+| quantizer design as the lever | RULED OUT | RT-124..127 (no PTQ trick rescues; adaptation/objective is the lever) |
 | quality-per-bit vs Q2_K | NEGATIVE | RT-121 (OURS 114 vs Q2_K 98 PPL) |
-| factual parity vs FP/Q2_K | MEASURED gap, fix OPEN (now an OBJECTIVE problem) | RT-130: adapted ~0.04 vs FP 0.81/Q2_K 0.74, i2_s==f16. RT-131/FACT-002: data swap (instr/mixed) recovers fluency (mixed 0.81 CE) but NOT facts (0.07) -> S3, the lever is the training objective. Next: FACT-003A answer-only loss mask (`rt116 --answer-loss-only`). |
+| factual parity vs FP/Q2_K | MEASURED gap, fix OPEN | RT-130: adapted ~0.04 vs FP 0.81/Q2_K 0.74, i2_s==f16. FACT-003C content-KL lambda=0.2 is current best (0.185) after raw KL failure and weak lambda=0.1 failure. |
+| variable/hybrid topology | FALLBACK PRODUCT BRANCH | Public native BitNet evidence plus our failures suggest 1:1 all-I2_S may be under-capacitized. Run HYBRID-001 if content-KL sweep plateaus below a useful factual tier. |
 | gpt-oss / MoE | OUT OF SCOPE | RT-117/118 (MXFP4 already; ~0 ROI) |
 
 ## Quantization-aware track: CONCLUDED (not the next experiment)
@@ -252,24 +258,24 @@ quantizer is not the bottleneck.** Scale granularity (RT-124A, partial +2.4 nats
 needs runtime), scale/threshold objective (RT-124B, absmean already best), AWQ/
 SmoothQuant diagonal scaling (RT-124C, +0.14), GPTQ/Hessian assignment (RT-125, +0.51 /
 6% of gap), and a signed-epsilon 2-bit codebook (RT-127, no gain over ternary) all fail
-to rescue one-shot conversion; a short teacher-free CE pass beats every one of them. See
+to rescue one-shot conversion; a short adaptation pass beats every one of them. See
 [Quantization-Aware b1.58 Conversion Plan](./quantization_aware_b158_conversion_plan.md)
 (synthesis section). RT-126 rotation and RT-128 1D-gate were not needed (a strong
 assignment method already gained only 6%).
 
-## Next: consolidate, then adaptation/data
+## Next: paper write-up and product branch diverge
 
-The experimental picture is closed enough to write up. Priority order:
+The paper/report can preserve the systems and conversion-limit story. The product path
+should not stay trapped in same-topology all-I2_S.
 
 ```text
 1. Lock the docs to the post-RT-129 claim table (this file, index, quality docs).
 2. Draft the paper/report from Figures 1-7 + the claim table + the gpt-oss appendix.
-3. THEN the only remaining quality lever (G10, factual parity). RT-131/FACT-002 closed
-   the DATA question (instruction/mixed recover fluency, not facts -> S3), so the lever is
-   the training OBJECTIVE, not data and not quantizer engineering. Ladder: FACT-003A
-   answer-only loss mask (`rt116 --answer-loss-only`, implemented) -> FACT-003B base-KL
-   replay -> FACT-003C protected factual replay + leakage check. Optional later candidate:
-   a pairwise phase-rotation probe.
+3. Finish FACT-003C content-KL lambda sweep (0.1 failed, 0.2 best, 0.5 pending).
+4. Lock the fair comparison scorecard: pretraining cost, post-training cost, params,
+   storage, speed, PPL, factual score, generation.
+5. If content-KL plateaus below useful factual quality, run HYBRID-001A selective
+   late-layer capacity restore.
 ```
 
 ## What NOT to do next
@@ -281,7 +287,8 @@ The experimental picture is closed enough to write up. Priority order:
   small CE-adapted models (RT-122). Use a repetition penalty (~1.2) or sampling (RT-129);
   report the decode.
 - Do not reopen quantizer/codebook/rotation engineering as a main track — RT-124..127
-  ruled it out; the lever is adaptation/data. Keep cheap pairwise phase rotation only
+  ruled it out; the lever is adaptation/objective. Keep cheap pairwise phase rotation only
   as a later candidate idea, not the main path.
-- Do not run more experiments before consolidating the docs/claim table; the risk now is
-  losing a closed result, not lacking a new one.
+- Do not confuse the paper goal with the product goal. Paper can stop at limits; the
+  product path now follows the best practical lever: content-KL first, hybrid capacity
+  second if factual quality plateaus.

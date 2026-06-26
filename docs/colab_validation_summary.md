@@ -501,18 +501,20 @@ whole-file ratio converges toward the scale-invariant 16x target-linear floor
 even tighter: i2_s vs f16 = -0.0071 nats (essentially identical). The
 storage/latency/parity story is a confirmed SCALE LAW on a real 1.1B LLaMA.
 
-## Next Actions
+## Next Actions (legacy section updated 2026-06-27)
 
 Synthetic gates, real-text validation, packed-format Phase 1/2/3/4 reference,
-RT-113 storage/latency, and RT-114 scale-up are all done. Recommended from here:
+RT-113 storage/latency, RT-114/115 scale-up, RT-116/120 recovery, RT-121 baseline,
+RT-129 decoding rescue, RT-124..127 quantizer sweep, and FACT-001..003C factual
+recovery are all done or in progress. Current recommendation:
 
-1. Archive the real-text JSON reports from Colab back into `reports/` or rerun
-   the sweep before paper-style quantitative claims.
-2. Start [Quality Recovery Plan](./quality_recovery_plan.md): QR-001 PTQ collapse,
-   QR-002 teacher-free CE adaptation, QR-003 adapted F16-vs-I2_S preservation,
-   QR-004 prompt quality.
-3. (Optional) confirm on a 1.1B model (TinyLlama) for an even lower whole-file
-   ratio after or alongside QR.
+1. Finish the FACT-003C content-KL sweep: `lambda=0.2` is current best, `lambda=0.1`
+   failed, `lambda=0.5` is pending.
+2. Update [Fair Comparison Framework](./fair_comparison_framework.md) with the best
+   content-KL recipe: post-train tokens/time, storage, speed, PPL, factual score.
+3. If content-KL plateaus below a useful factual tier, run
+   [Hybrid / Variable BitNet Conversion Plan](./hybrid_variable_bitnet_conversion_plan.md)
+   HYBRID-001A.
 4. Keep Mac M5 I2_S/TL1 work as a separate upstream/toolchain issue, not the main
    research path.
 

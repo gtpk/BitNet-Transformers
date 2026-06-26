@@ -51,14 +51,14 @@ Still open:
 
 ```text
 Does the adapted I2_S model answer facts and simple instructions close to FP/Q2_K?
-If not, which adaptation/data recipe closes the gap most cheaply?
+If not, which adaptation/objective recipe closes the gap most cheaply?
 ```
 
 Do **not** restart quantizer/codebook work for this gap. RT-124..127 ruled that out.
 
 ## Main Hypotheses
 
-### H1: The factual gap is mostly data mismatch
+### H1: The factual gap is mostly data mismatch (tested; insufficient)
 
 Current recovery used WikiText-style CE. It restores token statistics and reduces
 degeneration, but it does not teach assistant-style factual answering.
@@ -81,7 +81,7 @@ Expected signal:
 longer CE improves factual score in line with CE/PPL recovery.
 ```
 
-### H3: The factual gap is decoding/objective instability
+### H3: The factual gap is decoding/objective instability (current winning branch)
 
 RT-129 showed greedy was a bad operating point. Factual prompts may still be sensitive
 to repetition or sampling settings.
@@ -109,7 +109,7 @@ This plan is intentionally split into:
 
 ```text
 FACT-001: measure current factual gap
-FACT-002..004: improve adaptation/data only after the gap is measured
+FACT-002..003: improve adaptation data/objective only after the gap is measured
 ```
 
 Do not train first. A new training run without a fixed factual panel can only produce
@@ -301,8 +301,9 @@ Order (cheapest/safest first):
 
 ```text
 FACT-003A  answer-only loss mask     -- cheapest, no new loss term
-FACT-003B  base-KL replay            -- keep base answer distribution on non-eval prompts
-FACT-003C  protected factual replay  -- small fact set disjoint from FACT-001 + leakage check
+FACT-003B  raw base-KL replay        -- tested; failed by copying EOS/empty
+FACT-003C  content-KL replay         -- WIN; exclude EOS/special from KL
+FACT-003D  protected factual replay  -- deferred; small fact set disjoint from FACT-001 + leakage check
 ```
 
 ### FACT-003A: answer-only loss mask (do this first)
@@ -449,16 +450,18 @@ Revised options (the anchor needs redesign, not just a weaker lambda):
 - accept FACT-003A (0.15) as the current practical ceiling for this recipe at 1.1B and
   reconsider scale, or anchor on free-form (non-Q/A) base text instead of chat answers.
 
-### Product pivot after FACT-003B: test capacity/topology before more KL
+### Superseded pivot after FACT-003B: capacity/topology was the fallback
 
-For the paper, FACT-003B is a clean negative objective result. For the product goal
-("흙수저용으로 실제 쓸 수 있는 모델"), the next highest-information question is now:
+FACT-003B was a clean negative objective result. At that point, capacity/topology looked
+like the next highest-information question:
 
 ```text
 Does the 1:1 all-I2_S topology simply lack enough representational capacity?
 ```
 
-So before spending more GPU time on KL variants, run the cheaper capacity probe:
+FACT-003C changed this ordering. Content-KL fixed the specific 003B failure mode and
+became the current best factual lever. Therefore capacity/topology is now the **second**
+branch, not the immediate next branch:
 
 - [Native BitNet Architecture Audit](./native_bitnet_architecture_audit.md)
 - [Hybrid / Variable BitNet Conversion Plan](./hybrid_variable_bitnet_conversion_plan.md)
@@ -466,10 +469,9 @@ So before spending more GPU time on KL variants, run the cheaper capacity probe:
 Decision rule:
 
 ```text
-If HYBRID-001A late-layer/attention/MLP restore moves facts,
-  spend capacity selectively and then re-adapt.
-If HYBRID-001A does not move facts,
-  return to FACT-003C / non-EOS content-KL with stronger evidence that topology is not the issue.
+First finish the FACT-003C lambda sweep.
+If content-KL plateaus below fact_rate 0.3~0.4,
+  run HYBRID-001A late-layer/attention/MLP restore.
 ```
 
 ### FACT-003C: content-KL (--kl-content-only) — the fix for 003B's collapse [WIN]
@@ -498,16 +500,33 @@ checkpointing.
 Success criteria (set with the user) — met: fact_rate > 0.15 ✓, no empty ✓, CE recovery
 largely kept ✓, i2_s == f16 ✓. Not yet at the 0.3 "good"/0.4 "keep-pushing" tiers.
 
-Next: **λ sweep on content-KL** (0.1 / 0.5; 0.2 = 0.185 done) to find the best operating
-point. Then auxiliaries if a higher tier is wanted: unfreeze lm_head (--train-lm-head),
-v2 top-k logits cache (underdog-GPU speed), or protected factual replay.
+#### FACT-003C lambda sweep status (2026-06-27)
+
+| lambda | fact_i2s | CE recovered | degeneration | read |
+| ---: | ---: | ---: | --- | --- |
+| 0.1 | 0.037 | 0.484 | salad | too weak; anchor did not guide the STE basin |
+| **0.2** | **0.185** | **0.845** | ok 27/27 | current sweet spot |
+| 0.5 | running | running | running | tests whether stronger content anchor helps or over-regularizes |
+
+Interpretation:
+
+```text
+content-KL is non-monotonic.
+raw KL failed by copying stop/EOS -> empty.
+too-weak content-KL fails by under-anchoring -> salad.
+lambda=0.2 is the current best operating point.
+```
+
+Next: finish `lambda=0.5`. If it beats 0.2 without collapse, sweep 0.3/0.4. If it
+over-regularizes or collapses, freeze `lambda=0.2` as the default FACT recipe and move to
+fair scorecard / HYBRID-001 if the factual ceiling remains too low.
 
 #### Deferred
 
 ```text
 v2 cache: precompute top-k base logits for the fixed replay set once, drop the in-memory
           teacher -> faster + lower memory (the underdog-GPU path).
-protected factual replay (small fact set disjoint from FACT-001) + the leakage gate above.
+FACT-003D protected factual replay (small fact set disjoint from FACT-001) + leakage gate.
 extras:   CE + repetition/unlikelihood or entropy-floor regularizers, only if degeneration
           returns under sane decoding.
 ```
@@ -650,7 +669,7 @@ FACT-001 / RT-130: current factual gap panel
 
 Only after FACT-001 should we spend GPU on instruction or longer adaptation.
 
-## FACT-001 / RT-130 RESULT (2026-06-25): the factual gap is large and is a DATA problem (Outcome B)
+## FACT-001 / RT-130 RESULT (2026-06-25): the factual gap is large and is not a runtime problem
 
 `scripts/rt130_factual_gap_panel.py` on `data/factual_panel_v1.jsonl` (27 prompts),
 TinyLlama-1.1B variants, rep-penalty 1.2 primary.

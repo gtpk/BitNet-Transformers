@@ -922,19 +922,23 @@ Next procedure:
 
 2. **Implement one objective at a time in `scripts/rt116_quality_recovery.py`.**
 
-   Priority order:
+   Latest priority order:
 
    | order | objective | reason | status |
    | ---: | --- | --- | --- |
    | 1 | answer-only loss mask (FACT-003A) | cheapest; may stop prompt-format overfitting | **DONE** `--answer-loss-only` (RT-132: mixed 0.07->0.15) |
-   | 2 | base-KL replay (FACT-003B) | anchor b1.58 to the base model's answer distribution | **DONE** `--base-kl-replay` (same FP model as self-teacher) |
-   | 3 | protected factual replay set (FACT-003C) | test factual retention without FACT-001 leakage | TODO (v2 logits cache also TODO) |
-   | 4 | repetition/free-run penalty | only if degeneration returns under sane decoding | TODO |
+   | 2 | raw base-KL replay (FACT-003B) | anchor b1.58 to the base model's answer distribution | **DONE / NEGATIVE** lambda=1.0 copied EOS -> empty collapse |
+   | 3 | content-KL replay (FACT-003C) | copy base content distribution while excluding EOS/special stop mass | **CURRENT BEST** lambda=0.2: fact 0.185, recovered 0.845, ok 27/27 |
+   | 4 | protected factual replay set (FACT-003D) | test factual retention without FACT-001 leakage | DEFER until content-KL sweep ends |
+   | 5 | hybrid capacity probe (HYBRID-001) | test whether same-topology all-I2_S is under-capacitized | DEFER until content-KL plateaus |
 
    Strategy note: project reframed from teacher-free to **base-anchored practical conversion**
-   (a usable cheaply-runnable b1.58/I2_S model). FACT-003B is the chosen recipe:
-   `CE_answer + lambda*KL(base||student)` on a leakage-checked instruction replay set, frozen
-   fp16 self-teacher. Target fact_rate 0.15 -> >= 0.40 ("usable" tier), not Q2_K parity.
+   (a usable cheaply-runnable b1.58/I2_S model). Raw FACT-003B was not the recipe; it failed
+   because it copied the chat teacher's stop/EOS behaviour. The chosen current recipe is
+   FACT-003C:
+   `CE_answer + lambda*KL_content(base||student)` on a leakage-checked instruction replay
+   set, frozen fp16 self-teacher, with EOS/BOS/pad/special tokens removed from the KL.
+   Target fact_rate is 0.15 -> >= 0.40 ("usable" tier), not Q2_K parity.
 
    FACT-003A run (instruction + mixed, same RT-120 budget; score with rt130 panel,
    compare `fact_rate` to FACT-002 instr 0.00 / mixed 0.07 / Q2_K 0.74 / FP 0.81):

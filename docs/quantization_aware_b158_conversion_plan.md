@@ -481,7 +481,7 @@ If gate collapses many channels and hurts quality:
   signed-epsilon alone is the cleaner compromise.
 
 If neither works:
-  return to adaptation/data objectives, not codebook engineering.
+  return to adaptation/objective work, not codebook engineering.
 ```
 
 ## Decision Tree
@@ -670,7 +670,7 @@ cheap complex/phase rotations as a diagnostic loophole. It should not overturn t
 synthesis unless cheap phase rotations improve CE beyond RT-125 and survive
 QAT/runtime-cost checks.
 
-## RT-127 RESULT + TRACK SYNTHESIS (2026-06-25): the quantizer is not the bottleneck; adaptation/data is
+## RT-127 RESULT + TRACK SYNTHESIS (2026-06-25): the quantizer is not the bottleneck; adaptation/objective is
 
 RT-127 signed-epsilon 2-bit codebook ({-1,-eps,+eps,+1}, per-tensor gamma MSE-searched;
 `scripts/rt127_signed_epsilon.py`). CE_fp 3.15, ternary 11.66.

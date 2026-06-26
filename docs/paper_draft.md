@@ -1,4 +1,4 @@
-# The Systems Promise and Quality Limits of Teacher-Free b1.58 Conversion for Dense LLaMA Models
+# The Systems Promise and Quality Limits of Post-Training b1.58 Conversion for Dense LLaMA Models
 
 Status: working draft (RT-111..129 consolidated). Numbers are from this project's runs;
 see the Reproduction appendix. Companion: [Paper Skeleton](./paper_skeleton.md) (claim
@@ -23,11 +23,13 @@ adapted ternary model produces non-degenerate, readable text matching the degene
 profile of FP and Q2_K (greedy alone degenerates — a known small-model artifact). We then
 run a full post-training-quantization toolbox sweep — scale granularity, scale/threshold
 objective, AWQ/SmoothQuant scaling, GPTQ/Hessian assignment, and a 2-bit codebook — and
-find the conversion bottleneck is **not the quantizer** but adaptation/data: no one-shot
-quantizer trick rescues conversion, while a short CE pass beats all of them. We therefore
-frame b1.58 conversion as a systems-strong, decoding-usable path whose remaining limit is
-factual quality (it does not beat a one-shot Q2_K on perplexity, nor match FP on facts),
-pointing to adaptation/data — not bit/codebook engineering — as the next lever.
+find the conversion bottleneck is **not the quantizer**: no one-shot quantizer trick
+rescues conversion, while a short CE pass beats all of them. Later factual experiments
+show that the next lever is the objective itself: raw base-KL copies EOS/empty behavior
+and fails, while content-KL that excludes EOS/special tokens is the first objective to
+move factual quality without breaking I2_S parity. The model still does not beat Q2_K or
+match FP on facts, so the product question becomes a fair cost/quality trade-off rather
+than a pure PPL-per-bit claim.
 
 ## 1. Introduction
 
@@ -153,7 +155,7 @@ adapted i2_s == adapted f16 at every decode; PTQ (no adaptation) stays collapsed
 any decode. So usability needs adaptation **and** a repetition penalty, and "1.58-bit
 is unusable" was a greedy-decoding artifact.
 
-### 5.5 The factual gap is large and is a data problem (RT-130 / FACT-001)
+### 5.5 The factual gap is large and is not a runtime problem (RT-130 / FACT-001)
 
 A fixed 27-prompt factual panel (capitals/science/authors/reasoning/instruction;
 contains-match scoring) on the 1.1B variants, rep-penalty-1.2 decode:
@@ -220,8 +222,8 @@ A full one-shot PTQ toolbox on Llama-160M (CE_fp 3.15, ternary 11.66):
 | signed-epsilon 2-bit codebook | does not beat ternary |
 
 No lever makes one-shot conversion usable; the best stack stays at PPL in the thousands,
-while a short teacher-free CE pass reaches ~114. The reconstruction residual is
-codebook-dominated and roughly granularity-invariant. **Conclusion: adaptation/data, not
+while a short adaptation pass reaches ~114. The reconstruction residual is
+codebook-dominated and roughly granularity-invariant. **Conclusion: adaptation/objective, not
 quantizer design, is the lever.**
 
 ### 6.3 gpt-oss / MoE is out of scope (RT-117/118)
@@ -238,9 +240,11 @@ The recipe's value is dense FP-weight models, not already-low-bit MoE.
   so this is neither a quantization nor a runtime gap: our WikiText-CE adaptation traded
   the base model's knowledge for WikiText fluency (catastrophic forgetting). RT-131 then
   showed that swapping the *data* (instruction/mixed CE) recovers fluency (mixed: 0.81 CE
-  recovered, PPL 56) but **not facts** (0.07) — so the fix is the training *objective*
-  (FACT-003: replay/KL, answer-only masking, protected factual replay), not more data or
-  fewer bits. This is the main remaining work.
+  recovered, PPL 56) but **not facts** (0.07). FACT-003A answer-only masking moves facts
+  to ~0.15. FACT-003B raw base-KL backfires by copying terse/EOS behavior. FACT-003C
+  content-KL fixes that mechanism and is the current best arm (lambda=0.2: fact 0.185,
+  recovery 0.845, ok 27/27, i2_s≈f16). This is still far from Q2_K/FP, but it identifies
+  a real factual lever: copy the base model's content distribution, not its stop decision.
 - **PPL-per-bit.** We do not beat Q2_K on PPL (Section 6.1).
 - **Statistics.** Recovery is reported at a single seed (G6 open).
 - **Cross-tool PPL.** PyTorch CE and llama.cpp perplexity differ in absolute value
@@ -251,17 +255,21 @@ The recipe's value is dense FP-weight models, not already-low-bit MoE.
 
 ## 8. Future Work
 
-The locked conclusion points the next effort at adaptation/data, not quantizer/codebook:
+The locked paper conclusion still rules out scalar quantizer/codebook engineering. For a
+usable low-resource product, the next effort is to finish the content-KL sweep and compare
+methods fairly under a cost/quality scorecard:
 
-1. **Factual recovery (G10):** run the
-   [Factual Gap Experiment Plan](./factual_gap_experiment_plan.md): first measure the
-   current FP/Q2_K/adapted-I2_S factual gap (FACT-001), then test instruction-style
-   adaptation data, longer/better-data CE, and repetition-aware / free-run objectives to
-   close the gap and reduce reliance on a decode-time repetition penalty.
-2. **Cheap carry-forward:** per-output-channel (row) scale is a foldable one-shot init
+1. **FACT-003C sweep:** finish content-KL lambda sweep (`0.1` failed, `0.2` current best,
+   `0.5` pending), then freeze the default recipe.
+2. **Fair scorecard:** use [Fair Comparison Framework](./fair_comparison_framework.md)
+   to compare native BitNet, Q2_K, ours all-I2_S, and future hybrid models by training
+   cost, post-training cost, params, storage, speed, and quality.
+3. **Variable/hybrid capacity (HYBRID-001):** if content-KL plateaus below a useful factual
+   tier, test whether last-layer/attention/MLP capacity pockets move factual quality.
+4. **Cheap carry-forward:** per-output-channel (row) scale is a foldable one-shot init
    improvement (+1.84 nats) worth folding into the adaptation init.
-3. **Scale-up:** confirm storage/speed/recovery on a stronger small base model.
-4. **Optional diagnostic:** a pairwise/Hadamard phase-rotation probe to close any residual
+5. **Scale-up:** confirm storage/speed/recovery on a stronger small base model.
+6. **Optional diagnostic:** a pairwise/Hadamard phase-rotation probe to close any residual
    assignment loophole (not the main path — GPTQ already gained only 6%).
 
 ## Appendix A: Reproduction

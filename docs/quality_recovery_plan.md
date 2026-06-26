@@ -374,9 +374,10 @@ bitnet.cpp I2_S runtime essentially unchanged. Combined with the systems track
 (RT-112..115: small + fast + scale law), the three-sentence story is now closed on
 x86/Linux LLaMA: **small -> fast -> quality recovers cheaply, teacher-free**.
 
-Next from this historical point was QR-005 / TRAIN-002 / RT-117; those are now
-complete. The current next step is RT-120 / TRAIN-003 budget scaling for
-TinyLlama-1.1B.
+Next from this historical point was QR-005 / TRAIN-002 / RT-117 / RT-120; those are now
+complete. The current quality frontier moved to FACT-003C content-KL in
+[Factual Gap Experiment Plan](./factual_gap_experiment_plan.md): `lambda=0.2` is the
+best factual arm so far, `lambda=0.1` failed, and `lambda=0.5` is pending.
 
 ## TRAIN-002 / TinyLlama-1.1B RESULT (2026-06-25): recovery direction + runtime preservation scale
 
