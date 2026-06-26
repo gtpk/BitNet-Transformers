@@ -285,6 +285,13 @@ def main():
                          "Use for a clean held-out fact_rate. Needs --panel-file.")
     ap.add_argument("--panel-file", type=Path, default=REPO_ROOT / "data/factual_panel_v1.jsonl",
                     help="factual eval panel to de-leak against (FACT-003B)")
+    ap.add_argument("--ckpt-dir", type=Path, default=None,
+                    help="resumable-checkpoint dir; use a Drive path (e.g. /content/drive/MyDrive/..) "
+                         "to survive a VM recycle. Saves model+optimizer+step every --ckpt-every-min.")
+    ap.add_argument("--ckpt-every-min", type=float, default=60.0,
+                    help="wall-clock minutes between checkpoints (0 disables)")
+    ap.add_argument("--resume", action="store_true",
+                    help="resume training from <ckpt-dir>/ckpt.pt if present (continues the step count)")
     args = ap.parse_args()
     if args.grad_accum_steps < 1:
         raise ValueError("--grad-accum-steps must be >= 1")
@@ -368,10 +375,34 @@ def main():
         opt = torch.optim.AdamW(tparams, lr=args.lr)
     g = torch.Generator().manual_seed(args.seed)
     usable = train_ids.numel() - 1
+
+    # resumable checkpointing (survives VM recycle if --ckpt-dir is on Drive)
+    import os, time
+    ckpt_path = (args.ckpt_dir / "ckpt.pt") if args.ckpt_dir else None
+    start_step = 0
+    if args.resume and ckpt_path and ckpt_path.exists():
+        ck = torch.load(ckpt_path, map_location=device)
+        model.load_state_dict(ck["model"])
+        try:
+            opt.load_state_dict(ck["opt"])
+        except Exception as e:
+            print(f"  [resume] optimizer state not restored ({e}); continuing with fresh optimizer", flush=True)
+        g.set_state(ck["gen"])
+        start_step = int(ck["step"]) + 1
+        print(f"  [resume] loaded {ckpt_path} -> continue at step {start_step}/{args.steps}", flush=True)
+
+    def save_ckpt(step):
+        args.ckpt_dir.mkdir(parents=True, exist_ok=True)
+        tmp = ckpt_path.with_suffix(".tmp")
+        torch.save({"model": model.state_dict(), "opt": opt.state_dict(),
+                    "step": step, "gen": g.get_state(), "steps": args.steps}, tmp)
+        os.replace(tmp, ckpt_path)
+        print(f"  [checkpoint] step {step} -> {ckpt_path}", flush=True)
+
     model.train()
-    import time
     t_start = time.time()
-    for step in range(args.steps):
+    last_ckpt = t_start
+    for step in range(start_step, args.steps):
         opt.zero_grad(set_to_none=True)
         train_ce_sum = 0.0
         train_kl_sum = 0.0
@@ -398,14 +429,17 @@ def main():
             (loss / args.grad_accum_steps).backward()
         opt.step()
         if step % args.log_every == 0 or step == args.steps - 1:
-            done = step + 1
+            done = step - start_step + 1                 # steps done THIS session (for rate/ETA)
             elapsed = time.time() - t_start
-            rate = elapsed / done                       # sec per optimizer step
-            eta = rate * (args.steps - done)
-            pct = 100.0 * done / args.steps
+            rate = elapsed / done                        # sec per optimizer step
+            eta = rate * (args.steps - 1 - step)
+            pct = 100.0 * (step + 1) / args.steps         # absolute progress
             kl_str = f"  kl={train_kl_sum / args.grad_accum_steps:.4f}" if teacher is not None else ""
             print(f"  step {step:4d}/{args.steps} ({pct:5.1f}%)  train_ce={train_ce_sum / args.grad_accum_steps:.4f}{kl_str}  "
                   f"elapsed {elapsed/60:.1f}m  ETA {eta/60:.1f}m  ({rate:.1f}s/step)", flush=True)
+        if ckpt_path and args.ckpt_every_min > 0 and (time.time() - last_ckpt) >= args.ckpt_every_min * 60:
+            save_ckpt(step)
+            last_ckpt = time.time()
     if teacher is not None:  # free the frozen base teacher before export
         del teacher
         if device == "cuda":
