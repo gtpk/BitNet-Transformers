@@ -209,12 +209,19 @@ def eval_ce(model, eval_ids, seq_len, device, max_windows=64):
     return tot / max(cnt, 1)
 
 
-def base_kl_replay_term(model, teacher, replay_ids, replay_mask, seq_len, replay_batch, temp, gen, device):
-    """FACT-003B: answer-masked forward-KL(base||student) on a sampled replay window.
+def base_kl_replay_term(model, teacher, replay_ids, replay_mask, seq_len, replay_batch, temp, gen, device,
+                        special_vocab=None):
+    """FACT-003B/C: answer-masked forward-KL(base||student) on a sampled replay window.
 
     Returns a scalar loss tensor with grad through the student (teacher is frozen / no-grad),
     averaged over answer tokens only, scaled by temp^2 (standard KD). Returns None if the
-    sampled window has no answer tokens."""
+    sampled window has no answer tokens.
+
+    FACT-003C content-KL: if special_vocab (a [vocab] bool mask, True at EOS/BOS/pad/... ids)
+    is given, those vocab columns are removed from BOTH distributions (logits -> -inf) so the
+    KL anchors only the base model's CONTENT distribution, not its "when to stop" (EOS) mass.
+    Naive base-KL (FACT-003B) copied the chat teacher's early-EOS -> empty collapse; this fixes
+    that by never matching EOS/special probability."""
     import torch.nn.functional as F
     usable = replay_ids.numel() - 1
     starts = torch.randint(0, max(1, usable - seq_len), (replay_batch,), generator=gen).tolist()
@@ -224,10 +231,18 @@ def base_kl_replay_term(model, teacher, replay_ids, replay_mask, seq_len, replay
         return None
     with torch.no_grad():
         t = teacher(input_ids=rx).logits.float() / temp
+        if special_vocab is not None:
+            t = t.masked_fill(special_vocab, float("-inf"))   # drop EOS/special from teacher dist
         p_t = F.softmax(t, dim=-1)
         logp_t = F.log_softmax(t, dim=-1)
-    logp_s = F.log_softmax(model(input_ids=rx).logits.float() / temp, dim=-1)
-    kl_tok = (p_t * (logp_t - logp_s)).sum(-1)        # [B,T] forward KL per token
+    s = model(input_ids=rx).logits.float() / temp
+    if special_vocab is not None:
+        s = s.masked_fill(special_vocab, float("-inf"))
+    logp_s = F.log_softmax(s, dim=-1)
+    term = p_t * (logp_t - logp_s)                    # [B,T,V] forward-KL summand
+    if special_vocab is not None:
+        term = term.masked_fill(special_vocab, 0.0)   # special cols are 0*(-inf)=nan -> set 0
+    kl_tok = term.sum(-1)                              # [B,T] KL per token
     return kl_tok[rm].mean() * (temp * temp)          # answer tokens only, KD temp^2 scale
 
 
@@ -277,6 +292,10 @@ def main():
                     help="FACT-003B: size of the fixed instruction replay pool the KL anchor samples from")
     ap.add_argument("--replay-batch", type=int, default=2,
                     help="FACT-003B: microbatch of replay windows per step for the KL term (keep small)")
+    ap.add_argument("--kl-content-only", action="store_true",
+                    help="FACT-003C: drop EOS/special tokens from the base-KL distribution so the "
+                         "anchor copies the base model's CONTENT, not its 'when to stop' (EOS) mass. "
+                         "Fixes the FACT-003B empty-collapse from a chat teacher's early-EOS.")
     ap.add_argument("--teacher-dtype", choices=["float16", "bfloat16", "float32"], default="float16",
                     help="FACT-003B: dtype of the frozen base teacher (float16 halves its memory)")
     ap.add_argument("--exclude-panel", action="store_true",
@@ -328,6 +347,7 @@ def main():
     # FACT-003B: frozen base teacher (self-anchor) + fixed instruction replay pool
     teacher = None
     replay_ids = replay_mask = None
+    special_vocab = None
     if args.base_kl_replay:
         ttd = {"float16": torch.float16, "bfloat16": torch.bfloat16, "float32": torch.float32}[args.teacher_dtype]
         teacher = AutoModelForCausalLM.from_pretrained(args.model_id, dtype=ttd).to(device).eval()
@@ -336,10 +356,16 @@ def main():
         teacher.config.use_cache = False
         r_ids, r_mask = _instruction_ids_mask(tok, exclude_texts=panel_exclude)  # anchor never reinforces eval
         replay_ids, replay_mask = r_ids[: args.replay_tokens], r_mask[: args.replay_tokens]
+        if args.kl_content_only:
+            ids = sorted(set(int(i) for i in (tok.all_special_ids or []) if i is not None))
+            special_vocab = torch.zeros(model.config.vocab_size, dtype=torch.bool, device=device)
+            special_vocab[ids] = True
+            print(f"FACT-003C content-KL: dropping {len(ids)} special/EOS vocab ids from the anchor {ids}")
         print(f"FACT-003B base-KL replay: teacher={args.model_id} ({args.teacher_dtype}, frozen); "
               f"replay pool {replay_ids.numel():,} instruction tokens "
               f"({100*float(replay_mask.float().mean()):.1f}% answer); "
-              f"lambda={args.kl_weight} temp={args.kl_temp} replay_batch={args.replay_batch}")
+              f"lambda={args.kl_weight} temp={args.kl_temp} replay_batch={args.replay_batch}"
+              f"{' content-only' if args.kl_content_only else ''}")
 
     # QR-001: FP baseline, then PTQ collapse
     ce_fp = eval_ce(model, eval_ids, args.seq_len, device)
@@ -364,7 +390,8 @@ def main():
     tparams = uniq
     arm = ("QR-002a(linears)" + ("+norms" if args.train_norms else "")
            + ("+lmhead" if args.train_lm_head else "") + ("+ansmask" if args.answer_loss_only else "")
-           + (f"+basekl{args.kl_weight}" if args.base_kl_replay else ""))
+           + (f"+basekl{args.kl_weight}" if args.base_kl_replay else "")
+           + ("c" if (args.base_kl_replay and args.kl_content_only) else ""))
     print(f"adapting {sum(p.numel() for p in tparams)/1e6:.1f}M params across {len(tparams)} tensors [{arm}]")
     print(f"microbatch={args.batch}  grad_accum={args.grad_accum_steps}  "
           f"effective_batch={args.batch * args.grad_accum_steps}")
@@ -422,7 +449,8 @@ def main():
             train_ce_sum += float(loss)
             if teacher is not None:  # FACT-003B: add base-KL replay anchor
                 kl = base_kl_replay_term(model, teacher, replay_ids, replay_mask, args.seq_len,
-                                         args.replay_batch, args.kl_temp, g, device)
+                                         args.replay_batch, args.kl_temp, g, device,
+                                         special_vocab=special_vocab)
                 if kl is not None:
                     train_kl_sum += float(kl)
                     loss = loss + args.kl_weight * kl
@@ -465,6 +493,7 @@ def main():
               "arm": arm, "train_source": args.train_source, "train_norms": args.train_norms, "train_lm_head": args.train_lm_head,
               "answer_loss_only": args.answer_loss_only,
               "base_kl_replay": args.base_kl_replay, "kl_weight": args.kl_weight, "kl_temp": args.kl_temp,
+              "kl_content_only": args.kl_content_only,
               "replay_tokens": args.replay_tokens, "replay_batch": args.replay_batch,
               "ce_fp": ce_fp, "ce_ptq": ce_ptq, "ce_adapted": ce_adapted,
               "ppl_fp": math.exp(ce_fp), "ppl_ptq": math.exp(ce_ptq), "ppl_adapted": math.exp(ce_adapted),
