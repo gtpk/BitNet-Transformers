@@ -422,6 +422,33 @@ CE/PPL not collapsed, i2_s == f16 preserved. Memory note: adds a frozen fp16 tea
 (~2.2 GB for 1.1B) + a small replay forward; fits an L4, tight on a T4 (lower --replay-batch
 or --teacher-dtype, or use the v2 logits cache below).
 
+#### FACT-003B / RT-133 RESULT (2026-06-26): lambda=1.0 base-KL BACKFIRED (negative)
+
+| run | fact_i2s (rep1.2) | CE recovered | adapted PPL | degeneration |
+| --- | ---: | ---: | ---: | --- |
+| FACT-003A mixed (no KL) | 0.15 | 0.82 | 56 | ok 26/27 |
+| **FACT-003B mixed kl=1.0** | **0.00** | 0.47 | ~1290 | **empty 25/27** |
+
+Base-KL with lambda=1.0 made it WORSE: `fact_rate` 0.15 -> 0.00 and the empty-answer
+collapse that 003A had fixed came back (adapted i2_s outputs are literally `''`). i2_s==f16
+(27/27), so runtime is fine; this is the objective. train_ce stayed ~7.5 the whole run
+(never descended like 003A) and recovered dropped 0.82 -> 0.47.
+
+Mechanism (confirmed by the empty outputs): the teacher is TinyLlama-1.1B-**Chat**, whose
+answer distribution on a bare `Q:..\nA:` prompt is terse / early-EOS. Anchoring the student
+to the base distribution on the answer tokens faithfully copied that "stop early" behaviour
+-> empty collapse; and lambda=1.0 over-regularised, blocking CE recovery. **Naive base-KL on
+a chat teacher's Q/A answers transfers its terseness — the anchor hurt the very thing it was
+meant to protect.** Artifacts: `reports/rt133_fact003b_mixed_kl1_*`.
+
+Revised options (the anchor needs redesign, not just a weaker lambda):
+- **Exclude EOS / special tokens from the KL** (copy the base content distribution, not its
+  stop decision) — directly targets the failure; small code change. Most promising.
+- lambda sweep down (0.2/0.5) — likely still leaks the EOS bias, just diluted; cheap to test.
+- unfreeze lm_head (--train-lm-head) so the output/stop head can re-adapt away from EOS.
+- accept FACT-003A (0.15) as the current practical ceiling for this recipe at 1.1B and
+  reconsider scale, or anchor on free-form (non-Q/A) base text instead of chat answers.
+
 ### FACT-003B v2 (logits cache) and FACT-003C (only if needed)
 
 ```text
