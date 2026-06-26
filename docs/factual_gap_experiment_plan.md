@@ -505,21 +505,28 @@ largely kept ✓, i2_s == f16 ✓. Not yet at the 0.3 "good"/0.4 "keep-pushing" 
 | lambda | fact_i2s | CE recovered | degeneration | read |
 | ---: | ---: | ---: | --- | --- |
 | 0.1 | 0.037 | 0.484 | salad | too weak; anchor did not guide the STE basin |
-| **0.2** | **0.185** | **0.845** | ok 27/27 | current sweet spot |
-| 0.5 | running | running | running | tests whether stronger content anchor helps or over-regularizes |
+| **0.2** | **0.185** | **0.845** | ok 27/27 | **sweet spot (best of whole FACT program)** |
+| 0.5 | 0.037 | 0.837 | ok 27/27 | too strong; fluent but specific facts washed out |
 
-Interpretation:
+Interpretation (sweep COMPLETE — clean inverted-U):
 
 ```text
-content-KL is non-monotonic.
-raw KL failed by copying stop/EOS -> empty.
-too-weak content-KL fails by under-anchoring -> salad.
-lambda=0.2 is the current best operating point.
+content-KL is non-monotonic. Two failure modes flank lambda=0.2:
+  raw KL (003B)        -> copies stop/EOS                 -> empty
+  too-weak (0.1)       -> under-anchors, CE stuck ~7.4    -> salad
+  too-strong (0.5)     -> over-anchors (kl->0.95), facts  -> washed out (0.037), fluent
+  lambda=0.2           -> escapes plateau + keeps facts   -> 0.185 (best)
+The anchor ACTIVELY helps the STE escape the CE plateau (not a mere regularizer), but
+over-anchoring trades specific facts for generic base fluency.
 ```
 
-Next: finish `lambda=0.5`. If it beats 0.2 without collapse, sweep 0.3/0.4. If it
-over-regularizes or collapses, freeze `lambda=0.2` as the default FACT recipe and move to
-fair scorecard / HYBRID-001 if the factual ceiling remains too low.
+Decision: **freeze lambda=0.2 as the default FACT recipe** (fact 0.185 > the 0.15 bar, no
+collapse, recovered 0.845, i2_s==f16). All three lambda committed under
+`reports/rt134_fact003c_mixed_ckl{0.1,0.2,0.5}_*` (md5-verified). Same-topology
+(target-linear-only, frozen lm_head/embeds) adaptation+objective tuning at 1.1B plateaus
+around fact ~0.185; reaching the 0.4 "usable" tier likely needs added capacity (the
+variable/hybrid direction) or auxiliaries (unfreeze lm_head, protected factual replay),
+not more lambda sweeping.
 
 #### Deferred
 

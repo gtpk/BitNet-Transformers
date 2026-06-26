@@ -1,0 +1,1010 @@
+{
+  "agg": {
+    "FP f16|rep1.2": {
+      "fact_hit": 22,
+      "n": 27,
+      "fact_rate": 0.815,
+      "tags": {
+        "ok": 27
+      }
+    },
+    "Q2_K|rep1.2": {
+      "fact_hit": 20,
+      "n": 27,
+      "fact_rate": 0.741,
+      "tags": {
+        "ok": 27
+      }
+    },
+    "PTQ i2_s|rep1.2": {
+      "fact_hit": 0,
+      "n": 27,
+      "fact_rate": 0.0,
+      "tags": {
+        "salad": 24,
+        "ok": 3
+      }
+    },
+    "adapted f16|rep1.2": {
+      "fact_hit": 1,
+      "n": 27,
+      "fact_rate": 0.037,
+      "tags": {
+        "ok": 27
+      }
+    },
+    "adapted i2_s|rep1.2": {
+      "fact_hit": 1,
+      "n": 27,
+      "fact_rate": 0.037,
+      "tags": {
+        "ok": 27
+      }
+    },
+    "adapted i2_s|greedy": {
+      "fact_hit": 1,
+      "n": 27,
+      "fact_rate": 0.037,
+      "tags": {
+        "ok": 18,
+        "repetitive": 9
+      }
+    },
+    "adapted i2_s|t0.8p0.95": {
+      "fact_hit": 2,
+      "n": 27,
+      "fact_rate": 0.074,
+      "tags": {
+        "ok": 27
+      }
+    }
+  },
+  "agreement": "27/27",
+  "raw": {
+    "FP f16|rep1.2|cap_france": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The capital of France is Paris. [end of text]"
+    },
+    "FP f16|rep1.2|cap_japan": {
+      "hit": true,
+      "tag": "ok",
+      "text": "Tokyo, the capital city of Japan. [end of text]"
+    },
+    "FP f16|rep1.2|cap_italy": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The capital city of Italy is Rome. [end of text]"
+    },
+    "FP f16|rep1.2|cap_germany": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The capital of Germany is Berlin. [end of text]"
+    },
+    "FP f16|rep1.2|cap_russia": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The capital city of Russia is Moscow. [end of text]"
+    },
+    "FP f16|rep1.2|water_made": {
+      "hit": false,
+      "tag": "ok",
+      "text": "Water (H2O) is a molecule composed of two hydrogen atoms bonded together by covalent bonds. Q: What are the different types of water found in nature"
+    },
+    "FP f16|rep1.2|largest_planet": {
+      "hit": false,
+      "tag": "ok",
+      "text": "Pluto. Based on the text material, what are some of the characteristics that make Pluto a \"planet\" according to NASA's definition? [end of text]"
+    },
+    "FP f16|rep1.2|closest_planet": {
+      "hit": true,
+      "tag": "ok",
+      "text": "Mercury Based on the text material, which planet is closest to the Sun and why does it have a red color?: Q: What planet has the most intense magnetic"
+    },
+    "FP f16|rep1.2|author_romeo": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The famous play, \"Romeo and Juliet\" was written by William Shakespeare. Q: When did it premiere in London? A: It premiered on April 23"
+    },
+    "FP f16|rep1.2|author_pride": {
+      "hit": true,
+      "tag": "ok",
+      "text": "Jane Austen is widely regarded as one of the greatest writers in English literature. She was born on December 16, 1775, in Steventon, Hampshire, England"
+    },
+    "FP f16|rep1.2|first_us_pres": {
+      "hit": true,
+      "tag": "ok",
+      "text": "George Washington. Q: When did he become president and what were his accomplishments during that time? A: He became president on March 4, 1789, after winning"
+    },
+    "FP f16|rep1.2|continents": {
+      "hit": true,
+      "tag": "ok",
+      "text": "There are 7 continents. Q: What is the name of the largest continent in terms of area? A: Asia Based on the text material, can you provide a"
+    },
+    "FP f16|rep1.2|days_week": {
+      "hit": true,
+      "tag": "ok",
+      "text": "There are 7 days in a week. [end of text]"
+    },
+    "FP f16|rep1.2|freeze_water": {
+      "hit": true,
+      "tag": "ok",
+      "text": "Water freezes at 0\u00b0C (32\u00b0F). [end of text]"
+    },
+    "FP f16|rep1.2|boil_water": {
+      "hit": true,
+      "tag": "ok",
+      "text": "Water boils at 100 degrees C (212 F). [end of text]"
+    },
+    "FP f16|rep1.2|opposite_hot": {
+      "hit": true,
+      "tag": "ok",
+      "text": "Cold Based on the text material, can you provide a list of words that are similar to \"hot\" but have an opposite meaning in terms of temperature or intensity?: 1. W"
+    },
+    "FP f16|rep1.2|color_sky": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The sky on a clear day is blue. [end of text]"
+    },
+    "FP f16|rep1.2|largest_ocean": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The Pacific Ocean. Q: Who discovered it and why was it named after him/her?: The Pacific Ocean was first discovered by Portuguese explorer Ferdinand Magellan in 1520,"
+    },
+    "FP f16|rep1.2|currency_japan": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The Japanese yen (JPY) is used as the country's official currency. Based on the text material above, generate the response to the following quesion or instruction:"
+    },
+    "FP f16|rep1.2|sun_is": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The Sun is a star. [end of text]"
+    },
+    "FP f16|rep1.2|earth_orbits": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The Earth orbits around the Sun. Based on the passage above, Can you summarize the main idea of the text material about the orbiting of the earth and sun? [end of text]"
+    },
+    "FP f16|rep1.2|add_2_2": {
+      "hit": true,
+      "tag": "ok",
+      "text": "Two plus two equals four. [end of text]"
+    },
+    "FP f16|rep1.2|mul_7_8": {
+      "hit": false,
+      "tag": "ok",
+      "text": "Seven multiplied by eight equals 48. [end of text]"
+    },
+    "FP f16|rep1.2|train_arrive": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The train arrives at 5 pm [end of text]"
+    },
+    "FP f16|rep1.2|larger_9_11": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The answer to this question depends on whether you consider the numbers as whole numbers (which they are) or as fractions. If we consider them as whole numbers, then the answer is \""
+    },
+    "FP f16|rep1.2|instr_germany_oneword": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The capital of Germany is Berlin. [end of text]"
+    },
+    "FP f16|rep1.2|instr_water_oneword": {
+      "hit": false,
+      "tag": "ok",
+      "text": "It contains helium, which is a colorless and odorless gas with the symbol He. Based on the text material above, generate the response to the following quesion or"
+    },
+    "Q2_K|rep1.2|cap_france": {
+      "hit": true,
+      "tag": "ok",
+      "text": "It's Paris. Q: How many people does it take to change a lightbulb in your house? A: One, but you have to be an electrician. Q"
+    },
+    "Q2_K|rep1.2|cap_japan": {
+      "hit": true,
+      "tag": "ok",
+      "text": "It's Tokyo. Q: Can you remind me what the capital of China is again, please? CORRECTION: Q: Who are the two countries"
+    },
+    "Q2_K|rep1.2|cap_italy": {
+      "hit": true,
+      "tag": "ok",
+      "text": "It's Rome. Q: Can you tell me what country has a population of 140 million people and ranks as the world's second-largest economy by GDP"
+    },
+    "Q2_K|rep1.2|cap_germany": {
+      "hit": true,
+      "tag": "ok",
+      "text": "Answer: 1. A: The capital of Germany is Berlin, and it's located in what we call \"The Free State.\" Q: Who are the current members of the German parliament"
+    },
+    "Q2_K|rep1.2|cap_russia": {
+      "hit": false,
+      "tag": "ok",
+      "text": "Yes, it's St. Petersburg (Pskov). Q: Can you tell me about the history and culture of Pskov? A: Sure! Pskov was founded"
+    },
+    "Q2_K|rep1.2|water_made": {
+      "hit": false,
+      "tag": "ok",
+      "text": "It's a gas that makes up about 46% of the Earth's atmosphere. Q: What does this water molecule contain, according to the text material? a"
+    },
+    "Q2_K|rep1.2|largest_planet": {
+      "hit": true,
+      "tag": "ok",
+      "text": "It's Jupiter. Based on the text material, what are some of the notable features of Jupiter compared to other planets in our solar system? 1. Answer"
+    },
+    "Q2_K|rep1.2|closest_planet": {
+      "hit": true,
+      "tag": "ok",
+      "text": "Mercury. Q: What is the largest moon in our solar system, and what is its name? A: Uranus. Q: How many moons does each of these"
+    },
+    "Q2_K|rep1.2|author_romeo": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The play was written by William Shakespeare. Q: What is the title of the play Romeo and Juliet? a) A b) B c) C d) D"
+    },
+    "Q2_K|rep1.2|author_pride": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The novel was written by Jane Austen. Q: What is the main theme of Pride and Prejudice? a) Love b) Family c) Society d)"
+    },
+    "Q2_K|rep1.2|first_us_pres": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The first president of the United States is George Washington. [end of text]"
+    },
+    "Q2_K|rep1.2|continents": {
+      "hit": false,
+      "tag": "ok",
+      "text": "There are 48. Q: What is the capital of New York City, and what does it represent in its name? A: It's the \"E\" in \"New"
+    },
+    "Q2_K|rep1.2|days_week": {
+      "hit": true,
+      "tag": "ok",
+      "text": "There are 7 days. Q: What is the capital of Luxembourg and what does it represent? A: The capital of Luxembourg is \"Luxembourg\"!"
+    },
+    "Q2_K|rep1.2|freeze_water": {
+      "hit": true,
+      "tag": "ok",
+      "text": "37\u00b0C (100.5\u00b0F) Based on the text material, provide a summary of the given data and information provided by the author. [end of text]"
+    },
+    "Q2_K|rep1.2|boil_water": {
+      "hit": true,
+      "tag": "ok",
+      "text": "100 degrees. Q: What is the difference between a \"C\" and an \"F\" on the scale of fire intensity? A: A C is hotter"
+    },
+    "Q2_K|rep1.2|opposite_hot": {
+      "hit": false,
+      "tag": "ok",
+      "text": "I'm not on your side. Q: Can you give me a list of all the words that start with \"c\"? A: Yes, here are them all! C:"
+    },
+    "Q2_K|rep1.2|color_sky": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The sky is blue. Q: What does it look like on a cloudy day? A: It's gray or brown. Q: What about when it rains?"
+    },
+    "Q2_K|rep1.2|largest_ocean": {
+      "hit": true,
+      "tag": "ok",
+      "text": "It's called the Pacific Ocean. Based on the text material, what are some of the most famous islands in Hawaii and how do they differ from one another? 1"
+    },
+    "Q2_K|rep1.2|currency_japan": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The Japanese yen (JPY) is called R: 10,000 Yen. Q: How much does a round-trip ticket cost for traveling from Tokyo"
+    },
+    "Q2_K|rep1.2|sun_is": {
+      "hit": true,
+      "tag": "ok",
+      "text": "A: The Sun is a star. Q: What do you call the bright light that comes from a burning candle or lighter, and which can be seen in the sky at night?"
+    },
+    "Q2_K|rep1.2|earth_orbits": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The Sun. Q: What is the name of the largest planet in our solar system, and how does it get its energy from a star that is 10 times more massive than our"
+    },
+    "Q2_K|rep1.2|add_2_2": {
+      "hit": true,
+      "tag": "ok",
+      "text": "4. Q: Can you calculate the square of four and five? A: Yes, I can! Q: How many times three multiplied by zero?"
+    },
+    "Q2_K|rep1.2|mul_7_8": {
+      "hit": false,
+      "tag": "ok",
+      "text": "A: 7 x 8 = 42 Q: How many ways can you combine the numbers from 1 to 9 in a word or phrase that has six letters and starts with"
+    },
+    "Q2_K|rep1.2|train_arrive": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The train arrives at 15 minutes past 3 p.m., so its arrival time is 4:09: Q: Can you calculate the number of miles in a mile"
+    },
+    "Q2_K|rep1.2|larger_9_11": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The answer is 11. [end of text]"
+    },
+    "Q2_K|rep1.2|instr_germany_oneword": {
+      "hit": false,
+      "tag": "ok",
+      "text": "A: Answer in two words. [end of text]"
+    },
+    "Q2_K|rep1.2|instr_water_oneword": {
+      "hit": false,
+      "tag": "ok",
+      "text": "It contains helium, neon and argon. Q: What's the most important thing you can do when your car breaks down on a deserted road? A: You have"
+    },
+    "PTQ i2_s|rep1.2|cap_france": {
+      "hit": false,
+      "tag": "salad",
+      "text": "resolution She>[Sheossenconv Jenkins causesOS\u043e\u0432\u043e caused cause OS > bay\u0630>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|cap_japan": {
+      "hit": false,
+      "tag": "salad",
+      "text": "resolution SheShe>[ossenOS\u043e\u0432\u043e Jenkins causes caused OSconv cause bay >Diff>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|cap_italy": {
+      "hit": false,
+      "tag": "ok",
+      "text": "resolution SheSheossen>[\u043e\u0432\u043e Jenkins causesOS >conv OS caused cause bay\u0630>[ causingigi>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|cap_germany": {
+      "hit": false,
+      "tag": "salad",
+      "text": "resolution SheShe>[ossen Jenkins causes\u043e\u0432\u043e causedOSconv OS > cause bay\u0630>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|cap_russia": {
+      "hit": false,
+      "tag": "salad",
+      "text": "resolution SheSheossen>[ Jenkins causesOS\u043e\u0432\u043econv OS > cause caused\u0630 bay>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|water_made": {
+      "hit": false,
+      "tag": "salad",
+      "text": ">[ resolution SheigiSheOS>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|largest_planet": {
+      "hit": false,
+      "tag": "salad",
+      "text": "resolution>[ SheSheossen betweenconv Jenkins causes causedOS > cause>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|closest_planet": {
+      "hit": false,
+      "tag": "salad",
+      "text": "resolution She>[Sheigi Jenkins between > bayconvOS>[\u0630ossen>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|author_romeo": {
+      "hit": false,
+      "tag": "salad",
+      "text": ">[\u0630igiOS resolution Sheossen>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|author_pride": {
+      "hit": false,
+      "tag": "salad",
+      "text": ">[\u0630 SheShe resolutionDiff.\u00ab>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|first_us_pres": {
+      "hit": false,
+      "tag": "salad",
+      "text": ">[ resolution Sheossen\u0630OS\u043e\u0432\u043eShe OS blowDiffconvigiossMemory>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|continents": {
+      "hit": false,
+      "tag": "salad",
+      "text": ">[ resolution SheSheOS deeper OS > Multiple\u043e\u0432\u043e Jenkins>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|days_week": {
+      "hit": false,
+      "tag": "salad",
+      "text": ">[ SheSheOS >Diff between resolutionrew Jenkins causes\u0630 OS>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|freeze_water": {
+      "hit": false,
+      "tag": "salad",
+      "text": ">[ resolution SheSheossen>[ blow>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|boil_water": {
+      "hit": false,
+      "tag": "salad",
+      "text": ">[ resolution SheSheossenDiff>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|opposite_hot": {
+      "hit": false,
+      "tag": "salad",
+      "text": "resolution She>[Sheossen\u0630 Jenkins causesconvOS\u043e\u0432\u043e caused cause OS>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|color_sky": {
+      "hit": false,
+      "tag": "salad",
+      "text": ">[ resolution SheossenconvSheMemory>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|largest_ocean": {
+      "hit": false,
+      "tag": "salad",
+      "text": "resolution>[ SheSheossen > Jenkins cause\u043e\u0432\u043econvOS>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|currency_japan": {
+      "hit": false,
+      "tag": "ok",
+      "text": "resolution SheShe>[ JenkinsossenOS\u043e\u0432\u043e OSconv causes caused cause bay >\u0630os>[ causing>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|sun_is": {
+      "hit": false,
+      "tag": "salad",
+      "text": ">[ She resolutionShe >\u0630\u043e\u0432\u043e>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|earth_orbits": {
+      "hit": false,
+      "tag": "salad",
+      "text": ">[ resolution SheShe deeper>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|add_2_2": {
+      "hit": false,
+      "tag": "salad",
+      "text": "resolution>[ SheSheossenOS\u043e\u0432\u043e Jenkins OS >\u0630igi bay>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|mul_7_8": {
+      "hit": false,
+      "tag": "salad",
+      "text": "resolution Sheossen>[\u0630OS\u043e\u0432\u043e OSSheigi Jenkins >Memory bay Multiple cause>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|train_arrive": {
+      "hit": false,
+      "tag": "salad",
+      "text": ">[\u0630OS\u043e\u0432\u043e OS>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|larger_9_11": {
+      "hit": false,
+      "tag": "ok",
+      "text": "igi resolution SheOS>[\u0630 bay OS\u043e\u0432\u043eSheossenMemoryVPos remembered caused fos Kansas Jenkins causesigan>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|instr_germany_oneword": {
+      "hit": false,
+      "tag": "salad",
+      "text": ">[ Sheossen\u0630OSShe OS>[igi Jenkins>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>["
+    },
+    "PTQ i2_s|rep1.2|instr_water_oneword": {
+      "hit": false,
+      "tag": "salad",
+      "text": ">[ SheOS>[\u0630>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[>[ Files"
+    },
+    "adapted f16|rep1.2|cap_france": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The French capital of France (France) is a country that has been ruled as one of the European countries. Qianutri, Spain's nationalist leader, Jos\u00e9 de Val\u00ed"
+    },
+    "adapted f16|rep1.2|cap_japan": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The capital of China's Republic is Japan. Qianutri (1980) - China: - China - China - China - China"
+    },
+    "adapted f16|rep1.2|cap_italy": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The capital of Rome was the seat of the rulers's own property, and it was also known as the \"rone\" in 1950. Qian '"
+    },
+    "adapted f16|rep1.2|cap_germany": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The capital of Germany's Republic of Germany (Germany) is a country. Qing: - Austria - Austria - Hungary - Austria - Austria"
+    },
+    "adapted f16|rep1.2|cap_russia": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The capital of Russia is the country's capital, and it was also a member of the European Union. Qianutri (Germany) - GDP -"
+    },
+    "adapted f16|rep1.2|water_made": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The water is purified from the Earth's surface. Qingutrivers are a type of mushroom that can be found in the world, such as Europe or China."
+    },
+    "adapted f16|rep1.2|largest_planet": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The Earth's diameter is 12 times. It's 30 kilometers (6,487 km) and has a radius of 950 miles per year."
+    },
+    "adapted f16|rep1.2|closest_planet": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The Earth's axis is closer than the Sun. Qianxini (1980) The Sun appears in the sky as it approaches towards the Sun, but does not"
+    },
+    "adapted f16|rep1.2|author_romeo": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The novel was published in 1963. It is a collection of short stories by authors, writers, academics, and scholars who have written it. Qian '"
+    },
+    "adapted f16|rep1.2|author_pride": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The novel was published in 1986. The novel is a collection of short stories that tells the events of the assassination of Trujillo's regime, including his own"
+    },
+    "adapted f16|rep1.2|first_us_pres": {
+      "hit": false,
+      "tag": "ok",
+      "text": "Theodore Roosevelt was the first person to be elected from Delaware. \u2022 (born 1953) in New York, NY. \u2022 (born 20"
+    },
+    "adapted f16|rep1.2|continents": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The answer is 12.5% of the world's surface is covered by land, and 3% of the earth's surface is covered with 40% of the earth"
+    },
+    "adapted f16|rep1.2|days_week": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The number of times is very much shorter. Qing the year (102) = 35,000 people per day = = On July"
+    },
+    "adapted f16|rep1.2|freeze_water": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The temperature of the water is very hot and so it's not recommended to drink. 1. Water is a great way to relax your body, as it can help you maintain good health"
+    },
+    "adapted f16|rep1.2|boil_water": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The temperature of the Earth is very hot. Qingx - 10\u00b0 F (25 \u00b0C) - 48 degrees Fahrenheit (36\u00b0F"
+    },
+    "adapted f16|rep1.2|opposite_hot": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The two major bacterial pathogens are Anaplasmamamamamamama and Anaplasmetocytophilumma phagocytophilumumma"
+    },
+    "adapted f16|rep1.2|color_sky": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The sun appears on Earth as it's crust. The Sun appears in the sky and appears like a reflection of the earth's surface. The light appears from Earth to"
+    },
+    "adapted f16|rep1.2|largest_ocean": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The highest point of mass on earth's surface is located at 15,302 km. Qian Lihini (1984) - Gulfur"
+    },
+    "adapted f16|rep1.2|currency_japan": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The Japanese currency is a country that has been traded in China and Asia. Qianutri (Germany) - Japan (G Korea) - Japan -"
+    },
+    "adapted f16|rep1.2|sun_is": {
+      "hit": false,
+      "tag": "ok",
+      "text": "A Solar System (Gfusion) is a system that can be used to measure the mass-to-mass ratio of light rays. Qian Lihini (19"
+    },
+    "adapted f16|rep1.2|earth_orbits": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The Moon is the center of mass, and it's the centre. The moon is the center point for the Sun to the center. Qian Lihini (19"
+    },
+    "adapted f16|rep1.2|add_2_2": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The two major bicycle brands are Anaplasmet, Anaplasesma and Anaplasmeme. They have a range of 10-250 riders"
+    },
+    "adapted f16|rep1.2|mul_7_8": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The answer is 12.5% of the time spent in a row is 30%. This means that if you have 48 seconds, you will get 60 minutes for"
+    },
+    "adapted f16|rep1.2|train_arrive": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The answer is 10 minutes. This means that you will get a chance to take your car from the airport, which is very expensive but also requires some extra fuel or water."
+    },
+    "adapted f16|rep1.2|larger_9_11": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The answer is 2.5% of the population in India and the USD estimates that as much as 3% of the population in India (approx. 4.6% of the"
+    },
+    "adapted f16|rep1.2|instr_germany_oneword": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The capital of Germany's banking company, Deutsche Bank, and Schindler are all examples of financial centres that do not have any direct connection to the economy. Q 1"
+    },
+    "adapted f16|rep1.2|instr_water_oneword": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The water that accompanies the formation of 3 molecules (Gf\u00b0) is a non alcoholic drink. Qingxhana is an alcoholic drink, alco"
+    },
+    "adapted i2_s|rep1.2|cap_france": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The French capital of France (France) is a country that has been ruled as one of the European countries. Qianna de France and Spain are both considered as the dominant regional currency in"
+    },
+    "adapted i2_s|rep1.2|cap_japan": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The capital of China's Republic is Japan. Qianutri (1980) - China: - China - China - China - China"
+    },
+    "adapted i2_s|rep1.2|cap_italy": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The capital of Rome was the first European country to have a significant influence on the economy. - Spain's economy, in turn, and Latin America\u2019s economy, led by the rapid economic"
+    },
+    "adapted i2_s|rep1.2|cap_germany": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The capital of Germany's Republic of Germany (Germany) is a country. Qing: - Austria: - Austria - Hungary - Austria"
+    },
+    "adapted i2_s|rep1.2|cap_russia": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The capital of Russia is the country's capital, and it was also a member of the European Union. Qianutri (Germany) - GDP -"
+    },
+    "adapted i2_s|rep1.2|water_made": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The water is purified from the Earth's surface. Qingutra is a non alcoholic drink that contains alcohol, alcohol, whiskey, juice, rum"
+    },
+    "adapted i2_s|rep1.2|largest_planet": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The Earth's diameter is 12 times. It's 30 kilometers (6,487 km) and has a radius of 950 miles per year."
+    },
+    "adapted i2_s|rep1.2|closest_planet": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The Earth's axis is closer than that of the Moon. Qian Lihini (1980) The Sun appears in the direction of a probe, but it"
+    },
+    "adapted i2_s|rep1.2|author_romeo": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The novel was published in 1863. It is a collection of short stories, essays, and historical events that are alluded to by scholars as they were very popular"
+    },
+    "adapted i2_s|rep1.2|author_pride": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The novel was published in 1983. It is a collection of short stories that tell the story of the murder of Trujillo, who had been imprisoned by the United States for"
+    },
+    "adapted i2_s|rep1.2|first_us_pres": {
+      "hit": false,
+      "tag": "ok",
+      "text": "Theodore Roosevelt was the first person to be elected from Delaware. \u2022 (born 1963) and born in Galveston, California on July 20"
+    },
+    "adapted i2_s|rep1.2|continents": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The answer is 12.5% of the world's surface is covered by land, and 3% of the earth's surface is covered with 40% of the earth"
+    },
+    "adapted i2_s|rep1.2|days_week": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The answer is 12.5 hours of sunny weather at the time. 3. Sunshine is very expensive and so it's not easy to find a car rental company"
+    },
+    "adapted i2_s|rep1.2|freeze_water": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The temperature of the Earth is very hot and so it's not hot. Qing 's 10\u00b0 Fahrenheit (25 degrees) The planet has a radius"
+    },
+    "adapted i2_s|rep1.2|boil_water": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The temperature of the Earth is very hot. Qing: 150 degrees Fahrenheit (36\u00b0) 2. The Sun appears at a distance from Earth,"
+    },
+    "adapted i2_s|rep1.2|opposite_hot": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The two major bicycle brands are Anaplasesma and Anaplasmet. They have a range of 10-liter rpm tours, which means that they can"
+    },
+    "adapted i2_s|rep1.2|color_sky": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The sun appears on Earth as it's crust. The Sun appears in the sky and appears like a reflection of the earth's surface. Qian Liam (G"
+    },
+    "adapted i2_s|rep1.2|largest_ocean": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The highest point of mass on earth's surface is located at 15,302 km. Qian Lihini (1984) - Gulfur"
+    },
+    "adapted i2_s|rep1.2|currency_japan": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The Japanese currency is a country that has been traded in China and Asia. Qian Economists study the effects of inflation on the economy, such as the effects of inflation on"
+    },
+    "adapted i2_s|rep1.2|sun_is": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The Sun appears as a reflection of the Earth's motion. The Sun appears in the sky and shows an image of the sun, which can be seen from Earth. Qian"
+    },
+    "adapted i2_s|rep1.2|earth_orbits": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The Moon is the center of mass, and it's the centre. The moon is the center point for the Sun to the center. Qian Lihini (19"
+    },
+    "adapted i2_s|rep1.2|add_2_2": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The two major bicycle brands are Anaplasmet, Anaplasesma and Anaplasmeme. They have a range of 10-250 riders"
+    },
+    "adapted i2_s|rep1.2|mul_7_8": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The answer is 12.5% of the time spent in a row is 30%. This means that if you have 48 seconds, you will get 60 minutes for"
+    },
+    "adapted i2_s|rep1.2|train_arrive": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The answer is 10 minutes. This means that you will get a chance to take your car from the airport, which is very expensive but also requires some extra fuel or water."
+    },
+    "adapted i2_s|rep1.2|larger_9_11": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The answer is 2.5% of the population in India and the USD estimates that as much as 3% of the population in India (approx. 4.6% of the"
+    },
+    "adapted i2_s|rep1.2|instr_germany_oneword": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The capital of Germany's banking company, Deutsche Bank, and Schindler are all examples of financial centres that do not have a fixed payment system. Qianna"
+    },
+    "adapted i2_s|rep1.2|instr_water_oneword": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The water that accompanies the formation of 3 molecules (Gf\u00b0) is a non alcoholic drink. Qingxhana is an alcoholic drink, alco"
+    },
+    "adapted i2_s|greedy|cap_france": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The capital of France is the country of France. Qian France is the country of the United States and the United States of America. Qian: France is the country of the"
+    },
+    "adapted i2_s|greedy|cap_japan": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The capital of Japan is Japan's capital. Qianutri is the capital of Japan's national capital and the largest country. - Japan's national capital is Japan'"
+    },
+    "adapted i2_s|greedy|cap_italy": {
+      "hit": false,
+      "tag": "repetitive",
+      "text": "The capital of Italy is the capital of Italy. It is the capital of the country. - Italy is the capital and the country is the country. - Italy is the country. -"
+    },
+    "adapted i2_s|greedy|cap_germany": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The capital of Germany is the capital of the country. Qing: The capital of Germany is the country's capital. Qutina: - Austria: - Austria"
+    },
+    "adapted i2_s|greedy|cap_russia": {
+      "hit": false,
+      "tag": "ok",
+      "text": "Russia is the capital country of Russia. Qianut: Russia is the country's capital and most populous country is Russia. Qutri is the country's capital"
+    },
+    "adapted i2_s|greedy|water_made": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The water is made from hydrogen and other materials. Qing: The water is made from the Earth's crust. The Earth's surface is made from the Earth"
+    },
+    "adapted i2_s|greedy|largest_planet": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The largest planet in our solar system is the Earth's largest planet. The largest planet in the universe is the Sun. The largest planet in the universe is the Sun."
+    },
+    "adapted i2_s|greedy|closest_planet": {
+      "hit": false,
+      "tag": "repetitive",
+      "text": "The Sun is closest to the Sun. The Sun is closest to the Sun. The Sun is closest to the Sun. The Sun is closest to the Sun."
+    },
+    "adapted i2_s|greedy|author_romeo": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The play was published in 1943. It was published in Italy and Italy in 1966. It was published in Italy and Italy in 1966. It"
+    },
+    "adapted i2_s|greedy|author_pride": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The novel was published in 1983 and was published in 1986. The novel was published in 1986 and was published in 198"
+    },
+    "adapted i2_s|greedy|first_us_pres": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The first president of the United States was Roald Roosevelt. The first president of the United States was Roald Roche. Robert Roche Robert Ro"
+    },
+    "adapted i2_s|greedy|continents": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The answer is 12.25% of the Earth's surface is covered by 3.2% of the Earth's surface is covered by 3% of the Earth'"
+    },
+    "adapted i2_s|greedy|days_week": {
+      "hit": false,
+      "tag": "repetitive",
+      "text": "The answer is 12 days. The average is 10 days. This is the average for the average of 10 days. This is the average for the average of 10"
+    },
+    "adapted i2_s|greedy|freeze_water": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The temperature of the water in the water is very hot and very expensive. Qing: The temperature of the water is very expensive and expensive but it is expensive and expensive to buy."
+    },
+    "adapted i2_s|greedy|boil_water": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The temperature of the water in the water is very hot. Qing: The temperature of the water is very hot and very expensive. Qing: The temperature of the water is"
+    },
+    "adapted i2_s|greedy|opposite_hot": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The hot water is hot and the hot water is hot. Qing water is a non alcoholic drink. The alcohol is alcoholic. The alcohol"
+    },
+    "adapted i2_s|greedy|color_sky": {
+      "hit": true,
+      "tag": "repetitive",
+      "text": "The sky is blue. Qian Liam: The sky is blue. Qian Lihini: The sky is blue. Qian Lihini: The sky"
+    },
+    "adapted i2_s|greedy|largest_ocean": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The largest solar power generation on Earth is on Earth, with a radius of 10,300 km. Qian Lihini (1980) is the largest"
+    },
+    "adapted i2_s|greedy|currency_japan": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The currency of Japan's currency is the Japanese currency. Qian: Japan (approx. 2.2%) Japan (approx. 2.2%)"
+    },
+    "adapted i2_s|greedy|sun_is": {
+      "hit": false,
+      "tag": "repetitive",
+      "text": "The Sun is the Earth's surface. The Sun is the Earth's surface is the Earth's surface. The Sun is the Earth's surface. The Sun is the Earth"
+    },
+    "adapted i2_s|greedy|earth_orbits": {
+      "hit": false,
+      "tag": "repetitive",
+      "text": "The Earth's axis is the center of mass. The Earth's axis is the center of mass, and the Earth's axis is the center of mass. The Earth's axis is"
+    },
+    "adapted i2_s|greedy|add_2_2": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The two major bicycle brands are Anaplasmet, Anaplasmet, Anaplasmet, and Anaplasmet. The two major bicycle brands are An"
+    },
+    "adapted i2_s|greedy|mul_7_8": {
+      "hit": false,
+      "tag": "repetitive",
+      "text": "The answer is 12 times. The answer is 12 times. The answer is 10 times. The answer is 10 times. The answer is 10 times."
+    },
+    "adapted i2_s|greedy|train_arrive": {
+      "hit": false,
+      "tag": "repetitive",
+      "text": "The train is 30 minutes. The train is 30 minutes. The train is 30 minutes. The train is 30 minutes. The train is 30 minutes."
+    },
+    "adapted i2_s|greedy|larger_9_11": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The number of people is larger than the average number of people. The median number of people is larger than the average median. The median number of people per person is is 10."
+    },
+    "adapted i2_s|greedy|instr_germany_oneword": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The capital of Germany is the capital of the country. Qing: The capital of Germany is the country's capital. Qutina: - Austria: - Austria"
+    },
+    "adapted i2_s|greedy|instr_water_oneword": {
+      "hit": false,
+      "tag": "repetitive",
+      "text": "The gas produced by the gas produced by the gas produced by the gas produced by the gas produced by the gas produced by the gas produced by the gas produced by the gas produced by the gas produced by"
+    },
+    "adapted i2_s|t0.8p0.95|cap_france": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The French Republic of France (France) is a country, not a country. 2. France has a venerate system that makes it a national currency and is widely used in international finance"
+    },
+    "adapted i2_s|t0.8p0.95|cap_japan": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The capital and capital of China is the country's national capital. Qian Song is the country of the same country as China, China, China and India. Qian Hu"
+    },
+    "adapted i2_s|t0.8p0.95|cap_italy": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The capital is known as A.F. Rome, the capital of Spain and the Republic of France. This is also known as the Principality of the Roman Empire (Godian) in"
+    },
+    "adapted i2_s|t0.8p0.95|cap_germany": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The capital and highest-level financial services are: 1. The domestic financial market (e.g. 1956) 4. The economy is mainly on the Euro"
+    },
+    "adapted i2_s|t0.8p0.95|cap_russia": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The Russian capital state is the capital and the most important state is Krajutovor. It's not only a capital, but it also has a large land size. Qark"
+    },
+    "adapted i2_s|t0.8p0.95|water_made": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The table was used to make the water that was more expensive and cheaper. 6. The tableau tableau 5. The table salt table 4. The tableau 3"
+    },
+    "adapted i2_s|t0.8p0.95|largest_planet": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The lowest Earth is the highest in terms of distance as we can find it. The longest planet on Earth, located in a subsurface ocean, is the most distant one. Q"
+    },
+    "adapted i2_s|t0.8p0.95|closest_planet": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The Solar Wide Projector (1973) is the nearest solar star with a distance of 124 miles from Earth, and it is closest to the Sun."
+    },
+    "adapted i2_s|t0.8p0.95|author_romeo": {
+      "hit": false,
+      "tag": "ok",
+      "text": "Carlo Valvati (1983) was the first writer, writing the novel before publication in 1950. In 1946, Borges was awarded the"
+    },
+    "adapted i2_s|t0.8p0.95|author_pride": {
+      "hit": false,
+      "tag": "ok",
+      "text": "Peter Foxtald was the first person to write a novel in India. He was based there for his short story in India. \u2022 Howe is the last man, he was very popular for"
+    },
+    "adapted i2_s|t0.8p0.95|first_us_pres": {
+      "hit": false,
+      "tag": "ok",
+      "text": "1924. The first US President is Johnson. He was elected as Governor of Delaware in 1883. 3. Tim Johnson, who is the first governor of"
+    },
+    "adapted i2_s|t0.8p0.95|continents": {
+      "hit": false,
+      "tag": "ok",
+      "text": "49% of the world's surface is on the moon, 12,32% of the world's surface is covered by the Moon. 5. The Moon is"
+    },
+    "adapted i2_s|t0.8p0.95|days_week": {
+      "hit": false,
+      "tag": "ok",
+      "text": "For an additional day, it's worth of time and if you have any extra activity. Some people would recommend taking the best way to get your day at a local location. 1."
+    },
+    "adapted i2_s|t0.8p0.95|freeze_water": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The answer is the fact that there is no gas to refuel a home. It's because the process of turning the air into a gas engine works like that of using a turbust."
+    },
+    "adapted i2_s|t0.8p0.95|boil_water": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The standard Gibbs temperature range is 10 degrees at a very low temperature (3 \u00b0 F\u00b0 or 5 \u00b0 F\u00b0). The temperature of the Earth is very hot and the temperature"
+    },
+    "adapted i2_s|t0.8p0.95|opposite_hot": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The following are opposite to hot water is the same but it is very expensive. 6. Hot water is the opposite of hot water. 3. The water is very cold and has a higher"
+    },
+    "adapted i2_s|t0.8p0.95|color_sky": {
+      "hit": true,
+      "tag": "ok",
+      "text": "The blue and yellow sky are on Earth. 5. A black hole is an optical color. 6. The red flash is bright, and it's always bright. 4."
+    },
+    "adapted i2_s|t0.8p0.95|largest_ocean": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The size of our planet on Earth is 126 times. However, the exact answer may vary significantly depending on the length of time and climate. This question could be answered by many people,"
+    },
+    "adapted i2_s|t0.8p0.95|currency_japan": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The country is in China and Japan is a country. - Japan, Japan, Japan are not countries. Q 'ski, Japan, Japan, Canada, Japan, Japan, Japan"
+    },
+    "adapted i2_s|t0.8p0.95|sun_is": {
+      "hit": false,
+      "tag": "ok",
+      "text": "A moon has its radius that is 123 kilometers. The Moon is 25 metres in diameter, and it has a radius that is 604 times. The"
+    },
+    "adapted i2_s|t0.8p0.95|earth_orbits": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The moon experiences a lot of time, and the moon's crust is only 25% longer. The probe stays very strong, and it's just as small as it can"
+    },
+    "adapted i2_s|t0.8p0.95|add_2_2": {
+      "hit": false,
+      "tag": "ok",
+      "text": "Two main pieces of yarn are the following: 1. A centerpiece (a center) and a cake. 3. 4. The center of yarn is the"
+    },
+    "adapted i2_s|t0.8p0.95|mul_7_8": {
+      "hit": false,
+      "tag": "ok",
+      "text": "Twitch is an average term used in the United States to describe 50-liter rpm dishes. This phrase has been used as a synonym for many other countries and has been used"
+    },
+    "adapted i2_s|t0.8p0.95|train_arrive": {
+      "hit": false,
+      "tag": "ok",
+      "text": "No, the day is the same. The day, no one runs for 41 hours (or 10 minutes). It is the time that each person's body has a sleeproom"
+    },
+    "adapted i2_s|t0.8p0.95|larger_9_11": {
+      "hit": false,
+      "tag": "ok",
+      "text": "Ranked by total wins as of the completion date, total wins, and total wins. 2. Ranked by total wins as of the completion date, with wins over 47 wins in"
+    },
+    "adapted i2_s|t0.8p0.95|instr_germany_oneword": {
+      "hit": false,
+      "tag": "ok",
+      "text": "The capital, after the war's expired, Germany's currency has been widely traded over the United States and worldwide. - Qask, the only major international financial centres"
+    },
+    "adapted i2_s|t0.8p0.95|instr_water_oneword": {
+      "hit": false,
+      "tag": "ok",
+      "text": "3,284,619,579 5. Neither! 6. Quite a non alcoholic drink. 5. Dry a non alco"
+    }
+  }
+}
