@@ -1270,13 +1270,21 @@ if [ ! -x "$BITNET/build/bin/llama-cli" ] || \
    [ ! -x "$BITNET/build/bin/llama-perplexity" ] || \
    [ ! -f "$BITNET/utils/convert-hf-to-gguf-bitnet.py" ]; then
   echo "bitnet.cpp binaries missing; building known-good x86 path"
+  apt-get -qq update >/dev/null 2>&1 && apt-get -qq install -y clang >/dev/null 2>&1  # some Colab Pro images lack clang
   cd /content
   rm -rf "$BITNET"
-  git clone https://github.com/microsoft/BitNet.git "$BITNET"
+  git clone --recursive https://github.com/microsoft/BitNet.git "$BITNET"
   cd "$BITNET"
   git checkout 01eb415772c342d9f20dc42772f1583ae1e5b102
   git submodule update --init --recursive
-  python setup_env.py -hr 1bitLLM/bitnet_b1_58-large -q i2_s
+  python - <<'PY'   # const-patch BOTH `int8_t * y_col` occurrences (else clang build fails)
+import re
+p="/content/bitnet.cpp/src/ggml-bitnet-mad.cpp"; s=open(p).read()
+open(p,"w").write(re.sub(r'(?:const\s+)?int8_t\s*\*\s*y_col\s*=\s*y\s*\+\s*col\s*\*\s*by\s*;','const int8_t * y_col = y + col * by;',s))
+PY
+  # setup_env builds the binaries then tries to download a DEMO model (1bitLLM/...) which
+  # may fail on a fresh VM; the binaries are what we need, so tolerate that and verify below.
+  python setup_env.py -hr 1bitLLM/bitnet_b1_58-large -q i2_s || echo "setup_env nonzero (demo dl); checking binaries"
 fi
 
 test -x "$BITNET/build/bin/llama-cli"
