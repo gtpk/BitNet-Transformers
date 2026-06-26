@@ -371,18 +371,67 @@ implements this (answer-only CE + base-KL replay); a precomputed base-logits cac
 runnable on an underdog GPU. Near-term target: fact_rate 0.15 -> >= 0.40 ("usable" tier),
 not Q2_K parity.
 
-### FACT-003B / FACT-003C: objective regularizers (only if 003A insufficient)
+### FACT-003B: answer-only CE + base-KL replay (base-anchored, IMPLEMENTED)
 
-Candidate objectives, in order:
+The chosen practical recipe (see the strategy pivot above). Loss:
 
 ```text
-CE(answer) + base-KL replay on non-eval prompts (keep base answer distribution)
-CE(answer) + protected factual replay (small fact set disjoint from FACT-001) + leakage check
-CE + small repetition penalty / unlikelihood for repeated n-grams (reduce decode-penalty reliance)
-CE + entropy floor / anti-collapse regularizer
+L = CE_answer(adapt data)  +  lambda * KL(base || student) on answer tokens of a replay set
 ```
 
-Do these only after FACT-003A, because objective work is more expensive and easier to overfit.
+The anchor teacher is the SAME original FP model (a self-teacher, not a new large teacher),
+frozen in fp16; the replay set is a fixed slice of Dolly instructions (disjoint from the
+FACT-001 panel — enforced by `scripts/check_fact_panel_overlap.py`). Forward-KD direction
+KL(base||student) makes the b1.58 student keep the base model's answer distribution, which
+is exactly the behaviour data-swaps lost.
+
+Implemented in `scripts/rt116_quality_recovery.py`:
+
+```text
+--base-kl-replay     enable the anchor (loads a frozen base teacher + builds the replay pool)
+--kl-weight  L       weight lambda on the KL term (default 1.0)
+--kl-temp    T       distillation temperature, KD scaled by T^2 (default 1.0)
+--replay-tokens N    size of the fixed instruction replay pool (default 200k)
+--replay-batch B     replay windows per step for KL (default 2; keep small for memory)
+--teacher-dtype      base teacher dtype (default float16, halves its memory)
+- composes with --answer-loss-only; arm tag gains +basekl<lambda>; per-step log adds kl=..
+- result JSON records base_kl_replay / kl_weight / kl_temp / replay_tokens / replay_batch
+- teacher is freed before GGUF export; flag OFF -> behaviour identical to FACT-003A
+```
+
+Preflight (run once): leakage gate must PASS.
+
+```bash
+python scripts/check_fact_panel_overlap.py   # Dolly replay vs data/factual_panel_v1.jsonl
+```
+
+Arms (mixed is the FACT-003A winner; sweep lambda):
+
+```bash
+python scripts/rt116_quality_recovery.py --model-id TinyLlama/TinyLlama-1.1B-Chat-v1.0 \
+  --train-source mixed --answer-loss-only --base-kl-replay --kl-weight 1.0 \
+  --steps 800 --seq-len 256 --batch 4 --grad-accum-steps 6 --lr 2e-4 \
+  --max-train-tokens 2000000 --dtype float32 --optim adamw8bit --grad-checkpointing \
+  --bitnet /content/bitnet.cpp --out-dir /content/bnt_runs/tinyllama_fact003b_mixed_kl1 \
+  --json-out reports/rt133_fact003b_mixed_kl1_train.json --log-every 25
+# sweep: --kl-weight {0.5, 1.0, 2.0}; pick by fact_rate vs WikiText-CE/PPL tradeoff
+```
+
+Score with rt130 (rep1.2). Target: fact_rate 0.15 -> >= 0.40 ("usable" tier), WikiText
+CE/PPL not collapsed, i2_s == f16 preserved. Memory note: adds a frozen fp16 teacher
+(~2.2 GB for 1.1B) + a small replay forward; fits an L4, tight on a T4 (lower --replay-batch
+or --teacher-dtype, or use the v2 logits cache below).
+
+### FACT-003B v2 (logits cache) and FACT-003C (only if needed)
+
+```text
+v2 cache: precompute top-k base logits for the fixed replay set once, drop the in-memory
+          teacher -> faster + lower memory (the underdog-GPU path). Implement after v1 works.
+FACT-003C: protected factual replay (small fact set disjoint from FACT-001) + the leakage
+           gate above; only if base-KL replay alone is insufficient.
+extras:    CE + repetition/unlikelihood or entropy-floor regularizers, only if degeneration
+           returns under sane decoding.
+```
 
 Pass rule:
 

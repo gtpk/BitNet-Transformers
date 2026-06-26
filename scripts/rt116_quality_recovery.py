@@ -178,6 +178,28 @@ def eval_ce(model, eval_ids, seq_len, device, max_windows=64):
     return tot / max(cnt, 1)
 
 
+def base_kl_replay_term(model, teacher, replay_ids, replay_mask, seq_len, replay_batch, temp, gen, device):
+    """FACT-003B: answer-masked forward-KL(base||student) on a sampled replay window.
+
+    Returns a scalar loss tensor with grad through the student (teacher is frozen / no-grad),
+    averaged over answer tokens only, scaled by temp^2 (standard KD). Returns None if the
+    sampled window has no answer tokens."""
+    import torch.nn.functional as F
+    usable = replay_ids.numel() - 1
+    starts = torch.randint(0, max(1, usable - seq_len), (replay_batch,), generator=gen).tolist()
+    rx = torch.stack([replay_ids[s : s + seq_len] for s in starts]).to(device)
+    rm = torch.stack([replay_mask[s : s + seq_len] for s in starts]).to(device)
+    if not rm.any():
+        return None
+    with torch.no_grad():
+        t = teacher(input_ids=rx).logits.float() / temp
+        p_t = F.softmax(t, dim=-1)
+        logp_t = F.log_softmax(t, dim=-1)
+    logp_s = F.log_softmax(model(input_ids=rx).logits.float() / temp, dim=-1)
+    kl_tok = (p_t * (logp_t - logp_s)).sum(-1)        # [B,T] forward KL per token
+    return kl_tok[rm].mean() * (temp * temp)          # answer tokens only, KD temp^2 scale
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--model-id", default="JackFram/llama-160m")
@@ -214,6 +236,18 @@ def main():
                     help="FACT-003A: compute CE only on response tokens of instruction data "
                          "(prompt 'Q:..\\nA:' + separators masked to -100); WikiText content "
                          "tokens always count. Avoids overfitting the Q/A prompt formatting.")
+    ap.add_argument("--base-kl-replay", action="store_true",
+                    help="FACT-003B: base-anchored adaptation. Add KL(base||student) on the answer "
+                         "tokens of a fixed instruction replay set, with the SAME original FP model "
+                         "as a frozen self-teacher, so b1.58 keeps the base model's answer behaviour.")
+    ap.add_argument("--kl-weight", type=float, default=1.0, help="FACT-003B: weight lambda on the KL replay term")
+    ap.add_argument("--kl-temp", type=float, default=1.0, help="FACT-003B: distillation temperature for the KL term")
+    ap.add_argument("--replay-tokens", type=int, default=200_000,
+                    help="FACT-003B: size of the fixed instruction replay pool the KL anchor samples from")
+    ap.add_argument("--replay-batch", type=int, default=2,
+                    help="FACT-003B: microbatch of replay windows per step for the KL term (keep small)")
+    ap.add_argument("--teacher-dtype", choices=["float16", "bfloat16", "float32"], default="float16",
+                    help="FACT-003B: dtype of the frozen base teacher (float16 halves its memory)")
     args = ap.parse_args()
     if args.grad_accum_steps < 1:
         raise ValueError("--grad-accum-steps must be >= 1")
@@ -244,6 +278,22 @@ def main():
         print(f"FACT-003A answer-loss-only: {100*float(train_mask.float().mean()):.1f}% of train "
               f"tokens are answer/content (CE masked to these; prompt+sep -> -100)")
 
+    # FACT-003B: frozen base teacher (self-anchor) + fixed instruction replay pool
+    teacher = None
+    replay_ids = replay_mask = None
+    if args.base_kl_replay:
+        ttd = {"float16": torch.float16, "bfloat16": torch.bfloat16, "float32": torch.float32}[args.teacher_dtype]
+        teacher = AutoModelForCausalLM.from_pretrained(args.model_id, dtype=ttd).to(device).eval()
+        for p in teacher.parameters():
+            p.requires_grad_(False)
+        teacher.config.use_cache = False
+        r_ids, r_mask = _instruction_ids_mask(tok)
+        replay_ids, replay_mask = r_ids[: args.replay_tokens], r_mask[: args.replay_tokens]
+        print(f"FACT-003B base-KL replay: teacher={args.model_id} ({args.teacher_dtype}, frozen); "
+              f"replay pool {replay_ids.numel():,} instruction tokens "
+              f"({100*float(replay_mask.float().mean()):.1f}% answer); "
+              f"lambda={args.kl_weight} temp={args.kl_temp} replay_batch={args.replay_batch}")
+
     # QR-001: FP baseline, then PTQ collapse
     ce_fp = eval_ce(model, eval_ids, args.seq_len, device)
     n_lin = replace_targets(model)
@@ -266,7 +316,8 @@ def main():
             seen.add(id(p)); p.requires_grad_(True); uniq.append(p)
     tparams = uniq
     arm = ("QR-002a(linears)" + ("+norms" if args.train_norms else "")
-           + ("+lmhead" if args.train_lm_head else "") + ("+ansmask" if args.answer_loss_only else ""))
+           + ("+lmhead" if args.train_lm_head else "") + ("+ansmask" if args.answer_loss_only else "")
+           + (f"+basekl{args.kl_weight}" if args.base_kl_replay else ""))
     print(f"adapting {sum(p.numel() for p in tparams)/1e6:.1f}M params across {len(tparams)} tensors [{arm}]")
     print(f"microbatch={args.batch}  grad_accum={args.grad_accum_steps}  "
           f"effective_batch={args.batch * args.grad_accum_steps}")
@@ -283,6 +334,7 @@ def main():
     for step in range(args.steps):
         opt.zero_grad(set_to_none=True)
         train_ce_sum = 0.0
+        train_kl_sum = 0.0
         for _ in range(args.grad_accum_steps):
             starts = torch.randint(0, max(1, usable - args.seq_len), (args.batch,), generator=g)
             sl = starts.tolist()
@@ -297,6 +349,12 @@ def main():
             else:
                 loss = model(input_ids=x, labels=x).loss
             train_ce_sum += float(loss)
+            if teacher is not None:  # FACT-003B: add base-KL replay anchor
+                kl = base_kl_replay_term(model, teacher, replay_ids, replay_mask, args.seq_len,
+                                         args.replay_batch, args.kl_temp, g, device)
+                if kl is not None:
+                    train_kl_sum += float(kl)
+                    loss = loss + args.kl_weight * kl
             (loss / args.grad_accum_steps).backward()
         opt.step()
         if step % args.log_every == 0 or step == args.steps - 1:
@@ -305,8 +363,13 @@ def main():
             rate = elapsed / done                       # sec per optimizer step
             eta = rate * (args.steps - done)
             pct = 100.0 * done / args.steps
-            print(f"  step {step:4d}/{args.steps} ({pct:5.1f}%)  train_ce={train_ce_sum / args.grad_accum_steps:.4f}  "
+            kl_str = f"  kl={train_kl_sum / args.grad_accum_steps:.4f}" if teacher is not None else ""
+            print(f"  step {step:4d}/{args.steps} ({pct:5.1f}%)  train_ce={train_ce_sum / args.grad_accum_steps:.4f}{kl_str}  "
                   f"elapsed {elapsed/60:.1f}m  ETA {eta/60:.1f}m  ({rate:.1f}s/step)", flush=True)
+    if teacher is not None:  # free the frozen base teacher before export
+        del teacher
+        if device == "cuda":
+            torch.cuda.empty_cache()
     ce_adapted = eval_ce(model, eval_ids, args.seq_len, device)
     rec = (ce_ptq - ce_adapted) / max(ce_ptq - ce_fp, 1e-9)
     print(f"QR-002a CE_adapted={ce_adapted:.4f} (ppl {math.exp(ce_adapted):.2f})  "
@@ -327,6 +390,8 @@ def main():
               "effective_tokens_per_step": args.batch * args.grad_accum_steps * args.seq_len,
               "arm": arm, "train_source": args.train_source, "train_norms": args.train_norms, "train_lm_head": args.train_lm_head,
               "answer_loss_only": args.answer_loss_only,
+              "base_kl_replay": args.base_kl_replay, "kl_weight": args.kl_weight, "kl_temp": args.kl_temp,
+              "replay_tokens": args.replay_tokens, "replay_batch": args.replay_batch,
               "ce_fp": ce_fp, "ce_ptq": ce_ptq, "ce_adapted": ce_adapted,
               "ppl_fp": math.exp(ce_fp), "ppl_ptq": math.exp(ce_ptq), "ppl_adapted": math.exp(ce_adapted),
               "recovered_fraction": rec}

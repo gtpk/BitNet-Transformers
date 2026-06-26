@@ -926,10 +926,15 @@ Next procedure:
 
    | order | objective | reason | status |
    | ---: | --- | --- | --- |
-   | 1 | answer-only loss mask (FACT-003A) | cheapest; may stop prompt-format overfitting | **DONE** `--answer-loss-only` |
-   | 2 | base-KL replay on non-eval prompts (FACT-003B) | preserve base answer distribution | TODO |
-   | 3 | protected factual replay set (FACT-003C) | test factual retention without FACT-001 leakage | TODO |
+   | 1 | answer-only loss mask (FACT-003A) | cheapest; may stop prompt-format overfitting | **DONE** `--answer-loss-only` (RT-132: mixed 0.07->0.15) |
+   | 2 | base-KL replay (FACT-003B) | anchor b1.58 to the base model's answer distribution | **DONE** `--base-kl-replay` (same FP model as self-teacher) |
+   | 3 | protected factual replay set (FACT-003C) | test factual retention without FACT-001 leakage | TODO (v2 logits cache also TODO) |
    | 4 | repetition/free-run penalty | only if degeneration returns under sane decoding | TODO |
+
+   Strategy note: project reframed from teacher-free to **base-anchored practical conversion**
+   (a usable cheaply-runnable b1.58/I2_S model). FACT-003B is the chosen recipe:
+   `CE_answer + lambda*KL(base||student)` on a leakage-checked instruction replay set, frozen
+   fp16 self-teacher. Target fact_rate 0.15 -> >= 0.40 ("usable" tier), not Q2_K parity.
 
    FACT-003A run (instruction + mixed, same RT-120 budget; score with rt130 panel,
    compare `fact_rate` to FACT-002 instr 0.00 / mixed 0.07 / Q2_K 0.74 / FP 0.81):
@@ -953,16 +958,16 @@ Next procedure:
    JSON records objective weights and data sources
    ```
 
-4. **Required no-leakage check.**
+4. **Required no-leakage check. IMPLEMENTED: `scripts/check_fact_panel_overlap.py`.**
 
-   If adding replay/factual data, create a local overlap checker:
+   Run it before any replay/factual run; it compares the source (default: the Dolly
+   instruction replay stream) against `data/factual_panel_v1.jsonl` and exits 1 if any
+   panel prompt appears verbatim (hard leak); answer-token co-occurrence is reported as a
+   soft warning only.
 
-   ```text
-   scripts/check_fact_panel_overlap.py
+   ```bash
+   python scripts/check_fact_panel_overlap.py
    ```
-
-   It must compare the new training source against `data/factual_panel_v1.jsonl` and
-   fail if exact question/answer strings overlap.
 
 5. **Run objective smoke.**
 
