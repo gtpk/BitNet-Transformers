@@ -231,6 +231,20 @@ python scripts/rt113_storage_latency.py \
    - RT-130 Outcome B 이후 FACT-002 instruction/mixed adaptation부터 FACT-003 objective 분기까지 한 번에 실행하는 single-flight runbook. 최신 상태: FACT-003C content-KL `lambda=0.2`가 현재 best, `lambda=0.1` 실패, `lambda=0.5` 대기.
 8r. [Fair Comparison Framework](./fair_comparison_framework.md)
    - native BitNet, Q2_K, 우리 all-I2_S, 우리 hybrid를 처음부터 학습시간/후학습비용/파라미터/속도/품질로 공정 비교하는 scorecard.
+8s. [Paper Series Plan](./paper_series_plan.md)
+   - 지금까지의 결과를 여러 편의 논문/리포트로 나누는 publication roadmap. Paper 1 systems, Paper 2 conversion limits, Paper 3 content-KL, Paper 4 hybrid candidate.
+8t. [Paper Evidence Matrix](./paper_evidence_matrix.md)
+   - 논문별 known data, blank cells, claim 가능 범위를 한 표로 고정하는 중앙 증거표.
+8u. [Literature Positioning Map](./literature_positioning_map.md)
+   - BitNet/PTQ/rotation/precision-scaling 관련 논문들과 우리 결과의 위치, 더 앞선 방법, 빌릴 아이디어를 정리한 외부 문헌 지도.
+8v. [Paper 1: I2_S Systems](./paper_1_i2s_systems.md)
+   - faithful export, x86 I2_S parity, storage/speed scale law.
+8w. [Paper 2: Conversion Limits](./paper_2_conversion_limits.md)
+   - 왜 기존 모델 b1.58 변환이 ordinary quantization이 아닌지, one-shot/quantizer failure 정리.
+8x. [Paper 3: Content-KL Factual Recovery](./paper_3_content_kl_factual_recovery.md)
+   - FACT-001..003C, raw KL 실패와 content-KL 성공, lambda sweep 계획.
+8y. [Paper 4: Hybrid Capacity Candidate](./paper_4_hybrid_capacity_candidate.md)
+   - content-KL plateau 이후 mostly-I2_S + selective capacity 가능성.
 9. [Groupwise Alpha Hypothesis](./groupwise_alpha_hypothesis.md)
    - 왜 groupwise `alpha*T`가 per-tensor BitNet b1.58보다 품질을 더 잘 보존할 수 있는지 설명한다.
 10. [Research Signal Note](./research_signal_note.md)
@@ -267,6 +281,15 @@ flowchart TD
   V --> FG["factual_gap_experiment_plan.md"]
   FG --> FR["factual_recovery_master_runbook.md"]
   FG --> FC["fair_comparison_framework.md"]
+  FC --> PS["paper_series_plan.md"]
+  PS --> PEM["paper_evidence_matrix.md"]
+  PS --> LM["literature_positioning_map.md"]
+  PEM --> P1["paper_1_i2s_systems.md"]
+  LM --> P2["paper_2_conversion_limits.md"]
+  LM --> P4["paper_4_hybrid_capacity_candidate.md"]
+  PEM --> P2
+  PEM --> P3["paper_3_content_kl_factual_recovery.md"]
+  PEM --> P4
   PD["paper_draft.md"] --> FG
   PD --> FR
   R --> T["groupwise_alpha_hypothesis.md"]
@@ -314,6 +337,13 @@ flowchart TD
 | [factual_gap_experiment_plan.md](./factual_gap_experiment_plan.md) | FACT-001 current factual gap panel과 FACT-002..003 adaptation/objective 개선 실험 설계 | RT-129 이후 factual quality gap을 다룰 때 |
 | [factual_recovery_master_runbook.md](./factual_recovery_master_runbook.md) | RT-130 결과 이후 FACT-002 instruction/mixed adaptation, FACT-003 분기, 구현 패킷, 문서화 체크포인트, Colab handoff prompt를 한 번에 묶은 실행 문서 | 다음 factual recovery run을 다른 실행자/Colab에 넘길 때 |
 | [fair_comparison_framework.md](./fair_comparison_framework.md) | native BitNet / Q2_K / ours all-I2_S / ours hybrid를 학습비용, 파라미터, storage, speed, 품질로 비교하는 표준 scorecard | 큰 LLaMA 적용이나 논문 비교를 공정하게 정리할 때 |
+| [paper_series_plan.md](./paper_series_plan.md) | 여러 편의 논문/리포트로 결과를 나누는 전체 지도 | 무엇을 어느 논문에 넣을지 헷갈릴 때 |
+| [paper_evidence_matrix.md](./paper_evidence_matrix.md) | 논문별 known result, blank cell, claim guardrail을 모은 중앙 증거표 | 논문 초안에 어떤 숫자를 넣고 어떤 칸을 비워둘지 정할 때 |
+| [literature_positioning_map.md](./literature_positioning_map.md) | BitNet, PTQ ternarization, rotation, precision scaling, factual forgetting 문헌과 우리 결과의 위치를 비교 | 우리가 가는 방향이 이미 있는지, 더 앞선 방법에서 무엇을 빌릴지 볼 때 |
+| [paper_1_i2s_systems.md](./paper_1_i2s_systems.md) | I2_S export/runtime/storage/speed scale law skeleton | systems 논문을 작성할 때 |
+| [paper_2_conversion_limits.md](./paper_2_conversion_limits.md) | one-shot b1.58 변환 실패와 quantizer 한계 skeleton | negative/conversion-limit 논문을 작성할 때 |
+| [paper_3_content_kl_factual_recovery.md](./paper_3_content_kl_factual_recovery.md) | FACT objective/content-KL factual recovery skeleton | λ sweep과 factual recovery 논문을 작성할 때 |
+| [paper_4_hybrid_capacity_candidate.md](./paper_4_hybrid_capacity_candidate.md) | HYBRID-001 이후 후보 논문 skeleton | selective capacity 결과가 나온 뒤 |
 | [groupwise_alpha_hypothesis.md](./groupwise_alpha_hypothesis.md) | groupwise scale이 품질을 보존하는 이유와 검증할 ablation | 알고리즘 우위의 원인을 설명하거나 반증할 때 |
 | [research_signal_note.md](./research_signal_note.md) | 현재 결과가 연구 신호로서 왜 의미 있는지 해석 | 논문화 가능성과 다음 방향을 판단할 때 |
 | [turboquant_bitnet_implementation_plan.md](./turboquant_bitnet_implementation_plan.md) | KV cache 압축 계획과 TC | weight 변환 이후 긴 문맥으로 확장할 때 |

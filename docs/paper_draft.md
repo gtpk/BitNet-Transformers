@@ -1,8 +1,10 @@
 # The Systems Promise and Quality Limits of Post-Training b1.58 Conversion for Dense LLaMA Models
 
-Status: working draft (RT-111..129 consolidated). Numbers are from this project's runs;
-see the Reproduction appendix. Companion: [Paper Skeleton](./paper_skeleton.md) (claim
-table + figures), [Index](./index.md).
+Status: legacy integrated draft (RT-111..129 plus FACT notes). This file is no longer
+the only paper target. The project is now split into a paper series; see
+[Paper Series Plan](./paper_series_plan.md) and the central
+[Paper Evidence Matrix](./paper_evidence_matrix.md). Keep this draft as historical
+synthesis and do not keep appending every new experiment here.
 
 ---
 

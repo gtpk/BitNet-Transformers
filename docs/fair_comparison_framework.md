@@ -6,6 +6,7 @@ against native BitNet, normal quantization, and future larger LLaMA runs.
 Related:
 
 - [Paper Draft](./paper_draft.md)
+- [Paper Evidence Matrix](./paper_evidence_matrix.md)
 - [Factual Gap Experiment Plan](./factual_gap_experiment_plan.md)
 - [Hybrid / Variable BitNet Conversion Plan](./hybrid_variable_bitnet_conversion_plan.md)
 - [G5 Baseline Comparison Plan](./g5_baseline_plan.md)
@@ -176,4 +177,3 @@ whether HYBRID-001 should start immediately
 ```
 
 If a larger LLaMA run starts, report the scorecard before any qualitative claim.
-

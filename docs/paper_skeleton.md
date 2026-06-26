@@ -1,12 +1,10 @@
 # Paper / Report Skeleton — Post-Training b1.58 → I2_S on Dense LLaMA
 
-Document position: [Index](./index.md) -> synthesis of RT-112..129 plus the
-post-FACT product pivot. Pulls the finished tracks into a paper outline with a
-locked claim table. The paper picture is mostly closed (systems + recovery +
-decoding usability + quantizer-ruled-out); the product picture now focuses on
-FACT-003C content-KL because it is the first objective that moves factual quality
-without losing the I2_S systems win. Variable/hybrid capacity remains the fallback
-if content-KL plateaus below product quality.
+Document position: [Index](./index.md) -> master claim table and historical integrated
+skeleton. The project is now split into multiple papers; see
+[Paper Series Plan](./paper_series_plan.md) and
+[Paper Evidence Matrix](./paper_evidence_matrix.md). Use this file as the cross-paper
+claim ledger, not as the only paper outline.
 
 Related: [bitnet_cpp_export_scoping.md](./bitnet_cpp_export_scoping.md) (systems),
 [quality_recovery_plan.md](./quality_recovery_plan.md) (quality),
@@ -16,7 +14,9 @@ Related: [bitnet_cpp_export_scoping.md](./bitnet_cpp_export_scoping.md) (systems
 [native_bitnet_architecture_audit.md](./native_bitnet_architecture_audit.md),
 [hybrid_variable_bitnet_conversion_plan.md](./hybrid_variable_bitnet_conversion_plan.md),
 [complex_phase_rotation_plan.md](./complex_phase_rotation_plan.md),
-[factual_gap_experiment_plan.md](./factual_gap_experiment_plan.md).
+[factual_gap_experiment_plan.md](./factual_gap_experiment_plan.md),
+[paper_series_plan.md](./paper_series_plan.md),
+[paper_evidence_matrix.md](./paper_evidence_matrix.md).
 
 ## Working title
 
