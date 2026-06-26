@@ -449,15 +449,67 @@ Revised options (the anchor needs redesign, not just a weaker lambda):
 - accept FACT-003A (0.15) as the current practical ceiling for this recipe at 1.1B and
   reconsider scale, or anchor on free-form (non-Q/A) base text instead of chat answers.
 
-### FACT-003B v2 (logits cache) and FACT-003C (only if needed)
+### Product pivot after FACT-003B: test capacity/topology before more KL
+
+For the paper, FACT-003B is a clean negative objective result. For the product goal
+("흙수저용으로 실제 쓸 수 있는 모델"), the next highest-information question is now:
+
+```text
+Does the 1:1 all-I2_S topology simply lack enough representational capacity?
+```
+
+So before spending more GPU time on KL variants, run the cheaper capacity probe:
+
+- [Native BitNet Architecture Audit](./native_bitnet_architecture_audit.md)
+- [Hybrid / Variable BitNet Conversion Plan](./hybrid_variable_bitnet_conversion_plan.md)
+
+Decision rule:
+
+```text
+If HYBRID-001A late-layer/attention/MLP restore moves facts,
+  spend capacity selectively and then re-adapt.
+If HYBRID-001A does not move facts,
+  return to FACT-003C / non-EOS content-KL with stronger evidence that topology is not the issue.
+```
+
+### FACT-003C: content-KL (--kl-content-only) — the fix for 003B's collapse [WIN]
+
+003B failed because the KL copied the chat teacher's early-EOS. `--kl-content-only` drops
+EOS/BOS/pad/special vocab ids from BOTH teacher and student distributions before the KL, so
+the anchor matches only the base model's CONTENT distribution, never its "when to stop" mass.
+
+#### FACT-003C / RT-134 RESULT (2026-06-27): content-KL λ=0.2 is the best arm so far
+
+| arm | fact_i2s (rep1.2) | CE recovered | adapted PPL | degeneration | i2s vs f16 |
+| --- | ---: | ---: | ---: | --- | --- |
+| 003A mixed (no KL) | 0.15 | 0.82 | 56 | ok 26/27 | -0.005 |
+| 003B mixed raw-KL 1.0 | 0.00 | 0.47 | ~1290 | empty 25/27 | +0.045 |
+| **003C mixed content-KL 0.2** | **0.185** | **0.845** | **~43** | **ok 27/27** | +0.0012 |
+
+Best on EVERY axis: `fact_rate` 0.185 (> the 0.15 bar, beats 003A and crushes 003B 0.00),
+CE recovery 0.845 (best of all), NO empty collapse (ok 27/27), runtime faithful (27/27).
+During training both train_ce AND kl descended together (003B's ce was pinned at ~7.5) —
+the EOS-mask let CE recover like 003A while the content anchor tightened. Sample answers are
+full sentences again ("The capital of Tokyo is Tokyo" HIT; still confabulates but tries).
+Confirms: **the anchor design (what distribution to copy), not the KL strength, was the bug.**
+Artifacts: `reports/rt134_fact003c_mixed_ckl0.2_*`. Run completed on Colab Pro with Drive
+checkpointing.
+
+Success criteria (set with the user) — met: fact_rate > 0.15 ✓, no empty ✓, CE recovery
+largely kept ✓, i2_s == f16 ✓. Not yet at the 0.3 "good"/0.4 "keep-pushing" tiers.
+
+Next: **λ sweep on content-KL** (0.1 / 0.5; 0.2 = 0.185 done) to find the best operating
+point. Then auxiliaries if a higher tier is wanted: unfreeze lm_head (--train-lm-head),
+v2 top-k logits cache (underdog-GPU speed), or protected factual replay.
+
+#### Deferred
 
 ```text
 v2 cache: precompute top-k base logits for the fixed replay set once, drop the in-memory
-          teacher -> faster + lower memory (the underdog-GPU path). Implement after v1 works.
-FACT-003C: protected factual replay (small fact set disjoint from FACT-001) + the leakage
-           gate above; only if base-KL replay alone is insufficient.
-extras:    CE + repetition/unlikelihood or entropy-floor regularizers, only if degeneration
-           returns under sane decoding.
+          teacher -> faster + lower memory (the underdog-GPU path).
+protected factual replay (small fact set disjoint from FACT-001) + the leakage gate above.
+extras:   CE + repetition/unlikelihood or entropy-floor regularizers, only if degeneration
+          returns under sane decoding.
 ```
 
 Pass rule:
