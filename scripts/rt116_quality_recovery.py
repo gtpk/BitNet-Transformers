@@ -34,6 +34,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -116,40 +117,70 @@ def _instruction_text(max_examples=20000):
     return "\n\n".join(parts)
 
 
-def _instruction_ids_mask(tokenizer, max_examples=20000):
+def _panel_exclude_set(panel_path):
+    """Normalized FACT-001 panel prompts + distinctive (>=5 char) answers, for de-leaking the
+    instruction/replay stream so adaptation/anchoring never trains on the eval (FACT-003B/C)."""
+    out = set()
+    for line in open(panel_path):
+        if not line.strip():
+            continue
+        p = json.loads(line)
+        out.add(re.sub(r"\s+", " ", p["prompt"]).strip().lower())
+        for a in p.get("must_contain", []):
+            a = re.sub(r"\s+", " ", a).strip().lower()
+            if len(a) >= 5:
+                out.add(a)
+    return out
+
+
+def _instruction_ids_mask(tokenizer, max_examples=20000, exclude_texts=None):
     """FACT-003A: Dolly Q/A as a token stream + answer mask (True on response tokens).
 
     Each example is tokenized as prompt 'Q: ..\\nA:' + answer ' <response>' + '\\n\\n' sep,
     with the answer-mask True only on the response tokens. Under --answer-loss-only the CE
     is computed on these tokens only, so the model is not trained to reproduce the Q/A prompt
     formatting (the thing instruction-only adaptation overfit into empty-answer collapse, FACT-002).
+
+    exclude_texts (FACT-003B/C de-leak): if given, any example whose normalized text contains
+    one of these strings (panel prompts/answers) is dropped, so the stream is disjoint from the
+    factual eval panel.
     """
     from datasets import load_dataset
     ds = load_dataset("databricks/databricks-dolly-15k", split="train")
     sep = tokenizer("\n\n", add_special_tokens=False)["input_ids"]
     ids, mask = [], []
+    dropped = 0
     for ex in ds.select(range(min(max_examples, len(ds)))):
         ctx = (ex.get("context") or "").strip()
         q = ex["instruction"].strip() + (("\n" + ctx) if ctx else "")
+        full = f"Q: {q}\nA: {ex['response'].strip()}"
+        if exclude_texts:
+            norm = re.sub(r"\s+", " ", full).strip().lower()
+            if any(x in norm for x in exclude_texts):
+                dropped += 1
+                continue
         p = tokenizer(f"Q: {q}\nA:", add_special_tokens=False)["input_ids"]
         a = tokenizer(" " + ex["response"].strip(), add_special_tokens=False)["input_ids"]
         ids += p + a + sep
         mask += [0] * len(p) + [1] * len(a) + [0] * len(sep)
+    if exclude_texts:
+        print(f"  de-leak: dropped {dropped} Dolly examples overlapping the factual panel")
     return torch.tensor(ids, dtype=torch.long), torch.tensor(mask, dtype=torch.bool)
 
 
-def load_corpus(source, tokenizer, max_train_tokens, max_eval_tokens, answer_mask=False):
+def load_corpus(source, tokenizer, max_train_tokens, max_eval_tokens, answer_mask=False, exclude_texts=None):
     """Returns (train_ids, eval_ids, train_answer_mask). eval is ALWAYS WikiText validation.
 
     train_answer_mask[i] is True for tokens whose CE counts under --answer-loss-only: response
     tokens for instruction data, and all content tokens for WikiText (no prompt/answer split).
     When answer_mask=False the mask is all-True and the token stream is byte-identical to the
-    FACT-002 runs (the masked-stream tokenization is only built when actually needed)."""
+    FACT-002 runs (the masked-stream tokenization is only built when actually needed).
+    exclude_texts de-leaks the instruction stream against the factual panel (FACT-003B)."""
     wt_train, wt_eval = _wikitext_train_eval(tokenizer, max_train_tokens, max_eval_tokens)
     if source == "wikitext":
         return wt_train, wt_eval, torch.ones_like(wt_train, dtype=torch.bool)
     if answer_mask:
-        instr, instr_msk = _instruction_ids_mask(tokenizer)
+        instr, instr_msk = _instruction_ids_mask(tokenizer, exclude_texts=exclude_texts)
     else:
         instr = torch.tensor(tokenizer(_instruction_text())["input_ids"], dtype=torch.long)
         instr_msk = torch.ones_like(instr, dtype=torch.bool)
@@ -248,6 +279,12 @@ def main():
                     help="FACT-003B: microbatch of replay windows per step for the KL term (keep small)")
     ap.add_argument("--teacher-dtype", choices=["float16", "bfloat16", "float32"], default="float16",
                     help="FACT-003B: dtype of the frozen base teacher (float16 halves its memory)")
+    ap.add_argument("--exclude-panel", action="store_true",
+                    help="FACT-003B de-leak: drop instruction examples that overlap the factual "
+                         "panel from the TRAINING stream too (the replay pool is always de-leaked). "
+                         "Use for a clean held-out fact_rate. Needs --panel-file.")
+    ap.add_argument("--panel-file", type=Path, default=REPO_ROOT / "data/factual_panel_v1.jsonl",
+                    help="factual eval panel to de-leak against (FACT-003B)")
     args = ap.parse_args()
     if args.grad_accum_steps < 1:
         raise ValueError("--grad-accum-steps must be >= 1")
@@ -269,10 +306,13 @@ def main():
         model.gradient_checkpointing_enable()
         model.enable_input_require_grads()  # else ckpt warns: no input needs grad (embeds frozen)
 
+    panel_exclude = _panel_exclude_set(args.panel_file) if (args.exclude_panel or args.base_kl_replay) else None
     train_ids, eval_ids, train_mask = load_corpus(
         args.train_source, tok, args.max_train_tokens, args.max_eval_tokens,
-        answer_mask=args.answer_loss_only)
-    print(f"train-source={args.train_source}")
+        answer_mask=args.answer_loss_only,
+        exclude_texts=(panel_exclude if args.exclude_panel else None))
+    print(f"train-source={args.train_source}"
+          + ("  [train de-leaked vs panel]" if args.exclude_panel else ""))
     print(f"train tokens={train_ids.numel():,}  eval tokens={eval_ids.numel():,}")
     if args.answer_loss_only:
         print(f"FACT-003A answer-loss-only: {100*float(train_mask.float().mean()):.1f}% of train "
@@ -287,7 +327,7 @@ def main():
         for p in teacher.parameters():
             p.requires_grad_(False)
         teacher.config.use_cache = False
-        r_ids, r_mask = _instruction_ids_mask(tok)
+        r_ids, r_mask = _instruction_ids_mask(tok, exclude_texts=panel_exclude)  # anchor never reinforces eval
         replay_ids, replay_mask = r_ids[: args.replay_tokens], r_mask[: args.replay_tokens]
         print(f"FACT-003B base-KL replay: teacher={args.model_id} ({args.teacher_dtype}, frozen); "
               f"replay pool {replay_ids.numel():,} instruction tokens "
