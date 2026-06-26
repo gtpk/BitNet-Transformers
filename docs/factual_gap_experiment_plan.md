@@ -341,6 +341,36 @@ Score with the RT-130 panel (rep1.2) and compare `fact_rate` to FACT-002 (instr 
 mixed 0.07), Q2_K 0.74, FP 0.81. Pass = `fact_rate` clearly up (e.g. >= 0.15) and no
 empty-collapse; if still ~0 but fluent, go to FACT-003B (base-KL replay).
 
+#### FACT-003A / RT-132 RESULT (2026-06-26): answer-only mask is the first lever to move facts
+
+| arm | FACT-002 (no mask) | **FACT-003A (+ansmask)** | CE recovered | degeneration | i2s vs f16 |
+| --- | ---: | ---: | ---: | --- | --- |
+| instruction | 0.00 (empty 25/27) | 0.04 (1/27) | 0.40 -> **0.555** | ok 27 (collapse fixed) | -0.0047 nats |
+| **mixed** | 0.07 | **0.15** (i2_s 4/27; f16 0.19) | 0.814 -> **0.822** | ok 26/27 | +0.0070 nats |
+
+References reproduced: FP 0.815, Q2_K 0.741, PTQ 0.0. Reads:
+- **The objective moved facts where data could not.** mixed `fact_rate` doubled 0.07 -> 0.15
+  (meets the 003A pass bar); instruction 0.00 -> 0.04. Confirms S3: the lever is the
+  training objective, not the data.
+- **Empty-collapse fixed.** Instruction-only no longer degenerates to empty answers
+  (empty 25 -> ok 27), validating the prompt-format-overfit hypothesis. CE recovery up on
+  both arms.
+- **Runtime exonerated again** (adapted i2_s ~ f16). Artifacts: `reports/rt132_fact003a_*`.
+
+But absolute facts (0.15) are still far below Q2_K 0.74 — answer-only masking is necessary,
+not sufficient. This motivated the strategy pivot below.
+
+### Strategy pivot (2026-06-26): teacher-free -> base-anchored practical conversion
+
+Goal is reframed from "teacher-free research result" to a **usable, cheaply-runnable b1.58
+/ I2_S model**: keep the systems wins (small/fast, i2_s==f16, fluency recovery, decoding
+anti-collapse) and stop the factual/instruction forgetting during adaptation. The cheapest
+anchor is the SAME original FP model used as a self-teacher (no new large teacher): hold the
+b1.58 model's answer distribution near the base model's on a small replay set. FACT-003B
+implements this (answer-only CE + base-KL replay); a precomputed base-logits cache keeps it
+runnable on an underdog GPU. Near-term target: fact_rate 0.15 -> >= 0.40 ("usable" tier),
+not Q2_K parity.
+
 ### FACT-003B / FACT-003C: objective regularizers (only if 003A insufficient)
 
 Candidate objectives, in order:
