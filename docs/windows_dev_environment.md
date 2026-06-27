@@ -96,29 +96,48 @@ tuning at 1.1B **plateaus at fact ~0.185**. Reaching the 0.4 "usable" tier needs
 **capacity** (the variable/hybrid direction), not more λ. All committed; artifacts under
 `reports/rt13{1,2,3,4}_*` (md5-verified).
 
-## 5. NEXT TASK — HYBRID-001A late-layer capacity probe
+## 5. HYBRID-001A — DONE (result: NOT a capacity bottleneck)
 
-Driver committed: `scripts/hybrid001a_capacity_probe.py`. Asks "is the 0.185 plateau capacity
-or objective?" by restoring late layers to FP (from the trained STE latents) while the rest
-stay ternary, and measuring fact_rate (PyTorch, rep-pen 1.2, contains-match) + CE + degeneration.
-Arms A0(none)/A1(last1)/A2(last2)/A3(last4)/A4(last4 attn)/A5(last4 mlp). Verdict: some arm
->= 0.30 => capacity bottleneck -> HYBRID-001B cost-cut (Q4->Q3->Q2->2-plane on helpful layers);
-barely moves => objective/data (lm_head unfreeze, protected factual replay).
+`scripts/hybrid001a_capacity_probe.py` was run on the FACT-003C λ=0.2 STE latents (committed
+`977f21c`; `reports/hybrid001a_capacity_probe.{json,md}`). Restoring late target-linears to FP
+(STE latent) while the rest stay ternary:
 
-```bash
-python scripts/hybrid001a_capacity_probe.py \
-  --ckpt <path>/fact003c_mixed_ckl0.2/ckpt.pt \
-  --json-out reports/hybrid001a_capacity_probe.json --md-out reports/hybrid001a_capacity_probe.md
+```text
+arm  restore           FP    fact   CE     ppl
+A0   none (all I2_S)    0     0.148  3.84   46.5   <- BEST on every axis
+A1   last 1 block       44M   0.074  4.94   139
+A2   last 2 blocks      88M   0.037  4.73   114
+A3   last 4 blocks      176M  0.111  4.56   95
+A4   last 4 attn        38M   0.111  5.40   222
+A5   last 4 MLP         138M  0.037  4.97   144
 ```
 
-**BLOCKER — the latent checkpoint.** The probe needs the FACT-003C λ=0.2 STE latents:
-`ckpt.pt` (6.4 GB), currently only on the **Colab Google Drive** at
-`MyDrive/bnt_ckpt/fact003c_mixed_ckl0.2/ckpt.pt`. To run on Windows, get that file onto the box:
-- easiest: download it from Google Drive (web or Drive-for-Desktop, same account) to the server, OR
-- the Colab run that was launching HYBRID-001A may have finished — its result would be on the
-  Colab VM disk at `/content/bnt/reports/hybrid001a_capacity_probe.{json,md}` (grab if the VM
-  is still alive), OR
-- regenerate the latents by re-running FACT-003C λ=0.2 (needs ~17 GB → Colab L4, not the 3080).
+**Verdict: not (post-hoc) capacity.** Every restore arm is <= A0 and CE gets WORSE. The model
+was STE-trained with ALL target linears ternary, so early layers co-adapted to feed *ternary*
+late layers; post-hoc un-quantizing late layers breaks that coherence (distribution mismatch).
+This rules out the cheap post-hoc capacity patch — it does NOT rule out a **train-from-start
+hybrid** (early layers co-adapt to FP late layers from the beginning).
+
+## 5b. NEXT TASK — pick one (per the FACT-003C/HYBRID decision tree)
+
+Same-topology objective tuning plateaued at ~0.185 and post-hoc capacity didn't help, so the
+live options are (cheapest first):
+
+```text
+1. lm_head unfreeze (--train-lm-head) + content-KL lambda=0.2   -- cheap; the output head can
+     re-adapt; rt116 already supports the flag. TRAINING (~17 GB -> Colab L4, not the 3080).
+2. protected factual replay (FACT-003D)  -- small fact set disjoint from FACT-001 (leakage gate
+     scripts/check_fact_panel_overlap.py) added to the content-KL run. Needs code.
+3. train-from-start hybrid (HYBRID-001B) -- keep late N blocks FP DURING adaptation (not
+     post-hoc) so early layers co-adapt; then cost-cut Q4->Q3->Q2->2-plane. Bigger; needs code
+     + a hybrid GGUF export path (llama-quantize --exclude-weights leaves tensors un-quantized).
+```
+
+Note the **3080 (10 GB) cannot run the FACT training config (~17 GB)**; options 1/2/3 are
+training and should run on Colab Pro L4, OR on the 3080 only with a reduced config (bf16,
+batch 1–2, grad-ckpt, teacher 8-bit/offload). The 3080 is ideal for the *probe/inference/dev*
+side. The FACT-003C λ=0.2 STE `ckpt.pt` (6.4 GB) lives on the Colab Google Drive
+(`MyDrive/bnt_ckpt/fact003c_mixed_ckl0.2/ckpt.pt`) if a probe needs the latents again.
 
 ## 6. Transferring results back to origin
 
