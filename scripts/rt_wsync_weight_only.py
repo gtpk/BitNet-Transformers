@@ -71,6 +71,69 @@ def q_row_norm(W):
 QUANT = {"pt": q_pt, "row": q_row, "group": q_group, "row_norm": q_row_norm}
 
 
+# --- H-I2S (Hadamard-rotated I2_S, WSYNC-004): the rotation is a RUNTIME activation transform,
+# NOT folded into a dense weight. Reference forward = Q_I2S(W H^T) applied to (H x). ---
+def _sylvester(k):
+    H = torch.ones(1, 1)
+    while H.shape[0] < k:
+        H = torch.cat([torch.cat([H, H], 1), torch.cat([H, -H], 1)], 0)
+    return H
+
+
+def block_hadamard(n, tile=128, device="cpu", dtype=torch.float32):
+    if n % tile:
+        tile = math.gcd(n, tile) or n
+    Ht = _sylvester(tile) / (tile ** 0.5)  # symmetric, orthogonal: Ht^T=Ht, Ht Ht = I
+    H = torch.zeros(n, n)
+    for i in range(0, n, tile):
+        H[i:i + tile, i:i + tile] = Ht
+    return H.to(device=device, dtype=dtype)
+
+
+class HI2SLinear(torch.nn.Module):
+    """y = Q_I2S(W H^T) (H x). H = block Hadamard on the INPUT dim (tile 128). The ternary weight
+    Q(W H^T) is what would be stored; H is applied to the activation at runtime (quality/reference
+    only, no speed claim). H is NOT pre-multiplied back into the weight."""
+    def __init__(self, lin, tile=128):
+        super().__init__()
+        W = lin.weight.data
+        out, inp = W.shape
+        H = block_hadamard(inp, tile, W.device, W.dtype)  # [in,in], symmetric
+        self.register_buffer("H", H)
+        self.register_buffer("Wq_r", q_pt(W @ H))  # Q(W H^T), H^T=H  -> ternary in rotated basis
+        self.bias = lin.bias
+
+    def forward(self, x):
+        import torch.nn.functional as F
+        return F.linear(x @ self.H, self.Wq_r, self.bias)  # rotate activation, then ternary matmul
+
+
+def _set_submodule(root, dotted, mod):
+    parts = dotted.split(".")
+    obj = root
+    for p in parts[:-1]:
+        obj = getattr(obj, p)
+    setattr(obj, parts[-1], mod)
+
+
+@torch.no_grad()
+def apply_hi2s(model, tile=128):
+    """Wrap every target nn.Linear with HI2SLinear. Returns (mean weight MSE, mean row-norm ratio),
+    where the diagnostic effective weight is W_eff = Q(W H^T) H (used ONLY for the MSE/rnr numbers;
+    the forward keeps the activation-rotation structure)."""
+    import torch.nn as nn
+    mses, ratios = [], []
+    for name, mod in list(model.named_modules()):
+        if isinstance(mod, nn.Linear) and is_target_weight_key(name + ".weight"):
+            wrapped = HI2SLinear(mod, tile)
+            W = mod.weight.data
+            W_eff = wrapped.Wq_r @ wrapped.H  # diagnostic only
+            mses.append(((W - W_eff) ** 2).mean().item())
+            ratios.append((W_eff.norm(dim=1) / W.norm(dim=1).clamp(min=1e-8)).mean().item())
+            _set_submodule(model, name, wrapped)
+    return sum(mses) / max(len(mses), 1), sum(ratios) / max(len(ratios), 1)
+
+
 @torch.no_grad()
 def apply_arm(model, arm):
     """Replace every target-linear weight in place with the arm's quantized weight.
@@ -110,7 +173,9 @@ def main():
     for arm in args.arms.split(","):
         m = AutoModelForCausalLM.from_pretrained(args.model_id, dtype=torch.float32).to(device).eval()
         wmse = rnr = 0.0
-        if arm != "fp":
+        if arm == "h_i2s":
+            wmse, rnr = apply_hi2s(m)   # activation-rotation reference, NOT a folded dense weight
+        elif arm != "fp":
             wmse, rnr = apply_arm(m, arm)
         m.config.use_cache = True
         ce = eval_ce(m, wt, 256, device, max_windows=args.ce_windows)
@@ -144,18 +209,25 @@ def main():
         if cands:
             best = min(cands, key=lambda a: rows[a]["ce"])
             d_ce = base["ce"] - rows[best]["ce"]
-            d_fact = rows[best]["fact_rate"] - base["fact_rate"]
-            passed = d_ce >= 0.5 or d_fact >= 0.05
+            best_fact = max(rows[a]["fact_rate"] for a in cands)  # behaviour is the meaningful axis
+            d_fact = best_fact - base["fact_rate"]
+            # 3-tier (per WSYNC discipline): CE alone can move between two collapsed states, so a real
+            # win needs FACT off 0.0, not just a CE delta.
+            if d_ce >= 0.5 and best_fact >= 0.05:
+                verdict = ("SUCCESS -- a transform improves CE by >=0.5 nats AND lifts FACT off 0.0 "
+                           "(>=0.05). Real behavioural recovery -> Track A candidate: a data-free b1.58 "
+                           "INIT worth attaching before PopQA blend. Claim only a better STARTING POINT.")
+            elif d_ce >= 0.5:
+                verdict = ("PARTIAL -- CE improves >=0.5 nats but FACT stays 0.0. Rotation/scaling helps "
+                           "RECONSTRUCTION but not BEHAVIOUR (the CE gain is between collapsed states). "
+                           "Data-free geometry is misaligned with model behaviour (plan S3).")
+            else:
+                verdict = ("FAIL -- no transform clears >=0.5 nats CE with FACT off 0.0. Data-free weight "
+                           "sync does not rescue b1.58 collapse at 160M; the lever is representative data "
+                           "(PopQA blend) / capacity (plan S2/S4). Clean negative -> demote the WSYNC track.")
             lines += ["", f"best non-fp/pt by CE: {best} (CE {rows[best]['ce']} vs pt {base['ce']}, "
-                      f"dCE {d_ce:+.3f}; FACT {rows[best]['fact_rate']} vs pt {base['fact_rate']}, dFACT {d_fact:+.3f})",
-                      "", "VERDICT: " + (
-                          "PASS -- a weight-only transform clears the bar (>=0.5 nats CE or >=0.05 FACT vs "
-                          "per-tensor); WSYNC may be a useful b1.58 INIT before PopQA blend. Claim only a "
-                          "better STARTING POINT, NOT 'solves factual recovery'."
-                          if passed else
-                          "FAIL -- no weight-only transform beats per-tensor by >=0.5 nats CE or >=0.05 FACT. "
-                          "Sigma_x~=I is too weak; the lever is representative data (PopQA blend) / capacity, "
-                          "not data-free weight sync (plan decision S2/S4).")]
+                      f"dCE {d_ce:+.3f}); best FACT among transforms {best_fact} (pt {base['fact_rate']}, "
+                      f"dFACT {d_fact:+.3f})", "", "VERDICT: " + verdict]
     args.json_out.parent.mkdir(parents=True, exist_ok=True)
     args.json_out.write_text(json.dumps(rows, indent=2), encoding="utf-8")
     args.md_out.write_text("\n".join(lines), encoding="utf-8")
