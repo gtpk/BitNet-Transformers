@@ -115,6 +115,10 @@ FACT-002..003: improve adaptation data/objective only after the gap is measured
 Do not train first. A new training run without a fixed factual panel can only produce
 another ambiguous PPL number.
 
+For PopQA transfer scoring (FACT-003H), use `data/popqa_heldout_tight.jsonl` as the primary
+held-out panel. The full held-out set is retained only as a permissive secondary read because
+some examples have many aliases or multi-word/noisy answers.
+
 ## Models And Variants
 
 Use the TinyLlama-1.1B budget-scaled artifacts first because RT-129 already established

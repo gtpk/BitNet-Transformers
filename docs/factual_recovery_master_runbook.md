@@ -89,6 +89,10 @@ Current RT-130 state is L0.
 6. **Archive JSON and markdown results.**
    No result enters paper docs without a committed JSON/MD artifact or a reproduced
    table.
+7. **PopQA transfer scoring uses the tight panel.**
+   For PopQA transfer scoring, use `data/popqa_heldout_tight.jsonl` as the primary held-out
+   panel. The full held-out set is retained only as a permissive secondary read because some
+   examples have many aliases or multi-word/noisy answers.
 
 ## Required Artifacts
 
