@@ -47,6 +47,8 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from bitnet_llama import conversion as C  # noqa: E402
 from bitnet_llama.module import PerTensorBitLinear  # noqa: E402
+from bitnet_llama.sidecar import (  # noqa: E402
+    I2SLoRALinear, wrap_targets_with_lora, sidecar_accounting)
 
 
 def set_module(root, name, mod):
@@ -73,6 +75,17 @@ def materialize_and_save(model, out_dir, tokenizer):
     """Replace PerTensorBitLinear -> dense Linear holding Wq=gamma*T, save HF dir."""
     import copy
     m2 = copy.deepcopy(model).to("cpu").float()
+    # pass 1: fold I2_S+sidecar -> dense effective weight (gamma*T + scale*B@A) for scoring; the
+    # deployable form keeps gamma*T as I2_S and the sidecar separate, but quality is identical.
+    for name, mod in list(m2.named_modules()):
+        if isinstance(mod, I2SLoRALinear):
+            dense = nn.Linear(mod.in_features, mod.out_features, bias=mod.base.bias is not None)
+            with torch.no_grad():
+                dense.weight.copy_(mod.effective_weight())
+                if mod.base.bias is not None:
+                    dense.bias.copy_(mod.base.bias)
+            set_module(m2, name, dense)
+    # pass 2: remaining un-wrapped ternary bases -> dense gamma*T
     for name, mod in list(m2.named_modules()):
         if isinstance(mod, PerTensorBitLinear):
             dense = nn.Linear(mod.in_features, mod.out_features, bias=mod.bias is not None)
@@ -415,6 +428,14 @@ def main():
                     help="FACT-003G: jsonl of factual QA BLENDED into the mixed stream (same answer-CE, not a separate loss)")
     ap.add_argument("--factual-blend-frac", type=float, default=0.0,
                     help="FACT-003G: fraction of mixed train tokens that are blended factual QA (e.g. 0.05)")
+    ap.add_argument("--sidecar-rank", type=int, default=0,
+                    help="SIDE: I2_S+LoRA sidecar rank per target linear (0 = disabled, existing behavior)")
+    ap.add_argument("--sidecar-alpha", type=float, default=8.0, help="SIDE: LoRA scale = alpha/rank")
+    ap.add_argument("--sidecar-target", choices=["all", "attn", "mlp", "top_saliency"], default="all")
+    ap.add_argument("--sidecar-train-base", action="store_true",
+                    help="SIDE: also adapt the ternary base (co-adapted, SIDE-002); default = frozen base, LoRA only")
+    ap.add_argument("--sidecar-init", choices=["zero", "random", "svd_residual"], default="zero")
+    ap.add_argument("--sidecar-top-layers", type=int, default=4, help="SIDE: blocks wrapped when --sidecar-target top_saliency")
     ap.add_argument("--metrics-out", type=Path, default=None,
                     help="append per-log-step metrics as jsonl (put on Drive to survive VM recycle)")
     ap.add_argument("--tb-logdir", type=Path, default=None,
@@ -492,14 +513,39 @@ def main():
     ce_fp = eval_ce(model, eval_ids, args.seq_len, device)
     n_lin = replace_targets(model)
     model.to(device=device, dtype=tdtype)  # new PerTensorBitLinear modules -> model dtype
-    ce_ptq = eval_ce(model, eval_ids, args.seq_len, device)
+    n_side = 0
+    if args.sidecar_rank > 0:  # SIDE: wrap target ternary linears with a low-rank LoRA sidecar
+        n_layers_cfg = getattr(model.config, "num_hidden_layers", 0)
+        n_side = wrap_targets_with_lora(model, args.sidecar_rank, args.sidecar_alpha,
+                                        target=args.sidecar_target, init=args.sidecar_init,
+                                        top_layers=args.sidecar_top_layers, n_layers=n_layers_cfg)
+        model.to(device=device, dtype=tdtype)
+        acct = sidecar_accounting(model)
+        print(f"SIDE: rank={args.sidecar_rank} alpha={args.sidecar_alpha} target={args.sidecar_target} "
+              f"train_base={args.sidecar_train_base} init={args.sidecar_init} -> wrapped {n_side} linears; "
+              f"sidecar {acct['sidecar_params']:,} params / {acct['sidecar_bytes_fp16']:,}B fp16 "
+              f"= {acct['sidecar_bytes_ratio_vs_target_i2s']*100:.2f}% of I2_S target bytes")
+    ce_ptq = eval_ce(model, eval_ids, args.seq_len, device)  # B=0 init -> base behaviour, unchanged
     print(f"QR-001  CE_fp={ce_fp:.4f} (ppl {math.exp(ce_fp):.2f})  "
           f"CE_ptq={ce_ptq:.4f} (ppl {math.exp(ce_ptq):.2f})  [{n_lin} target linears]")
 
     # QR-002a/b/c: freeze all, then unfreeze target linears (+ optional norms / lm_head)
     for p in model.parameters():
         p.requires_grad_(False)
-    tparams = [m.weight for m in model.modules() if isinstance(m, PerTensorBitLinear)]
+    if args.sidecar_rank > 0:
+        # sidecar: LoRA A/B always trainable; ternary base trainable only if --sidecar-train-base;
+        # any un-wrapped target base (target=attn/mlp) still adapts normally.
+        side_mods = [m for m in model.modules() if isinstance(m, I2SLoRALinear)]
+        wrapped_base_ids = {id(m.base) for m in side_mods}
+        tparams = []
+        for m in side_mods:
+            tparams += [m.lora_A.weight, m.lora_B.weight]
+            if args.sidecar_train_base:
+                tparams.append(m.base.weight)
+        tparams += [m.weight for m in model.modules()
+                    if isinstance(m, PerTensorBitLinear) and id(m) not in wrapped_base_ids]
+    else:
+        tparams = [m.weight for m in model.modules() if isinstance(m, PerTensorBitLinear)]
     if args.train_norms:
         tparams += [p for n, p in model.named_parameters() if "norm" in n.lower() and p.dim() == 1]
     if args.train_lm_head:
@@ -514,7 +560,9 @@ def main():
            + (f"+basekl{args.kl_weight}" if args.base_kl_replay else "")
            + ("c" if (args.base_kl_replay and args.kl_content_only) else "")
            + (f"+factrep{args.factual_weight}" if args.factual_replay else "")
-           + (f"+blend{args.factual_blend_frac}" if args.factual_blend_file else ""))
+           + (f"+blend{args.factual_blend_frac}" if args.factual_blend_file else "")
+           + (f"+side{args.sidecar_rank}{args.sidecar_target[:3]}{'cob' if args.sidecar_train_base else 'frz'}"
+              if args.sidecar_rank > 0 else ""))
     print(f"adapting {sum(p.numel() for p in tparams)/1e6:.1f}M params across {len(tparams)} tensors [{arm}]")
     print(f"microbatch={args.batch}  grad_accum={args.grad_accum_steps}  "
           f"effective_batch={args.batch * args.grad_accum_steps}")
@@ -677,6 +725,11 @@ def main():
               "factual_weight": args.factual_weight, "factual_batch": args.factual_batch,
               "factual_blend_file": str(args.factual_blend_file) if args.factual_blend_file else None,
               "factual_blend_frac": args.factual_blend_frac,
+              "sidecar_enabled": args.sidecar_rank > 0, "sidecar_rank": args.sidecar_rank,
+              "sidecar_alpha": args.sidecar_alpha, "sidecar_target": args.sidecar_target,
+              "sidecar_train_base": args.sidecar_train_base, "sidecar_linears": n_side,
+              **({f"sidecar_{k}": v for k, v in sidecar_accounting(model).items()} if args.sidecar_rank > 0 else {}),
+              "trainable_params": int(sum(p.numel() for p in tparams)),
               "ce_fp": ce_fp, "ce_ptq": ce_ptq, "ce_adapted": ce_adapted,
               "ppl_fp": math.exp(ce_fp), "ppl_ptq": math.exp(ce_ptq), "ppl_adapted": math.exp(ce_adapted),
               "recovered_fraction": rec}
