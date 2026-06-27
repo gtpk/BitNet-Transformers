@@ -82,8 +82,6 @@ def train_arm(args, mu, seed, out_dir):
            "--model-id", args.model_id,
            "--train-source", "mixed", "--answer-loss-only",
            "--base-kl-replay", "--kl-content-only", "--kl-weight", "0.2", "--exclude-panel",
-           "--factual-replay", str(replay_path),
-           "--factual-weight", str(mu), "--factual-batch", "4",
            "--steps", str(args.steps), "--seq-len", str(args.seq_len),
            "--batch", str(args.batch), "--lr", str(args.lr), "--seed", str(seed),
            "--max-train-tokens", str(args.max_train_tokens),
@@ -91,7 +89,13 @@ def train_arm(args, mu, seed, out_dir):
            "--out-dir", str(out_dir),
            "--json-out", str(out_dir.parent / f"{out_dir.name}_train.json"),
            "--log-every", str(args.log_every)]
-    print(f"\n===== mu={mu} seed={seed} =====\n{' '.join(cmd)}", flush=True)
+    if args.blend_frac > 0:  # FACT-003G/H: blend into the mixed stream (NOT a separate mu*loss)
+        cmd += ["--factual-blend-file", str(replay_path), "--factual-blend-frac", str(args.blend_frac)]
+        tag = f"blend{args.blend_frac} seed={seed}"
+    else:                    # FACT-003D: bolt-on factual-CE term with weight mu
+        cmd += ["--factual-replay", str(replay_path), "--factual-weight", str(mu), "--factual-batch", "4"]
+        tag = f"mu={mu} seed={seed}"
+    print(f"\n===== {tag} =====\n{' '.join(cmd)}", flush=True)
     env = {**os.environ, "PYTHONUTF8": "1", "PYTHONIOENCODING": "utf-8"}
     t0 = time.time()
     subprocess.run(cmd, check=True, env=env)
@@ -106,7 +110,10 @@ def main():
     ap.add_argument("--seeds", default="0", help="comma list; >1 seed at a single mu = Q1 seed-variance check")
     ap.add_argument("--work", type=Path, default=REPO_ROOT / "reports" / "fact003d_160m_sweep")
     ap.add_argument("--seed", type=int, default=None, help="single-seed shorthand; overrides --seeds when set")
-    ap.add_argument("--factual-replay", type=Path, default=REPO_ROOT / "data/atomic_facts_train.jsonl")
+    ap.add_argument("--factual-replay", type=Path, default=REPO_ROOT / "data/atomic_facts_train.jsonl",
+                    help="train file: used as bolt-on --factual-replay (mu) OR, with --blend-frac>0, as the blend source")
+    ap.add_argument("--blend-frac", type=float, default=0.0,
+                    help="FACT-003G/H: if >0, BLEND --factual-replay into the mixed stream at this frac (no mu*loss)")
     ap.add_argument("--heldout-file", type=Path, default=REPO_ROOT / "data/atomic_facts_heldout.jsonl")
     ap.add_argument("--train-score-file", type=Path, default=None,
                     help="defaults to --factual-replay; sampled as memorisation/control panel")
