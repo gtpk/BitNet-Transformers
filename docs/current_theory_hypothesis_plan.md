@@ -289,7 +289,7 @@ reduce token-time memory traffic, not only checkpoint bytes.
 | H5 | tiny hard factual replay generalizes | false on 1.1B | use only as diagnostic |
 | H6 | representative blend should beat tiny replay | open, promising | PopQA blend 1.1B is the key next run |
 | H7 | post-hoc FP layer restore fixes capacity | false | train-from-start hybrid only if needed |
-| H8 | valid rotations/equalization can improve ternary fit | open | WSYNC / Turbo-style projection probes |
+| H8 | valid rotations/equalization can improve ternary fit | false data-free (RT-WSYNC-001 + H-I2S: row/group/row-norm scaling AND block-Hadamard rotation all fail at 160M -- ternary stays collapsed, FACT 0.0) | demote data-free weight-only sync (plan S4); revisit only combined with STE/adaptation |
 | H9 | selective extra planes/capacity can close the remaining gap | open | PTQTP-lite after representative data is tested |
 
 ## TurboQuant-Style Projection As Part Of `G`

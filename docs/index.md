@@ -241,6 +241,8 @@ python scripts/rt113_storage_latency.py \
    - RT-130 Outcome B 이후 factual recovery 분기를 한 번에 실행하는 single-flight runbook. 최신 상태: content-KL `lambda=0.2`가 current best, small hard replay는 1.1B에서 과적합 위험, 다음은 `mu=0.25` 판정과 PopQA blend 1.1B.
 8q2. [FACT-003E Length-Balanced Replay Plan](./fact003e_length_balanced_replay_plan.md)
    - FACT-003D의 short atomic replay가 PTQ/QAT식 representative data가 아니라는 약점을 검증하기 위해, 같은 protected facts를 short/sentence/chat/explain/long surface로 확장하는 3080용 실험 계획.
+8q3. [FACT-003H Result + Decision Table](./fact003h_result_and_decision.md)
+   - PopQA blend 1.1B 결과 수신 템플릿(eval/popqa_tight/loose/train/CE/tags/i2s-f16)과 결과별 A~E 다음-실험 판정표. small hard replay 사망 후 왕좌 결정전.
 8r. [Fair Comparison Framework](./fair_comparison_framework.md)
    - native BitNet, Q2_K, 우리 all-I2_S, 우리 hybrid를 처음부터 학습시간/후학습비용/파라미터/속도/품질로 공정 비교하는 scorecard.
 8r2. [RTX 3080 Parallel Queue](./box_3080_parallel_queue.md)
