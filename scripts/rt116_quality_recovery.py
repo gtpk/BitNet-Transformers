@@ -94,8 +94,24 @@ def load_wikitext(tokenizer, max_train_tokens, max_eval_tokens):
         ds = load_dataset("wikitext", "wikitext-2-raw-v1")
 
     def join_tok(split, cap):
-        text = "\n\n".join(t for t in ds[split]["text"] if t.strip())
-        ids = tokenizer(text, return_tensors=None)["input_ids"]
+        # Stream per-document and stop at `cap` tokens, rather than tokenizing the whole
+        # concatenated corpus in one call. Equivalent token stream (docs are joined by "\n\n",
+        # a natural Llama-tokenizer boundary; BOS kept on the first doc) but bounded memory and
+        # no multi-MB single input -- the latter SEGFAULTS the `tokenizers` rust lib on Windows
+        # (access violation / exit 5), while being a no-op correctness-wise on Linux.
+        sep = tokenizer("\n\n", add_special_tokens=False)["input_ids"]
+        ids, first = [], True
+        for t in ds[split]["text"]:
+            if not t.strip():
+                continue
+            if first:
+                ids.extend(tokenizer(t, return_tensors=None)["input_ids"])
+                first = False
+            else:
+                ids.extend(sep)
+                ids.extend(tokenizer(t, add_special_tokens=False, return_tensors=None)["input_ids"])
+            if len(ids) >= cap:
+                break
         return torch.tensor(ids[:cap], dtype=torch.long)
 
     return join_tok("train", max_train_tokens), join_tok("validation", max_eval_tokens)
