@@ -5,7 +5,7 @@ Document position: [Index](./index.md) -> after
 
 Status: proposal / next experiment track. No result yet.
 
-## Why This Track Exists
+## Why This I2_S-Rooted Branch Exists
 
 The project has learned three hard facts:
 
@@ -37,20 +37,28 @@ all-I2_S purity        -> fastest/smallest, but may lack capacity
 Q2_K/Q3/Q4 everywhere  -> better quality, but weaker memory-traffic win
 ```
 
-The proposed artifact is:
+The proposed artifact is still rooted in I2_S:
 
 ```text
-mostly I2_S + tiny sidecar
+I2_S base + tiny sidecar
 ```
 
 not:
 
 ```text
-pure I2_S.
+sidecar model with I2_S as an afterthought.
 ```
 
-Therefore this is Track B by representation, but it can become a product track if
-the sidecar is tiny and the speed/storage win remains large.
+The rule is:
+
+```text
+I2_S remains the trunk.
+The sidecar is only a small branch that may compensate for what one ternary plane
+cannot express.
+```
+
+If the sidecar becomes the main carrier of behavior, the experiment fails the
+project philosophy even if quality improves.
 
 ## Core Form
 
@@ -135,7 +143,7 @@ SIDE tests a different hypothesis from PopQA blend.
 | Is factual failure data/objective mismatch? | yes | indirectly |
 | Is one-plane I2_S capacity insufficient? | no direct answer | yes |
 | Can tiny extra params recover behavior? | no | yes |
-| Does runtime remain mostly I2_S? | yes | maybe, depends on sidecar cost |
+| Does runtime remain I2_S-rooted? | yes | maybe, depends on sidecar cost |
 
 The key diagnostic:
 
@@ -147,17 +155,18 @@ If neither helps, model size/objective/base choice may be the bottleneck.
 
 ## Track Classification
 
-### Track A-Compatible Variant
+### I2_S-Rooted Variant
 
-This variant keeps the final main matrix as I2_S and adds a tiny optional module:
+This variant keeps the final main matrix as I2_S and adds a tiny optional branch:
 
 ```text
 I2_S matmul + low-rank sidecar matmul
 ```
 
-Allowed Track A claim only if:
+Allowed claim only if:
 
 ```text
+I2_S target bytes remain the dominant compressed substrate,
 sidecar bytes and ops are reported separately,
 I2_S parity is preserved for the base,
 speed/storage remain meaningfully better than Q2_K/Q4,
@@ -166,12 +175,13 @@ speed/storage remain meaningfully better than Q2_K/Q4,
 and the result is called:
 
 ```text
-mostly-I2_S + sidecar
+I2_S-rooted + sidecar
 ```
 
-not pure I2_S.
+not all-I2_S, and not a generic LoRA model. The distinction matters: I2_S remains
+the trunk.
 
-### Track B Upper-Bound Variant
+### Upper-Bound Variant
 
 Use larger ranks or more target modules:
 
@@ -182,7 +192,8 @@ possibly lm_head,
 ```
 
 only to estimate how much capacity is missing. Do not productize unless the overhead
-is still acceptable.
+is still acceptable. If this variant wins only with large sidecars, the lesson is
+not "use sidecars"; the lesson is "one-plane I2_S lacks too much capacity."
 
 ## Experimental Ladder
 
@@ -214,7 +225,7 @@ sidecar ops / I2_S ops proxy
 Pass to continue:
 
 ```text
-r=4 or r=8 overhead is small enough to remain "mostly I2_S".
+r=4 or r=8 overhead is small enough to remain I2_S-rooted.
 ```
 
 ### SIDE-001: 160M Frozen-Base Sidecar Smoke On PC

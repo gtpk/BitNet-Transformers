@@ -220,7 +220,7 @@ python scripts/rt113_storage_latency.py \
 8j. [Why Existing Models Resist b1.58 Conversion](./why_b158_conversion_is_hard.md)
    - 왜 BitNet b1.58은 native 학습에선 좋지만 기존 모델 변환은 quantization처럼 쉽지 않은지 문제정의.
 8j1. [Current Theory, Hypotheses, And Experiment Plan](./current_theory_hypothesis_plan.md)
-   - 지금까지의 이론, 반증된 가설, 통합 수식, I2_S-preserving vs non-I2_S 트랙, Colab/PC 분업, TurboQuant-style projection 후보, 다음 실험 순서를 한 문서로 압축한 현재 관제탑.
+   - 지금까지의 이론, 반증된 가설, 통합 수식, I2_S trunk와 보조 가지, Colab/PC 분업, TurboQuant-style projection 후보, 다음 실험 순서를 한 문서로 압축한 현재 관제탑.
 8j2. [BitNet Conversion Compiler Plan](./bitnet_conversion_compiler_plan.md)
    - 지금까지의 실험과 QuaRot/AWQ/SmoothQuant/PTQTP/TWLA/HAWQ/HAQ/BRECQ 문헌을 합쳐, b1.58 변환을 valid coordinate transform(`G`), estimated saliency(`S=phi(...)`), budgeted capacity 선택(`C`), representative adaptation(`A`)의 staged compiler 문제로 정의한다.
 8k. [Native BitNet Architecture Audit](./native_bitnet_architecture_audit.md)
@@ -228,7 +228,7 @@ python scripts/rt113_storage_latency.py \
 8l. [Hybrid / Variable BitNet Conversion Plan](./hybrid_variable_bitnet_conversion_plan.md)
    - content-KL이 plateau될 때 1:1 all-I2_S 대신 selective precision, multi-strip ternary, residual, late-layer capacity를 budgeted topology conversion으로 검증하는 계획.
 8l2. [I2_S + LoRA / Residual Sidecar Plan](./i2s_lora_sidecar_plan.md)
-   - all-I2_S가 부족할 때 전체를 Q2/Q3로 올리지 않고 `gamma*T + BA` 형태의 tiny low-rank sidecar로 behavior를 보정할 수 있는지 검증하는 SIDE-000..005 계획.
+   - I2_S base를 trunk로 유지한 채 전체를 Q2/Q3로 올리지 않고 `gamma*T + BA` 형태의 tiny low-rank sidecar로 behavior를 보정할 수 있는지 검증하는 SIDE-000..005 계획.
 8m. [Quantization-Aware b1.58 Conversion Plan](./quantization_aware_b158_conversion_plan.md)
    - 기존 quantization toolbox(scale granularity, threshold/MSE objective, activation-aware scaling, GPTQ/Hessian assignment, rotation, signed-epsilon)를 BitNet 변환에 적용하는 처음부터 끝까지의 실험/가지치기 계획.
 8n. [Colab Quantization-Aware Conversion Prompt](./colab_quantization_aware_prompt.md)
@@ -278,7 +278,7 @@ python scripts/rt113_storage_latency.py \
 8ad. [Paper 3: Content-KL Factual Recovery](./paper_3_content_kl_factual_recovery.md)
    - FACT-001..003C, raw KL 실패와 content-KL 성공, lambda sweep 계획.
 8ae. [Paper 4: Hybrid Capacity Candidate](./paper_4_hybrid_capacity_candidate.md)
-   - content-KL plateau 이후 mostly-I2_S + selective capacity 가능성.
+   - content-KL plateau 이후 I2_S-rooted auxiliary capacity 가능성.
 9. [Groupwise Alpha Hypothesis](./groupwise_alpha_hypothesis.md)
    - 왜 groupwise `alpha*T`가 per-tensor BitNet b1.58보다 품질을 더 잘 보존할 수 있는지 설명한다.
 10. [Research Signal Note](./research_signal_note.md)
@@ -382,11 +382,11 @@ flowchart TD
 | [g5_baseline_plan.md](./g5_baseline_plan.md) | B0/B1/Q2_K/Q3_K/Q4_0/OURS baseline panel 설계 | "왜 기존 quantization이 아니라 이 방법인가"를 답할 때 |
 | [mixed_bit_dp_plan.md](./mixed_bit_dp_plan.md) | RT-123 sensitivity scan과 mixed-bit selector 초안. RT-123 이후 full additive DP는 보류 | higher-bit pockets를 후보 색인용으로만 참고할 때 |
 | [why_b158_conversion_is_hard.md](./why_b158_conversion_is_hard.md) | 기존 FP 모델을 b1.58로 변환하기 어려운 이유를 수학/통계/시스템 결과로 정리 | 프로젝트 질문을 다시 정의하고 claim을 좁힐 때 |
-| [current_theory_hypothesis_plan.md](./current_theory_hypothesis_plan.md) | 지금까지의 이론, 가설 판정, 통합 수식, I2_S-preserving/non-I2_S 트랙, Colab/PC 분업, TurboQuant-style projection 후보, 다음 실험 순서를 압축한 관제탑 | 현재 어디까지 왔고 다음 무엇을 해야 하는지 빠르게 정렬할 때 |
+| [current_theory_hypothesis_plan.md](./current_theory_hypothesis_plan.md) | 지금까지의 이론, 가설 판정, 통합 수식, I2_S trunk와 보조 가지, Colab/PC 분업, TurboQuant-style projection 후보, 다음 실험 순서를 압축한 관제탑 | 현재 어디까지 왔고 다음 무엇을 해야 하는지 빠르게 정렬할 때 |
 | [bitnet_conversion_compiler_plan.md](./bitnet_conversion_compiler_plan.md) | b1.58 변환을 valid coordinate transform, saliency estimator, adaptive capacity, representative adaptation의 staged compiler 문제로 정의하는 상위 수식/가정/실행 계획 | WSYNC/PopQA/PTQTP-lite/hybrid 중 무엇을 먼저 실험할지 정할 때 |
 | [native_bitnet_architecture_audit.md](./native_bitnet_architecture_audit.md) | 공개 BitNet 자료의 실제 구조와 비공개/미확정 부분을 정리 | native BitNet이 그냥 LLaMA+ternary인지 판단할 때 |
 | [hybrid_variable_bitnet_conversion_plan.md](./hybrid_variable_bitnet_conversion_plan.md) | 1:1 all-I2_S 대신 가변 capacity/하이브리드 topology를 검증하는 HYBRID-001 계획 | factual gap을 capacity/topology 문제로 검증할 때 |
-| [i2s_lora_sidecar_plan.md](./i2s_lora_sidecar_plan.md) | I2_S base에 tiny low-rank residual sidecar를 붙여, mostly-I2_S 상태에서 부족한 factual/behavior capacity를 보정할 수 있는지 검증하는 SIDE-000..005 계획 | Q2/Q3 전체 업그레이드 전에 작은 capacity 보정이 가능한지 볼 때 |
+| [i2s_lora_sidecar_plan.md](./i2s_lora_sidecar_plan.md) | I2_S base를 trunk로 유지하고 tiny low-rank residual sidecar를 붙여, 부족한 factual/behavior capacity를 보정할 수 있는지 검증하는 SIDE-000..005 계획 | Q2/Q3 전체 업그레이드 전에 I2_S-rooted 보정이 가능한지 볼 때 |
 | [quantization_aware_b158_conversion_plan.md](./quantization_aware_b158_conversion_plan.md) | quantization 기법을 b1.58 변환에 적용하는 RT-124..128 전체 실험계획, 가지치기, 결론 도달 규칙 | 다음 Colab 실험을 설계하거나 결과를 해석할 때 |
 | [colab_quantization_aware_prompt.md](./colab_quantization_aware_prompt.md) | Colab 실행 가능한 AI에게 줄 copy-paste prompt와 결과 템플릿 | 다른 실행자에게 RT-124를 넘길 때 |
 | [complex_phase_rotation_plan.md](./complex_phase_rotation_plan.md) | 복소수 위상 `e^{iθ}`를 pairwise real rotation으로 구현하는 후속 분석/후보 아이디어 | factual gap 이후 rotation 후보를 다시 볼지 판단할 때 |
@@ -410,7 +410,7 @@ flowchart TD
 | [paper_1_i2s_systems.md](./paper_1_i2s_systems.md) | I2_S export/runtime/storage/speed scale law skeleton | systems 논문을 작성할 때 |
 | [paper_2_conversion_limits.md](./paper_2_conversion_limits.md) | one-shot b1.58 변환 실패와 quantizer 한계 skeleton | negative/conversion-limit 논문을 작성할 때 |
 | [paper_3_content_kl_factual_recovery.md](./paper_3_content_kl_factual_recovery.md) | FACT objective/content-KL factual recovery skeleton | λ sweep과 factual recovery 논문을 작성할 때 |
-| [paper_4_hybrid_capacity_candidate.md](./paper_4_hybrid_capacity_candidate.md) | HYBRID-001 이후 후보 논문 skeleton | selective capacity 결과가 나온 뒤 |
+| [paper_4_hybrid_capacity_candidate.md](./paper_4_hybrid_capacity_candidate.md) | HYBRID-001 이후 후보 논문 skeleton | I2_S-rooted auxiliary capacity 결과가 나온 뒤 |
 | [groupwise_alpha_hypothesis.md](./groupwise_alpha_hypothesis.md) | groupwise scale이 품질을 보존하는 이유와 검증할 ablation | 알고리즘 우위의 원인을 설명하거나 반증할 때 |
 | [research_signal_note.md](./research_signal_note.md) | 현재 결과가 연구 신호로서 왜 의미 있는지 해석 | 논문화 가능성과 다음 방향을 판단할 때 |
 | [turboquant_bitnet_implementation_plan.md](./turboquant_bitnet_implementation_plan.md) | KV cache 압축 계획과 TC | weight 변환 이후 긴 문맥으로 확장할 때 |
@@ -514,7 +514,7 @@ flowchart TD
 4. **Turbo projection probe:** KV cache에는 RHT/sphere/codebook reference, weight에는
    `Q(W H^T) Hx` H-I2S linear probe를 돌린다. PyTorch reference에서 이득이 없으면 kernel
    작업으로 넘어가지 않는다.
-5. **Saliency + selective capacity:** PopQA/instruction activation으로 `S=phi(...)`를 추정한 뒤
+5. **Saliency + I2_S-rooted auxiliary capacity:** PopQA/instruction activation으로 `S=phi(...)`를 추정한 뒤
    top-k protection, two-plane/PTQTP-lite, Q2/Q3 pockets를 random-k와 비교한다.
 6. **Scale ladder:** 1.1B에서 실제 component gain이 확인된 뒤 Gemma/Qwen small audit,
    마지막으로 Qwen 7B-class goalpost로 넘어간다.

@@ -398,8 +398,8 @@ reduce token-time memory traffic, not only checkpoint bytes.
 | H6 | representative blend should beat tiny replay | open, promising | PopQA blend 1.1B is the key next run |
 | H7 | post-hoc FP layer restore fixes capacity | false | train-from-start hybrid only if needed |
 | H8 | valid rotations/equalization can improve ternary fit | false data-free (RT-WSYNC-001 + H-I2S: row/group/row-norm scaling AND block-Hadamard rotation all fail at 160M -- ternary stays collapsed, FACT 0.0) | demote data-free weight-only sync (plan S4); revisit only combined with STE/adaptation |
-| H9 | selective extra planes/capacity can close the remaining gap | open | PTQTP-lite after representative data is tested |
-| H10 | mostly-I2_S + tiny low-rank residual can recover missing behavior | open | SIDE-001 160M rank 2/4/8 smoke |
+| H9 | selective extra planes/capacity can close the remaining gap | open | only as I2_S-rooted auxiliary capacity, not a replacement |
+| H10 | I2_S-rooted tiny low-rank residual can recover missing behavior | open | SIDE-001 160M rank 2/4/8 smoke |
 
 ## TurboQuant-Style Projection As Part Of `G`
 
@@ -446,22 +446,26 @@ If this helps, it becomes a candidate runtime kernel:
 FWHT/RHT on activation -> I2_S matmul
 ```
 
-If it only helps with a non-I2_S Lloyd/codebook quantizer, it becomes a custom
-kernel idea, not a bitnet.cpp-compatible default.
+If it only helps with a Lloyd/codebook quantizer that cannot be rewritten as an
+I2_S-rooted branch, it becomes an upper-bound diagnostic, not a bitnet.cpp-compatible
+default.
 
-## Two-Track Roadmap
+## I2_S Trunk And Auxiliary Branches
 
-The project now splits into two explicit tracks.
+The project should not drift away from I2_S. The correct mental model is:
 
 ```text
-Track A: I2_S-preserving mainline
-Track B: non-I2_S exploration / upper-bound track
+I2_S trunk
+  -> I2_S-preserving branches
+  -> bounded auxiliary branches
+  -> upper-bound diagnostics, clearly labeled
 ```
 
-Track A is the product track. Track B is allowed to be more speculative, but it
-must not silently replace Track A claims.
+The trunk is always the current product philosophy. Branches are allowed only if
+they explain, protect, or minimally extend the I2_S artifact. They must not silently
+become a different quantization project.
 
-### Track A: I2_S-Preserving Mainline
+### Trunk: I2_S-Preserving Mainline
 
 Philosophy:
 
@@ -481,7 +485,7 @@ Allowed:
 | projection | H-I2S only if final matmul remains I2_S | keeps kernel philosophy |
 | KV cache | TurboQuant-style KV compression as independent runtime add-on | does not change weight format |
 
-Not allowed in Track A:
+Not allowed on the trunk:
 
 ```text
 custom non-I2_S codebooks,
@@ -491,7 +495,7 @@ multi-plane weights counted as one-plane I2_S,
 kernel claims without x86/runtime verification.
 ```
 
-Track A success criterion:
+Trunk success criterion:
 
 ```text
 Mostly I2_S artifact
@@ -500,64 +504,71 @@ Mostly I2_S artifact
 + storage/speed advantage remains visible.
 ```
 
-### Track B: Non-I2_S Exploration / Upper Bounds
+### Auxiliary Branches: Still Rooted In I2_S
 
 Philosophy:
 
 ```text
-Break the I2_S rule only to learn what capacity or geometry is missing.
+Keep the I2_S base as the main carrier, then add the smallest possible helper.
 ```
 
 Allowed:
 
 | component | example | purpose |
 | --- | --- | --- |
-| multi-plane ternary | PTQTP-lite, two `alpha*T` planes | test capacity shortage |
-| hybrid precision | Q2/Q3/FP pockets, low-rank residual | measure minimum extra capacity |
-| custom codebook | Lloyd/codebook after RHT, signed-epsilon variants | test representation mismatch |
-| custom kernels | fused RHT+matmul, custom ternary planes | upper-bound systems path |
-| train-from-start hybrid | fixed FP/Q2 pockets during adaptation | avoid post-hoc co-adaptation break |
-| architecture changes | BitNet-specific layer surgery, expanded strips/channels | long-range design candidate |
+| tiny sidecar | `gamma*T + BA`, low-rank residual | compensate missing modes while keeping I2_S base |
+| selected extra plane | second ternary plane on top-saliency layers | add capacity locally, not globally |
+| selected Q2/Q3 pocket | very small top-saliency pocket | measure minimum auxiliary precision without replacing the I2_S trunk |
+| I2_S-compatible transform | folded scale, signed permutation, H-I2S if useful | improve the I2_S projection |
+| KV branch | TurboQuant-style KV compression | reduce runtime memory outside weights |
 
-Track B success criterion:
+Auxiliary branch success criterion:
 
 ```text
-It must answer a diagnostic question:
-  "what does I2_S lack?"
-or produce a path that can be partially migrated back into Track A.
+It must improve behavior while I2_S remains the trunk:
+  most target-linear bytes stay I2_S,
+  sidecar/pocket overhead is small and reported,
+  speed/storage still beat broad Q2/Q3/Q4 alternatives.
 ```
 
-Track B failure criterion:
+Auxiliary branch failure criterion:
 
 ```text
-quality improves but memory traffic/speed collapses,
-or implementation requires a custom runtime with small quality gain.
+quality improves only by letting the auxiliary branch carry most behavior,
+or overhead approaches Q2/Q3 everywhere,
+or runtime advantage collapses.
 ```
 
-### Promotion Rule: B -> A
+### Upper-Bound Diagnostics
 
-A Track B idea can move into Track A only if it can be rewritten as:
+Some ideas do not belong to the current I2_S trunk. Keep them as diagnostics or
+literature upper bounds unless they can be rewritten back into an I2_S-rooted form:
 
 ```text
-folded transform + I2_S
-or
-small runtime pre/post transform + I2_S
-or
-representative adaptation with unchanged I2_S weights
+dense learned rotation,
+large sidecar rank,
+full Q2/Q3 restore,
+custom Lloyd/codebook kernels.
+```
+
+These do not become the product path unless they can be rewritten as:
+
+```text
+I2_S trunk + small auxiliary branch
 ```
 
 Examples:
 
-| Track B finding | promotion path |
+| diagnostic finding | I2_S-rooted rewrite |
 | --- | --- |
 | dense rotation helps | try signed permutation / block-Hadamard H-I2S |
 | custom Lloyd codebook helps | test whether I2_S plus RHT captures most of it |
-| two planes help | identify top-saliency layers; maybe one-plane + data is enough |
-| FP pocket helps | train-from-start Q2/I2_S hybrid, then measure byte trade-off honestly |
+| two planes help | restrict extra plane to top-saliency layers |
+| FP pocket helps | shrink to sidecar / Q2 pocket / low-rank residual |
 
 ### Sidecar Candidate
 
-The most practical Track B idea right now is:
+The most practical auxiliary branch right now is:
 
 ```text
 y = I2_S(x) + low_rank_residual(x)
@@ -570,8 +581,8 @@ W_side = gamma*T + B A
 ```
 
 This keeps the main matrix in I2_S while adding a tiny low-rank correction. It is
-not pure I2_S, but it may remain product-relevant if the sidecar is much smaller
-than moving the whole model to Q2/Q3.
+not all-I2_S, but still I2_S-rooted. It remains product-relevant only if the sidecar
+stays much smaller than moving the whole model to Q2/Q3.
 
 Plan:
 
@@ -579,8 +590,8 @@ Plan:
 docs/i2s_lora_sidecar_plan.md
 ```
 
-PC should test rank `2/4/8` on 160M first. Colab should only confirm on 1.1B if the
-160M smoke moves FACT.
+PC should test rank `2/4/8` on 160M first. Colab should only confirm on 1.1B if
+the 160M smoke moves FACT without letting the sidecar dominate bytes/ops.
 
 ## Hardware Split: Colab vs RTX 3080 PC
 
@@ -589,7 +600,7 @@ PC should test rank `2/4/8` on 160M first. Colab should only confirm on 1.1B if 
 Use Colab for runs that need either memory, Linux/x86 runtime, or long 1.1B
 training.
 
-Track A Colab jobs:
+I2_S trunk Colab jobs:
 
 ```text
 1.1B FACT-003H PopQA blend
@@ -599,12 +610,12 @@ storage/latency measurement on Linux/x86
 Qwen/Gemma small audit once the 1.1B gate is positive
 ```
 
-Track B Colab jobs:
+I2_S-rooted auxiliary Colab jobs:
 
 ```text
-1.1B train-from-start hybrid
-two-plane/PTQTP-lite model-level probes
-Q2/Q3 pocket adaptation
+1.1B I2_S + tiny sidecar confirmation
+I2_S-rooted two-plane/PTQTP-lite model-level probes
+small top-saliency Q2/Q3 pocket adaptation
 larger representative data adaptation
 ```
 
@@ -622,7 +633,7 @@ every run must produce JSON/MD artifacts before changing the plan.
 Use the 3080 box as a fast predictor and tooling machine, not as the final judge
 for 1.1B quality.
 
-Track A PC jobs:
+I2_S trunk PC jobs:
 
 ```text
 160M seed sweeps
@@ -634,12 +645,12 @@ WSYNC-001/002 cheap geometry probes
 Turbo projection PyTorch reference on small layers
 ```
 
-Track B PC jobs:
+I2_S-rooted auxiliary / diagnostic PC jobs:
 
 ```text
 two-plane small-layer probes
 random/top-k saliency checks
-custom codebook reconstruction tests
+custom codebook reconstruction tests only as an upper-bound diagnostic
 H-I2S linear probes before any kernel work
 small hybrid ablations on 160M
 ```
@@ -821,8 +832,8 @@ Stop or demote a branch when:
 | small hard replay | train facts high but eval flat/worse |
 | WSYNC | MSE improves but CE/FACT does not |
 | rotation/projection | PyTorch reference does not beat baseline |
-| custom kernel | benefit requires non-I2_S codebook but quality gain is small |
-| hybrid capacity | added bytes do not improve FACT/CE under fair budget |
+| custom kernel | benefit requires a non-I2_S-rooted codebook but quality gain is small |
+| I2_S-rooted auxiliary capacity | added bytes do not improve FACT/CE under fair budget |
 | 7B scale-up | 1.1B does not show the component works |
 
 ## Claim Guardrail
@@ -832,7 +843,7 @@ Allowed now:
 ```text
 We have a faithful, fast I2_S substrate and strong evidence that b1.58 conversion
 needs a compiler: valid transforms, saliency, representative adaptation, and
-possibly selective capacity.
+possibly I2_S-rooted auxiliary capacity.
 ```
 
 Not allowed yet:
