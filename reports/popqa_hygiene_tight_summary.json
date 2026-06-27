@@ -1,0 +1,27 @@
+{
+  "source_heldout": "C:\\Users\\gtpk\\BitNet-Transformers\\data\\popqa_blend_heldout.jsonl",
+  "source_rows": 1412,
+  "kept": 916,
+  "dropped_reasons": {
+    "alias": 443,
+    "answer_len": 53,
+    "prompt_len": 0,
+    "leak": 0
+  },
+  "filters": {
+    "max_aliases": 3,
+    "max_answer_words": 2,
+    "prompt_words": [
+      6,
+      20
+    ]
+  },
+  "tight_alias_count": {
+    "min": 1,
+    "mean": 1.44,
+    "max": 3
+  },
+  "postcheck_leak": 0,
+  "out": "C:\\Users\\gtpk\\BitNet-Transformers\\data\\popqa_heldout_tight.jsonl",
+  "scoring_caveat": "PopQA heldout contains-match is alias-permissive: the RAW panel (popqa_blend_heldout.jsonl) keeps up to 69 aliases / multi-word answers, which can inflate fact_rate via spurious matches. Use this TIGHT panel (<=3 short aliases, <=2-word answers) as the PRIMARY FACT-003H transfer metric; report the loose panel only as a permissive secondary read."
+}

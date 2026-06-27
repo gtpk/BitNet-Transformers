@@ -1,0 +1,916 @@
+{"id": "3889725", "category": "popqa_tight", "prompt": "Q: Who was the director of Tomorrow Is Yesterday?\nA:", "must_contain": ["michael o'herlihy"]}
+{"id": "5925479", "category": "popqa_tight", "prompt": "Q: Who is the author of The Fields?\nA:", "must_contain": ["conrad richter"]}
+{"id": "5952754", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The Rubber Gun?\nA:", "must_contain": ["stephen lack"]}
+{"id": "1797712", "category": "popqa_tight", "prompt": "Q: What is the capital of Buckinghamshire?\nA:", "must_contain": ["aylesbury", "aylesbury, buckinghamshire"]}
+{"id": "2663393", "category": "popqa_tight", "prompt": "Q: Who was the director of An Event?\nA:", "must_contain": ["vatroslav mimica"]}
+{"id": "1054561", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for A Place in the World?\nA:", "must_contain": ["adolfo aristarain", "adolfo aristaraín"]}
+{"id": "4034109", "category": "popqa_tight", "prompt": "Q: What genre is Emmeline?\nA:", "must_contain": ["gothic fiction", "gothic literature", "gothic novel"]}
+{"id": "1159795", "category": "popqa_tight", "prompt": "Q: Who was the producer of Particle Fever?\nA:", "must_contain": ["mark levinson"]}
+{"id": "5773556", "category": "popqa_tight", "prompt": "Q: Who was the director of Skinner's Dress Suit?\nA:", "must_contain": ["bill seiter", "william seiter"]}
+{"id": "4080248", "category": "popqa_tight", "prompt": "Q: Who was the producer of Expectations?\nA:", "must_contain": ["george avakian"]}
+{"id": "3128409", "category": "popqa_tight", "prompt": "Q: In what city was Ingvild Bryn born?\nA:", "must_contain": ["voss"]}
+{"id": "3364203", "category": "popqa_tight", "prompt": "Q: What is the capital of Grand Casablanca?\nA:", "must_contain": ["ad-dār al-bayḍā", "anfa", "casablanca"]}
+{"id": "3514387", "category": "popqa_tight", "prompt": "Q: What is Anderson the capital of?\nA:", "must_contain": ["madison county"]}
+{"id": "3432680", "category": "popqa_tight", "prompt": "Q: What sport does Anderson play?\nA:", "must_contain": ["association football", "football", "soccer"]}
+{"id": "325434", "category": "popqa_tight", "prompt": "Q: What genre is Teacher's Pet?\nA:", "must_contain": ["musical film", "musical movie"]}
+{"id": "4330249", "category": "popqa_tight", "prompt": "Q: Who is the mother of Harald Molander?\nA:", "must_contain": ["karin molander"]}
+{"id": "1634814", "category": "popqa_tight", "prompt": "Q: Who was the director of Beautiful Ohio?\nA:", "must_contain": ["chad lowe"]}
+{"id": "1496073", "category": "popqa_tight", "prompt": "Q: Who was the director of Turning the Tables?\nA:", "must_contain": ["elmer clifton"]}
+{"id": "783085", "category": "popqa_tight", "prompt": "Q: What sport does Koumiba Djossouvi play?\nA:", "must_contain": ["rugby", "rugby union"]}
+{"id": "5032330", "category": "popqa_tight", "prompt": "Q: What is Ludwig Lichtschein's occupation?\nA:", "must_contain": ["rabbi", "rav"]}
+{"id": "3332507", "category": "popqa_tight", "prompt": "Q: Who is the author of Androcles and the Lion?\nA:", "must_contain": ["bernard shaw", "g.b. shaw"]}
+{"id": "205245", "category": "popqa_tight", "prompt": "Q: What is Naka-ku the capital of?\nA:", "must_contain": ["yokohama"]}
+{"id": "1773960", "category": "popqa_tight", "prompt": "Q: What genre is Ironic?\nA:", "must_contain": ["pop rock", "pop-rock", "pop/rock"]}
+{"id": "1010824", "category": "popqa_tight", "prompt": "Q: Who was the director of Easy Money?\nA:", "must_contain": ["daniel espinosa"]}
+{"id": "3020711", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Easy Money?\nA:", "must_contain": ["jack roy", "rodney dangerfield"]}
+{"id": "3020712", "category": "popqa_tight", "prompt": "Q: Who was the composer of Easy Money?\nA:", "must_contain": ["laurence rosenthal"]}
+{"id": "1632526", "category": "popqa_tight", "prompt": "Q: Who is the author of Easy Money?\nA:", "must_contain": ["jens lapidus"]}
+{"id": "286413", "category": "popqa_tight", "prompt": "Q: Who was the director of La Zizanie?\nA:", "must_contain": ["claude zidi"]}
+{"id": "305622", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for ?\nA:", "must_contain": ["gregory burke"]}
+{"id": "4210200", "category": "popqa_tight", "prompt": "Q: In what city was George Chambers born?\nA:", "must_contain": ["kimberley", "kimberley, nottinghamshire"]}
+{"id": "1754590", "category": "popqa_tight", "prompt": "Q: What genre is Vault?\nA:", "must_contain": ["public art"]}
+{"id": "3554519", "category": "popqa_tight", "prompt": "Q: Who is the author of Box the Pony?\nA:", "must_contain": ["leah purcell", "scott rankin"]}
+{"id": "2643439", "category": "popqa_tight", "prompt": "Q: Who was the producer of Shelter?\nA:", "must_contain": ["jamie smith", "jamie xx"]}
+{"id": "5196597", "category": "popqa_tight", "prompt": "Q: Who is the author of Shelter?\nA:", "must_contain": ["harlan coben"]}
+{"id": "1613612", "category": "popqa_tight", "prompt": "Q: Who is the mother of Parikshit?\nA:", "must_contain": ["uttarā"]}
+{"id": "1180309", "category": "popqa_tight", "prompt": "Q: In what city was Juan Manuel Montero Vázquez born?\nA:", "must_contain": ["palencia"]}
+{"id": "1729008", "category": "popqa_tight", "prompt": "Q: Who was the producer of Star Trek: First Contact?\nA:", "must_contain": ["rick berman"]}
+{"id": "1729012", "category": "popqa_tight", "prompt": "Q: Who was the director of Star Trek: First Contact?\nA:", "must_contain": ["jonathan frakes"]}
+{"id": "1729013", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Star Trek: First Contact?\nA:", "must_contain": ["brannon braga"]}
+{"id": "1729014", "category": "popqa_tight", "prompt": "Q: Who was the composer of Star Trek: First Contact?\nA:", "must_contain": ["jerry goldsmith"]}
+{"id": "6478434", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for La liceale nella classe dei ripetenti?\nA:", "must_contain": ["mariano laurenti"]}
+{"id": "6435500", "category": "popqa_tight", "prompt": "Q: Who was the composer of There Will Never Be Another You?\nA:", "must_contain": ["harry warren"]}
+{"id": "3194472", "category": "popqa_tight", "prompt": "Q: Who was the composer of Full House?\nA:", "must_contain": ["jesse frederick"]}
+{"id": "4963133", "category": "popqa_tight", "prompt": "Q: Who was the composer of Shenmue?\nA:", "must_contain": ["takenobu mitsuyoshi"]}
+{"id": "3450708", "category": "popqa_tight", "prompt": "Q: What is the capital of Massac County?\nA:", "must_contain": ["metropolis", "metropolis, illinois"]}
+{"id": "3676773", "category": "popqa_tight", "prompt": "Q: Who was the director of Challenge?\nA:", "must_contain": ["raj chakraborty", "raju chakraborty"]}
+{"id": "5117100", "category": "popqa_tight", "prompt": "Q: In what city was Matt Hamilton born?\nA:", "must_contain": ["hemel", "hemel hempstead"]}
+{"id": "3148344", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Amblin'?\nA:", "must_contain": ["spielberg", "steven spielberg"]}
+{"id": "914940", "category": "popqa_tight", "prompt": "Q: In what city was Julia Jones born?\nA:", "must_contain": ["droitwich", "droitwich spa"]}
+{"id": "2797971", "category": "popqa_tight", "prompt": "Q: Who is the father of Apollo?\nA:", "must_contain": ["zeus"]}
+{"id": "2797972", "category": "popqa_tight", "prompt": "Q: Who is the mother of Apollo?\nA:", "must_contain": ["leto"]}
+{"id": "568167", "category": "popqa_tight", "prompt": "Q: Who was the producer of Air Force?\nA:", "must_contain": ["howard hawks"]}
+{"id": "1308133", "category": "popqa_tight", "prompt": "Q: Who is the father of Leir of Britain?\nA:", "must_contain": ["bladud", "blaiddyd"]}
+{"id": "3718761", "category": "popqa_tight", "prompt": "Q: Who was the producer of Saptapadi?\nA:", "must_contain": ["uttam kumar"]}
+{"id": "4830188", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Keep Fit?\nA:", "must_contain": ["anthony kimmins"]}
+{"id": "4708901", "category": "popqa_tight", "prompt": "Q: Who is the father of John Donkin?\nA:", "must_contain": ["bryan donkin"]}
+{"id": "5168709", "category": "popqa_tight", "prompt": "Q: Who is the father of Mihailo II of Duklja?\nA:", "must_contain": ["constantine bodin"]}
+{"id": "2106208", "category": "popqa_tight", "prompt": "Q: Who is the father of Shergar?\nA:", "must_contain": ["great nephew"]}
+{"id": "5693141", "category": "popqa_tight", "prompt": "Q: Who was the producer of Secretary?\nA:", "must_contain": ["steven shainberg"]}
+{"id": "5693143", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Secretary?\nA:", "must_contain": ["steven shainberg"]}
+{"id": "3077625", "category": "popqa_tight", "prompt": "Q: Who was the producer of Paradise: Hope?\nA:", "must_contain": ["ulrich seidl"]}
+{"id": "6498315", "category": "popqa_tight", "prompt": "Q: What is Ernst Theodor Echtermeyer's occupation?\nA:", "must_contain": ["philosopher"]}
+{"id": "967077", "category": "popqa_tight", "prompt": "Q: In what city was Ivan Khomukha born?\nA:", "must_contain": ["ipatovo"]}
+{"id": "4374533", "category": "popqa_tight", "prompt": "Q: In what city was Henry C Bailey JR born?\nA:", "must_contain": ["suffolk", "suffolk, va", "suffolk, virginia"]}
+{"id": "5501213", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Public Relations?\nA:", "must_contain": ["matthew weiner"]}
+{"id": "2138099", "category": "popqa_tight", "prompt": "Q: Who was the producer of Vinci?\nA:", "must_contain": ["juliusz machulski"]}
+{"id": "6110987", "category": "popqa_tight", "prompt": "Q: Who was the composer of Vinyl?\nA:", "must_contain": ["mike peters"]}
+{"id": "275762", "category": "popqa_tight", "prompt": "Q: Who was the director of Virus?\nA:", "must_contain": ["john bruno"]}
+{"id": "275763", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Virus?\nA:", "must_contain": ["chuck pfarrer", "john bruno"]}
+{"id": "603395", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Virus?\nA:", "must_contain": ["kinji fukasaku", "sakyo komatsu"]}
+{"id": "275764", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Virus?\nA:", "must_contain": ["chuck pfarrer", "john bruno"]}
+{"id": "603396", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Virus?\nA:", "must_contain": ["kinji fukasaku", "sakyo komatsu"]}
+{"id": "5746036", "category": "popqa_tight", "prompt": "Q: In what city was Shinji Hamazaki born?\nA:", "must_contain": ["kure"]}
+{"id": "747228", "category": "popqa_tight", "prompt": "Q: Who was the producer of Mediastan?\nA:", "must_contain": ["assange", "julian assange"]}
+{"id": "5949971", "category": "popqa_tight", "prompt": "Q: Who is the author of The Rachel Papers?\nA:", "must_contain": ["martin amis"]}
+{"id": "2601634", "category": "popqa_tight", "prompt": "Q: Who was the composer of Balika Badhu?\nA:", "must_contain": ["pancham"]}
+{"id": "3331448", "category": "popqa_tight", "prompt": "Q: What sport does Andrew Tucker play?\nA:", "must_contain": ["association football", "football", "soccer"]}
+{"id": "2997690", "category": "popqa_tight", "prompt": "Q: Who was the composer of The Dawning?\nA:", "must_contain": ["simon may"]}
+{"id": "5148092", "category": "popqa_tight", "prompt": "Q: Who was the director of Technological Threat?\nA:", "must_contain": ["bill kroyer", "william kroyer"]}
+{"id": "3411028", "category": "popqa_tight", "prompt": "Q: Who was the director of An Education?\nA:", "must_contain": ["lone scherfig"]}
+{"id": "1067525", "category": "popqa_tight", "prompt": "Q: Who was the director of Chicken Party?\nA:", "must_contain": ["tate taylor"]}
+{"id": "5940624", "category": "popqa_tight", "prompt": "Q: Who was the director of The Man in Half Moon Street?\nA:", "must_contain": ["ralph murphy"]}
+{"id": "5962848", "category": "popqa_tight", "prompt": "Q: Who was the director of Qayamat Se Qayamat Tak?\nA:", "must_contain": ["mansoor khan"]}
+{"id": "323685", "category": "popqa_tight", "prompt": "Q: What sport does Atanas Atanasov play?\nA:", "must_contain": ["association football", "football", "soccer"]}
+{"id": "2075905", "category": "popqa_tight", "prompt": "Q: What genre is Vogue?\nA:", "must_contain": ["j-pop", "japanese pop", "jpop"]}
+{"id": "184388", "category": "popqa_tight", "prompt": "Q: Who was the director of Vogue?\nA:", "must_contain": ["david fincher"]}
+{"id": "6285203", "category": "popqa_tight", "prompt": "Q: What is the capital of Malaysia?\nA:", "must_contain": ["kl", "kuala lumpur"]}
+{"id": "6440905", "category": "popqa_tight", "prompt": "Q: What sport does 2004–05 Segunda División B play?\nA:", "must_contain": ["association football", "football", "soccer"]}
+{"id": "2490460", "category": "popqa_tight", "prompt": "Q: What genre is Haddaway?\nA:", "must_contain": ["euro dance", "euro-dance", "eurodance"]}
+{"id": "5315108", "category": "popqa_tight", "prompt": "Q: Who is the author of Now and Then?\nA:", "must_contain": ["joseph heller"]}
+{"id": "313937", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for La Collectionneuse?\nA:", "must_contain": ["patrick bauchau"]}
+{"id": "504059", "category": "popqa_tight", "prompt": "Q: Who was the producer of Densen Uta?\nA:", "must_contain": ["masato harada"]}
+{"id": "2955103", "category": "popqa_tight", "prompt": "Q: What genre is It Sounds Like?\nA:", "must_contain": ["prog house", "progressive house"]}
+{"id": "237759", "category": "popqa_tight", "prompt": "Q: Who was the producer of The American?\nA:", "must_contain": ["george clooney"]}
+{"id": "2326200", "category": "popqa_tight", "prompt": "Q: Who is the author of The American?\nA:", "must_contain": ["henricus james", "henry james"]}
+{"id": "5336010", "category": "popqa_tight", "prompt": "Q: Who was the director of Barbara?\nA:", "must_contain": ["christian petzold"]}
+{"id": "5336011", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Barbara?\nA:", "must_contain": ["christian petzold"]}
+{"id": "2513644", "category": "popqa_tight", "prompt": "Q: What is Kekko Fornarelli's occupation?\nA:", "must_contain": ["composer", "pianist"]}
+{"id": "2070810", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Head On?\nA:", "must_contain": ["christos tsiolkas"]}
+{"id": "2224150", "category": "popqa_tight", "prompt": "Q: What is Brendan Canty's occupation?\nA:", "must_contain": ["composer", "musical artist", "musician"]}
+{"id": "969963", "category": "popqa_tight", "prompt": "Q: What genre is Arrival?\nA:", "must_contain": ["pop", "pop music"]}
+{"id": "1931430", "category": "popqa_tight", "prompt": "Q: Who was the composer of Arrival?\nA:", "must_contain": ["benny andersson"]}
+{"id": "287661", "category": "popqa_tight", "prompt": "Q: What is the religion of Anne of Great Britain?\nA:", "must_contain": ["anglicanism"]}
+{"id": "2965793", "category": "popqa_tight", "prompt": "Q: Who is the father of Demeter?\nA:", "must_contain": ["cronus", "kronos"]}
+{"id": "4812706", "category": "popqa_tight", "prompt": "Q: What is Tukums the capital of?\nA:", "must_contain": ["tukums municipality"]}
+{"id": "1402952", "category": "popqa_tight", "prompt": "Q: What sport does 1991–92 Southend United F.C. season play?\nA:", "must_contain": ["association football", "football", "soccer"]}
+{"id": "3729486", "category": "popqa_tight", "prompt": "Q: In what city was Christian Vaquero born?\nA:", "must_contain": ["montevideo"]}
+{"id": "3182524", "category": "popqa_tight", "prompt": "Q: Who was the producer of The Champ?\nA:", "must_contain": ["king vidor"]}
+{"id": "3182527", "category": "popqa_tight", "prompt": "Q: Who was the director of The Champ?\nA:", "must_contain": ["king vidor"]}
+{"id": "2438146", "category": "popqa_tight", "prompt": "Q: What genre is The Chase?\nA:", "must_contain": ["film noir"]}
+{"id": "2438149", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The Chase?\nA:", "must_contain": ["philip yordan"]}
+{"id": "1410036", "category": "popqa_tight", "prompt": "Q: Who was the director of The Chief?\nA:", "must_contain": ["charles reisner"]}
+{"id": "326468", "category": "popqa_tight", "prompt": "Q: Who was the director of The Child?\nA:", "must_contain": ["benjamin christensen"]}
+{"id": "2424620", "category": "popqa_tight", "prompt": "Q: What genre is Francesco Guardi?\nA:", "must_contain": ["veduta", "vedute"]}
+{"id": "3201858", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for A Woman of No Importance?\nA:", "must_contain": ["oscar wilde"]}
+{"id": "1901642", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Microphone?\nA:", "must_contain": ["ahmad abdalla"]}
+{"id": "285768", "category": "popqa_tight", "prompt": "Q: Who is the author of My Neighbor?\nA:", "must_contain": ["františek kafka", "franz kafka", "kafka"]}
+{"id": "1396461", "category": "popqa_tight", "prompt": "Q: What genre is For a Friend?\nA:", "must_contain": ["pop", "pop music"]}
+{"id": "4106489", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Fifty-One?\nA:", "must_contain": ["sam catlin"]}
+{"id": "246607", "category": "popqa_tight", "prompt": "Q: Who was the director of The Claim?\nA:", "must_contain": ["michael winterbottom"]}
+{"id": "246608", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The Claim?\nA:", "must_contain": ["frank cottrell-boyce"]}
+{"id": "246609", "category": "popqa_tight", "prompt": "Q: Who was the composer of The Claim?\nA:", "must_contain": ["michael nyman"]}
+{"id": "1287920", "category": "popqa_tight", "prompt": "Q: Who was the composer of The Climb?\nA:", "must_contain": ["jessi alexander"]}
+{"id": "2672543", "category": "popqa_tight", "prompt": "Q: Who was the director of The Clock?\nA:", "must_contain": ["christian marclay"]}
+{"id": "1016541", "category": "popqa_tight", "prompt": "Q: Who was the director of The Clock?\nA:", "must_contain": ["vincent minnelli", "vincente minnelli"]}
+{"id": "1353558", "category": "popqa_tight", "prompt": "Q: Who was the composer of Yahudi Ki Ladki?\nA:", "must_contain": ["pankaj mullick"]}
+{"id": "242771", "category": "popqa_tight", "prompt": "Q: Who is the author of Memory, Sorrow, and Thorn?\nA:", "must_contain": ["tad williams"]}
+{"id": "6472778", "category": "popqa_tight", "prompt": "Q: Who was the composer of See You?\nA:", "must_contain": ["martin gore"]}
+{"id": "6163801", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for While the Sun Shines?\nA:", "must_contain": ["terence rattigan", "terrence rattigan"]}
+{"id": "6305089", "category": "popqa_tight", "prompt": "Q: Who was the composer of La rondine?\nA:", "must_contain": ["giacomo puccini", "puccini"]}
+{"id": "2953719", "category": "popqa_tight", "prompt": "Q: What genre is Evil Dead: Hail to the King?\nA:", "must_contain": ["survival horror"]}
+{"id": "1518691", "category": "popqa_tight", "prompt": "Q: Who is the author of Musicophilia?\nA:", "must_contain": ["oliver sacks"]}
+{"id": "1734901", "category": "popqa_tight", "prompt": "Q: What is the capital of Albania?\nA:", "must_contain": ["tirana", "tirane", "tiranë"]}
+{"id": "4587763", "category": "popqa_tight", "prompt": "Q: What genre is Ivan Julian?\nA:", "must_contain": ["punk", "punk music", "punk rock"]}
+{"id": "6317793", "category": "popqa_tight", "prompt": "Q: What is the capital of Sri Lanka?\nA:", "must_contain": ["colombo", "kotte"]}
+{"id": "6317794", "category": "popqa_tight", "prompt": "Q: What is the capital of Sri Lanka?\nA:", "must_contain": ["colombo", "kotte"]}
+{"id": "1779886", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The Joy Luck Club?\nA:", "must_contain": ["amy tan"]}
+{"id": "3024065", "category": "popqa_tight", "prompt": "Q: Who is the mother of Maria Alekseyevna of Russia?\nA:", "must_contain": ["maria miloslavskaya"]}
+{"id": "5918225", "category": "popqa_tight", "prompt": "Q: Who was the producer of The Comic?\nA:", "must_contain": ["aaron ruben", "carl reiner", "carlton reiner"]}
+{"id": "5918226", "category": "popqa_tight", "prompt": "Q: Who was the producer of The Comic?\nA:", "must_contain": ["aaron ruben", "carl reiner", "carlton reiner"]}
+{"id": "5918227", "category": "popqa_tight", "prompt": "Q: Who was the director of The Comic?\nA:", "must_contain": ["carl reiner", "carlton reiner"]}
+{"id": "5919221", "category": "popqa_tight", "prompt": "Q: What genre is The Court?\nA:", "must_contain": ["courtroom drama", "legal drama"]}
+{"id": "1401547", "category": "popqa_tight", "prompt": "Q: Who is the author of Redeployment?\nA:", "must_contain": ["phil klay"]}
+{"id": "5265903", "category": "popqa_tight", "prompt": "Q: What genre is Needle?\nA:", "must_contain": ["horror film", "horror movie"]}
+{"id": "3499376", "category": "popqa_tight", "prompt": "Q: What is Bad Ems the capital of?\nA:", "must_contain": ["rhein-lahn-kreis"]}
+{"id": "3039072", "category": "popqa_tight", "prompt": "Q: Who was the director of The Sugarland Express?\nA:", "must_contain": ["spielberg", "steven spielberg"]}
+{"id": "4622525", "category": "popqa_tight", "prompt": "Q: Who was the director of Demonia?\nA:", "must_contain": ["lucio fulci"]}
+{"id": "2297022", "category": "popqa_tight", "prompt": "Q: What genre is Drôles de zèbres?\nA:", "must_contain": ["comedy film", "comedy movie"]}
+{"id": "3321084", "category": "popqa_tight", "prompt": "Q: Who is the author of Ancestor?\nA:", "must_contain": ["scott sigler"]}
+{"id": "3563235", "category": "popqa_tight", "prompt": "Q: Who was the director of Breaking News?\nA:", "must_contain": ["nagathihalli chandrashekhar"]}
+{"id": "5046329", "category": "popqa_tight", "prompt": "Q: What is the capital of Tuvalu?\nA:", "must_contain": ["funafuti", "funafuti island"]}
+{"id": "1847214", "category": "popqa_tight", "prompt": "Q: What is Kanchanaburi the capital of?\nA:", "must_contain": ["kanchanaburi", "kanchanaburi province"]}
+{"id": "6453288", "category": "popqa_tight", "prompt": "Q: Who was the director of The Craft?\nA:", "must_contain": ["andrew fleming"]}
+{"id": "2672696", "category": "popqa_tight", "prompt": "Q: Who was the director of The Crash?\nA:", "must_contain": ["wilhelm dieterle", "william dieterle"]}
+{"id": "5939352", "category": "popqa_tight", "prompt": "Q: Who was the director of The Love Nest?\nA:", "must_contain": ["thomas bentley"]}
+{"id": "5919596", "category": "popqa_tight", "prompt": "Q: Who was the director of The Cross?\nA:", "must_contain": ["matthew crouch"]}
+{"id": "402260", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The Crowd?\nA:", "must_contain": ["king vidor"]}
+{"id": "2314335", "category": "popqa_tight", "prompt": "Q: What is the capital of Beheira Governorate?\nA:", "must_contain": ["damanhur"]}
+{"id": "3746560", "category": "popqa_tight", "prompt": "Q: In what city was Clarence Beck born?\nA:", "must_contain": ["harrisburg", "harrisburg, pennsylvania"]}
+{"id": "1840196", "category": "popqa_tight", "prompt": "Q: What is the capital of San Marino?\nA:", "must_contain": ["san marino"]}
+{"id": "5945304", "category": "popqa_tight", "prompt": "Q: Who is the author of The Octoroon?\nA:", "must_contain": ["dion boucicault"]}
+{"id": "53424", "category": "popqa_tight", "prompt": "Q: Who was the producer of The Message?\nA:", "must_contain": ["chen kuo-fu"]}
+{"id": "2308997", "category": "popqa_tight", "prompt": "Q: Who was the director of The Message?\nA:", "must_contain": ["bobby roth"]}
+{"id": "53427", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The Message?\nA:", "must_contain": ["chen kuo-fu"]}
+{"id": "2920105", "category": "popqa_tight", "prompt": "Q: What is the capital of Cantabria?\nA:", "must_contain": ["santander", "santander, spain"]}
+{"id": "529887", "category": "popqa_tight", "prompt": "Q: In what city was C. N. Annadurai born?\nA:", "must_contain": ["kancheepuram", "kanchipuram"]}
+{"id": "6281317", "category": "popqa_tight", "prompt": "Q: Who was the producer of Best Of?\nA:", "must_contain": ["david brandes"]}
+{"id": "4810130", "category": "popqa_tight", "prompt": "Q: Who is the author of Kanojo wa Uso o Aishisugiteru?\nA:", "must_contain": ["kotomi aoki"]}
+{"id": "3704887", "category": "popqa_tight", "prompt": "Q: Who was the director of Cheech & Chong's The Corsican Brothers?\nA:", "must_contain": ["tommy chong"]}
+{"id": "6207424", "category": "popqa_tight", "prompt": "Q: What genre is With Passion?\nA:", "must_contain": ["tech-death"]}
+{"id": "2858408", "category": "popqa_tight", "prompt": "Q: Who was the producer of The Curse?\nA:", "must_contain": ["lucio fulci"]}
+{"id": "2858411", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The Curse?\nA:", "must_contain": ["david keith"]}
+{"id": "5424079", "category": "popqa_tight", "prompt": "Q: In what city was Pete Larson born?\nA:", "must_contain": ["wilmington", "wilmington, de", "wilmington, delaware"]}
+{"id": "4495198", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Hoppa högst?\nA:", "must_contain": ["astrid lindgren"]}
+{"id": "401885", "category": "popqa_tight", "prompt": "Q: Who was the producer of If I Had to Do It All Over Again?\nA:", "must_contain": ["claude lelouch"]}
+{"id": "5269026", "category": "popqa_tight", "prompt": "Q: Who was the director of Nelson?\nA:", "must_contain": ["walter summers"]}
+{"id": "309685", "category": "popqa_tight", "prompt": "Q: Who was the director of Nelson?\nA:", "must_contain": ["maurice elvey"]}
+{"id": "5520262", "category": "popqa_tight", "prompt": "Q: Who is the author of Race Against Time?\nA:", "must_contain": ["caroline quine", "carolyn keene"]}
+{"id": "2187915", "category": "popqa_tight", "prompt": "Q: What genre is Street Fighter?\nA:", "must_contain": ["fighting game"]}
+{"id": "6471223", "category": "popqa_tight", "prompt": "Q: Who was the director of The Turning Point?\nA:", "must_contain": ["fridrikh ermler"]}
+{"id": "5919977", "category": "popqa_tight", "prompt": "Q: Who was the director of The Cycle?\nA:", "must_contain": ["dariush mehrjui"]}
+{"id": "1425545", "category": "popqa_tight", "prompt": "Q: What color is Aston Villa F.C.?\nA:", "must_contain": ["sky blue"]}
+{"id": "3128371", "category": "popqa_tight", "prompt": "Q: Who is the father of Eleanor of Scotland?\nA:", "must_contain": ["james i"]}
+{"id": "3034032", "category": "popqa_tight", "prompt": "Q: What genre is Rule the World?\nA:", "must_contain": ["pop", "pop music"]}
+{"id": "4290975", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Growing Up?\nA:", "must_contain": ["hou hsiao-hsien", "hou xiaoxian"]}
+{"id": "1136850", "category": "popqa_tight", "prompt": "Q: Who is the author of Growing Up?\nA:", "must_contain": ["russell baker"]}
+{"id": "4439350", "category": "popqa_tight", "prompt": "Q: Who was the producer of The Cocoanuts?\nA:", "must_contain": ["walter wanger"]}
+{"id": "3518710", "category": "popqa_tight", "prompt": "Q: Who was the producer of Public Toilet?\nA:", "must_contain": ["fruit chan"]}
+{"id": "3518711", "category": "popqa_tight", "prompt": "Q: Who was the director of Public Toilet?\nA:", "must_contain": ["fruit chan"]}
+{"id": "1092672", "category": "popqa_tight", "prompt": "Q: Who is the mother of Paula Weinstein?\nA:", "must_contain": ["hannah weinstein"]}
+{"id": "6161740", "category": "popqa_tight", "prompt": "Q: Who was the director of What I Know?\nA:", "must_contain": ["patty jenkins"]}
+{"id": "6161741", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for What I Know?\nA:", "must_contain": ["veena sud"]}
+{"id": "1122965", "category": "popqa_tight", "prompt": "Q: Who was the director of Basement?\nA:", "must_contain": ["topel lee"]}
+{"id": "3311405", "category": "popqa_tight", "prompt": "Q: Who is the author of American Dream, Global Nightmare?\nA:", "must_contain": ["ziauddin sardar"]}
+{"id": "1387341", "category": "popqa_tight", "prompt": "Q: Who is the author of The Wrestling?\nA:", "must_contain": ["simon garfield"]}
+{"id": "40260", "category": "popqa_tight", "prompt": "Q: What genre is Nevada?\nA:", "must_contain": ["western", "western film", "western genre"]}
+{"id": "40263", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Nevada?\nA:", "must_contain": ["zane grey"]}
+{"id": "5274970", "category": "popqa_tight", "prompt": "Q: Who is the author of Nevada?\nA:", "must_contain": ["steve gerber"]}
+{"id": "3148563", "category": "popqa_tight", "prompt": "Q: Who is the father of King Arthur?\nA:", "must_contain": ["uther pendragon"]}
+{"id": "3148564", "category": "popqa_tight", "prompt": "Q: Who is the mother of King Arthur?\nA:", "must_contain": ["eigyr", "igraine"]}
+{"id": "3196113", "category": "popqa_tight", "prompt": "Q: Who was the director of A Day to Remember?\nA:", "must_contain": ["ralph thomas"]}
+{"id": "2183006", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for A Day to Remember?\nA:", "must_contain": ["jean-louis bertuccelli", "jean-louis bertucelli"]}
+{"id": "2448958", "category": "popqa_tight", "prompt": "Q: Who was the producer of The Plague?\nA:", "must_contain": ["clive barker"]}
+{"id": "2599893", "category": "popqa_tight", "prompt": "Q: Who was the director of The Plague?\nA:", "must_contain": ["luis puenzo"]}
+{"id": "83046", "category": "popqa_tight", "prompt": "Q: Who was the composer of How Many More Times?\nA:", "must_contain": ["jim page", "jimmy page"]}
+{"id": "754429", "category": "popqa_tight", "prompt": "Q: Who was the producer of The Player?\nA:", "must_contain": ["michael tolkin"]}
+{"id": "754434", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The Player?\nA:", "must_contain": ["michael tolkin"]}
+{"id": "4541238", "category": "popqa_tight", "prompt": "Q: Who was the composer of Back to School?\nA:", "must_contain": ["danny elfman"]}
+{"id": "6404309", "category": "popqa_tight", "prompt": "Q: Who was the producer of A Good Year?\nA:", "must_contain": ["ridley scott"]}
+{"id": "209136", "category": "popqa_tight", "prompt": "Q: Who is the author of A Good Year?\nA:", "must_contain": ["peter mayle"]}
+{"id": "5579512", "category": "popqa_tight", "prompt": "Q: Who is the father of Richard Somerset, 2nd Baron Raglan?\nA:", "must_contain": ["fitzroy somerset"]}
+{"id": "3881615", "category": "popqa_tight", "prompt": "Q: What genre is Deadline?\nA:", "must_contain": ["mystery film"]}
+{"id": "1371681", "category": "popqa_tight", "prompt": "Q: What genre is Deadline?\nA:", "must_contain": ["electronic music", "electrosonic"]}
+{"id": "263272", "category": "popqa_tight", "prompt": "Q: Who is the author of Deadline?\nA:", "must_contain": ["brett ewins"]}
+{"id": "3881623", "category": "popqa_tight", "prompt": "Q: Who is the author of Deadline?\nA:", "must_contain": ["mira grant", "seanan mcguire"]}
+{"id": "4258960", "category": "popqa_tight", "prompt": "Q: Who was the composer of Going Up?\nA:", "must_contain": ["louis hirsch"]}
+{"id": "4060489", "category": "popqa_tight", "prompt": "Q: Who was the composer of Piano Concerto?\nA:", "must_contain": ["dun tan", "tan dun"]}
+{"id": "6494609", "category": "popqa_tight", "prompt": "Q: Who was the producer of Back to Black?\nA:", "must_contain": ["dj ronson", "mark ronson"]}
+{"id": "6135583", "category": "popqa_tight", "prompt": "Q: What is Wallace Dollase's occupation?\nA:", "must_contain": ["horse trainer", "racehorse trainer"]}
+{"id": "4897248", "category": "popqa_tight", "prompt": "Q: In what city was Jakob Kaiser born?\nA:", "must_contain": ["hammelburg"]}
+{"id": "2831618", "category": "popqa_tight", "prompt": "Q: Who was the producer of Hoffmeyer's Legacy?\nA:", "must_contain": ["mack sennett"]}
+{"id": "248060", "category": "popqa_tight", "prompt": "Q: Who was the producer of The Pledge?\nA:", "must_contain": ["pappy pariah", "sean penn"]}
+{"id": "4500149", "category": "popqa_tight", "prompt": "Q: Who was the director of Hotel Splendide?\nA:", "must_contain": ["michael powell", "powell"]}
+{"id": "1611841", "category": "popqa_tight", "prompt": "Q: What sport does David Homoláč play?\nA:", "must_contain": ["association football", "football", "soccer"]}
+{"id": "43108", "category": "popqa_tight", "prompt": "Q: What is the capital of Uganda?\nA:", "must_contain": ["kampala"]}
+{"id": "5848133", "category": "popqa_tight", "prompt": "Q: Who was the composer of Sukran?\nA:", "must_contain": ["vijay antony"]}
+{"id": "3191295", "category": "popqa_tight", "prompt": "Q: What genre is Die Fledermaus?\nA:", "must_contain": ["operetta"]}
+{"id": "1219902", "category": "popqa_tight", "prompt": "Q: In what city was Wellington Santos da Silva born?\nA:", "must_contain": ["guarulhos"]}
+{"id": "2760034", "category": "popqa_tight", "prompt": "Q: What genre is Frederic Edwin Church?\nA:", "must_contain": ["landscape", "landscape art", "landscape painting"]}
+{"id": "2661013", "category": "popqa_tight", "prompt": "Q: What genre is Sultan?\nA:", "must_contain": ["rap francais"]}
+{"id": "5848738", "category": "popqa_tight", "prompt": "Q: Who was the composer of Sultan?\nA:", "must_contain": ["koti", "saluri koti"]}
+{"id": "698369", "category": "popqa_tight", "prompt": "Q: Who was the producer of Jab We Met?\nA:", "must_contain": ["dhilin mehta", "dhillin mehta"]}
+{"id": "1236145", "category": "popqa_tight", "prompt": "Q: Who was the producer of Mr. Baseball?\nA:", "must_contain": ["fred schepisi"]}
+{"id": "979359", "category": "popqa_tight", "prompt": "Q: Who was the producer of The Lucky Stiff?\nA:", "must_contain": ["jack benny"]}
+{"id": "5849339", "category": "popqa_tight", "prompt": "Q: Who is the author of Summer?\nA:", "must_contain": ["edith wharton"]}
+{"id": "5921269", "category": "popqa_tight", "prompt": "Q: Who was the director of The Delivery?\nA:", "must_contain": ["harold ramis", "seth gordon"]}
+{"id": "5921271", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The Delivery?\nA:", "must_contain": ["charlie grandy", "daniel chun"]}
+{"id": "2056642", "category": "popqa_tight", "prompt": "Q: Who was the director of Grease?\nA:", "must_contain": ["randal kleiser"]}
+{"id": "4604790", "category": "popqa_tight", "prompt": "Q: Who was the composer of Grease?\nA:", "must_contain": ["jim jacobs"]}
+{"id": "2972379", "category": "popqa_tight", "prompt": "Q: What is the capital of Greece?\nA:", "must_contain": ["athens"]}
+{"id": "2220035", "category": "popqa_tight", "prompt": "Q: Who is the father of Riphath?\nA:", "must_contain": ["gomer"]}
+{"id": "2983320", "category": "popqa_tight", "prompt": "Q: Who was the director of Sunday?\nA:", "must_contain": ["jonathan nossiter"]}
+{"id": "310517", "category": "popqa_tight", "prompt": "Q: Who was the director of Sunday?\nA:", "must_contain": ["charles mcdougall"]}
+{"id": "2983321", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Sunday?\nA:", "must_contain": ["jonathan nossiter"]}
+{"id": "4497034", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Sunset?\nA:", "must_contain": ["blake edwards"]}
+{"id": "5851902", "category": "popqa_tight", "prompt": "Q: Who is the author of Sunset?\nA:", "must_contain": ["erin hunter"]}
+{"id": "5703447", "category": "popqa_tight", "prompt": "Q: Who was the composer of Schlager?\nA:", "must_contain": ["svika pick"]}
+{"id": "3508703", "category": "popqa_tight", "prompt": "Q: What sport does Bill Wilkinson play?\nA:", "must_contain": ["ice hockey"]}
+{"id": "1143620", "category": "popqa_tight", "prompt": "Q: What genre is Gentleman?\nA:", "must_contain": ["afro beat", "afro-beat", "afrobeat"]}
+{"id": "4203116", "category": "popqa_tight", "prompt": "Q: Who was the composer of Gentleman?\nA:", "must_contain": ["david lubega", "lou bega"]}
+{"id": "1648048", "category": "popqa_tight", "prompt": "Q: What genre is Nineteen Eighty-Four?\nA:", "must_contain": ["political fiction"]}
+{"id": "3312963", "category": "popqa_tight", "prompt": "Q: Who is the father of Scooter Barry?\nA:", "must_contain": ["rick barry"]}
+{"id": "726288", "category": "popqa_tight", "prompt": "Q: Who was the director of Going Places?\nA:", "must_contain": ["ray enright"]}
+{"id": "2728910", "category": "popqa_tight", "prompt": "Q: Who was the producer of Adventure?\nA:", "must_contain": ["victor fleming"]}
+{"id": "2728912", "category": "popqa_tight", "prompt": "Q: Who was the director of Adventure?\nA:", "must_contain": ["victor fleming"]}
+{"id": "2941257", "category": "popqa_tight", "prompt": "Q: What genre is A Mother?\nA:", "must_contain": ["pripovijetka", "short story", "tale"]}
+{"id": "5960904", "category": "popqa_tight", "prompt": "Q: Who is the author of The True Deceiver?\nA:", "must_contain": ["tove jansson"]}
+{"id": "2045728", "category": "popqa_tight", "prompt": "Q: Who was the producer of Source Code?\nA:", "must_contain": ["mark gordon"]}
+{"id": "2110964", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Rang-ha?\nA:", "must_contain": ["abbas kiarostami"]}
+{"id": "1750783", "category": "popqa_tight", "prompt": "Q: What genre is John K. Samson?\nA:", "must_contain": ["rock", "rock music"]}
+{"id": "3618189", "category": "popqa_tight", "prompt": "Q: What genre is Ca-bau-kan?\nA:", "must_contain": ["romance film", "romance genre", "romantic film"]}
+{"id": "2934585", "category": "popqa_tight", "prompt": "Q: Who was the director of The Physician?\nA:", "must_contain": ["georg jacoby"]}
+{"id": "1796951", "category": "popqa_tight", "prompt": "Q: Who was the director of One Day?\nA:", "must_contain": ["lone scherfig"]}
+{"id": "1796952", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for One Day?\nA:", "must_contain": ["david nicholls"]}
+{"id": "5039974", "category": "popqa_tight", "prompt": "Q: Who was the producer of One Way?\nA:", "must_contain": ["til schweiger"]}
+{"id": "580323", "category": "popqa_tight", "prompt": "Q: Who was the producer of Smart People?\nA:", "must_contain": ["michael london"]}
+{"id": "580328", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Smart People?\nA:", "must_contain": ["mark poirier"]}
+{"id": "2210887", "category": "popqa_tight", "prompt": "Q: Who was the composer of Bloomfield?\nA:", "must_contain": ["johnny harris"]}
+{"id": "4201776", "category": "popqa_tight", "prompt": "Q: What sport does Noumandiez Doué play?\nA:", "must_contain": ["association football", "football", "soccer"]}
+{"id": "3658789", "category": "popqa_tight", "prompt": "Q: In what city was Catherine Tishem born?\nA:", "must_contain": ["norwich", "norwich, england", "norwich, norfolk"]}
+{"id": "2313321", "category": "popqa_tight", "prompt": "Q: In what city was Everett Glass born?\nA:", "must_contain": ["bangor", "bangor, maine"]}
+{"id": "2451142", "category": "popqa_tight", "prompt": "Q: Who is the author of Those Who Hunt the Night?\nA:", "must_contain": ["barbara hambly", "barbara hamilton"]}
+{"id": "6482750", "category": "popqa_tight", "prompt": "Q: What sport does Sporting News play?\nA:", "must_contain": ["america's pastime", "baseball", "⚾"]}
+{"id": "6375207", "category": "popqa_tight", "prompt": "Q: What is Erwin Schulhoff's occupation?\nA:", "must_contain": ["composer", "pianist"]}
+{"id": "1200458", "category": "popqa_tight", "prompt": "Q: Who is the author of Saturday?\nA:", "must_contain": ["ian mcewan"]}
+{"id": "3027041", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Las Meninas?\nA:", "must_contain": ["ihor podolchak"]}
+{"id": "1401285", "category": "popqa_tight", "prompt": "Q: Who was the producer of Vitti Dandu?\nA:", "must_contain": ["ajay devgan", "ajay devgn", "vishal devgan"]}
+{"id": "2826049", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Growth?\nA:", "must_contain": ["gabriel cowan"]}
+{"id": "4892533", "category": "popqa_tight", "prompt": "Q: Who is the father of Georg Adolf Erman?\nA:", "must_contain": ["paul erman"]}
+{"id": "1458427", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Scaramouche?\nA:", "must_contain": ["george froeschel", "rafael sabatini"]}
+{"id": "2309875", "category": "popqa_tight", "prompt": "Q: What is Otuzco the capital of?\nA:", "must_contain": ["otuzco province"]}
+{"id": "1242206", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Brighton Beach Memoirs?\nA:", "must_contain": ["neil simon"]}
+{"id": "1159773", "category": "popqa_tight", "prompt": "Q: Who was the director of One on One?\nA:", "must_contain": ["ki-duk kim", "kim gi-deok", "kim ki-duk"]}
+{"id": "5343341", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for One on One?\nA:", "must_contain": ["robby benson"]}
+{"id": "1159774", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for One on One?\nA:", "must_contain": ["ki-duk kim", "kim gi-deok", "kim ki-duk"]}
+{"id": "5343338", "category": "popqa_tight", "prompt": "Q: Who is the author of One on One?\nA:", "must_contain": ["tabitha king"]}
+{"id": "2738003", "category": "popqa_tight", "prompt": "Q: What is Arcangelo Ghisleri's occupation?\nA:", "must_contain": ["journalist", "journalists", "journo"]}
+{"id": "1599851", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Tahmina?\nA:", "must_contain": ["anar", "anar rzayev"]}
+{"id": "6499440", "category": "popqa_tight", "prompt": "Q: Who was the producer of Animal House?\nA:", "must_contain": ["ivan reitman", "matty simmons"]}
+{"id": "5929490", "category": "popqa_tight", "prompt": "Q: What genre is The Governor?\nA:", "must_contain": ["docudrama", "documentary drama", "drama-documentary"]}
+{"id": "4403442", "category": "popqa_tight", "prompt": "Q: Who is the author of High Five?\nA:", "must_contain": ["janet evanovich", "steffie hall"]}
+{"id": "5457293", "category": "popqa_tight", "prompt": "Q: Who was the director of Pirivom Santhippom?\nA:", "must_contain": ["karu pazhaniappan", "karuppaih pazhaniappan"]}
+{"id": "6328399", "category": "popqa_tight", "prompt": "Q: Who was the producer of Meet Bill?\nA:", "must_contain": ["aaron eckhart"]}
+{"id": "1881360", "category": "popqa_tight", "prompt": "Q: Who is the mother of Todd McCaffrey?\nA:", "must_contain": ["anne mccaffrey"]}
+{"id": "3904602", "category": "popqa_tight", "prompt": "Q: Who was the director of Det var paa Rundetaarn?\nA:", "must_contain": ["poul bang"]}
+{"id": "4150910", "category": "popqa_tight", "prompt": "Q: Who is the author of Stack Overflow?\nA:", "must_contain": ["joel spolsky"]}
+{"id": "786914", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The Dinner?\nA:", "must_contain": ["ettore scola"]}
+{"id": "4974288", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Game Change?\nA:", "must_contain": ["danny strong"]}
+{"id": "3531642", "category": "popqa_tight", "prompt": "Q: In what city was Bob Cremins born?\nA:", "must_contain": ["pelham manor"]}
+{"id": "6161652", "category": "popqa_tight", "prompt": "Q: Who was the director of What Every Woman Learns?\nA:", "must_contain": ["federico nobile", "fred niblo", "frederick liedtke"]}
+{"id": "1517122", "category": "popqa_tight", "prompt": "Q: What is the capital of Kareličy District?\nA:", "must_contain": ["kareličy"]}
+{"id": "353886", "category": "popqa_tight", "prompt": "Q: Who is the father of Nebuchadnezzar II?\nA:", "must_contain": ["nabopolassar"]}
+{"id": "476948", "category": "popqa_tight", "prompt": "Q: Who was the director of Thanks for Sharing?\nA:", "must_contain": ["stuart blumberg"]}
+{"id": "476949", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Thanks for Sharing?\nA:", "must_contain": ["stuart blumberg"]}
+{"id": "63804", "category": "popqa_tight", "prompt": "Q: What is Alfred Mombert's occupation?\nA:", "must_contain": ["bard", "poet", "poetess"]}
+{"id": "5140852", "category": "popqa_tight", "prompt": "Q: Who is the author of Memoir?\nA:", "must_contain": ["john mcgahern", "sean"]}
+{"id": "5263848", "category": "popqa_tight", "prompt": "Q: Who was the director of Nazrana?\nA:", "must_contain": ["ravi tandon"]}
+{"id": "5722743", "category": "popqa_tight", "prompt": "Q: In what city was Serjik Teymourian born?\nA:", "must_contain": ["teheran", "tehran"]}
+{"id": "3250528", "category": "popqa_tight", "prompt": "Q: What genre is The Great Ziegfeld?\nA:", "must_contain": ["musical film", "musical movie"]}
+{"id": "3686960", "category": "popqa_tight", "prompt": "Q: Who was the composer of Echoes?\nA:", "must_contain": ["roger waters"]}
+{"id": "804820", "category": "popqa_tight", "prompt": "Q: What genre is The Four II?\nA:", "must_contain": ["wuxia", "wǔxiá"]}
+{"id": "4084926", "category": "popqa_tight", "prompt": "Q: Who was the director of Alphaville?\nA:", "must_contain": ["jean-luc godard"]}
+{"id": "5534467", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for They Live?\nA:", "must_contain": ["john carpenter"]}
+{"id": "5534469", "category": "popqa_tight", "prompt": "Q: Who was the composer of They Live?\nA:", "must_contain": ["john carpenter"]}
+{"id": "3065444", "category": "popqa_tight", "prompt": "Q: What genre is The Reach?\nA:", "must_contain": ["pripovijetka", "short story", "tale"]}
+{"id": "1337112", "category": "popqa_tight", "prompt": "Q: Who was the producer of The Reach?\nA:", "must_contain": ["michael douglas"]}
+{"id": "2859542", "category": "popqa_tight", "prompt": "Q: Who was the director of The Rebel?\nA:", "must_contain": ["aurelio grimaldi"]}
+{"id": "246631", "category": "popqa_tight", "prompt": "Q: Who was the director of The Relic?\nA:", "must_contain": ["peter hyams"]}
+{"id": "246634", "category": "popqa_tight", "prompt": "Q: Who was the composer of The Relic?\nA:", "must_contain": ["john debney"]}
+{"id": "332566", "category": "popqa_tight", "prompt": "Q: What is Pierre Pansu's occupation?\nA:", "must_contain": ["mathematician"]}
+{"id": "5963922", "category": "popqa_tight", "prompt": "Q: What genre is The Wedding?\nA:", "must_contain": ["romance novel"]}
+{"id": "6438537", "category": "popqa_tight", "prompt": "Q: Who was the director of The Wedding?\nA:", "must_contain": ["wojciech smarzowski"]}
+{"id": "6438538", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The Wedding?\nA:", "must_contain": ["wojciech smarzowski"]}
+{"id": "5963923", "category": "popqa_tight", "prompt": "Q: Who is the author of The Wedding?\nA:", "must_contain": ["danielle steel"]}
+{"id": "2116285", "category": "popqa_tight", "prompt": "Q: What is Javad Maroufi's occupation?\nA:", "must_contain": ["composer"]}
+{"id": "5159652", "category": "popqa_tight", "prompt": "Q: What genre is Gasoline?\nA:", "must_contain": ["crime film", "crime movie"]}
+{"id": "1288509", "category": "popqa_tight", "prompt": "Q: Who was the director of The Divide?\nA:", "must_contain": ["xavier gens"]}
+{"id": "6415411", "category": "popqa_tight", "prompt": "Q: Who was the producer of The River?\nA:", "must_contain": ["jean renoir"]}
+{"id": "1631715", "category": "popqa_tight", "prompt": "Q: Who was the director of The River?\nA:", "must_contain": ["leonard lorentz", "pare lorentz"]}
+{"id": "5471260", "category": "popqa_tight", "prompt": "Q: Who was the director of The River?\nA:", "must_contain": ["frank borzage"]}
+{"id": "6415414", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The River?\nA:", "must_contain": ["jean renoir"]}
+{"id": "1623707", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The River?\nA:", "must_contain": ["ming-liang tsai", "tsai ming-liang"]}
+{"id": "1631716", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The River?\nA:", "must_contain": ["leonard lorentz", "pare lorentz"]}
+{"id": "5952063", "category": "popqa_tight", "prompt": "Q: Who is the author of The River?\nA:", "must_contain": ["flannery o'connor"]}
+{"id": "1787343", "category": "popqa_tight", "prompt": "Q: What is the capital of Wa State?\nA:", "must_contain": ["pangkham"]}
+{"id": "5314797", "category": "popqa_tight", "prompt": "Q: Who is the author of Now I Know?\nA:", "must_contain": ["aidan chambers"]}
+{"id": "6390764", "category": "popqa_tight", "prompt": "Q: What is the capital of Anivsky District?\nA:", "must_contain": ["aniva", "rutaka", "ruutaka"]}
+{"id": "1763222", "category": "popqa_tight", "prompt": "Q: Who is the author of Among Others?\nA:", "must_contain": ["jo walton"]}
+{"id": "6083055", "category": "popqa_tight", "prompt": "Q: What is the capital of Haiti?\nA:", "must_contain": ["port-au-prince"]}
+{"id": "4930327", "category": "popqa_tight", "prompt": "Q: What genre is Metric?\nA:", "must_contain": ["independent rock", "indie rock"]}
+{"id": "4329444", "category": "popqa_tight", "prompt": "Q: Who was the producer of Happy?\nA:", "must_contain": ["frederic zelnik"]}
+{"id": "470173", "category": "popqa_tight", "prompt": "Q: Who was the producer of Happy?\nA:", "must_contain": ["allu aravind"]}
+{"id": "3845086", "category": "popqa_tight", "prompt": "Q: Who was the director of Havoc?\nA:", "must_contain": ["barbara kopple"]}
+{"id": "247862", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Havoc?\nA:", "must_contain": ["peter fleischmann"]}
+{"id": "669499", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The Normal Heart?\nA:", "must_contain": ["larry kramer"]}
+{"id": "4790558", "category": "popqa_tight", "prompt": "Q: What is Archer City the capital of?\nA:", "must_contain": ["archer county"]}
+{"id": "6302980", "category": "popqa_tight", "prompt": "Q: Who was the producer of High Risk?\nA:", "must_contain": ["wong jing"]}
+{"id": "6302982", "category": "popqa_tight", "prompt": "Q: Who was the director of High Risk?\nA:", "must_contain": ["corey yuen", "wong jing"]}
+{"id": "1693526", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for High Risk?\nA:", "must_contain": ["stewart raffill"]}
+{"id": "6302983", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for High Risk?\nA:", "must_contain": ["wong jing"]}
+{"id": "2075977", "category": "popqa_tight", "prompt": "Q: Who was the director of A Cinderella Story: Once Upon a Song?\nA:", "must_contain": ["damon santostefano"]}
+{"id": "2870831", "category": "popqa_tight", "prompt": "Q: What genre is Suicide?\nA:", "must_contain": ["essay"]}
+{"id": "5847596", "category": "popqa_tight", "prompt": "Q: Who is the author of Suicide?\nA:", "must_contain": ["viktor suvorov"]}
+{"id": "6463290", "category": "popqa_tight", "prompt": "Q: What genre is Heart?\nA:", "must_contain": ["rock", "rock music"]}
+{"id": "3847187", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Heart?\nA:", "must_contain": ["ali adler", "allison adler"]}
+{"id": "857817", "category": "popqa_tight", "prompt": "Q: What is Heath's occupation?\nA:", "must_contain": ["song writer", "songwriter"]}
+{"id": "1884191", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Heavy?\nA:", "must_contain": ["james mangold"]}
+{"id": "1884192", "category": "popqa_tight", "prompt": "Q: Who was the composer of Heavy?\nA:", "must_contain": ["thurston moore"]}
+{"id": "1159643", "category": "popqa_tight", "prompt": "Q: Who was the composer of Mexico?\nA:", "must_contain": ["james taylor"]}
+{"id": "983453", "category": "popqa_tight", "prompt": "Q: What genre is Heist?\nA:", "must_contain": ["action game"]}
+{"id": "599074", "category": "popqa_tight", "prompt": "Q: Who was the director of Helen?\nA:", "must_contain": ["sandra nettelbeck"]}
+{"id": "599075", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Helen?\nA:", "must_contain": ["sandra nettelbeck"]}
+{"id": "1000588", "category": "popqa_tight", "prompt": "Q: Who is the author of Helen?\nA:", "must_contain": ["eliza edgeworth", "maria edgeworth"]}
+{"id": "345054", "category": "popqa_tight", "prompt": "Q: Who is the author of Helen?\nA:", "must_contain": ["euripides"]}
+{"id": "1501207", "category": "popqa_tight", "prompt": "Q: What genre is Hello?\nA:", "must_contain": ["pop", "pop music"]}
+{"id": "2963274", "category": "popqa_tight", "prompt": "Q: Who was the producer of Hello?\nA:", "must_contain": ["atul agnihotri"]}
+{"id": "4365923", "category": "popqa_tight", "prompt": "Q: Who was the composer of Hello?\nA:", "must_contain": ["masaharu fukuyama"]}
+{"id": "4373688", "category": "popqa_tight", "prompt": "Q: Who is the author of Henry?\nA:", "must_contain": ["carl anderson"]}
+{"id": "5275786", "category": "popqa_tight", "prompt": "Q: What is the religion of Neville Figgis?\nA:", "must_contain": ["anglicanism"]}
+{"id": "4783605", "category": "popqa_tight", "prompt": "Q: What genre is Just a Matter of Time?\nA:", "must_contain": ["novella"]}
+{"id": "2838012", "category": "popqa_tight", "prompt": "Q: Who was the composer of High Time?\nA:", "must_contain": ["henry mancini"]}
+{"id": "4541758", "category": "popqa_tight", "prompt": "Q: Who was the director of Like Crazy?\nA:", "must_contain": ["drake doremus"]}
+{"id": "2491290", "category": "popqa_tight", "prompt": "Q: What genre is For Sale?\nA:", "must_contain": ["pop", "pop music"]}
+{"id": "2716696", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for For Sale?\nA:", "must_contain": ["laetitia masson"]}
+{"id": "1336640", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Spotlight?\nA:", "must_contain": ["josh singer"]}
+{"id": "5018441", "category": "popqa_tight", "prompt": "Q: Who is the author of Losing It?\nA:", "must_contain": ["valerie bertinelli"]}
+{"id": "1236283", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The Man, the Woman and the Money?\nA:", "must_contain": ["luciano salce", "marco ferreri", "pilantra"]}
+{"id": "2069076", "category": "popqa_tight", "prompt": "Q: Who is the father of Melora Hardin?\nA:", "must_contain": ["jerry hardin"]}
+{"id": "3755811", "category": "popqa_tight", "prompt": "Q: Who was the director of Early Spring?\nA:", "must_contain": ["astrid henning-jensen"]}
+{"id": "3755812", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Early Spring?\nA:", "must_contain": ["tove ditlevsen"]}
+{"id": "1807138", "category": "popqa_tight", "prompt": "Q: Who was the composer of Prelude for Clarinet?\nA:", "must_contain": ["krzysztof penderecki"]}
+{"id": "5647433", "category": "popqa_tight", "prompt": "Q: Who is the author of Ruined?\nA:", "must_contain": ["lynn nottage"]}
+{"id": "1980542", "category": "popqa_tight", "prompt": "Q: What sport does Gregor Balažic play?\nA:", "must_contain": ["association football", "football", "soccer"]}
+{"id": "4134014", "category": "popqa_tight", "prompt": "Q: Who was the director of Framed?\nA:", "must_contain": ["george archainbaud"]}
+{"id": "2575406", "category": "popqa_tight", "prompt": "Q: Who was the producer of The Treatment?\nA:", "must_contain": ["oren rudavsky"]}
+{"id": "2575409", "category": "popqa_tight", "prompt": "Q: Who was the director of The Treatment?\nA:", "must_contain": ["oren rudavsky"]}
+{"id": "2575410", "category": "popqa_tight", "prompt": "Q: Who was the composer of The Treatment?\nA:", "must_contain": ["john zorn"]}
+{"id": "5033447", "category": "popqa_tight", "prompt": "Q: What sport does Luis Eduardo Maldonado play?\nA:", "must_contain": ["association football", "football", "soccer"]}
+{"id": "1572221", "category": "popqa_tight", "prompt": "Q: Who was the director of The Catalyst?\nA:", "must_contain": ["joe hahn", "joseph hahn"]}
+{"id": "1274659", "category": "popqa_tight", "prompt": "Q: Who was the producer of An Unearthly Child?\nA:", "must_contain": ["mervyn pinfield", "verity lambert"]}
+{"id": "4762905", "category": "popqa_tight", "prompt": "Q: What is Josh Mankiewicz's occupation?\nA:", "must_contain": ["journalist", "journalists", "journo"]}
+{"id": "2143226", "category": "popqa_tight", "prompt": "Q: What sport does Willy Roy play?\nA:", "must_contain": ["association football", "football", "soccer"]}
+{"id": "2194088", "category": "popqa_tight", "prompt": "Q: What genre is The Good Guy?\nA:", "must_contain": ["romantic comedy", "romcom", "romedy"]}
+{"id": "287773", "category": "popqa_tight", "prompt": "Q: Who was the director of The Departure?\nA:", "must_contain": ["jerzy skolimowski"]}
+{"id": "1781815", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Solo Sunny?\nA:", "must_contain": ["wolfgang kohlhaase"]}
+{"id": "3058589", "category": "popqa_tight", "prompt": "Q: Who is the father of Matthew the Apostle?\nA:", "must_contain": ["alphaeus"]}
+{"id": "3058587", "category": "popqa_tight", "prompt": "Q: What is the religion of Matthew the Apostle?\nA:", "must_contain": ["christian faith", "christianity"]}
+{"id": "2852710", "category": "popqa_tight", "prompt": "Q: What genre is Who Framed Roger Rabbit?\nA:", "must_contain": ["adventure game"]}
+{"id": "5952436", "category": "popqa_tight", "prompt": "Q: Who is the author of The Romantic?\nA:", "must_contain": ["barbara gowdy"]}
+{"id": "183161", "category": "popqa_tight", "prompt": "Q: Who was the producer of Deathstalker II?\nA:", "must_contain": ["roger corman"]}
+{"id": "6513488", "category": "popqa_tight", "prompt": "Q: Who was the producer of Holes?\nA:", "must_contain": ["mike medavoy"]}
+{"id": "6513495", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Holes?\nA:", "must_contain": ["louis sachar"]}
+{"id": "6513497", "category": "popqa_tight", "prompt": "Q: Who was the composer of Holes?\nA:", "must_contain": ["joel mcneely"]}
+{"id": "1249920", "category": "popqa_tight", "prompt": "Q: Who is the author of Holes?\nA:", "must_contain": ["louis sachar"]}
+{"id": "1585746", "category": "popqa_tight", "prompt": "Q: Who is the father of Horae?\nA:", "must_contain": ["zeus"]}
+{"id": "1585747", "category": "popqa_tight", "prompt": "Q: Who is the mother of Horae?\nA:", "must_contain": ["themis"]}
+{"id": "6297573", "category": "popqa_tight", "prompt": "Q: Who is the father of Horus?\nA:", "must_contain": ["osiris"]}
+{"id": "6297574", "category": "popqa_tight", "prompt": "Q: Who is the mother of Horus?\nA:", "must_contain": ["isis"]}
+{"id": "1074692", "category": "popqa_tight", "prompt": "Q: What genre is Hotel?\nA:", "must_contain": ["power pop"]}
+{"id": "5198991", "category": "popqa_tight", "prompt": "Q: Who was the director of Hotel?\nA:", "must_contain": ["michael figgis", "mike figgis"]}
+{"id": "990958", "category": "popqa_tight", "prompt": "Q: Who was the director of Hotel?\nA:", "must_contain": ["jessica hausner"]}
+{"id": "990959", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Hotel?\nA:", "must_contain": ["jessica hausner"]}
+{"id": "5198993", "category": "popqa_tight", "prompt": "Q: Who was the composer of Hotel?\nA:", "must_contain": ["michael figgis", "mike figgis"]}
+{"id": "649559", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Hours?\nA:", "must_contain": ["eric heisserer"]}
+{"id": "5602826", "category": "popqa_tight", "prompt": "Q: Who was the director of House?\nA:", "must_contain": ["steve miner"]}
+{"id": "5924501", "category": "popqa_tight", "prompt": "Q: What genre is The Expert?\nA:", "must_contain": ["mandapop", "mandopop"]}
+{"id": "4682521", "category": "popqa_tight", "prompt": "Q: Who was the producer of Leader?\nA:", "must_contain": ["sashadhar mukherjee"]}
+{"id": "4682523", "category": "popqa_tight", "prompt": "Q: Who was the director of Leader?\nA:", "must_contain": ["ram mukherjee"]}
+{"id": "3872769", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Leader?\nA:", "must_contain": ["sekhar kammula"]}
+{"id": "4682524", "category": "popqa_tight", "prompt": "Q: Who was the composer of Leader?\nA:", "must_contain": ["naushad", "naushad ali"]}
+{"id": "388957", "category": "popqa_tight", "prompt": "Q: What is the religion of Blaise Pascal?\nA:", "must_contain": ["jansenism", "jansenisme", "jansenists"]}
+{"id": "3176477", "category": "popqa_tight", "prompt": "Q: What sport does 2012 Uzbekistan First League play?\nA:", "must_contain": ["association football", "football", "soccer"]}
+{"id": "1580690", "category": "popqa_tight", "prompt": "Q: What sport does Valeri Zelepukin play?\nA:", "must_contain": ["ice hockey"]}
+{"id": "1105667", "category": "popqa_tight", "prompt": "Q: What genre is Overseas?\nA:", "must_contain": ["independent rock", "indie rock"]}
+{"id": "1593572", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Hard to Get?\nA:", "must_contain": ["jerry wald"]}
+{"id": "4331173", "category": "popqa_tight", "prompt": "Q: Who was the composer of Hard to Say?\nA:", "must_contain": ["dan fogelberg"]}
+{"id": "2447689", "category": "popqa_tight", "prompt": "Q: Who is the author of The Bishop's Heir?\nA:", "must_contain": ["katherine kurtz"]}
+{"id": "4168629", "category": "popqa_tight", "prompt": "Q: Who was the producer of Friday?\nA:", "must_contain": ["sandra thomas"]}
+{"id": "4168633", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Friday?\nA:", "must_contain": ["ice cube", "o'shea jackson"]}
+{"id": "5056791", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Friday?\nA:", "must_contain": ["ice cube", "o'shea jackson"]}
+{"id": "3430671", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Friend?\nA:", "must_contain": ["kwak kyung-taek"]}
+{"id": "4501267", "category": "popqa_tight", "prompt": "Q: What is the capital of Larnaca District?\nA:", "must_contain": ["larnaca"]}
+{"id": "4535105", "category": "popqa_tight", "prompt": "Q: Who was the composer of I Wanna Pick You Up?\nA:", "must_contain": ["brian wilson"]}
+{"id": "602038", "category": "popqa_tight", "prompt": "Q: Who is the father of Ralph Wiggum?\nA:", "must_contain": ["chief wiggum", "clancy wiggum"]}
+{"id": "385081", "category": "popqa_tight", "prompt": "Q: Who was the director of Kadal Kadannoru Mathukkutty?\nA:", "must_contain": ["ranjith", "ranjith balakrishnan"]}
+{"id": "5946121", "category": "popqa_tight", "prompt": "Q: Who was the director of The Other Person?\nA:", "must_contain": ["maurits binger"]}
+{"id": "1898744", "category": "popqa_tight", "prompt": "Q: What genre is Me & My?\nA:", "must_contain": ["euro dance", "euro-dance", "eurodance"]}
+{"id": "2797319", "category": "popqa_tight", "prompt": "Q: Who was the producer of The Faculty?\nA:", "must_contain": ["robert rodriguez"]}
+{"id": "2797324", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The Faculty?\nA:", "must_contain": ["kevin williamson"]}
+{"id": "2827342", "category": "popqa_tight", "prompt": "Q: What is Guillem Ramon de Gironella's occupation?\nA:", "must_contain": ["troubadour"]}
+{"id": "728924", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Surrender?\nA:", "must_contain": ["jerry belson"]}
+{"id": "2557840", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Widows' Peak?\nA:", "must_contain": ["hugh leonard"]}
+{"id": "6273897", "category": "popqa_tight", "prompt": "Q: What genre is Legend?\nA:", "must_contain": ["fantasy", "fantasy fiction"]}
+{"id": "3714492", "category": "popqa_tight", "prompt": "Q: Who was the director of Legend?\nA:", "must_contain": ["ridley scott"]}
+{"id": "819142", "category": "popqa_tight", "prompt": "Q: Who was the director of Legend?\nA:", "must_contain": ["boyapati srinivas", "boyapati srinu"]}
+{"id": "819143", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Legend?\nA:", "must_contain": ["boyapati srinivas", "boyapati srinu"]}
+{"id": "1194631", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Legend?\nA:", "must_contain": ["brian helgeland"]}
+{"id": "819144", "category": "popqa_tight", "prompt": "Q: Who was the composer of Legend?\nA:", "must_contain": ["dsp"]}
+{"id": "4940198", "category": "popqa_tight", "prompt": "Q: Who is the author of Legend?\nA:", "must_contain": ["marie lu"]}
+{"id": "6386523", "category": "popqa_tight", "prompt": "Q: What genre is Legion?\nA:", "must_contain": ["horror literature"]}
+{"id": "879565", "category": "popqa_tight", "prompt": "Q: Who is the father of Legion?\nA:", "must_contain": ["charles xavier", "professor x"]}
+{"id": "4940435", "category": "popqa_tight", "prompt": "Q: Who was the producer of Legion?\nA:", "must_contain": ["avi nesher"]}
+{"id": "2187490", "category": "popqa_tight", "prompt": "Q: Who was the director of Legion?\nA:", "must_contain": ["scott stewart"]}
+{"id": "4940448", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Legion?\nA:", "must_contain": ["rob grant", "robert grant"]}
+{"id": "2187491", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Legion?\nA:", "must_contain": ["scott stewart"]}
+{"id": "621561", "category": "popqa_tight", "prompt": "Q: Who was the producer of Man of the Year?\nA:", "must_contain": ["barry levinson"]}
+{"id": "2831793", "category": "popqa_tight", "prompt": "Q: Who was the producer of Man of the Year?\nA:", "must_contain": ["marco vicario", "renato vicario"]}
+{"id": "5065973", "category": "popqa_tight", "prompt": "Q: Who was the director of Man of the Year?\nA:", "must_contain": ["dirk shafer"]}
+{"id": "621564", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Man of the Year?\nA:", "must_contain": ["barry levinson"]}
+{"id": "5065974", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Man of the Year?\nA:", "must_contain": ["dirk shafer"]}
+{"id": "5013533", "category": "popqa_tight", "prompt": "Q: Who is the author of Looking Forward?\nA:", "must_contain": ["stephen marlowe"]}
+{"id": "4504154", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The Killing?\nA:", "must_contain": ["lionel white", "stanley kubrick"]}
+{"id": "2654545", "category": "popqa_tight", "prompt": "Q: Who was the director of Shades of Gray?\nA:", "must_contain": ["rob bowman"]}
+{"id": "4171892", "category": "popqa_tight", "prompt": "Q: Who was the director of Frozen?\nA:", "must_contain": ["chi-kin kwok", "derek kwok"]}
+{"id": "4776718", "category": "popqa_tight", "prompt": "Q: What is Julia de Asensi's occupation?\nA:", "must_contain": ["journalist", "journalists", "journo"]}
+{"id": "2712847", "category": "popqa_tight", "prompt": "Q: What is the capital of South Australia?\nA:", "must_contain": ["adelaide", "greater adelaide"]}
+{"id": "987659", "category": "popqa_tight", "prompt": "Q: Who is the author of Psalm 69?\nA:", "must_contain": ["david", "king david"]}
+{"id": "305660", "category": "popqa_tight", "prompt": "Q: Who was the producer of Adopted?\nA:", "must_contain": ["pauly shore"]}
+{"id": "305663", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Adopted?\nA:", "must_contain": ["pauly shore"]}
+{"id": "5725307", "category": "popqa_tight", "prompt": "Q: Who is the author of Sex, Ecology, Spirituality?\nA:", "must_contain": ["ken wilber"]}
+{"id": "2692328", "category": "popqa_tight", "prompt": "Q: What sport does FK Mladost Bački Jarak play?\nA:", "must_contain": ["association football", "football", "soccer"]}
+{"id": "5957133", "category": "popqa_tight", "prompt": "Q: Who is the author of The Squirrel Wife?\nA:", "must_contain": ["philippa pearce"]}
+{"id": "5013568", "category": "popqa_tight", "prompt": "Q: Who is the author of Looking for Alibrandi?\nA:", "must_contain": ["carmelina marchetta", "melina marchetta"]}
+{"id": "4756000", "category": "popqa_tight", "prompt": "Q: Who is the father of Heinrich Gustav Reichenbach?\nA:", "must_contain": ["ludwig reichenbach", "rchb."]}
+{"id": "4683998", "category": "popqa_tight", "prompt": "Q: Who is the father of Jitendra Narayan?\nA:", "must_contain": ["nripendra narayan"]}
+{"id": "5909257", "category": "popqa_tight", "prompt": "Q: Who is the author of The Audience?\nA:", "must_contain": ["peter morgan"]}
+{"id": "4172061", "category": "popqa_tight", "prompt": "Q: Who is the author of Fruits?\nA:", "must_contain": ["valerie bloom"]}
+{"id": "2599603", "category": "popqa_tight", "prompt": "Q: Who is the father of Linus Torvalds?\nA:", "must_contain": ["nils torvalds"]}
+{"id": "5298383", "category": "popqa_tight", "prompt": "Q: Who was the producer of No Problem?\nA:", "must_contain": ["anil", "anil kapoor"]}
+{"id": "1363059", "category": "popqa_tight", "prompt": "Q: What genre is The Circle?\nA:", "must_contain": ["fantasy film", "fantasy movie"]}
+{"id": "284231", "category": "popqa_tight", "prompt": "Q: Who was the producer of The Circle?\nA:", "must_contain": ["jafar panahi"]}
+{"id": "2672513", "category": "popqa_tight", "prompt": "Q: Who was the director of The Circle?\nA:", "must_contain": ["frank borzage"]}
+{"id": "284236", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The Circle?\nA:", "must_contain": ["jafar panahi"]}
+{"id": "1363063", "category": "popqa_tight", "prompt": "Q: Who was the composer of The Circle?\nA:", "must_contain": ["benny andersson"]}
+{"id": "4805477", "category": "popqa_tight", "prompt": "Q: What is Maurice Le Boucher's occupation?\nA:", "must_contain": ["composer", "organ player", "organist"]}
+{"id": "2837000", "category": "popqa_tight", "prompt": "Q: Who was the producer of Hot Water?\nA:", "must_contain": ["harold lloyd"]}
+{"id": "2789480", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Eddie Presley?\nA:", "must_contain": ["duane whitaker"]}
+{"id": "601212", "category": "popqa_tight", "prompt": "Q: Who is the author of Puerto Rico?\nA:", "must_contain": ["andreas seyfarth"]}
+{"id": "284073", "category": "popqa_tight", "prompt": "Q: Who was the composer of Super Metroid?\nA:", "must_contain": ["kenji yamamoto"]}
+{"id": "1771125", "category": "popqa_tight", "prompt": "Q: Who is the father of Clemente Palma?\nA:", "must_contain": ["ricardo palma"]}
+{"id": "3537594", "category": "popqa_tight", "prompt": "Q: What sport does Bobby Cram play?\nA:", "must_contain": ["association football", "football", "soccer"]}
+{"id": "2313979", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Extraterrestrial?\nA:", "must_contain": ["nacho vigalondo"]}
+{"id": "1164239", "category": "popqa_tight", "prompt": "Q: Who is the father of T. E. Lawrence?\nA:", "must_contain": ["thomas chapman"]}
+{"id": "1495624", "category": "popqa_tight", "prompt": "Q: Who was the director of Out of This World?\nA:", "must_contain": ["hal walker"]}
+{"id": "599910", "category": "popqa_tight", "prompt": "Q: Who was the composer of Out of This World?\nA:", "must_contain": ["cole porter"]}
+{"id": "5360349", "category": "popqa_tight", "prompt": "Q: Who is the author of Out of This World?\nA:", "must_contain": ["lawrence watt-evans"]}
+{"id": "6282215", "category": "popqa_tight", "prompt": "Q: What is the capital of Poprad District?\nA:", "must_contain": ["poprad"]}
+{"id": "1045939", "category": "popqa_tight", "prompt": "Q: Who was the producer of The Meeting?\nA:", "must_contain": ["rita dominic"]}
+{"id": "5941475", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The Meeting?\nA:", "must_contain": ["aaron shure"]}
+{"id": "4003351", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Ee Snehatheerathu?\nA:", "must_contain": ["kunchacko boban", "nedumudi venu"]}
+{"id": "3013107", "category": "popqa_tight", "prompt": "Q: What is the capital of Roraima?\nA:", "must_contain": ["boa vista"]}
+{"id": "4584501", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for On the Day Before?\nA:", "must_contain": ["aaron sorkin", "paul redford"]}
+{"id": "2657379", "category": "popqa_tight", "prompt": "Q: What is Stevie Cameron's occupation?\nA:", "must_contain": ["journalist", "journalists", "journo"]}
+{"id": "6163772", "category": "popqa_tight", "prompt": "Q: Who was the director of While There is Still Time?\nA:", "must_contain": ["charles chauvel"]}
+{"id": "3526818", "category": "popqa_tight", "prompt": "Q: Who is the author of Bloodtide?\nA:", "must_contain": ["melvin burgess"]}
+{"id": "5791760", "category": "popqa_tight", "prompt": "Q: What genre is Soul of the Samurai?\nA:", "must_contain": ["a-avg", "action-adventure game"]}
+{"id": "905670", "category": "popqa_tight", "prompt": "Q: Who was the producer of Personal Best?\nA:", "must_contain": ["p.h. vazak", "robert towne"]}
+{"id": "694940", "category": "popqa_tight", "prompt": "Q: Who was the director of The End of Twerk?\nA:", "must_contain": ["wendey stanzler"]}
+{"id": "1382342", "category": "popqa_tight", "prompt": "Q: Who is the mother of Patrick Villiers Farrow?\nA:", "must_contain": ["maureen o'sullivan"]}
+{"id": "1710792", "category": "popqa_tight", "prompt": "Q: Who was the producer of The Criminal?\nA:", "must_contain": ["nat cohen"]}
+{"id": "2941092", "category": "popqa_tight", "prompt": "Q: What genre is Before Midnight?\nA:", "must_contain": ["detective fiction"]}
+{"id": "2213220", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Before Midnight?\nA:", "must_contain": ["ethan hawke", "julie delpy"]}
+{"id": "2213219", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Before Midnight?\nA:", "must_contain": ["ethan hawke", "julie delpy"]}
+{"id": "2941094", "category": "popqa_tight", "prompt": "Q: Who is the author of Before Midnight?\nA:", "must_contain": ["rex stout"]}
+{"id": "2603293", "category": "popqa_tight", "prompt": "Q: Who was the director of Not Quite Paradise?\nA:", "must_contain": ["lewis gilbert"]}
+{"id": "1761538", "category": "popqa_tight", "prompt": "Q: What genre is Jay Bentley?\nA:", "must_contain": ["punk", "punk music", "punk rock"]}
+{"id": "5938377", "category": "popqa_tight", "prompt": "Q: Who was the director of The Little Ones?\nA:", "must_contain": ["jim o'connolly"]}
+{"id": "3056492", "category": "popqa_tight", "prompt": "Q: What is Bernard Peiffer's occupation?\nA:", "must_contain": ["pianist"]}
+{"id": "682849", "category": "popqa_tight", "prompt": "Q: Who was the producer of Suspicion?\nA:", "must_contain": ["alfred hitchcock"]}
+{"id": "682854", "category": "popqa_tight", "prompt": "Q: Who was the director of Suspicion?\nA:", "must_contain": ["alfred hitchcock"]}
+{"id": "339797", "category": "popqa_tight", "prompt": "Q: Who was the producer of Friday the 13th Part 2?\nA:", "must_contain": ["steve miner"]}
+{"id": "4330661", "category": "popqa_tight", "prompt": "Q: Who was the composer of Harbor Lights?\nA:", "must_contain": ["hugh williams", "wilhelm grosz", "will grosz"]}
+{"id": "307556", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Bad News Bears?\nA:", "must_contain": ["glenn ficarra", "john requa"]}
+{"id": "3783058", "category": "popqa_tight", "prompt": "Q: What genre is Convicted?\nA:", "must_contain": ["film noir"]}
+{"id": "3783061", "category": "popqa_tight", "prompt": "Q: Who was the director of Convicted?\nA:", "must_contain": ["henry levin"]}
+{"id": "1251460", "category": "popqa_tight", "prompt": "Q: In what city was Alastair Heathcote born?\nA:", "must_contain": ["athens"]}
+{"id": "3286131", "category": "popqa_tight", "prompt": "Q: Who is the father of Odysseus?\nA:", "must_contain": ["laertes"]}
+{"id": "1323570", "category": "popqa_tight", "prompt": "Q: In what city was Ko Wen-je born?\nA:", "must_contain": ["hsinchu", "xinzhu"]}
+{"id": "5788109", "category": "popqa_tight", "prompt": "Q: Who was the producer of Final Destination?\nA:", "must_contain": ["glen morgan"]}
+{"id": "5788114", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Final Destination?\nA:", "must_contain": ["glen morgan", "jeffrey reddick"]}
+{"id": "5788113", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Final Destination?\nA:", "must_contain": ["glen morgan", "jeffrey reddick"]}
+{"id": "3452990", "category": "popqa_tight", "prompt": "Q: What is the capital of Cherokee County?\nA:", "must_contain": ["canton", "canton, georgia"]}
+{"id": "1130291", "category": "popqa_tight", "prompt": "Q: Who is the author of Nice People?\nA:", "must_contain": ["rachel crothers"]}
+{"id": "1022353", "category": "popqa_tight", "prompt": "Q: What is the capital of Vermont?\nA:", "must_contain": ["montpelier", "montpelier, vermont"]}
+{"id": "4542012", "category": "popqa_tight", "prompt": "Q: Who is the author of Identical?\nA:", "must_contain": ["ellen hopkins"]}
+{"id": "617409", "category": "popqa_tight", "prompt": "Q: In what city was Bruno Nöckler born?\nA:", "must_contain": ["predoi", "prettau"]}
+{"id": "6426907", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Eyes of Laura Mars?\nA:", "must_contain": ["john carpenter"]}
+{"id": "4667323", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Jerry's Painting?\nA:", "must_contain": ["norm hiscock"]}
+{"id": "5297859", "category": "popqa_tight", "prompt": "Q: Who was the director of No Good Deed?\nA:", "must_contain": ["lawrence trilling"]}
+{"id": "510782", "category": "popqa_tight", "prompt": "Q: What genre is Sherlock Holmes: The Mystery of the Mummy?\nA:", "must_contain": ["adventure game"]}
+{"id": "2198017", "category": "popqa_tight", "prompt": "Q: What genre is El honorable Señor Valdez?\nA:", "must_contain": ["telenovela"]}
+{"id": "1195592", "category": "popqa_tight", "prompt": "Q: Who is the mother of Menelaus?\nA:", "must_contain": ["aerope"]}
+{"id": "74720", "category": "popqa_tight", "prompt": "Q: Who is the author of Sweetness?\nA:", "must_contain": ["torgny lindgren"]}
+{"id": "3325778", "category": "popqa_tight", "prompt": "Q: What sport does Andrei Bogomolov play?\nA:", "must_contain": ["association football", "football", "soccer"]}
+{"id": "6152663", "category": "popqa_tight", "prompt": "Q: Who was the director of Wedding in White?\nA:", "must_contain": ["william fruet"]}
+{"id": "3356649", "category": "popqa_tight", "prompt": "Q: In what city was Anton Lui born?\nA:", "must_contain": ["rabaul"]}
+{"id": "1374814", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Athirathan?\nA:", "must_contain": ["pradeep kumar"]}
+{"id": "2891332", "category": "popqa_tight", "prompt": "Q: Who is the author of Options?\nA:", "must_contain": ["robert sheckley"]}
+{"id": "177390", "category": "popqa_tight", "prompt": "Q: Who was the director of A Lover's Return?\nA:", "must_contain": ["christian maudet", "christian-jaque"]}
+{"id": "2185977", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Searching for Sugar Man?\nA:", "must_contain": ["malik bendjelloul"]}
+{"id": "6292195", "category": "popqa_tight", "prompt": "Q: What is the capital of Lahaul and Spiti district?\nA:", "must_contain": ["kyelang"]}
+{"id": "3461201", "category": "popqa_tight", "prompt": "Q: What genre is Be Yourself!?\nA:", "must_contain": ["musical film", "musical movie"]}
+{"id": "362631", "category": "popqa_tight", "prompt": "Q: Who was the composer of Happy Feet?\nA:", "must_contain": ["john powell"]}
+{"id": "2769262", "category": "popqa_tight", "prompt": "Q: Who was the director of College?\nA:", "must_contain": ["franco castellano", "giuseppe moccia"]}
+{"id": "2769263", "category": "popqa_tight", "prompt": "Q: Who was the director of College?\nA:", "must_contain": ["franco castellano", "giuseppe moccia"]}
+{"id": "156146", "category": "popqa_tight", "prompt": "Q: Who was the composer of College?\nA:", "must_contain": ["claudio simonetti"]}
+{"id": "5925774", "category": "popqa_tight", "prompt": "Q: Who was the director of The Final Test?\nA:", "must_contain": ["anthony asquith"]}
+{"id": "733999", "category": "popqa_tight", "prompt": "Q: What genre is William Keepers Maxwell, Jr.?\nA:", "must_contain": ["pripovijetka", "short story", "tale"]}
+{"id": "1368071", "category": "popqa_tight", "prompt": "Q: Who is the author of Getting Free?\nA:", "must_contain": ["nigel hinton"]}
+{"id": "6388189", "category": "popqa_tight", "prompt": "Q: What sport does Mark Jonas play?\nA:", "must_contain": ["association football", "football", "soccer"]}
+{"id": "1580482", "category": "popqa_tight", "prompt": "Q: Who was the director of Singh Is Kinng?\nA:", "must_contain": ["anees bazmee"]}
+{"id": "5773194", "category": "popqa_tight", "prompt": "Q: What is Ski Beatz's occupation?\nA:", "must_contain": ["music producer", "record producer"]}
+{"id": "4645995", "category": "popqa_tight", "prompt": "Q: What sport does Danilinho play?\nA:", "must_contain": ["association football", "football", "soccer"]}
+{"id": "2912083", "category": "popqa_tight", "prompt": "Q: Who was the director of These Children?\nA:", "must_contain": ["mario mattoli"]}
+{"id": "2912084", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for These Children?\nA:", "must_contain": ["mario mattoli"]}
+{"id": "4581309", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Island?\nA:", "must_contain": ["paul cox"]}
+{"id": "4581318", "category": "popqa_tight", "prompt": "Q: Who is the author of Island?\nA:", "must_contain": ["alistair macleod"]}
+{"id": "5521585", "category": "popqa_tight", "prompt": "Q: Who is the mother of Emperor He of Han?\nA:", "must_contain": ["consort liang", "empress gonghuai"]}
+{"id": "2741044", "category": "popqa_tight", "prompt": "Q: Who was the director of Cocktail?\nA:", "must_contain": ["homi adajania"]}
+{"id": "3761375", "category": "popqa_tight", "prompt": "Q: Who was the director of Cocktail?\nA:", "must_contain": ["herman yau"]}
+{"id": "3761382", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Cocktail?\nA:", "must_contain": ["anoop menon"]}
+{"id": "1279871", "category": "popqa_tight", "prompt": "Q: Who is the father of Konstantinos Diogenes?\nA:", "must_contain": ["romanus iv"]}
+{"id": "4928387", "category": "popqa_tight", "prompt": "Q: What genre is Up All Night?\nA:", "must_contain": ["pop", "pop music"]}
+{"id": "650610", "category": "popqa_tight", "prompt": "Q: Who was the director of Up All Night?\nA:", "must_contain": ["michael spiller"]}
+{"id": "5945336", "category": "popqa_tight", "prompt": "Q: Who is the author of The Odyssey: A Modern Sequel?\nA:", "must_contain": ["nicos kazantzakes", "nikos kazantzakis"]}
+{"id": "5089563", "category": "popqa_tight", "prompt": "Q: What genre is Mark Castillo?\nA:", "must_contain": ["metalcore", "metallic hardcore"]}
+{"id": "5775745", "category": "popqa_tight", "prompt": "Q: Who is the father of Ismene?\nA:", "must_contain": ["oedipus"]}
+{"id": "4907907", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for La terrazza?\nA:", "must_contain": ["age", "agenore incrocci", "ettore scola"]}
+{"id": "5261825", "category": "popqa_tight", "prompt": "Q: Who was the composer of Where or When?\nA:", "must_contain": ["richard rodgers"]}
+{"id": "67059", "category": "popqa_tight", "prompt": "Q: What genre is Castle Freak?\nA:", "must_contain": ["horror film", "horror movie"]}
+{"id": "67062", "category": "popqa_tight", "prompt": "Q: Who was the director of Castle Freak?\nA:", "must_contain": ["stuart gordon"]}
+{"id": "2626731", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Resistance?\nA:", "must_contain": ["anita shreve"]}
+{"id": "5561986", "category": "popqa_tight", "prompt": "Q: Who is the author of Resistance?\nA:", "must_contain": ["mike costa"]}
+{"id": "5738225", "category": "popqa_tight", "prompt": "Q: What sport does Shaun Carey play?\nA:", "must_contain": ["association football", "football", "soccer"]}
+{"id": "1227912", "category": "popqa_tight", "prompt": "Q: What is the capital of ?\nA:", "must_contain": ["bogorodsk", "noginsk", "rogozhi"]}
+{"id": "340086", "category": "popqa_tight", "prompt": "Q: Who is the mother of Alexandros II of Epirus?\nA:", "must_contain": ["lanassa"]}
+{"id": "5079256", "category": "popqa_tight", "prompt": "Q: In what city was Margaret Coit born?\nA:", "must_contain": ["norwich", "norwich, connecticut"]}
+{"id": "1805806", "category": "popqa_tight", "prompt": "Q: What is Tolis Voskopoulos's occupation?\nA:", "must_contain": ["composer"]}
+{"id": "3775086", "category": "popqa_tight", "prompt": "Q: Who was the director of Competition?\nA:", "must_contain": ["tom ricketts"]}
+{"id": "3008387", "category": "popqa_tight", "prompt": "Q: Who is the author of Competitors?\nA:", "must_contain": ["sergey lukyanenko"]}
+{"id": "1976177", "category": "popqa_tight", "prompt": "Q: Who was the producer of Tarzan's Greatest Adventure?\nA:", "must_contain": ["sy weintraub"]}
+{"id": "1627122", "category": "popqa_tight", "prompt": "Q: What is the religion of Waalo?\nA:", "must_contain": ["african religion"]}
+{"id": "1927140", "category": "popqa_tight", "prompt": "Q: What is the capital of Wales?\nA:", "must_contain": ["caerdydd", "cardiff", "cardiff, wales"]}
+{"id": "1033939", "category": "popqa_tight", "prompt": "Q: What genre is Water?\nA:", "must_contain": ["comedy film", "comedy movie"]}
+{"id": "4658693", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Water?\nA:", "must_contain": ["anurag kashyap", "deepa mehta"]}
+{"id": "4658694", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Water?\nA:", "must_contain": ["anurag kashyap", "deepa mehta"]}
+{"id": "972414", "category": "popqa_tight", "prompt": "Q: What sport does Gustavo García play?\nA:", "must_contain": ["association football", "football", "soccer"]}
+{"id": "488891", "category": "popqa_tight", "prompt": "Q: What is Hyderabad the capital of?\nA:", "must_contain": ["a.p", "andhra pradesh", "telangana"]}
+{"id": "3379859", "category": "popqa_tight", "prompt": "Q: Who was the producer of Arrive Alive?\nA:", "must_contain": ["art linson"]}
+{"id": "342711", "category": "popqa_tight", "prompt": "Q: Who is the father of Chula Chakrabongse?\nA:", "must_contain": ["chakkraphong phuwanat", "chakrabongse bhuvanadh", "phitsanulok prachanat"]}
+{"id": "2202524", "category": "popqa_tight", "prompt": "Q: What genre is Marie Bergman?\nA:", "must_contain": ["pop", "pop music"]}
+{"id": "236106", "category": "popqa_tight", "prompt": "Q: Who was the composer of Easy Living?\nA:", "must_contain": ["ralph rainger", "ralph reichenthal"]}
+{"id": "843797", "category": "popqa_tight", "prompt": "Q: What is Edwin E. Ellis's occupation?\nA:", "must_contain": ["photog", "photographer", "photographers"]}
+{"id": "2771809", "category": "popqa_tight", "prompt": "Q: What genre is Wendy?\nA:", "must_contain": ["rock", "rock music"]}
+{"id": "2367612", "category": "popqa_tight", "prompt": "Q: Who was the producer of Happy New Year?\nA:", "must_contain": ["gauri chibber", "gauri khan"]}
+{"id": "4329724", "category": "popqa_tight", "prompt": "Q: Who was the composer of Happy New Year?\nA:", "must_contain": ["cole porter"]}
+{"id": "6164657", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for White Gold?\nA:", "must_contain": ["john jopson"]}
+{"id": "5512280", "category": "popqa_tight", "prompt": "Q: Who is the author of Quantico?\nA:", "must_contain": ["greg bear"]}
+{"id": "688919", "category": "popqa_tight", "prompt": "Q: Who was the director of The Cool Ones?\nA:", "must_contain": ["gene nelson"]}
+{"id": "3461643", "category": "popqa_tight", "prompt": "Q: What is the capital of Cortland County?\nA:", "must_contain": ["cortland"]}
+{"id": "1376388", "category": "popqa_tight", "prompt": "Q: Who is the author of Beautiful You?\nA:", "must_contain": ["chuck palahniuk"]}
+{"id": "6164345", "category": "popqa_tight", "prompt": "Q: Who is the author of White?\nA:", "must_contain": ["ted dekker"]}
+{"id": "1175079", "category": "popqa_tight", "prompt": "Q: What is Susan Soltero's occupation?\nA:", "must_contain": ["journalist", "journalists", "journo"]}
+{"id": "4246734", "category": "popqa_tight", "prompt": "Q: In what city was Jim Baker born?\nA:", "must_contain": ["ilkeston"]}
+{"id": "2303335", "category": "popqa_tight", "prompt": "Q: What is Edward Francis Hutton's occupation?\nA:", "must_contain": ["financier"]}
+{"id": "4932549", "category": "popqa_tight", "prompt": "Q: What genre is Reality?\nA:", "must_contain": ["rock", "rock music"]}
+{"id": "1188328", "category": "popqa_tight", "prompt": "Q: Who is the author of Windy?\nA:", "must_contain": ["ruthann friedman"]}
+{"id": "2091182", "category": "popqa_tight", "prompt": "Q: Who was the producer of Wings?\nA:", "must_contain": ["lucien hubbard"]}
+{"id": "1262267", "category": "popqa_tight", "prompt": "Q: Who is the author of Wired?\nA:", "must_contain": ["bob woodward", "robert woodward"]}
+{"id": "2099950", "category": "popqa_tight", "prompt": "Q: Who was the director of Witch?\nA:", "must_contain": ["stephen cragg"]}
+{"id": "2922938", "category": "popqa_tight", "prompt": "Q: Who was the director of Relentless?\nA:", "must_contain": ["william lustig"]}
+{"id": "5557653", "category": "popqa_tight", "prompt": "Q: Who is the author of Relentless?\nA:", "must_contain": ["simon kernick"]}
+{"id": "5322768", "category": "popqa_tight", "prompt": "Q: What sport does Fernando Baiano play?\nA:", "must_contain": ["association football", "football", "soccer"]}
+{"id": "2314531", "category": "popqa_tight", "prompt": "Q: What sport does FK Radnički Pirot play?\nA:", "must_contain": ["association football", "football", "soccer"]}
+{"id": "1838983", "category": "popqa_tight", "prompt": "Q: Who was the producer of Green Light?\nA:", "must_contain": ["frank borzage"]}
+{"id": "13046", "category": "popqa_tight", "prompt": "Q: What is the capital of Lesotho?\nA:", "must_contain": ["maseru"]}
+{"id": "5963044", "category": "popqa_tight", "prompt": "Q: Who was the director of The Wacky World of Mother Goose?\nA:", "must_contain": ["jules bass"]}
+{"id": "2145750", "category": "popqa_tight", "prompt": "Q: Who was the director of One Night?\nA:", "must_contain": ["lucas belvaux"]}
+{"id": "4657189", "category": "popqa_tight", "prompt": "Q: Who was the director of One Night?\nA:", "must_contain": ["niki karimi"]}
+{"id": "2145751", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for One Night?\nA:", "must_contain": ["lucas belvaux"]}
+{"id": "4657190", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for One Night?\nA:", "must_contain": ["niki karimi"]}
+{"id": "349957", "category": "popqa_tight", "prompt": "Q: What is the capital of Byzantine Empire?\nA:", "must_contain": ["constantinople", "istanbul"]}
+{"id": "687797", "category": "popqa_tight", "prompt": "Q: Who was the producer of The Unborn?\nA:", "must_contain": ["michael bay"]}
+{"id": "3774158", "category": "popqa_tight", "prompt": "Q: Who was the producer of The Cat Returns?\nA:", "must_contain": ["suzuki toshio", "toshio suzuki"]}
+{"id": "347023", "category": "popqa_tight", "prompt": "Q: What sport does Dorus de Vries play?\nA:", "must_contain": ["association football", "football", "soccer"]}
+{"id": "5714418", "category": "popqa_tight", "prompt": "Q: What genre is Second Time Around?\nA:", "must_contain": ["sitcom", "situation comedy", "situational comedy"]}
+{"id": "3469403", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The Clearing?\nA:", "must_contain": ["justin haythe"]}
+{"id": "4907008", "category": "popqa_tight", "prompt": "Q: Who is the author of The New Science?\nA:", "must_contain": ["giambattista vico", "gianbattista vico"]}
+{"id": "4954098", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Lessons?\nA:", "must_contain": ["david simon", "ed burns"]}
+{"id": "4954097", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Lessons?\nA:", "must_contain": ["david simon", "ed burns"]}
+{"id": "2959064", "category": "popqa_tight", "prompt": "Q: What genre is The Dance?\nA:", "must_contain": ["house", "house music"]}
+{"id": "4617076", "category": "popqa_tight", "prompt": "Q: What is the capital of Emirate of Dubai?\nA:", "must_contain": ["dubai"]}
+{"id": "6464294", "category": "popqa_tight", "prompt": "Q: Who is the mother of Mahavira?\nA:", "must_contain": ["trishala"]}
+{"id": "6210009", "category": "popqa_tight", "prompt": "Q: Who was the producer of Woman?\nA:", "must_contain": ["maurice tourneur", "tourneur"]}
+{"id": "1936634", "category": "popqa_tight", "prompt": "Q: What genre is Women?\nA:", "must_contain": ["art rock"]}
+{"id": "1952483", "category": "popqa_tight", "prompt": "Q: Who is the author of Worst?\nA:", "must_contain": ["hiroshi takahashi"]}
+{"id": "2560354", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Graduate First?\nA:", "must_contain": ["maurice pialat"]}
+{"id": "5495643", "category": "popqa_tight", "prompt": "Q: Who was the director of Providence?\nA:", "must_contain": ["chris carter"]}
+{"id": "5495644", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Providence?\nA:", "must_contain": ["frank spotnitz"]}
+{"id": "1607001", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Providence?\nA:", "must_contain": ["david mercer"]}
+{"id": "5667071", "category": "popqa_tight", "prompt": "Q: Who was the director of Sagar Sangamey?\nA:", "must_contain": ["debaki bose"]}
+{"id": "2819141", "category": "popqa_tight", "prompt": "Q: What sport does Giorgio Venturin play?\nA:", "must_contain": ["association football", "football", "soccer"]}
+{"id": "1147271", "category": "popqa_tight", "prompt": "Q: Who was the producer of In Conflict?\nA:", "must_contain": ["owen pallett"]}
+{"id": "1829966", "category": "popqa_tight", "prompt": "Q: Who was the producer of The Late Show?\nA:", "must_contain": ["robert altman"]}
+{"id": "1829968", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The Late Show?\nA:", "must_contain": ["robert benton"]}
+{"id": "2490554", "category": "popqa_tight", "prompt": "Q: Who was the producer of Hostage?\nA:", "must_contain": ["bruce willis"]}
+{"id": "4499000", "category": "popqa_tight", "prompt": "Q: Who is the author of Hostage?\nA:", "must_contain": ["elvis cole", "robert crais"]}
+{"id": "620030", "category": "popqa_tight", "prompt": "Q: Who was the director of Saving Face?\nA:", "must_contain": ["alice wu"]}
+{"id": "620031", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Saving Face?\nA:", "must_contain": ["alice wu"]}
+{"id": "4955279", "category": "popqa_tight", "prompt": "Q: Who was the composer of Let Me Know?\nA:", "must_contain": ["towa tei"]}
+{"id": "397207", "category": "popqa_tight", "prompt": "Q: Who was the director of Wrong?\nA:", "must_contain": ["monsieur oiseau", "mr. oizo", "quentin dupieux"]}
+{"id": "397208", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Wrong?\nA:", "must_contain": ["monsieur oiseau", "mr. oizo", "quentin dupieux"]}
+{"id": "1962551", "category": "popqa_tight", "prompt": "Q: Who was the composer of Wrong?\nA:", "must_contain": ["martin gore"]}
+{"id": "397209", "category": "popqa_tight", "prompt": "Q: Who was the composer of Wrong?\nA:", "must_contain": ["monsieur oiseau", "mr. oizo", "quentin dupieux"]}
+{"id": "5921065", "category": "popqa_tight", "prompt": "Q: Who was the producer of The Debut?\nA:", "must_contain": ["lisa onodera"]}
+{"id": "2672844", "category": "popqa_tight", "prompt": "Q: Who was the director of The Delta?\nA:", "must_contain": ["ira sachs"]}
+{"id": "2672845", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The Delta?\nA:", "must_contain": ["ira sachs"]}
+{"id": "670165", "category": "popqa_tight", "prompt": "Q: What genre is The Demon?\nA:", "must_contain": ["slasher", "slasher film", "slasher movie"]}
+{"id": "5930024", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The Great Moment?\nA:", "must_contain": ["preston sturges"]}
+{"id": "2334073", "category": "popqa_tight", "prompt": "Q: Who was the director of Training Day?\nA:", "must_contain": ["antoine fuqua"]}
+{"id": "6028500", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Training Day?\nA:", "must_contain": ["daniel chun"]}
+{"id": "6028497", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Training Day?\nA:", "must_contain": ["adam reed"]}
+{"id": "5130344", "category": "popqa_tight", "prompt": "Q: In what city was Wayne Cooper born?\nA:", "must_contain": ["milan", "milan, georgia"]}
+{"id": "2517004", "category": "popqa_tight", "prompt": "Q: What genre is Quenta Silmarillion?\nA:", "must_contain": ["fantasy", "fantasy fiction"]}
+{"id": "2859395", "category": "popqa_tight", "prompt": "Q: Who was the director of Remains to Be Seen?\nA:", "must_contain": ["don weis"]}
+{"id": "2262550", "category": "popqa_tight", "prompt": "Q: Who was the producer of The Connection?\nA:", "must_contain": ["shirley brimberg", "shirley clarke"]}
+{"id": "2262552", "category": "popqa_tight", "prompt": "Q: Who was the director of The Connection?\nA:", "must_contain": ["shirley brimberg", "shirley clarke"]}
+{"id": "1176214", "category": "popqa_tight", "prompt": "Q: What is the capital of Othón P. Blanco Municipality?\nA:", "must_contain": ["chetumal", "chetumel"]}
+{"id": "5548246", "category": "popqa_tight", "prompt": "Q: Who is the author of Reaper's Gale?\nA:", "must_contain": ["steve lundin", "steven erikson"]}
+{"id": "1754705", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Human Resources?\nA:", "must_contain": ["laurent cantet"]}
+{"id": "1679718", "category": "popqa_tight", "prompt": "Q: Who was the director of Dragon?\nA:", "must_contain": ["peter", "peter chan"]}
+{"id": "3952545", "category": "popqa_tight", "prompt": "Q: Who is the author of Dragon?\nA:", "must_contain": ["laurence yep"]}
+{"id": "2057753", "category": "popqa_tight", "prompt": "Q: Who was the director of Pirates of Malaysia?\nA:", "must_contain": ["umberto lenzi"]}
+{"id": "3369181", "category": "popqa_tight", "prompt": "Q: What is Archibald Thomas Pechey's occupation?\nA:", "must_contain": ["lyricist", "singer-lyricist"]}
+{"id": "3467441", "category": "popqa_tight", "prompt": "Q: Who is the author of Being Digital?\nA:", "must_contain": ["nicholas negroponte"]}
+{"id": "314923", "category": "popqa_tight", "prompt": "Q: Who was the director of The Innocent?\nA:", "must_contain": ["luchino visconti"]}
+{"id": "3017758", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The Innocent?\nA:", "must_contain": ["ian mcewan"]}
+{"id": "314924", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The Innocent?\nA:", "must_contain": ["luchino visconti"]}
+{"id": "1721484", "category": "popqa_tight", "prompt": "Q: Who was the director of Zombieland?\nA:", "must_contain": ["ruben fleischer"]}
+{"id": "63853", "category": "popqa_tight", "prompt": "Q: What sport does Vyacheslav Chadov play?\nA:", "must_contain": ["association football", "football", "soccer"]}
+{"id": "4700304", "category": "popqa_tight", "prompt": "Q: What is John Barnes's occupation?\nA:", "must_contain": ["monk", "monks"]}
+{"id": "2448688", "category": "popqa_tight", "prompt": "Q: Who was the director of The Beginning?\nA:", "must_contain": ["gleb panfilov"]}
+{"id": "778795", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The Beginning?\nA:", "must_contain": ["chris carter"]}
+{"id": "6098645", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Venicile Vyapari?\nA:", "must_contain": ["james albert"]}
+{"id": "5290313", "category": "popqa_tight", "prompt": "Q: What sport does Nigel Marples play?\nA:", "must_contain": ["association football", "football", "soccer"]}
+{"id": "5927273", "category": "popqa_tight", "prompt": "Q: Who is the author of The Friendship?\nA:", "must_contain": ["mildred taylor"]}
+{"id": "802964", "category": "popqa_tight", "prompt": "Q: Who was the director of Two of Us?\nA:", "must_contain": ["michael lindsay-hogg"]}
+{"id": "3917655", "category": "popqa_tight", "prompt": "Q: In what city was Dilson Torres born?\nA:", "must_contain": ["maracay"]}
+{"id": "2569888", "category": "popqa_tight", "prompt": "Q: What is the capital of New Caledonia?\nA:", "must_contain": ["noumea", "nouméa"]}
+{"id": "2880969", "category": "popqa_tight", "prompt": "Q: What genre is Really Me?\nA:", "must_contain": ["teen sitcom"]}
+{"id": "2997726", "category": "popqa_tight", "prompt": "Q: Who was the producer of Dreams?\nA:", "must_contain": ["spielberg", "steven spielberg"]}
+{"id": "2037355", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Dreams?\nA:", "must_contain": ["ingmar bergman"]}
+{"id": "3954118", "category": "popqa_tight", "prompt": "Q: Who is the author of Dreams?\nA:", "must_contain": ["ivan bunin"]}
+{"id": "4276754", "category": "popqa_tight", "prompt": "Q: Who was the composer of Grandpa?\nA:", "must_contain": ["jamie o'hara"]}
+{"id": "4296607", "category": "popqa_tight", "prompt": "Q: Who was the director of Gunahon Ka Faisla?\nA:", "must_contain": ["shibu mitra"]}
+{"id": "3072581", "category": "popqa_tight", "prompt": "Q: Who is the father of St. James the Elder, Apostle?\nA:", "must_contain": ["zebedee"]}
+{"id": "2070408", "category": "popqa_tight", "prompt": "Q: Who was the producer of Turn to You?\nA:", "must_contain": ["justin bieber"]}
+{"id": "419966", "category": "popqa_tight", "prompt": "Q: Who is the father of Rahul Bhatt?\nA:", "must_contain": ["mahesh bhatt"]}
+{"id": "2713407", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Yesterday's Hero?\nA:", "must_contain": ["jackie collins"]}
+{"id": "1817767", "category": "popqa_tight", "prompt": "Q: Who was the producer of Les Retrouvailles?\nA:", "must_contain": ["yann tiersen"]}
+{"id": "6453500", "category": "popqa_tight", "prompt": "Q: Who was the director of The Doors?\nA:", "must_contain": ["oliver stone"]}
+{"id": "2104040", "category": "popqa_tight", "prompt": "Q: Who was the producer of The Descendants?\nA:", "must_contain": ["alexander payne"]}
+{"id": "1349344", "category": "popqa_tight", "prompt": "Q: Who is the author of Les Vingt et un Jours d'un neurasthénique?\nA:", "must_contain": ["mirbeau", "octave mirbeau"]}
+{"id": "1530395", "category": "popqa_tight", "prompt": "Q: Who was the director of Driven?\nA:", "must_contain": ["maurice elvey"]}
+{"id": "976837", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Investment?\nA:", "must_contain": ["ratnakar matkari", "veteran marathi"]}
+{"id": "1377069", "category": "popqa_tight", "prompt": "Q: Who was the composer of Innalenkil Nale?\nA:", "must_contain": ["shyam"]}
+{"id": "1580390", "category": "popqa_tight", "prompt": "Q: What is the capital of Northwest Territories?\nA:", "must_contain": ["yellowknife"]}
+{"id": "5961890", "category": "popqa_tight", "prompt": "Q: What genre is The Untold?\nA:", "must_contain": ["horror film", "horror movie"]}
+{"id": "4219186", "category": "popqa_tight", "prompt": "Q: In what city was George Maluleka born?\nA:", "must_contain": ["tembisa"]}
+{"id": "1590546", "category": "popqa_tight", "prompt": "Q: Who was the composer of Alceste?\nA:", "must_contain": ["jean-baptiste lully", "lulli"]}
+{"id": "3748555", "category": "popqa_tight", "prompt": "Q: In what city was Clarrie Millar born?\nA:", "must_contain": ["adelaide", "greater adelaide"]}
+{"id": "2134846", "category": "popqa_tight", "prompt": "Q: Who was the director of The Dream?\nA:", "must_contain": ["pieter verhoeff"]}
+{"id": "1367376", "category": "popqa_tight", "prompt": "Q: What genre is Zipper?\nA:", "must_contain": ["political thriller"]}
+{"id": "481118", "category": "popqa_tight", "prompt": "Q: Who was the director of Oru Pennum Randaanum?\nA:", "must_contain": ["adoor", "adoor gopalakrishnan"]}
+{"id": "4862409", "category": "popqa_tight", "prompt": "Q: Who was the composer of King David?\nA:", "must_contain": ["alan menken"]}
+{"id": "2319393", "category": "popqa_tight", "prompt": "Q: What genre is Gravity?\nA:", "must_contain": ["rock", "rock music"]}
+{"id": "1980835", "category": "popqa_tight", "prompt": "Q: Who was the producer of Gravity?\nA:", "must_contain": ["david heyman"]}
+{"id": "1980847", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Gravity?\nA:", "must_contain": ["george clooney"]}
+{"id": "1980848", "category": "popqa_tight", "prompt": "Q: Who was the composer of Gravity?\nA:", "must_contain": ["steven price"]}
+{"id": "4122588", "category": "popqa_tight", "prompt": "Q: Who is the father of Folke Zettervall?\nA:", "must_contain": ["helgo zettervall"]}
+{"id": "3526804", "category": "popqa_tight", "prompt": "Q: Who was the producer of Bloodstone?\nA:", "must_contain": ["ashok amritraj"]}
+{"id": "3209494", "category": "popqa_tight", "prompt": "Q: Who was the director of The Believer?\nA:", "must_contain": ["henry bean"]}
+{"id": "3209495", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The Believer?\nA:", "must_contain": ["henry bean"]}
+{"id": "5436280", "category": "popqa_tight", "prompt": "Q: In what city was Petros Tabouris born?\nA:", "must_contain": ["athens"]}
+{"id": "4321036", "category": "popqa_tight", "prompt": "Q: Who was the composer of Hallelujah, Baby!?\nA:", "must_contain": ["jule styne"]}
+{"id": "6500685", "category": "popqa_tight", "prompt": "Q: Who is the father of Jeremy Howard?\nA:", "must_contain": ["joe howard"]}
+{"id": "1306567", "category": "popqa_tight", "prompt": "Q: What is the religion of Shenandoah University?\nA:", "must_contain": ["umc"]}
+{"id": "5689230", "category": "popqa_tight", "prompt": "Q: Who was the director of Sanguinarium?\nA:", "must_contain": ["kim manners"]}
+{"id": "285213", "category": "popqa_tight", "prompt": "Q: Who was the director of Puzzle?\nA:", "must_contain": ["duccio tessari"]}
+{"id": "285214", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Puzzle?\nA:", "must_contain": ["ernesto gastaldi"]}
+{"id": "3792761", "category": "popqa_tight", "prompt": "Q: Who is the author of Country of My Skull?\nA:", "must_contain": ["antjie krog"]}
+{"id": "5921486", "category": "popqa_tight", "prompt": "Q: Who is the author of The Desperate Hours?\nA:", "must_contain": ["joseph hayes"]}
+{"id": "2483859", "category": "popqa_tight", "prompt": "Q: Who is the father of Máel Snechtai of Moray?\nA:", "must_contain": ["lulach"]}
+{"id": "4263529", "category": "popqa_tight", "prompt": "Q: Who was the director of Goodbye?\nA:", "must_contain": ["bill d'elia"]}
+{"id": "394756", "category": "popqa_tight", "prompt": "Q: Who was the director of Goodbye?\nA:", "must_contain": ["brad falchuk"]}
+{"id": "1808819", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Goodbye?\nA:", "must_contain": ["heddy honigmann"]}
+{"id": "394757", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Goodbye?\nA:", "must_contain": ["brad falchuk"]}
+{"id": "5552151", "category": "popqa_tight", "prompt": "Q: Who was the director of Redemption?\nA:", "must_contain": ["jon alpert"]}
+{"id": "4016639", "category": "popqa_tight", "prompt": "Q: What sport does Elias MacDonald play?\nA:", "must_contain": ["association football", "football", "soccer"]}
+{"id": "2007494", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for 24 Minutes?\nA:", "must_contain": ["ian maxtone-graham"]}
+{"id": "158234", "category": "popqa_tight", "prompt": "Q: What is the capital of Beltrami County?\nA:", "must_contain": ["bemidji", "bemidji, minnesota", "bemidji, mn"]}
+{"id": "4442437", "category": "popqa_tight", "prompt": "Q: Who is the author of Free to Choose?\nA:", "must_contain": ["milton fridman", "milton friedman"]}
+{"id": "1032898", "category": "popqa_tight", "prompt": "Q: What is the capital of American Samoa?\nA:", "must_contain": ["pago pago"]}
+{"id": "1518842", "category": "popqa_tight", "prompt": "Q: Who was the director of Quartet?\nA:", "must_contain": ["dustin hoffman"]}
+{"id": "2869541", "category": "popqa_tight", "prompt": "Q: What sport does Łukasz Szukała play?\nA:", "must_contain": ["association football", "football", "soccer"]}
+{"id": "3490970", "category": "popqa_tight", "prompt": "Q: What is the capital of Meigs County?\nA:", "must_contain": ["pomeroy", "pomeroy, ohio"]}
+{"id": "2686996", "category": "popqa_tight", "prompt": "Q: Who is the father of Arjun Sarja?\nA:", "must_contain": ["shakti prasad"]}
+{"id": "6449648", "category": "popqa_tight", "prompt": "Q: What sport does Guo Ruilong play?\nA:", "must_contain": ["association football", "football", "soccer"]}
+{"id": "689074", "category": "popqa_tight", "prompt": "Q: Who was the producer of Son of God?\nA:", "must_contain": ["roma downey"]}
+{"id": "804877", "category": "popqa_tight", "prompt": "Q: In what city was John M. Wood born?\nA:", "must_contain": ["minisink"]}
+{"id": "1683421", "category": "popqa_tight", "prompt": "Q: Who is the author of Enchiridion of Epictetus?\nA:", "must_contain": ["arrian"]}
+{"id": "4449613", "category": "popqa_tight", "prompt": "Q: Who was the director of Thérèse Desqueyroux?\nA:", "must_contain": ["georges franju"]}
+{"id": "3451987", "category": "popqa_tight", "prompt": "Q: What sport does Friedhelm Konietzka play?\nA:", "must_contain": ["association football", "football", "soccer"]}
+{"id": "2485263", "category": "popqa_tight", "prompt": "Q: Who was the director of Mahjong?\nA:", "must_contain": ["edward yang"]}
+{"id": "2485264", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Mahjong?\nA:", "must_contain": ["edward yang"]}
+{"id": "2832420", "category": "popqa_tight", "prompt": "Q: Who was the composer of Let Me Call You Sweetheart?\nA:", "must_contain": ["leo friedman"]}
+{"id": "5613857", "category": "popqa_tight", "prompt": "Q: What genre is Jetpac?\nA:", "must_contain": ["shooter", "shooter game"]}
+{"id": "1788652", "category": "popqa_tight", "prompt": "Q: In what city was Louis Renault born?\nA:", "must_contain": ["autun", "bibracte"]}
+{"id": "4754864", "category": "popqa_tight", "prompt": "Q: Who was the director of In Time?\nA:", "must_contain": ["andrew niccol"]}
+{"id": "2798406", "category": "popqa_tight", "prompt": "Q: Who was the director of Tomorrow?\nA:", "must_contain": ["francesca archibugi"]}
+{"id": "2798407", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Tomorrow?\nA:", "must_contain": ["francesca archibugi"]}
+{"id": "6015519", "category": "popqa_tight", "prompt": "Q: Who was the composer of Tomorrow?\nA:", "must_contain": ["charles strouse"]}
+{"id": "6015532", "category": "popqa_tight", "prompt": "Q: Who is the author of Tomorrow?\nA:", "must_contain": ["graham swift"]}
+{"id": "3486328", "category": "popqa_tight", "prompt": "Q: What color is York City F.C.?\nA:", "must_contain": ["red", "red color"]}
+{"id": "6148", "category": "popqa_tight", "prompt": "Q: Who is the father of Shimazu Tadayoshi?\nA:", "must_contain": ["shimadu hisamitu", "shimazu hisamitsu", "shimazu saburō"]}
+{"id": "4688630", "category": "popqa_tight", "prompt": "Q: What sport does Joe Bretto play?\nA:", "must_contain": ["ice hockey"]}
+{"id": "6454957", "category": "popqa_tight", "prompt": "Q: What sport does Laryea Kingston play?\nA:", "must_contain": ["association football", "football", "soccer"]}
+{"id": "867783", "category": "popqa_tight", "prompt": "Q: Who was the composer of Aa Divasam?\nA:", "must_contain": ["shyam"]}
+{"id": "5578918", "category": "popqa_tight", "prompt": "Q: In what city was Richard S. Bull born?\nA:", "must_contain": ["wilkinsburg"]}
+{"id": "1499341", "category": "popqa_tight", "prompt": "Q: What genre is Homecoming?\nA:", "must_contain": ["hard rock"]}
+{"id": "4490640", "category": "popqa_tight", "prompt": "Q: Who was the director of Homecoming?\nA:", "must_contain": ["joe may"]}
+{"id": "4490656", "category": "popqa_tight", "prompt": "Q: Who was the director of Homecoming?\nA:", "must_contain": ["todd holland"]}
+{"id": "1000632", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Homecoming?\nA:", "must_contain": ["david simon", "rafael alvarez"]}
+{"id": "1000631", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Homecoming?\nA:", "must_contain": ["david simon", "rafael alvarez"]}
+{"id": "1137769", "category": "popqa_tight", "prompt": "Q: Who was the composer of Homecoming?\nA:", "must_contain": ["sammy adams"]}
+{"id": "6475333", "category": "popqa_tight", "prompt": "Q: What is the capital of Tunisia?\nA:", "must_contain": ["tunis"]}
+{"id": "5703910", "category": "popqa_tight", "prompt": "Q: Who is the author of School for Coquettes?\nA:", "must_contain": ["dimitri petrococchino", "paul armont"]}
+{"id": "6029244", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Transitions?\nA:", "must_contain": ["david simon", "ed burns"]}
+{"id": "1662253", "category": "popqa_tight", "prompt": "Q: In what city was Maarten Biesheuvel born?\nA:", "must_contain": ["schiedam"]}
+{"id": "2609523", "category": "popqa_tight", "prompt": "Q: In what city was Robert Creamer born?\nA:", "must_contain": ["bronxville"]}
+{"id": "2614416", "category": "popqa_tight", "prompt": "Q: In what city was Roger Mendy born?\nA:", "must_contain": ["dakar"]}
+{"id": "1898138", "category": "popqa_tight", "prompt": "Q: Who is the father of Pedro, Prince Imperial of Brazil?\nA:", "must_contain": ["pedro ii"]}
+{"id": "2480274", "category": "popqa_tight", "prompt": "Q: Who was the producer of All Because of You?\nA:", "must_contain": ["butch walker"]}
+{"id": "2480279", "category": "popqa_tight", "prompt": "Q: Who was the composer of All Because of You?\nA:", "must_contain": ["avril lavigne", "butch walker"]}
+{"id": "2480280", "category": "popqa_tight", "prompt": "Q: Who was the composer of All Because of You?\nA:", "must_contain": ["avril lavigne", "butch walker"]}
+{"id": "1487881", "category": "popqa_tight", "prompt": "Q: What is Minneapolis the capital of?\nA:", "must_contain": ["ottawa county"]}
+{"id": "425261", "category": "popqa_tight", "prompt": "Q: Who was the composer of El Dorado?\nA:", "must_contain": ["nelson riddle"]}
+{"id": "480853", "category": "popqa_tight", "prompt": "Q: Who was the producer of Toughest Gun in Tombstone?\nA:", "must_contain": ["edward small"]}
+{"id": "1475765", "category": "popqa_tight", "prompt": "Q: Who is the father of John Edward Gray?\nA:", "must_contain": ["gray"]}
+{"id": "6242848", "category": "popqa_tight", "prompt": "Q: What is the capital of Spanish Empire?\nA:", "must_contain": ["madrid", "madrid, spain"]}
+{"id": "1237046", "category": "popqa_tight", "prompt": "Q: Who was the producer of Locked In?\nA:", "must_contain": ["harry lowell"]}
+{"id": "1237048", "category": "popqa_tight", "prompt": "Q: Who was the director of Locked In?\nA:", "must_contain": ["suri krishnamma"]}
+{"id": "1335671", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Professional Sweetheart?\nA:", "must_contain": ["maurine watkins"]}
+{"id": "1023414", "category": "popqa_tight", "prompt": "Q: What is the capital of Tarussky District?\nA:", "must_contain": ["tarusa"]}
+{"id": "2079298", "category": "popqa_tight", "prompt": "Q: Who was the producer of Cracks?\nA:", "must_contain": ["christine vachon"]}
+{"id": "400284", "category": "popqa_tight", "prompt": "Q: Who was the director of Metroland?\nA:", "must_contain": ["philip saville"]}
+{"id": "3039516", "category": "popqa_tight", "prompt": "Q: What genre is New Watch?\nA:", "must_contain": ["fantasy", "fantasy fiction"]}
+{"id": "356006", "category": "popqa_tight", "prompt": "Q: What is the capital of Saint Martin (French part)?\nA:", "must_contain": ["marigot"]}
+{"id": "2313917", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Whatever?\nA:", "must_contain": ["michel houellebecq"]}
+{"id": "6034618", "category": "popqa_tight", "prompt": "Q: Who is the author of Whatever?\nA:", "must_contain": ["michel houellebecq"]}
+{"id": "2522645", "category": "popqa_tight", "prompt": "Q: What is the religion of Saint David?\nA:", "must_contain": ["christian faith", "christianity"]}
+{"id": "4867859", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The Survivor?\nA:", "must_contain": ["ghassan kanafani"]}
+{"id": "5958502", "category": "popqa_tight", "prompt": "Q: Who is the author of The Survivor?\nA:", "must_contain": ["james herbert"]}
+{"id": "4202841", "category": "popqa_tight", "prompt": "Q: What is the capital of Gmina Secemin?\nA:", "must_contain": ["secemin"]}
+{"id": "632979", "category": "popqa_tight", "prompt": "Q: What sport does Sol Ky-Ong play?\nA:", "must_contain": ["judo"]}
+{"id": "3799060", "category": "popqa_tight", "prompt": "Q: What sport does Crease play?\nA:", "must_contain": ["cricket"]}
+{"id": "1468621", "category": "popqa_tight", "prompt": "Q: Who is the father of Matthew Henry Richey?\nA:", "must_contain": ["matthew richey"]}
+{"id": "2538608", "category": "popqa_tight", "prompt": "Q: In what city was Nicholas French born?\nA:", "must_contain": ["wexford"]}
+{"id": "4886017", "category": "popqa_tight", "prompt": "Q: In what city was Athīr al-Dīn al-Abharī born?\nA:", "must_contain": ["abhar"]}
+{"id": "4559960", "category": "popqa_tight", "prompt": "Q: Who was the director of Inflatable Sex Doll of the Wastelands?\nA:", "must_contain": ["atsushi yamatoya"]}
+{"id": "1116821", "category": "popqa_tight", "prompt": "Q: Who is the author of Template?\nA:", "must_contain": ["matt hughes", "matthew hughes"]}
+{"id": "5416039", "category": "popqa_tight", "prompt": "Q: What sport does Giorgio Cagnotto play?\nA:", "must_contain": ["diving"]}
+{"id": "5369942", "category": "popqa_tight", "prompt": "Q: What is Paddy Mullins's occupation?\nA:", "must_contain": ["horse trainer", "racehorse trainer"]}
+{"id": "4009404", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Brutti, sporchi e cattivi?\nA:", "must_contain": ["ettore scola"]}
+{"id": "4955964", "category": "popqa_tight", "prompt": "Q: Who is the author of Letting Go?\nA:", "must_contain": ["philip roth"]}
+{"id": "4983055", "category": "popqa_tight", "prompt": "Q: Who is the author of list of Mr. Men?\nA:", "must_contain": ["roger hargreaves"]}
+{"id": "4367386", "category": "popqa_tight", "prompt": "Q: Who was the composer of The Last Days?\nA:", "must_contain": ["hans zimmer"]}
+{"id": "5936556", "category": "popqa_tight", "prompt": "Q: Who is the author of The Last Days?\nA:", "must_contain": ["scott westerfeld"]}
+{"id": "1287272", "category": "popqa_tight", "prompt": "Q: In what city was Erik Pedersen born?\nA:", "must_contain": ["porsgrunn"]}
+{"id": "99232", "category": "popqa_tight", "prompt": "Q: Who was the director of Crisis?\nA:", "must_contain": ["ingmar bergman"]}
+{"id": "99233", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Crisis?\nA:", "must_contain": ["ingmar bergman"]}
+{"id": "1146036", "category": "popqa_tight", "prompt": "Q: What genre is Hot Cop?\nA:", "must_contain": ["disco", "disco music"]}
+{"id": "1158868", "category": "popqa_tight", "prompt": "Q: What is Jorge Traverso's occupation?\nA:", "must_contain": ["journalist", "journalists", "journo"]}
+{"id": "1481126", "category": "popqa_tight", "prompt": "Q: Who was the director of Whitney?\nA:", "must_contain": ["angela bassett", "angle bassett"]}
+{"id": "1972096", "category": "popqa_tight", "prompt": "Q: What is the religion of St. John's Church?\nA:", "must_contain": ["lutheran church", "lutheranism", "lutherans"]}
+{"id": "896602", "category": "popqa_tight", "prompt": "Q: What is Michael Hutchings's occupation?\nA:", "must_contain": ["chef"]}
+{"id": "3061119", "category": "popqa_tight", "prompt": "Q: Who was the producer of Girlfriend?\nA:", "must_contain": ["pammi baweja"]}
+{"id": "3061120", "category": "popqa_tight", "prompt": "Q: Who was the director of Girlfriend?\nA:", "must_contain": ["karan razdan"]}
+{"id": "3061121", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Girlfriend?\nA:", "must_contain": ["karan razdan"]}
+{"id": "5936710", "category": "popqa_tight", "prompt": "Q: Who is the author of The Last Hawk?\nA:", "must_contain": ["catherine asaro"]}
+{"id": "3628652", "category": "popqa_tight", "prompt": "Q: Who is the father of Came Home?\nA:", "must_contain": ["gone west"]}
+{"id": "6300443", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The Package?\nA:", "must_contain": ["graham roland", "paul zbyszewski"]}
+{"id": "6300444", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The Package?\nA:", "must_contain": ["graham roland", "paul zbyszewski"]}
+{"id": "222084", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The Package?\nA:", "must_contain": ["john bishop"]}
+{"id": "2549912", "category": "popqa_tight", "prompt": "Q: What is the religion of George Carey?\nA:", "must_contain": ["anglicanism"]}
+{"id": "5904527", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Confessions of a Dangerous Mind?\nA:", "must_contain": ["charlie kaufman"]}
+{"id": "5700988", "category": "popqa_tight", "prompt": "Q: Who was the composer of Say When?\nA:", "must_contain": ["ray henderson", "raymond brost"]}
+{"id": "1376178", "category": "popqa_tight", "prompt": "Q: Who is the author of Basketbolo žaidimas (krepšiasvydis) ir Lietuvos sporto lygos oficialės basketbolo taisyklės 1926-27 metams?\nA:", "must_contain": ["steponas darius"]}
+{"id": "2358241", "category": "popqa_tight", "prompt": "Q: Who was the director of Green Tea?\nA:", "must_contain": ["yuan zhang", "zhang yuan"]}
+{"id": "1196975", "category": "popqa_tight", "prompt": "Q: Who is the father of Tokugawa Ieyasu?\nA:", "must_contain": ["matsudaira hirotada"]}
+{"id": "2074848", "category": "popqa_tight", "prompt": "Q: Who is the father of Charles of Valois?\nA:", "must_contain": ["philippe iii", "the bold"]}
+{"id": "1249018", "category": "popqa_tight", "prompt": "Q: Who was the director of The Saint?\nA:", "must_contain": ["phillip noyce"]}
+{"id": "1249019", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The Saint?\nA:", "must_contain": ["jonathan hensleigh", "wesley strick"]}
+{"id": "1249020", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The Saint?\nA:", "must_contain": ["jonathan hensleigh", "wesley strick"]}
+{"id": "3492339", "category": "popqa_tight", "prompt": "Q: Who was the producer of Beyond the Last Mountain?\nA:", "must_contain": ["javed jabbar"]}
+{"id": "2450145", "category": "popqa_tight", "prompt": "Q: Who was the director of New World?\nA:", "must_contain": ["alain corneau"]}
+{"id": "4859462", "category": "popqa_tight", "prompt": "Q: Who was the director of New World?\nA:", "must_contain": ["park hoon-jung"]}
+{"id": "4859463", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for New World?\nA:", "must_contain": ["park hoon-jung"]}
+{"id": "1925863", "category": "popqa_tight", "prompt": "Q: Who is the author of The Origins and History of Consciousness?\nA:", "must_contain": ["erich neumann"]}
+{"id": "214499", "category": "popqa_tight", "prompt": "Q: Who was the director of Cotton Comes to Harlem?\nA:", "must_contain": ["ossie davis"]}
+{"id": "4636666", "category": "popqa_tight", "prompt": "Q: Who was the producer of Never Give Up?\nA:", "must_contain": ["haruki kadokawa"]}
+{"id": "1867301", "category": "popqa_tight", "prompt": "Q: Who was the director of The Score?\nA:", "must_contain": ["frank oz", "richard oznowicz"]}
+{"id": "3089923", "category": "popqa_tight", "prompt": "Q: In what city was Maria Wetterstrand born?\nA:", "must_contain": ["eskilstuna"]}
+{"id": "1346942", "category": "popqa_tight", "prompt": "Q: What is the religion of Lenni Brenner?\nA:", "must_contain": ["atheism", "unbelief"]}
+{"id": "3419373", "category": "popqa_tight", "prompt": "Q: Who was the composer of Azhimukham?\nA:", "must_contain": ["baburaj"]}
+{"id": "6191678", "category": "popqa_tight", "prompt": "Q: In what city was William Marshall Craig born?\nA:", "must_contain": ["manchester", "manchester, england"]}
+{"id": "3036772", "category": "popqa_tight", "prompt": "Q: Who was the director of Irresistible?\nA:", "must_contain": ["david nutter"]}
+{"id": "1752279", "category": "popqa_tight", "prompt": "Q: What is the capital of Bosnia and Herzegovina?\nA:", "must_contain": ["sarajevo"]}
+{"id": "3878845", "category": "popqa_tight", "prompt": "Q: Who was the director of Day Trip?\nA:", "must_contain": ["chan-wook park", "park chan-uk", "park chan-wook"]}
+{"id": "3878847", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Day Trip?\nA:", "must_contain": ["chan-wook park", "park chan-uk", "park chan-wook"]}
+{"id": "5345482", "category": "popqa_tight", "prompt": "Q: Who was the director of Open House?\nA:", "must_contain": ["david slade"]}
+{"id": "5345484", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Open House?\nA:", "must_contain": ["sam catlin"]}
+{"id": "2221370", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Open House?\nA:", "must_contain": ["brad falchuk"]}
+{"id": "2658237", "category": "popqa_tight", "prompt": "Q: What genre is Stranger?\nA:", "must_contain": ["real-time strategy", "rts"]}
+{"id": "4694191", "category": "popqa_tight", "prompt": "Q: In what city was Joel Johnson born?\nA:", "must_contain": ["elmore", "elmore, ohio"]}
+{"id": "3720231", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Travels with My Aunt?\nA:", "must_contain": ["hugh wheeler"]}
+{"id": "2527173", "category": "popqa_tight", "prompt": "Q: What is Belgorod the capital of?\nA:", "must_contain": ["belgorod oblast"]}
+{"id": "305911", "category": "popqa_tight", "prompt": "Q: Who was the director of The Dilemma?\nA:", "must_contain": ["ron howard"]}
+{"id": "305912", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The Dilemma?\nA:", "must_contain": ["allan loeb"]}
+{"id": "4740507", "category": "popqa_tight", "prompt": "Q: What is the capital of Grand Duchy of Finland?\nA:", "must_contain": ["helsingfors", "helsingia", "helsinki"]}
+{"id": "5373471", "category": "popqa_tight", "prompt": "Q: Who is the father of Zhang Tianxi?\nA:", "must_contain": ["zhang jun"]}
+{"id": "2271386", "category": "popqa_tight", "prompt": "Q: Who was the director of The Shock?\nA:", "must_contain": ["lambert hillyer"]}
+{"id": "1901290", "category": "popqa_tight", "prompt": "Q: Who was the producer of The Shore?\nA:", "must_contain": ["terence george", "terry george"]}
+{"id": "288740", "category": "popqa_tight", "prompt": "Q: What genre is The Shout?\nA:", "must_contain": ["horror film", "horror movie"]}
+{"id": "288741", "category": "popqa_tight", "prompt": "Q: Who was the producer of The Shout?\nA:", "must_contain": ["jeremy thomas"]}
+{"id": "949248", "category": "popqa_tight", "prompt": "Q: In what city was Yugo Yoshida born?\nA:", "must_contain": ["karatsu", "katatu"]}
+{"id": "283357", "category": "popqa_tight", "prompt": "Q: Who was the director of Man of the House?\nA:", "must_contain": ["stephen herek"]}
+{"id": "5262087", "category": "popqa_tight", "prompt": "Q: Who was the director of Fitzcarraldo?\nA:", "must_contain": ["werner herzog", "werner stipetić"]}
+{"id": "3117027", "category": "popqa_tight", "prompt": "Q: Who was the director of The Sixth?\nA:", "must_contain": ["samuel gasparov", "samvel gasparov"]}
+{"id": "4345863", "category": "popqa_tight", "prompt": "Q: What is Harvey Benge's occupation?\nA:", "must_contain": ["photog", "photographer", "photographers"]}
+{"id": "1022847", "category": "popqa_tight", "prompt": "Q: Who is the father of Iamus?\nA:", "must_contain": ["apollo", "phoebus"]}
+{"id": "718945", "category": "popqa_tight", "prompt": "Q: Who is the author of Gone for Good?\nA:", "must_contain": ["harlan coben"]}
+{"id": "3017525", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Les Bonnes Femmes?\nA:", "must_contain": ["claude chabrol"]}
+{"id": "4076529", "category": "popqa_tight", "prompt": "Q: What genre is Evergreen?\nA:", "must_contain": ["pop", "pop music"]}
+{"id": "4076535", "category": "popqa_tight", "prompt": "Q: Who was the producer of Evergreen?\nA:", "must_contain": ["michael balcon"]}
+{"id": "4076536", "category": "popqa_tight", "prompt": "Q: Who was the director of Evergreen?\nA:", "must_contain": ["victor saville"]}
+{"id": "4076538", "category": "popqa_tight", "prompt": "Q: Who was the composer of Evergreen?\nA:", "must_contain": ["richard rodgers"]}
+{"id": "781888", "category": "popqa_tight", "prompt": "Q: What sport does Mehmet Gürkan Öztürk play?\nA:", "must_contain": ["association football", "football", "soccer"]}
+{"id": "6029385", "category": "popqa_tight", "prompt": "Q: Who was the producer of Dennis the Menace?\nA:", "must_contain": ["john hughes"]}
+{"id": "6029389", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Dennis the Menace?\nA:", "must_contain": ["john hughes"]}
+{"id": "3846375", "category": "popqa_tight", "prompt": "Q: Who was the director of Dark Descent?\nA:", "must_contain": ["chris neal", "daniel knauf", "wilfred schmidt"]}
+{"id": "6435951", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for Pearl in the Crown?\nA:", "must_contain": ["kazimierz kutz"]}
+{"id": "5997365", "category": "popqa_tight", "prompt": "Q: Who is the author of Timestorm 2009–2099?\nA:", "must_contain": ["brian reed"]}
+{"id": "2273439", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The Slave?\nA:", "must_contain": ["sergio corbucci"]}
+{"id": "6217682", "category": "popqa_tight", "prompt": "Q: Who is the author of X-Ray?\nA:", "must_contain": ["ray davies"]}
+{"id": "6484458", "category": "popqa_tight", "prompt": "Q: What sport does Muhamed Konjić play?\nA:", "must_contain": ["association football", "football", "soccer"]}
+{"id": "3453821", "category": "popqa_tight", "prompt": "Q: Who is the author of Symposium?\nA:", "must_contain": ["aristocles", "plato", "platon"]}
+{"id": "1976723", "category": "popqa_tight", "prompt": "Q: Who was the director of Marge vs. the Monorail?\nA:", "must_contain": ["rich moore"]}
+{"id": "6490126", "category": "popqa_tight", "prompt": "Q: What genre is Idaho?\nA:", "must_contain": ["western", "western film", "western genre"]}
+{"id": "318560", "category": "popqa_tight", "prompt": "Q: What is the capital of Idaho?\nA:", "must_contain": ["boise", "boise, idaho"]}
+{"id": "4299590", "category": "popqa_tight", "prompt": "Q: What genre is Ideal?\nA:", "must_contain": ["ndw"]}
+{"id": "1326203", "category": "popqa_tight", "prompt": "Q: Who is the author of Ideal?\nA:", "must_contain": ["ayn rand"]}
+{"id": "3807464", "category": "popqa_tight", "prompt": "Q: Who was the composer of Cue Ball Cat?\nA:", "must_contain": ["scott bradley"]}
+{"id": "5937083", "category": "popqa_tight", "prompt": "Q: Who was the director of The Last Word?\nA:", "must_contain": ["binka zhelyazkova"]}
+{"id": "5937084", "category": "popqa_tight", "prompt": "Q: Who was the screenwriter for The Last Word?\nA:", "must_contain": ["binka zhelyazkova"]}
+{"id": "5956102", "category": "popqa_tight", "prompt": "Q: Who is the author of The Snake?\nA:", "must_contain": ["mickey spillane"]}
