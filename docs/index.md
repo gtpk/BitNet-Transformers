@@ -227,6 +227,8 @@ python scripts/rt113_storage_latency.py \
    - 공개 BitNet 자료가 실제 구조(BitLinear, SubLN, relu2, native training, inference runtime)에 대해 말하는 것과 말하지 않는 것을 고정한다.
 8l. [Hybrid / Variable BitNet Conversion Plan](./hybrid_variable_bitnet_conversion_plan.md)
    - content-KL이 plateau될 때 1:1 all-I2_S 대신 selective precision, multi-strip ternary, residual, late-layer capacity를 budgeted topology conversion으로 검증하는 계획.
+8l2. [I2_S + LoRA / Residual Sidecar Plan](./i2s_lora_sidecar_plan.md)
+   - all-I2_S가 부족할 때 전체를 Q2/Q3로 올리지 않고 `gamma*T + BA` 형태의 tiny low-rank sidecar로 behavior를 보정할 수 있는지 검증하는 SIDE-000..005 계획.
 8m. [Quantization-Aware b1.58 Conversion Plan](./quantization_aware_b158_conversion_plan.md)
    - 기존 quantization toolbox(scale granularity, threshold/MSE objective, activation-aware scaling, GPTQ/Hessian assignment, rotation, signed-epsilon)를 BitNet 변환에 적용하는 처음부터 끝까지의 실험/가지치기 계획.
 8n. [Colab Quantization-Aware Conversion Prompt](./colab_quantization_aware_prompt.md)
@@ -384,6 +386,7 @@ flowchart TD
 | [bitnet_conversion_compiler_plan.md](./bitnet_conversion_compiler_plan.md) | b1.58 변환을 valid coordinate transform, saliency estimator, adaptive capacity, representative adaptation의 staged compiler 문제로 정의하는 상위 수식/가정/실행 계획 | WSYNC/PopQA/PTQTP-lite/hybrid 중 무엇을 먼저 실험할지 정할 때 |
 | [native_bitnet_architecture_audit.md](./native_bitnet_architecture_audit.md) | 공개 BitNet 자료의 실제 구조와 비공개/미확정 부분을 정리 | native BitNet이 그냥 LLaMA+ternary인지 판단할 때 |
 | [hybrid_variable_bitnet_conversion_plan.md](./hybrid_variable_bitnet_conversion_plan.md) | 1:1 all-I2_S 대신 가변 capacity/하이브리드 topology를 검증하는 HYBRID-001 계획 | factual gap을 capacity/topology 문제로 검증할 때 |
+| [i2s_lora_sidecar_plan.md](./i2s_lora_sidecar_plan.md) | I2_S base에 tiny low-rank residual sidecar를 붙여, mostly-I2_S 상태에서 부족한 factual/behavior capacity를 보정할 수 있는지 검증하는 SIDE-000..005 계획 | Q2/Q3 전체 업그레이드 전에 작은 capacity 보정이 가능한지 볼 때 |
 | [quantization_aware_b158_conversion_plan.md](./quantization_aware_b158_conversion_plan.md) | quantization 기법을 b1.58 변환에 적용하는 RT-124..128 전체 실험계획, 가지치기, 결론 도달 규칙 | 다음 Colab 실험을 설계하거나 결과를 해석할 때 |
 | [colab_quantization_aware_prompt.md](./colab_quantization_aware_prompt.md) | Colab 실행 가능한 AI에게 줄 copy-paste prompt와 결과 템플릿 | 다른 실행자에게 RT-124를 넘길 때 |
 | [complex_phase_rotation_plan.md](./complex_phase_rotation_plan.md) | 복소수 위상 `e^{iθ}`를 pairwise real rotation으로 구현하는 후속 분석/후보 아이디어 | factual gap 이후 rotation 후보를 다시 볼지 판단할 때 |

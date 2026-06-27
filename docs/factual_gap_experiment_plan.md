@@ -119,6 +119,92 @@ For PopQA transfer scoring (FACT-003H), use `data/popqa_heldout_tight.jsonl` as 
 held-out panel. The full held-out set is retained only as a permissive secondary read because
 some examples have many aliases or multi-word/noisy answers.
 
+## Why FACT-003H PopQA Blend Might Work
+
+FACT-003D showed that a tiny separate hard fact loss is not enough. The failure is
+mathematically expected.
+
+Small hard replay uses:
+
+```text
+L_small(theta) =
+  L_answer_CE(D_lm)
+  + lambda * L_content_KL(base || theta)
+  + mu * L_CE(D_small)
+```
+
+where `D_small` has only a few hundred atomic facts. Even if the same facts are
+seen many times:
+
+```text
+n_eff(D_small) stays small.
+```
+
+The gradient has high item-specific variance:
+
+```text
+grad L_CE(D_small) = g_fact + noise,
+Var(noise) ~= sigma^2 / n_eff.
+```
+
+Therefore the optimizer can reduce `L_CE(D_small)` by memorizing those cards
+without improving the held-out factual risk:
+
+```text
+F_eval(theta) = E_{(q,a) ~ D_eval}[-log p_theta(a | q)].
+```
+
+This is exactly the observed signature:
+
+```text
+train_atomic high,
+held-out / FACT flat or worse.
+```
+
+PopQA blend changes the objective:
+
+```text
+D_rep = (1 - rho) D_lm + rho D_popqa
+
+L_blend(theta) =
+  L_answer_CE(D_rep)
+  + lambda * L_content_KL(base || theta)
+```
+
+Now factual examples are part of the normal answer-CE stream rather than a separate
+overweighted card set. If PopQA and the factual panel share structure, then:
+
+```text
+F_eval(theta)
+  <= F_popqa(theta)
+   + discrepancy(D_eval, D_popqa)
+   + generalization_error(n_eff).
+```
+
+FACT-003H is testing whether `D_popqa` is large and representative enough that:
+
+```text
+generalization_error(n_eff) is smaller than small replay
+and
+discrepancy(D_eval, D_popqa) is not too large.
+```
+
+Primary success signature:
+
+```text
+train PopQA, tight held-out PopQA, and FACT panel all move upward,
+with no train=1.0 / held-out-flat memorization signature.
+```
+
+Branch interpretation:
+
+| signature | interpretation |
+| --- | --- |
+| train/tight/FACT all improve | representative blend works |
+| train improves, tight/FACT flat | PopQA also became memorization |
+| tight improves, FACT flat | PopQA transfer works but panel distribution differs |
+| CE improves, FACT drops | CE objective still misaligned |
+
 ## Models And Variants
 
 Use the TinyLlama-1.1B budget-scaled artifacts first because RT-129 already established

@@ -208,6 +208,114 @@ mu * L_small_fact_CE
 is now demoted unless the dataset is large and representative. With 291 facts, it
 can drive train facts to 1.0 while held-out/eval facts stay flat or worsen.
 
+### T4b. Why PopQA Blend Can Work
+
+Let:
+
+```text
+D_lm      = general language / instruction stream
+D_fact    = representative factual QA stream, e.g. PopQA
+D_eval    = fixed held-out factual panel
+D_small   = tiny protected fact set
+```
+
+Small hard replay optimizes:
+
+```text
+L_small(theta) =
+  L_answer_CE(D_lm)
+  + lambda * L_content_KL(base || theta)
+  + mu * L_CE(D_small)
+```
+
+PopQA blend instead optimizes:
+
+```text
+D_rep = (1 - rho) D_lm + rho D_fact
+
+L_blend(theta) =
+  L_answer_CE(D_rep)
+  + lambda * L_content_KL(base || theta)
+```
+
+The important difference is not only size. It is gradient geometry.
+
+For a factual evaluation risk:
+
+```text
+F_eval(theta) = E_{(q,a) ~ D_eval}[-log p_theta(a | q)]
+```
+
+one small gradient step gives:
+
+```text
+Delta F_eval
+  ~= - eta < grad F_eval, grad L_train >_{H^{-1}}
+```
+
+where `H^{-1}` is the local preconditioner / curvature geometry. Training helps
+factual behavior only when:
+
+```text
+< grad F_eval, grad L_train >_{H^{-1}} > 0
+```
+
+Tiny hard replay has:
+
+```text
+grad L_CE(D_small) = g_fact + noise
+Var(noise) ~= sigma^2 / n_eff
+```
+
+with very small `n_eff`. Repeating the same 291 facts many times lowers train loss
+but does not create new coverage:
+
+```text
+n_eff does not grow like repeated tokens.
+```
+
+So the optimizer can find a cheap item-specific shortcut:
+
+```text
+train facts up,
+held-out / FACT flat or worse.
+```
+
+Representative blend has larger support:
+
+```text
+n_eff(PopQA) >> n_eff(D_small)
+Var(noise) lower
+grad L_train closer to grad F_eval
+```
+
+if `D_fact` and `D_eval` share enough factual QA structure. A useful bound is the
+usual domain-adaptation intuition:
+
+```text
+F_eval(theta)
+  <= F_fact(theta)
+   + discrepancy(D_eval, D_fact)
+   + generalization_error(n_eff)
+```
+
+FACT-003H is testing whether PopQA makes both the discrepancy and the
+generalization error small enough to move real held-out factual behavior.
+
+Expected good signature:
+
+```text
+train PopQA, tight held-out PopQA, and FACT panel move together.
+```
+
+Bad signatures:
+
+```text
+train up, held-out flat      -> memorization shortcut
+held-out up, FACT flat       -> distribution mismatch
+CE up, facts down            -> objective still misaligned
+```
+
 ### T5. Runtime Correctness Is A Separate Theorem
 
 For export:
@@ -291,6 +399,7 @@ reduce token-time memory traffic, not only checkpoint bytes.
 | H7 | post-hoc FP layer restore fixes capacity | false | train-from-start hybrid only if needed |
 | H8 | valid rotations/equalization can improve ternary fit | false data-free (RT-WSYNC-001 + H-I2S: row/group/row-norm scaling AND block-Hadamard rotation all fail at 160M -- ternary stays collapsed, FACT 0.0) | demote data-free weight-only sync (plan S4); revisit only combined with STE/adaptation |
 | H9 | selective extra planes/capacity can close the remaining gap | open | PTQTP-lite after representative data is tested |
+| H10 | mostly-I2_S + tiny low-rank residual can recover missing behavior | open | SIDE-001 160M rank 2/4/8 smoke |
 
 ## TurboQuant-Style Projection As Part Of `G`
 
@@ -445,6 +554,33 @@ Examples:
 | custom Lloyd codebook helps | test whether I2_S plus RHT captures most of it |
 | two planes help | identify top-saliency layers; maybe one-plane + data is enough |
 | FP pocket helps | train-from-start Q2/I2_S hybrid, then measure byte trade-off honestly |
+
+### Sidecar Candidate
+
+The most practical Track B idea right now is:
+
+```text
+y = I2_S(x) + low_rank_residual(x)
+```
+
+or:
+
+```text
+W_side = gamma*T + B A
+```
+
+This keeps the main matrix in I2_S while adding a tiny low-rank correction. It is
+not pure I2_S, but it may remain product-relevant if the sidecar is much smaller
+than moving the whole model to Q2/Q3.
+
+Plan:
+
+```text
+docs/i2s_lora_sidecar_plan.md
+```
+
+PC should test rank `2/4/8` on 160M first. Colab should only confirm on 1.1B if the
+160M smoke moves FACT.
 
 ## Hardware Split: Colab vs RTX 3080 PC
 
