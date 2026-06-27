@@ -1,0 +1,291 @@
+{"id": "currency:Poland", "category": "currency", "prompt": "Q: What is the currency of Poland?\nA:", "answer": " Zloty"}
+{"id": "capital:Liechtenstein", "category": "capital", "prompt": "Q: What is the capital of Liechtenstein?\nA:", "answer": " Vaduz"}
+{"id": "capital:Algeria", "category": "capital", "prompt": "Q: What is the capital of Algeria?\nA:", "answer": " Algiers"}
+{"id": "continent:Ghana", "category": "continent", "prompt": "Q: On which continent is Ghana located?\nA:", "answer": " Africa"}
+{"id": "continent:Norway", "category": "continent", "prompt": "Q: On which continent is Norway located?\nA:", "answer": " Europe"}
+{"id": "continent:Ireland", "category": "continent", "prompt": "Q: On which continent is Ireland located?\nA:", "answer": " Europe"}
+{"id": "currency:United States", "category": "currency", "prompt": "Q: What is the currency of United States?\nA:", "answer": " Dollar"}
+{"id": "capital:Malaysia", "category": "capital", "prompt": "Q: What is the capital of Malaysia?\nA:", "answer": " Kuala Lumpur"}
+{"id": "continent:Portugal", "category": "continent", "prompt": "Q: On which continent is Portugal located?\nA:", "answer": " Europe"}
+{"id": "currency:Norway", "category": "currency", "prompt": "Q: What is the currency of Norway?\nA:", "answer": " Krone"}
+{"id": "currency:Panama", "category": "currency", "prompt": "Q: What is the currency of Panama?\nA:", "answer": " Balboa"}
+{"id": "author:To Kill a Mockingbird", "category": "author", "prompt": "Q: Who wrote To Kill a Mockingbird?\nA:", "answer": " Lee"}
+{"id": "capital:Bangladesh", "category": "capital", "prompt": "Q: What is the capital of Bangladesh?\nA:", "answer": " Dhaka"}
+{"id": "currency:Czech Republic", "category": "currency", "prompt": "Q: What is the currency of Czech Republic?\nA:", "answer": " Koruna"}
+{"id": "capital:Tajikistan", "category": "capital", "prompt": "Q: What is the capital of Tajikistan?\nA:", "answer": " Dushanbe"}
+{"id": "capital:Somalia", "category": "capital", "prompt": "Q: What is the capital of Somalia?\nA:", "answer": " Mogadishu"}
+{"id": "author:Fahrenheit 451", "category": "author", "prompt": "Q: Who wrote Fahrenheit 451?\nA:", "answer": " Bradbury"}
+{"id": "capital:Finland", "category": "capital", "prompt": "Q: What is the capital of Finland?\nA:", "answer": " Helsinki"}
+{"id": "capital:Nepal", "category": "capital", "prompt": "Q: What is the capital of Nepal?\nA:", "answer": " Kathmandu"}
+{"id": "capital:Niger", "category": "capital", "prompt": "Q: What is the capital of Niger?\nA:", "answer": " Niamey"}
+{"id": "capital:Angola", "category": "capital", "prompt": "Q: What is the capital of Angola?\nA:", "answer": " Luanda"}
+{"id": "author:The Stranger", "category": "author", "prompt": "Q: Who wrote The Stranger?\nA:", "answer": " Camus"}
+{"id": "element:Nitrogen", "category": "element", "prompt": "Q: What is the chemical symbol for Nitrogen?\nA:", "answer": " N"}
+{"id": "author:The Hobbit", "category": "author", "prompt": "Q: Who wrote The Hobbit?\nA:", "answer": " Tolkien"}
+{"id": "continent:Australia", "category": "continent", "prompt": "Q: On which continent is Australia located?\nA:", "answer": " Oceania"}
+{"id": "currency:Jordan", "category": "currency", "prompt": "Q: What is the currency of Jordan?\nA:", "answer": " Dinar"}
+{"id": "capital:Lithuania", "category": "capital", "prompt": "Q: What is the capital of Lithuania?\nA:", "answer": " Vilnius"}
+{"id": "language:Czech Republic", "category": "language", "prompt": "Q: What is the main language spoken in Czech Republic?\nA:", "answer": " Czech"}
+{"id": "language:South Korea", "category": "language", "prompt": "Q: What is the main language spoken in South Korea?\nA:", "answer": " Korean"}
+{"id": "element:Sodium", "category": "element", "prompt": "Q: What is the chemical symbol for Sodium?\nA:", "answer": " Na"}
+{"id": "author:The Odyssey", "category": "author", "prompt": "Q: Who wrote The Odyssey?\nA:", "answer": " Homer"}
+{"id": "capital:Burkina Faso", "category": "capital", "prompt": "Q: What is the capital of Burkina Faso?\nA:", "answer": " Ouagadougou"}
+{"id": "capital:Serbia", "category": "capital", "prompt": "Q: What is the capital of Serbia?\nA:", "answer": " Belgrade"}
+{"id": "continent:India", "category": "continent", "prompt": "Q: On which continent is India located?\nA:", "answer": " Asia"}
+{"id": "capital:Canada", "category": "capital", "prompt": "Q: What is the capital of Canada?\nA:", "answer": " Ottawa"}
+{"id": "language:Finland", "category": "language", "prompt": "Q: What is the main language spoken in Finland?\nA:", "answer": " Finnish"}
+{"id": "author:Crime and Punishment", "category": "author", "prompt": "Q: Who wrote Crime and Punishment?\nA:", "answer": " Dostoevsky"}
+{"id": "element:Gold", "category": "element", "prompt": "Q: What is the chemical symbol for Gold?\nA:", "answer": " Au"}
+{"id": "element:Iron", "category": "element", "prompt": "Q: What is the chemical symbol for Iron?\nA:", "answer": " Fe"}
+{"id": "element:Lead", "category": "element", "prompt": "Q: What is the chemical symbol for Lead?\nA:", "answer": " Pb"}
+{"id": "element:Neon", "category": "element", "prompt": "Q: What is the chemical symbol for Neon?\nA:", "answer": " Ne"}
+{"id": "continent:Angola", "category": "continent", "prompt": "Q: On which continent is Angola located?\nA:", "answer": " Africa"}
+{"id": "capital:Belarus", "category": "capital", "prompt": "Q: What is the capital of Belarus?\nA:", "answer": " Minsk"}
+{"id": "capital:Belgium", "category": "capital", "prompt": "Q: What is the capital of Belgium?\nA:", "answer": " Brussels"}
+{"id": "language:India", "category": "language", "prompt": "Q: What is the main language spoken in India?\nA:", "answer": " Hindi"}
+{"id": "capital:Chad", "category": "capital", "prompt": "Q: What is the capital of Chad?\nA:", "answer": " N'Djamena"}
+{"id": "capital:Cuba", "category": "capital", "prompt": "Q: What is the capital of Cuba?\nA:", "answer": " Havana"}
+{"id": "element:Zinc", "category": "element", "prompt": "Q: What is the chemical symbol for Zinc?\nA:", "answer": " Zn"}
+{"id": "capital:Fiji", "category": "capital", "prompt": "Q: What is the capital of Fiji?\nA:", "answer": " Suva"}
+{"id": "capital:Iran", "category": "capital", "prompt": "Q: What is the capital of Iran?\nA:", "answer": " Tehran"}
+{"id": "capital:Iraq", "category": "capital", "prompt": "Q: What is the capital of Iraq?\nA:", "answer": " Baghdad"}
+{"id": "capital:Morocco", "category": "capital", "prompt": "Q: What is the capital of Morocco?\nA:", "answer": " Rabat"}
+{"id": "capital:Laos", "category": "capital", "prompt": "Q: What is the capital of Laos?\nA:", "answer": " Vientiane"}
+{"id": "capital:Mali", "category": "capital", "prompt": "Q: What is the capital of Mali?\nA:", "answer": " Bamako"}
+{"id": "capital:Oman", "category": "capital", "prompt": "Q: What is the capital of Oman?\nA:", "answer": " Muscat"}
+{"id": "capital:Peru", "category": "capital", "prompt": "Q: What is the capital of Peru?\nA:", "answer": " Lima"}
+{"id": "element:Chlorine", "category": "element", "prompt": "Q: What is the chemical symbol for Chlorine?\nA:", "answer": " Cl"}
+{"id": "capital:Togo", "category": "capital", "prompt": "Q: What is the capital of Togo?\nA:", "answer": " Lome"}
+{"id": "currency:Iceland", "category": "currency", "prompt": "Q: What is the currency of Iceland?\nA:", "answer": " Krona"}
+{"id": "capital:United Arab Emirates", "category": "capital", "prompt": "Q: What is the capital of United Arab Emirates?\nA:", "answer": " Abu Dhabi"}
+{"id": "capital:Kyrgyzstan", "category": "capital", "prompt": "Q: What is the capital of Kyrgyzstan?\nA:", "answer": " Bishkek"}
+{"id": "capital:Colombia", "category": "capital", "prompt": "Q: What is the capital of Colombia?\nA:", "answer": " Bogota"}
+{"id": "author:Animal Farm", "category": "author", "prompt": "Q: Who wrote Animal Farm?\nA:", "answer": " Orwell"}
+{"id": "author:The Brothers Karamazov", "category": "author", "prompt": "Q: Who wrote The Brothers Karamazov?\nA:", "answer": " Dostoevsky"}
+{"id": "capital:Turkey", "category": "capital", "prompt": "Q: What is the capital of Turkey?\nA:", "answer": " Ankara"}
+{"id": "capital:Maldives", "category": "capital", "prompt": "Q: What is the capital of Maldives?\nA:", "answer": " Male"}
+{"id": "capital:Nigeria", "category": "capital", "prompt": "Q: What is the capital of Nigeria?\nA:", "answer": " Abuja"}
+{"id": "language:Poland", "category": "language", "prompt": "Q: What is the main language spoken in Poland?\nA:", "answer": " Polish"}
+{"id": "capital:Singapore", "category": "capital", "prompt": "Q: What is the capital of Singapore?\nA:", "answer": " Singapore"}
+{"id": "continent:Argentina", "category": "continent", "prompt": "Q: On which continent is Argentina located?\nA:", "answer": " South America"}
+{"id": "capital:Uganda", "category": "capital", "prompt": "Q: What is the capital of Uganda?\nA:", "answer": " Kampala"}
+{"id": "currency:Denmark", "category": "currency", "prompt": "Q: What is the currency of Denmark?\nA:", "answer": " Krone"}
+{"id": "author:The Great Gatsby", "category": "author", "prompt": "Q: Who wrote The Great Gatsby?\nA:", "answer": " Fitzgerald"}
+{"id": "capital:Greece", "category": "capital", "prompt": "Q: What is the capital of Greece?\nA:", "answer": " Athens"}
+{"id": "capital:Nicaragua", "category": "capital", "prompt": "Q: What is the capital of Nicaragua?\nA:", "answer": " Managua"}
+{"id": "capital:Benin", "category": "capital", "prompt": "Q: What is the capital of Benin?\nA:", "answer": " Porto-Novo"}
+{"id": "continent:Canada", "category": "continent", "prompt": "Q: On which continent is Canada located?\nA:", "answer": " North America"}
+{"id": "author:The Divine Comedy", "category": "author", "prompt": "Q: Who wrote The Divine Comedy?\nA:", "answer": " Dante"}
+{"id": "language:Argentina", "category": "language", "prompt": "Q: What is the main language spoken in Argentina?\nA:", "answer": " Spanish"}
+{"id": "element:Fluorine", "category": "element", "prompt": "Q: What is the chemical symbol for Fluorine?\nA:", "answer": " F"}
+{"id": "capital:Mexico", "category": "capital", "prompt": "Q: What is the capital of Mexico?\nA:", "answer": " Mexico City"}
+{"id": "author:A Tale of Two Cities", "category": "author", "prompt": "Q: Who wrote A Tale of Two Cities?\nA:", "answer": " Dickens"}
+{"id": "currency:Vietnam", "category": "currency", "prompt": "Q: What is the currency of Vietnam?\nA:", "answer": " Dong"}
+{"id": "author:The Lord of the Rings", "category": "author", "prompt": "Q: Who wrote The Lord of the Rings?\nA:", "answer": " Tolkien"}
+{"id": "capital:Hungary", "category": "capital", "prompt": "Q: What is the capital of Hungary?\nA:", "answer": " Budapest"}
+{"id": "currency:Canada", "category": "currency", "prompt": "Q: What is the currency of Canada?\nA:", "answer": " Dollar"}
+{"id": "capital:Qatar", "category": "capital", "prompt": "Q: What is the capital of Qatar?\nA:", "answer": " Doha"}
+{"id": "language:Norway", "category": "language", "prompt": "Q: What is the main language spoken in Norway?\nA:", "answer": " Norwegian"}
+{"id": "capital:Indonesia", "category": "capital", "prompt": "Q: What is the capital of Indonesia?\nA:", "answer": " Jakarta"}
+{"id": "continent:Austria", "category": "continent", "prompt": "Q: On which continent is Austria located?\nA:", "answer": " Europe"}
+{"id": "capital:Israel", "category": "capital", "prompt": "Q: What is the capital of Israel?\nA:", "answer": " Jerusalem"}
+{"id": "continent:Kenya", "category": "continent", "prompt": "Q: On which continent is Kenya located?\nA:", "answer": " Africa"}
+{"id": "capital:Mongolia", "category": "capital", "prompt": "Q: What is the capital of Mongolia?\nA:", "answer": " Ulaanbaatar"}
+{"id": "currency:Philippines", "category": "currency", "prompt": "Q: What is the currency of Philippines?\nA:", "answer": " Peso"}
+{"id": "currency:Chile", "category": "currency", "prompt": "Q: What is the currency of Chile?\nA:", "answer": " Peso"}
+{"id": "currency:China", "category": "currency", "prompt": "Q: What is the currency of China?\nA:", "answer": " Yuan"}
+{"id": "capital:Djibouti", "category": "capital", "prompt": "Q: What is the capital of Djibouti?\nA:", "answer": " Djibouti"}
+{"id": "author:Robinson Crusoe", "category": "author", "prompt": "Q: Who wrote Robinson Crusoe?\nA:", "answer": " Defoe"}
+{"id": "language:Kenya", "category": "language", "prompt": "Q: What is the main language spoken in Kenya?\nA:", "answer": " Swahili"}
+{"id": "capital:Armenia", "category": "capital", "prompt": "Q: What is the capital of Armenia?\nA:", "answer": " Yerevan"}
+{"id": "capital:Senegal", "category": "capital", "prompt": "Q: What is the capital of Senegal?\nA:", "answer": " Dakar"}
+{"id": "element:Iodine", "category": "element", "prompt": "Q: What is the chemical symbol for Iodine?\nA:", "answer": " I"}
+{"id": "language:Iran", "category": "language", "prompt": "Q: What is the main language spoken in Iran?\nA:", "answer": " Persian"}
+{"id": "capital:Burundi", "category": "capital", "prompt": "Q: What is the capital of Burundi?\nA:", "answer": " Gitega"}
+{"id": "capital:Paraguay", "category": "capital", "prompt": "Q: What is the capital of Paraguay?\nA:", "answer": " Asuncion"}
+{"id": "capital:Chile", "category": "capital", "prompt": "Q: What is the capital of Chile?\nA:", "answer": " Santiago"}
+{"id": "capital:China", "category": "capital", "prompt": "Q: What is the capital of China?\nA:", "answer": " Beijing"}
+{"id": "author:Ulysses", "category": "author", "prompt": "Q: Who wrote Ulysses?\nA:", "answer": " Joyce"}
+{"id": "capital:Congo", "category": "capital", "prompt": "Q: What is the capital of Congo?\nA:", "answer": " Brazzaville"}
+{"id": "capital:Ethiopia", "category": "capital", "prompt": "Q: What is the capital of Ethiopia?\nA:", "answer": " Addis Ababa"}
+{"id": "capital:Brazil", "category": "capital", "prompt": "Q: What is the capital of Brazil?\nA:", "answer": " Brasilia"}
+{"id": "language:Thailand", "category": "language", "prompt": "Q: What is the main language spoken in Thailand?\nA:", "answer": " Thai"}
+{"id": "author:The Adventures of Huckleberry Finn", "category": "author", "prompt": "Q: Who wrote The Adventures of Huckleberry Finn?\nA:", "answer": " Twain"}
+{"id": "continent:Uganda", "category": "continent", "prompt": "Q: On which continent is Uganda located?\nA:", "answer": " Africa"}
+{"id": "capital:Brunei", "category": "capital", "prompt": "Q: What is the capital of Brunei?\nA:", "answer": " Bandar Seri Begawan"}
+{"id": "continent:Greece", "category": "continent", "prompt": "Q: On which continent is Greece located?\nA:", "answer": " Europe"}
+{"id": "element:Uranium", "category": "element", "prompt": "Q: What is the chemical symbol for Uranium?\nA:", "answer": " U"}
+{"id": "capital:Madagascar", "category": "capital", "prompt": "Q: What is the capital of Madagascar?\nA:", "answer": " Antananarivo"}
+{"id": "currency:Turkey", "category": "currency", "prompt": "Q: What is the currency of Turkey?\nA:", "answer": " Lira"}
+{"id": "currency:South Korea", "category": "currency", "prompt": "Q: What is the currency of South Korea?\nA:", "answer": " Won"}
+{"id": "continent:Mexico", "category": "continent", "prompt": "Q: On which continent is Mexico located?\nA:", "answer": " North America"}
+{"id": "capital:Switzerland", "category": "capital", "prompt": "Q: What is the capital of Switzerland?\nA:", "answer": " Bern"}
+{"id": "language:Hungary", "category": "language", "prompt": "Q: What is the main language spoken in Hungary?\nA:", "answer": " Hungarian"}
+{"id": "author:Lord of the Flies", "category": "author", "prompt": "Q: Who wrote Lord of the Flies?\nA:", "answer": " Golding"}
+{"id": "continent:Vietnam", "category": "continent", "prompt": "Q: On which continent is Vietnam located?\nA:", "answer": " Asia"}
+{"id": "language:Pakistan", "category": "language", "prompt": "Q: What is the main language spoken in Pakistan?\nA:", "answer": " Urdu"}
+{"id": "capital:Kazakhstan", "category": "capital", "prompt": "Q: What is the capital of Kazakhstan?\nA:", "answer": " Astana"}
+{"id": "capital:Romania", "category": "capital", "prompt": "Q: What is the capital of Romania?\nA:", "answer": " Bucharest"}
+{"id": "currency:Croatia", "category": "currency", "prompt": "Q: What is the currency of Croatia?\nA:", "answer": " Euro"}
+{"id": "language:Saudi Arabia", "category": "language", "prompt": "Q: What is the main language spoken in Saudi Arabia?\nA:", "answer": " Arabic"}
+{"id": "currency:Mexico", "category": "currency", "prompt": "Q: What is the currency of Mexico?\nA:", "answer": " Peso"}
+{"id": "capital:Sweden", "category": "capital", "prompt": "Q: What is the capital of Sweden?\nA:", "answer": " Stockholm"}
+{"id": "currency:Russia", "category": "currency", "prompt": "Q: What is the currency of Russia?\nA:", "answer": " Ruble"}
+{"id": "capital:Suriname", "category": "capital", "prompt": "Q: What is the capital of Suriname?\nA:", "answer": " Paramaribo"}
+{"id": "capital:Kuwait", "category": "capital", "prompt": "Q: What is the capital of Kuwait?\nA:", "answer": " Kuwait City"}
+{"id": "currency:Spain", "category": "currency", "prompt": "Q: What is the currency of Spain?\nA:", "answer": " Euro"}
+{"id": "capital:Rwanda", "category": "capital", "prompt": "Q: What is the capital of Rwanda?\nA:", "answer": " Kigali"}
+{"id": "currency:Thailand", "category": "currency", "prompt": "Q: What is the currency of Thailand?\nA:", "answer": " Baht"}
+{"id": "currency:Israel", "category": "currency", "prompt": "Q: What is the currency of Israel?\nA:", "answer": " Shekel"}
+{"id": "currency:Ukraine", "category": "currency", "prompt": "Q: What is the currency of Ukraine?\nA:", "answer": " Hryvnia"}
+{"id": "misc:0", "category": "simple_fact", "prompt": "Q: What is the largest mammal on Earth?\nA:", "answer": " blue whale"}
+{"id": "misc:1", "category": "simple_fact", "prompt": "Q: What is the tallest animal in the world?\nA:", "answer": " giraffe"}
+{"id": "misc:2", "category": "simple_fact", "prompt": "Q: What gas do plants absorb from the air for photosynthesis?\nA:", "answer": " carbon dioxide"}
+{"id": "misc:3", "category": "simple_fact", "prompt": "Q: What is the hardest natural substance on Earth?\nA:", "answer": " diamond"}
+{"id": "misc:4", "category": "simple_fact", "prompt": "Q: What organ pumps blood through the human body?\nA:", "answer": " heart"}
+{"id": "misc:5", "category": "simple_fact", "prompt": "Q: How many legs does a spider have?\nA:", "answer": " eight"}
+{"id": "misc:6", "category": "simple_fact", "prompt": "Q: What is the fastest land animal?\nA:", "answer": " cheetah"}
+{"id": "misc:7", "category": "simple_fact", "prompt": "Q: What planet is known as the Red Planet?\nA:", "answer": " mars"}
+{"id": "misc:8", "category": "simple_fact", "prompt": "Q: What is the closest star to Earth?\nA:", "answer": " the sun"}
+{"id": "misc:9", "category": "simple_fact", "prompt": "Q: What is the smallest prime number?\nA:", "answer": " two"}
+{"id": "capital:Azerbaijan", "category": "capital", "prompt": "Q: What is the capital of Azerbaijan?\nA:", "answer": " Baku"}
+{"id": "capital:Samoa", "category": "capital", "prompt": "Q: What is the capital of Samoa?\nA:", "answer": " Apia"}
+{"id": "author:Don Quixote", "category": "author", "prompt": "Q: Who wrote Don Quixote?\nA:", "answer": " Cervantes"}
+{"id": "capital:Ireland", "category": "capital", "prompt": "Q: What is the capital of Ireland?\nA:", "answer": " Dublin"}
+{"id": "currency:Costa Rica", "category": "currency", "prompt": "Q: What is the currency of Costa Rica?\nA:", "answer": " Colon"}
+{"id": "capital:Cambodia", "category": "capital", "prompt": "Q: What is the capital of Cambodia?\nA:", "answer": " Phnom Penh"}
+{"id": "currency:Pakistan", "category": "currency", "prompt": "Q: What is the currency of Pakistan?\nA:", "answer": " Rupee"}
+{"id": "capital:Venezuela", "category": "capital", "prompt": "Q: What is the capital of Venezuela?\nA:", "answer": " Caracas"}
+{"id": "element:Cobalt", "category": "element", "prompt": "Q: What is the chemical symbol for Cobalt?\nA:", "answer": " Co"}
+{"id": "capital:Bulgaria", "category": "capital", "prompt": "Q: What is the capital of Bulgaria?\nA:", "answer": " Sofia"}
+{"id": "capital:Spain", "category": "capital", "prompt": "Q: What is the capital of Spain?\nA:", "answer": " Madrid"}
+{"id": "capital:Sudan", "category": "capital", "prompt": "Q: What is the capital of Sudan?\nA:", "answer": " Khartoum"}
+{"id": "capital:Syria", "category": "capital", "prompt": "Q: What is the capital of Syria?\nA:", "answer": " Damascus"}
+{"id": "currency:Egypt", "category": "currency", "prompt": "Q: What is the currency of Egypt?\nA:", "answer": " Pound"}
+{"id": "element:Copper", "category": "element", "prompt": "Q: What is the chemical symbol for Copper?\nA:", "answer": " Cu"}
+{"id": "continent:Brazil", "category": "continent", "prompt": "Q: On which continent is Brazil located?\nA:", "answer": " South America"}
+{"id": "capital:North Macedonia", "category": "capital", "prompt": "Q: What is the capital of North Macedonia?\nA:", "answer": " Skopje"}
+{"id": "capital:Ivory Coast", "category": "capital", "prompt": "Q: What is the capital of Ivory Coast?\nA:", "answer": " Yamoussoukro"}
+{"id": "element:Lithium", "category": "element", "prompt": "Q: What is the chemical symbol for Lithium?\nA:", "answer": " Li"}
+{"id": "language:Romania", "category": "language", "prompt": "Q: What is the main language spoken in Romania?\nA:", "answer": " Romanian"}
+{"id": "currency:Brazil", "category": "currency", "prompt": "Q: What is the currency of Brazil?\nA:", "answer": " Real"}
+{"id": "capital:Guinea", "category": "capital", "prompt": "Q: What is the capital of Guinea?\nA:", "answer": " Conakry"}
+{"id": "author:The Old Man and the Sea", "category": "author", "prompt": "Q: Who wrote The Old Man and the Sea?\nA:", "answer": " Hemingway"}
+{"id": "currency:Malaysia", "category": "currency", "prompt": "Q: What is the currency of Malaysia?\nA:", "answer": " Ringgit"}
+{"id": "capital:Egypt", "category": "capital", "prompt": "Q: What is the capital of Egypt?\nA:", "answer": " Cairo"}
+{"id": "author:The Sun Also Rises", "category": "author", "prompt": "Q: Who wrote The Sun Also Rises?\nA:", "answer": " Hemingway"}
+{"id": "element:Manganese", "category": "element", "prompt": "Q: What is the chemical symbol for Manganese?\nA:", "answer": " Mn"}
+{"id": "capital:Guyana", "category": "capital", "prompt": "Q: What is the capital of Guyana?\nA:", "answer": " Georgetown"}
+{"id": "capital:Netherlands", "category": "capital", "prompt": "Q: What is the capital of Netherlands?\nA:", "answer": " Amsterdam"}
+{"id": "element:Carbon", "category": "element", "prompt": "Q: What is the chemical symbol for Carbon?\nA:", "answer": " C"}
+{"id": "capital:Bosnia and Herzegovina", "category": "capital", "prompt": "Q: What is the capital of Bosnia and Herzegovina?\nA:", "answer": " Sarajevo"}
+{"id": "continent:Sweden", "category": "continent", "prompt": "Q: On which continent is Sweden located?\nA:", "answer": " Europe"}
+{"id": "capital:Costa Rica", "category": "capital", "prompt": "Q: What is the capital of Costa Rica?\nA:", "answer": " San Jose"}
+{"id": "capital:Liberia", "category": "capital", "prompt": "Q: What is the capital of Liberia?\nA:", "answer": " Monrovia"}
+{"id": "currency:Iraq", "category": "currency", "prompt": "Q: What is the currency of Iraq?\nA:", "answer": " Dinar"}
+{"id": "currency:Peru", "category": "currency", "prompt": "Q: What is the currency of Peru?\nA:", "answer": " Sol"}
+{"id": "element:Barium", "category": "element", "prompt": "Q: What is the chemical symbol for Barium?\nA:", "answer": " Ba"}
+{"id": "capital:Tonga", "category": "capital", "prompt": "Q: What is the capital of Tonga?\nA:", "answer": " Nuku'alofa"}
+{"id": "continent:Tanzania", "category": "continent", "prompt": "Q: On which continent is Tanzania located?\nA:", "answer": " Africa"}
+{"id": "continent:Nepal", "category": "continent", "prompt": "Q: On which continent is Nepal located?\nA:", "answer": " Asia"}
+{"id": "author:Heart of Darkness", "category": "author", "prompt": "Q: Who wrote Heart of Darkness?\nA:", "answer": " Conrad"}
+{"id": "currency:Sweden", "category": "currency", "prompt": "Q: What is the currency of Sweden?\nA:", "answer": " Krona"}
+{"id": "continent:Thailand", "category": "continent", "prompt": "Q: On which continent is Thailand located?\nA:", "answer": " Asia"}
+{"id": "currency:Kuwait", "category": "currency", "prompt": "Q: What is the currency of Kuwait?\nA:", "answer": " Dinar"}
+{"id": "capital:Portugal", "category": "capital", "prompt": "Q: What is the capital of Portugal?\nA:", "answer": " Lisbon"}
+{"id": "continent:Pakistan", "category": "continent", "prompt": "Q: On which continent is Pakistan located?\nA:", "answer": " Asia"}
+{"id": "misc:10", "category": "simple_fact", "prompt": "Q: What is the chemical formula for table salt?\nA:", "answer": " NaCl"}
+{"id": "misc:11", "category": "simple_fact", "prompt": "Q: What is the longest river in the world?\nA:", "answer": " nile"}
+{"id": "misc:12", "category": "simple_fact", "prompt": "Q: What is the tallest mountain on Earth?\nA:", "answer": " everest"}
+{"id": "misc:13", "category": "simple_fact", "prompt": "Q: What is the largest desert in the world?\nA:", "answer": " sahara"}
+{"id": "misc:14", "category": "simple_fact", "prompt": "Q: What is the largest country by land area?\nA:", "answer": " russia"}
+{"id": "misc:15", "category": "simple_fact", "prompt": "Q: How many sides does a triangle have?\nA:", "answer": " three"}
+{"id": "misc:16", "category": "simple_fact", "prompt": "Q: How many sides does a hexagon have?\nA:", "answer": " six"}
+{"id": "misc:18", "category": "simple_fact", "prompt": "Q: What is the freezing point of water in Fahrenheit?\nA:", "answer": " 32"}
+{"id": "misc:19", "category": "simple_fact", "prompt": "Q: How many minutes are in one hour?\nA:", "answer": " sixty"}
+{"id": "misc:20", "category": "simple_fact", "prompt": "Q: How many months are in a year?\nA:", "answer": " twelve"}
+{"id": "misc:21", "category": "simple_fact", "prompt": "Q: What is the opposite of up?\nA:", "answer": " down"}
+{"id": "misc:22", "category": "simple_fact", "prompt": "Q: What is the opposite of light?\nA:", "answer": " dark"}
+{"id": "misc:23", "category": "simple_fact", "prompt": "Q: What color do you get by mixing blue and yellow?\nA:", "answer": " green"}
+{"id": "misc:24", "category": "simple_fact", "prompt": "Q: What is the primary gas that makes up most of Earth's atmosphere?\nA:", "answer": " nitrogen"}
+{"id": "misc:25", "category": "entity_attr", "prompt": "Q: What ocean lies between Europe and North America?\nA:", "answer": " atlantic"}
+{"id": "misc:26", "category": "simple_fact", "prompt": "Q: What is the largest internal organ in the human body?\nA:", "answer": " liver"}
+{"id": "misc:27", "category": "simple_fact", "prompt": "Q: What part of a plant conducts photosynthesis?\nA:", "answer": " leaf"}
+{"id": "misc:28", "category": "simple_fact", "prompt": "Q: What is the powerhouse of the cell?\nA:", "answer": " mitochondria"}
+{"id": "misc:29", "category": "simple_fact", "prompt": "Q: What force pulls objects toward the Earth?\nA:", "answer": " gravity"}
+{"id": "misc:30", "category": "simple_fact", "prompt": "Q: What is the SI unit of electric current?\nA:", "answer": " ampere"}
+{"id": "misc:31", "category": "simple_fact", "prompt": "Q: What is the SI unit of force?\nA:", "answer": " newton"}
+{"id": "misc:32", "category": "simple_fact", "prompt": "Q: What is the SI unit of energy?\nA:", "answer": " joule"}
+{"id": "misc:33", "category": "simple_fact", "prompt": "Q: What is the SI unit of frequency?\nA:", "answer": " hertz"}
+{"id": "misc:34", "category": "simple_fact", "prompt": "Q: How many millimeters are in one centimeter?\nA:", "answer": " ten"}
+{"id": "misc:35", "category": "simple_fact", "prompt": "Q: How many sides does a pentagon have?\nA:", "answer": " five"}
+{"id": "misc:36", "category": "simple_fact", "prompt": "Q: How many hours are in a full day?\nA:", "answer": " twenty-four"}
+{"id": "misc:37", "category": "simple_fact", "prompt": "Q: What is the largest organ of the human body?\nA:", "answer": " skin"}
+{"id": "capital:Papua New Guinea", "category": "capital", "prompt": "Q: What is the capital of Papua New Guinea?\nA:", "answer": " Port Moresby"}
+{"id": "capital:Guatemala", "category": "capital", "prompt": "Q: What is the capital of Guatemala?\nA:", "answer": " Guatemala City"}
+{"id": "capital:Mauritania", "category": "capital", "prompt": "Q: What is the capital of Mauritania?\nA:", "answer": " Nouakchott"}
+{"id": "capital:Australia", "category": "capital", "prompt": "Q: What is the capital of Australia?\nA:", "answer": " Canberra"}
+{"id": "author:The Picture of Dorian Gray", "category": "author", "prompt": "Q: Who wrote The Picture of Dorian Gray?\nA:", "answer": " Wilde"}
+{"id": "capital:Lebanon", "category": "capital", "prompt": "Q: What is the capital of Lebanon?\nA:", "answer": " Beirut"}
+{"id": "capital:San Marino", "category": "capital", "prompt": "Q: What is the capital of San Marino?\nA:", "answer": " San Marino"}
+{"id": "continent:Ecuador", "category": "continent", "prompt": "Q: On which continent is Ecuador located?\nA:", "answer": " South America"}
+{"id": "currency:Indonesia", "category": "currency", "prompt": "Q: What is the currency of Indonesia?\nA:", "answer": " Rupiah"}
+{"id": "element:Sulfur", "category": "element", "prompt": "Q: What is the chemical symbol for Sulfur?\nA:", "answer": " S"}
+{"id": "capital:Dominican Republic", "category": "capital", "prompt": "Q: What is the capital of Dominican Republic?\nA:", "answer": " Santo Domingo"}
+{"id": "author:Dracula", "category": "author", "prompt": "Q: Who wrote Dracula?\nA:", "answer": " Stoker"}
+{"id": "currency:Ghana", "category": "currency", "prompt": "Q: What is the currency of Ghana?\nA:", "answer": " Cedi"}
+{"id": "author:Faust", "category": "author", "prompt": "Q: Who wrote Faust?\nA:", "answer": " Goethe"}
+{"id": "language:Turkey", "category": "language", "prompt": "Q: What is the main language spoken in Turkey?\nA:", "answer": " Turkish"}
+{"id": "continent:Uruguay", "category": "continent", "prompt": "Q: On which continent is Uruguay located?\nA:", "answer": " South America"}
+{"id": "capital:Luxembourg", "category": "capital", "prompt": "Q: What is the capital of Luxembourg?\nA:", "answer": " Luxembourg"}
+{"id": "capital:Gabon", "category": "capital", "prompt": "Q: What is the capital of Gabon?\nA:", "answer": " Libreville"}
+{"id": "capital:El Salvador", "category": "capital", "prompt": "Q: What is the capital of El Salvador?\nA:", "answer": " San Salvador"}
+{"id": "capital:Ghana", "category": "capital", "prompt": "Q: What is the capital of Ghana?\nA:", "answer": " Accra"}
+{"id": "language:Greece", "category": "language", "prompt": "Q: What is the main language spoken in Greece?\nA:", "answer": " Greek"}
+{"id": "capital:Saudi Arabia", "category": "capital", "prompt": "Q: What is the capital of Saudi Arabia?\nA:", "answer": " Riyadh"}
+{"id": "capital:Estonia", "category": "capital", "prompt": "Q: What is the capital of Estonia?\nA:", "answer": " Tallinn"}
+{"id": "element:Platinum", "category": "element", "prompt": "Q: What is the chemical symbol for Platinum?\nA:", "answer": " Pt"}
+{"id": "language:Mexico", "category": "language", "prompt": "Q: What is the main language spoken in Mexico?\nA:", "answer": " Spanish"}
+{"id": "continent:Bolivia", "category": "continent", "prompt": "Q: On which continent is Bolivia located?\nA:", "answer": " South America"}
+{"id": "capital:Cameroon", "category": "capital", "prompt": "Q: What is the capital of Cameroon?\nA:", "answer": " Yaounde"}
+{"id": "element:Phosphorus", "category": "element", "prompt": "Q: What is the chemical symbol for Phosphorus?\nA:", "answer": " P"}
+{"id": "author:Brave New World", "category": "author", "prompt": "Q: Who wrote Brave New World?\nA:", "answer": " Huxley"}
+{"id": "currency:Colombia", "category": "currency", "prompt": "Q: What is the currency of Colombia?\nA:", "answer": " Peso"}
+{"id": "author:The Trial", "category": "author", "prompt": "Q: Who wrote The Trial?\nA:", "answer": " Kafka"}
+{"id": "capital:Turkmenistan", "category": "capital", "prompt": "Q: What is the capital of Turkmenistan?\nA:", "answer": " Ashgabat"}
+{"id": "currency:Germany", "category": "currency", "prompt": "Q: What is the currency of Germany?\nA:", "answer": " Euro"}
+{"id": "language:Israel", "category": "language", "prompt": "Q: What is the main language spoken in Israel?\nA:", "answer": " Hebrew"}
+{"id": "element:Argon", "category": "element", "prompt": "Q: What is the chemical symbol for Argon?\nA:", "answer": " Ar"}
+{"id": "element:Helium", "category": "element", "prompt": "Q: What is the chemical symbol for Helium?\nA:", "answer": " He"}
+{"id": "author:Frankenstein", "category": "author", "prompt": "Q: Who wrote Frankenstein?\nA:", "answer": " Shelley"}
+{"id": "capital:Bhutan", "category": "capital", "prompt": "Q: What is the capital of Bhutan?\nA:", "answer": " Thimphu"}
+{"id": "capital:Trinidad and Tobago", "category": "capital", "prompt": "Q: What is the capital of Trinidad and Tobago?\nA:", "answer": " Port of Spain"}
+{"id": "capital:Albania", "category": "capital", "prompt": "Q: What is the capital of Albania?\nA:", "answer": " Tirana"}
+{"id": "capital:Argentina", "category": "capital", "prompt": "Q: What is the capital of Argentina?\nA:", "answer": " Buenos Aires"}
+{"id": "author:Great Expectations", "category": "author", "prompt": "Q: Who wrote Great Expectations?\nA:", "answer": " Dickens"}
+{"id": "element:Magnesium", "category": "element", "prompt": "Q: What is the chemical symbol for Magnesium?\nA:", "answer": " Mg"}
+{"id": "capital:Philippines", "category": "capital", "prompt": "Q: What is the capital of Philippines?\nA:", "answer": " Manila"}
+{"id": "capital:Iceland", "category": "capital", "prompt": "Q: What is the capital of Iceland?\nA:", "answer": " Reykjavik"}
+{"id": "continent:Finland", "category": "continent", "prompt": "Q: On which continent is Finland located?\nA:", "answer": " Europe"}
+{"id": "capital:Austria", "category": "capital", "prompt": "Q: What is the capital of Austria?\nA:", "answer": " Vienna"}
+{"id": "language:Brazil", "category": "language", "prompt": "Q: What is the main language spoken in Brazil?\nA:", "answer": " Portuguese"}
+{"id": "element:Calcium", "category": "element", "prompt": "Q: What is the chemical symbol for Calcium?\nA:", "answer": " Ca"}
+{"id": "currency:Venezuela", "category": "currency", "prompt": "Q: What is the currency of Venezuela?\nA:", "answer": " Bolivar"}
+{"id": "author:Anna Karenina", "category": "author", "prompt": "Q: Who wrote Anna Karenina?\nA:", "answer": " Tolstoy"}
+{"id": "currency:Morocco", "category": "currency", "prompt": "Q: What is the currency of Morocco?\nA:", "answer": " Dirham"}
+{"id": "currency:South Africa", "category": "currency", "prompt": "Q: What is the currency of South Africa?\nA:", "answer": " Rand"}
+{"id": "capital:Sri Lanka", "category": "capital", "prompt": "Q: What is the capital of Sri Lanka?\nA:", "answer": " Colombo"}
+{"id": "currency:India", "category": "currency", "prompt": "Q: What is the currency of India?\nA:", "answer": " Rupee"}
+{"id": "author:Wuthering Heights", "category": "author", "prompt": "Q: Who wrote Wuthering Heights?\nA:", "answer": " Bronte"}
+{"id": "author:Treasure Island", "category": "author", "prompt": "Q: Who wrote Treasure Island?\nA:", "answer": " Stevenson"}
+{"id": "author:David Copperfield", "category": "author", "prompt": "Q: Who wrote David Copperfield?\nA:", "answer": " Dickens"}
+{"id": "currency:Mongolia", "category": "currency", "prompt": "Q: What is the currency of Mongolia?\nA:", "answer": " Tugrik"}
+{"id": "capital:Montenegro", "category": "capital", "prompt": "Q: What is the capital of Montenegro?\nA:", "answer": " Podgorica"}
+{"id": "element:Boron", "category": "element", "prompt": "Q: What is the chemical symbol for Boron?\nA:", "answer": " B"}
+{"id": "element:Titanium", "category": "element", "prompt": "Q: What is the chemical symbol for Titanium?\nA:", "answer": " Ti"}
+{"id": "currency:Vietnam ", "category": "currency", "prompt": "Q: What is the currency of Vietnam ?\nA:", "answer": " Dong"}
+{"id": "capital:Lesotho", "category": "capital", "prompt": "Q: What is the capital of Lesotho?\nA:", "answer": " Maseru"}
+{"id": "continent:Bangladesh", "category": "continent", "prompt": "Q: On which continent is Bangladesh located?\nA:", "answer": " Asia"}
+{"id": "continent:Colombia", "category": "continent", "prompt": "Q: On which continent is Colombia located?\nA:", "answer": " South America"}
+{"id": "capital:Denmark", "category": "capital", "prompt": "Q: What is the capital of Denmark?\nA:", "answer": " Copenhagen"}
+{"id": "language:Sweden", "category": "language", "prompt": "Q: What is the main language spoken in Sweden?\nA:", "answer": " Swedish"}

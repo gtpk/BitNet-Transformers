@@ -114,7 +114,9 @@ def train_arm(args, arm, train_lm_head, out_dir):
         cmd.append("--train-lm-head")
     print(f"\n===== arm {arm} (train_lm_head={train_lm_head}) =====\n{' '.join(cmd)}", flush=True)
     t0 = time.time()
-    subprocess.run(cmd, check=True)
+    import os
+    env = {**os.environ, "PYTHONUTF8": "1", "PYTHONIOENCODING": "utf-8"}
+    subprocess.run(cmd, check=True, env=env)
     print(f"  arm {arm} trained in {(time.time()-t0)/60:.1f}m -> {out_dir}", flush=True)
 
 

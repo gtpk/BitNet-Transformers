@@ -184,6 +184,61 @@ def _instruction_ids_mask(tokenizer, max_examples=20000, exclude_texts=None):
     return torch.tensor(ids, dtype=torch.long), torch.tensor(mask, dtype=torch.bool)
 
 
+def _factual_ids_mask(tokenizer, path, exclude_texts=None):
+    """FACT-003D: protected factual replay set as an answer-masked token stream.
+
+    Reads a jsonl of {"prompt": "Q: ..\\nA:", "answer": " <short answer>"} (the curated atomic
+    facts from make_atomic_facts.py) and builds the same prompt-masked / answer-kept stream as
+    _instruction_ids_mask, so the factual CE counts ONLY the answer tokens. exclude_texts is a
+    de-leak safety net: any item whose normalized text contains a panel prompt/answer is dropped
+    (the generator already excludes these; this asserts it again at load)."""
+    sep = tokenizer("\n\n", add_special_tokens=False)["input_ids"]
+    ids, mask = [], []
+    dropped = 0
+    n = 0
+    for line in open(path, encoding="utf-8"):
+        if not line.strip():
+            continue
+        ex = json.loads(line)
+        prompt, answer = ex["prompt"], ex["answer"]
+        if exclude_texts:
+            norm = re.sub(r"\s+", " ", prompt + " " + answer).strip().lower()
+            if any(x in norm for x in exclude_texts):
+                dropped += 1
+                continue
+        p = tokenizer(prompt, add_special_tokens=False)["input_ids"]
+        a = tokenizer(answer if answer.startswith(" ") else " " + answer, add_special_tokens=False)["input_ids"]
+        ids += p + a + sep
+        mask += [0] * len(p) + [1] * len(a) + [0] * len(sep)
+        n += 1
+    if exclude_texts and dropped:
+        raise ValueError(f"factual replay set {path} LEAKS vs panel: {dropped} items overlap "
+                         f"(regenerate with make_atomic_facts.py)")
+    print(f"  FACT-003D protected factual replay: {n} atomic facts, {len(ids):,} tokens "
+          f"({100*sum(mask)/max(len(mask),1):.1f}% answer)")
+    return torch.tensor(ids, dtype=torch.long), torch.tensor(mask, dtype=torch.bool)
+
+
+def factual_ce_term(model, fids, fmask, seq_len, fbatch, gen, device):
+    """FACT-003D: answer-masked CE on a sampled window of the protected factual stream.
+
+    Direct CE (NOT KL): we want the model to PRESERVE these exact answer tokens, not anchor to a
+    base distribution. Returns a scalar loss tensor (grad through student) or None if the sampled
+    window has no answer tokens."""
+    usable = fids.numel()
+    win = min(seq_len, usable)
+    starts = torch.randint(0, max(1, usable - win), (fbatch,), generator=gen).tolist()
+    fx = torch.stack([fids[s : s + win] for s in starts]).to(device)
+    fm = torch.stack([fmask[s : s + win] for s in starts]).to(device)
+    if not fm.any():
+        return None
+    labels = fx.clone()
+    labels[~fm] = -100
+    if not (labels != -100).any():
+        return None
+    return model(input_ids=fx, labels=labels).loss
+
+
 def load_corpus(source, tokenizer, max_train_tokens, max_eval_tokens, answer_mask=False, exclude_texts=None):
     """Returns (train_ids, eval_ids, train_answer_mask). eval is ALWAYS WikiText validation.
 
@@ -325,6 +380,10 @@ def main():
                          "to survive a VM recycle. Saves model+optimizer+step every --ckpt-every-min.")
     ap.add_argument("--ckpt-every-min", type=float, default=60.0,
                     help="wall-clock minutes between checkpoints (0 disables)")
+    ap.add_argument("--factual-replay", type=Path, default=None,
+                    help="FACT-003D: jsonl of protected atomic facts ({prompt,answer}); adds mu*answer-CE")
+    ap.add_argument("--factual-weight", type=float, default=1.0, help="FACT-003D: weight mu on the factual CE term")
+    ap.add_argument("--factual-batch", type=int, default=4, help="FACT-003D: windows per step for the factual term")
     ap.add_argument("--resume", action="store_true",
                     help="resume training from <ckpt-dir>/ckpt.pt if present (continues the step count)")
     args = ap.parse_args()
@@ -348,7 +407,8 @@ def main():
         model.gradient_checkpointing_enable()
         model.enable_input_require_grads()  # else ckpt warns: no input needs grad (embeds frozen)
 
-    panel_exclude = _panel_exclude_set(args.panel_file) if (args.exclude_panel or args.base_kl_replay) else None
+    panel_exclude = (_panel_exclude_set(args.panel_file)
+                     if (args.exclude_panel or args.base_kl_replay or args.factual_replay) else None)
     train_ids, eval_ids, train_mask = load_corpus(
         args.train_source, tok, args.max_train_tokens, args.max_eval_tokens,
         answer_mask=args.answer_loss_only,
@@ -383,6 +443,14 @@ def main():
               f"lambda={args.kl_weight} temp={args.kl_temp} replay_batch={args.replay_batch}"
               f"{' content-only' if args.kl_content_only else ''}")
 
+    # FACT-003D: protected factual replay -- direct answer-CE on a panel-disjoint atomic-facts set
+    factual_ids = factual_mask = None
+    if args.factual_replay:
+        factual_ids, factual_mask = _factual_ids_mask(tok, args.factual_replay, exclude_texts=panel_exclude)
+        factual_ids, factual_mask = factual_ids.to(device), factual_mask.to(device)
+        print(f"FACT-003D protected factual replay: mu={args.factual_weight} "
+              f"factual_batch={args.factual_batch} from {args.factual_replay}")
+
     # QR-001: FP baseline, then PTQ collapse
     ce_fp = eval_ce(model, eval_ids, args.seq_len, device)
     n_lin = replace_targets(model)
@@ -407,7 +475,8 @@ def main():
     arm = ("QR-002a(linears)" + ("+norms" if args.train_norms else "")
            + ("+lmhead" if args.train_lm_head else "") + ("+ansmask" if args.answer_loss_only else "")
            + (f"+basekl{args.kl_weight}" if args.base_kl_replay else "")
-           + ("c" if (args.base_kl_replay and args.kl_content_only) else ""))
+           + ("c" if (args.base_kl_replay and args.kl_content_only) else "")
+           + (f"+factrep{args.factual_weight}" if args.factual_replay else ""))
     print(f"adapting {sum(p.numel() for p in tparams)/1e6:.1f}M params across {len(tparams)} tensors [{arm}]")
     print(f"microbatch={args.batch}  grad_accum={args.grad_accum_steps}  "
           f"effective_batch={args.batch * args.grad_accum_steps}")
@@ -449,6 +518,7 @@ def main():
         opt.zero_grad(set_to_none=True)
         train_ce_sum = 0.0
         train_kl_sum = 0.0
+        train_fce_sum = 0.0
         for _ in range(args.grad_accum_steps):
             starts = torch.randint(0, max(1, usable - args.seq_len), (args.batch,), generator=g)
             sl = starts.tolist()
@@ -470,6 +540,12 @@ def main():
                 if kl is not None:
                     train_kl_sum += float(kl)
                     loss = loss + args.kl_weight * kl
+            if factual_ids is not None:  # FACT-003D: protected factual replay (direct answer-CE)
+                fce = factual_ce_term(model, factual_ids, factual_mask, args.seq_len,
+                                      args.factual_batch, g, device)
+                if fce is not None:
+                    train_fce_sum += float(fce)
+                    loss = loss + args.factual_weight * fce
             (loss / args.grad_accum_steps).backward()
         opt.step()
         if step % args.log_every == 0 or step == args.steps - 1:
@@ -479,7 +555,8 @@ def main():
             eta = rate * (args.steps - 1 - step)
             pct = 100.0 * (step + 1) / args.steps         # absolute progress
             kl_str = f"  kl={train_kl_sum / args.grad_accum_steps:.4f}" if teacher is not None else ""
-            print(f"  step {step:4d}/{args.steps} ({pct:5.1f}%)  train_ce={train_ce_sum / args.grad_accum_steps:.4f}{kl_str}  "
+            fce_str = f"  fce={train_fce_sum / args.grad_accum_steps:.4f}" if factual_ids is not None else ""
+            print(f"  step {step:4d}/{args.steps} ({pct:5.1f}%)  train_ce={train_ce_sum / args.grad_accum_steps:.4f}{kl_str}{fce_str}  "
                   f"elapsed {elapsed/60:.1f}m  ETA {eta/60:.1f}m  ({rate:.1f}s/step)", flush=True)
         if ckpt_path and args.ckpt_every_min > 0 and (time.time() - last_ckpt) >= args.ckpt_every_min * 60:
             save_ckpt(step)
@@ -511,6 +588,8 @@ def main():
               "base_kl_replay": args.base_kl_replay, "kl_weight": args.kl_weight, "kl_temp": args.kl_temp,
               "kl_content_only": args.kl_content_only,
               "replay_tokens": args.replay_tokens, "replay_batch": args.replay_batch,
+              "factual_replay": str(args.factual_replay) if args.factual_replay else None,
+              "factual_weight": args.factual_weight, "factual_batch": args.factual_batch,
               "ce_fp": ce_fp, "ce_ptq": ce_ptq, "ce_adapted": ce_adapted,
               "ppl_fp": math.exp(ce_fp), "ppl_ptq": math.exp(ce_ptq), "ppl_adapted": math.exp(ce_adapted),
               "recovered_fraction": rec}
@@ -561,11 +640,11 @@ def main():
     print(f"PPL fp={math.exp(ce_fp):.1f}  ptq={math.exp(ce_ptq):.1f}  adapted={math.exp(ce_adapted):.1f}")
     print(f"recovered_fraction = (ptq-adapted)/(ptq-fp) = {rec:.3f}")
     if rec > 0.3:
-        print("QR-002 VERDICT: PASS — short teacher-free CE recovers a meaningful fraction.")
+        print("QR-002 VERDICT: PASS -- short teacher-free CE recovers a meaningful fraction.")
     elif rec > 0.05:
-        print("QR-002 VERDICT: WEAK — some recovery; try +norms/+lm_head, more steps, or LR.")
+        print("QR-002 VERDICT: WEAK -- some recovery; try +norms/+lm_head, more steps, or LR.")
     else:
-        print("QR-002 VERDICT: FAIL — no recovery; revisit recipe (norms/lm_head/LR/corpus).")
+        print("QR-002 VERDICT: FAIL -- no recovery; revisit recipe (norms/lm_head/LR/corpus).")
 
     jo = args.json_out or args.work / f"rt116_{slug}_recovery.json"
     jo.parent.mkdir(parents=True, exist_ok=True)

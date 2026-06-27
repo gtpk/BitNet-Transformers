@@ -1,0 +1,97 @@
+{"id": "element:Silver", "category": "element", "prompt": "Q: What is the chemical symbol for Silver?\nA:", "must_contain": ["ag"]}
+{"id": "capital:India", "category": "capital", "prompt": "Q: What is the capital of India?\nA:", "must_contain": ["new delhi"]}
+{"id": "author:Gulliver's Travels", "category": "author", "prompt": "Q: Who wrote Gulliver's Travels?\nA:", "must_contain": ["swift"]}
+{"id": "continent:Chile", "category": "continent", "prompt": "Q: On which continent is Chile located?\nA:", "must_contain": ["south america"]}
+{"id": "capital:Tunisia", "category": "capital", "prompt": "Q: What is the capital of Tunisia?\nA:", "must_contain": ["tunis"]}
+{"id": "capital:South Korea", "category": "capital", "prompt": "Q: What is the capital of South Korea?\nA:", "must_contain": ["seoul"]}
+{"id": "capital:Czech Republic", "category": "capital", "prompt": "Q: What is the capital of Czech Republic?\nA:", "must_contain": ["prague"]}
+{"id": "currency:Nigeria", "category": "currency", "prompt": "Q: What is the currency of Nigeria?\nA:", "must_contain": ["naira"]}
+{"id": "currency:Ethiopia", "category": "currency", "prompt": "Q: What is the currency of Ethiopia?\nA:", "must_contain": ["birr"]}
+{"id": "capital:Zambia", "category": "capital", "prompt": "Q: What is the capital of Zambia?\nA:", "must_contain": ["lusaka"]}
+{"id": "author:The Catcher in the Rye", "category": "author", "prompt": "Q: Who wrote The Catcher in the Rye?\nA:", "must_contain": ["salinger"]}
+{"id": "capital:Vietnam", "category": "capital", "prompt": "Q: What is the capital of Vietnam?\nA:", "must_contain": ["hanoi"]}
+{"id": "capital:Honduras", "category": "capital", "prompt": "Q: What is the capital of Honduras?\nA:", "must_contain": ["tegucigalpa"]}
+{"id": "language:China", "category": "language", "prompt": "Q: What is the main language spoken in China?\nA:", "must_contain": ["mandarin"]}
+{"id": "capital:Moldova", "category": "capital", "prompt": "Q: What is the capital of Moldova?\nA:", "must_contain": ["chisinau"]}
+{"id": "capital:Andorra", "category": "capital", "prompt": "Q: What is the capital of Andorra?\nA:", "must_contain": ["andorra la vella"]}
+{"id": "capital:Zimbabwe", "category": "capital", "prompt": "Q: What is the capital of Zimbabwe?\nA:", "must_contain": ["harare"]}
+{"id": "capital:Uzbekistan", "category": "capital", "prompt": "Q: What is the capital of Uzbekistan?\nA:", "must_contain": ["tashkent"]}
+{"id": "currency:Hungary", "category": "currency", "prompt": "Q: What is the currency of Hungary?\nA:", "must_contain": ["forint"]}
+{"id": "capital:Namibia", "category": "capital", "prompt": "Q: What is the capital of Namibia?\nA:", "must_contain": ["windhoek"]}
+{"id": "currency:Saudi Arabia", "category": "currency", "prompt": "Q: What is the currency of Saudi Arabia?\nA:", "must_contain": ["riyal"]}
+{"id": "continent:Morocco", "category": "continent", "prompt": "Q: On which continent is Morocco located?\nA:", "must_contain": ["africa"]}
+{"id": "author:Les Miserables", "category": "author", "prompt": "Q: Who wrote Les Miserables?\nA:", "must_contain": ["hugo"]}
+{"id": "element:Aluminium", "category": "element", "prompt": "Q: What is the chemical symbol for Aluminium?\nA:", "must_contain": ["al"]}
+{"id": "capital:Cyprus", "category": "capital", "prompt": "Q: What is the capital of Cyprus?\nA:", "must_contain": ["nicosia"]}
+{"id": "currency:Guatemala", "category": "currency", "prompt": "Q: What is the currency of Guatemala?\nA:", "must_contain": ["quetzal"]}
+{"id": "author:War and Peace", "category": "author", "prompt": "Q: Who wrote War and Peace?\nA:", "must_contain": ["tolstoy"]}
+{"id": "continent:Mongolia", "category": "continent", "prompt": "Q: On which continent is Mongolia located?\nA:", "must_contain": ["asia"]}
+{"id": "element:Nickel", "category": "element", "prompt": "Q: What is the chemical symbol for Nickel?\nA:", "must_contain": ["ni"]}
+{"id": "language:Denmark", "category": "language", "prompt": "Q: What is the main language spoken in Denmark?\nA:", "must_contain": ["danish"]}
+{"id": "capital:Yemen", "category": "capital", "prompt": "Q: What is the capital of Yemen?\nA:", "must_contain": ["sanaa"]}
+{"id": "author:1984", "category": "author", "prompt": "Q: Who wrote 1984?\nA:", "must_contain": ["orwell"]}
+{"id": "currency:Kenya", "category": "currency", "prompt": "Q: What is the currency of Kenya?\nA:", "must_contain": ["shilling"]}
+{"id": "language:Vietnam", "category": "language", "prompt": "Q: What is the main language spoken in Vietnam?\nA:", "must_contain": ["vietnamese"]}
+{"id": "element:Silicon", "category": "element", "prompt": "Q: What is the chemical symbol for Silicon?\nA:", "must_contain": ["si"]}
+{"id": "continent:Spain", "category": "continent", "prompt": "Q: On which continent is Spain located?\nA:", "must_contain": ["europe"]}
+{"id": "continent:Nigeria", "category": "continent", "prompt": "Q: On which continent is Nigeria located?\nA:", "must_contain": ["africa"]}
+{"id": "capital:Myanmar", "category": "capital", "prompt": "Q: What is the capital of Myanmar?\nA:", "must_contain": ["naypyidaw"]}
+{"id": "element:Tin", "category": "element", "prompt": "Q: What is the chemical symbol for Tin?\nA:", "must_contain": ["sn"]}
+{"id": "capital:Afghanistan", "category": "capital", "prompt": "Q: What is the capital of Afghanistan?\nA:", "must_contain": ["kabul"]}
+{"id": "author:Oliver Twist", "category": "author", "prompt": "Q: Who wrote Oliver Twist?\nA:", "must_contain": ["dickens"]}
+{"id": "continent:Ethiopia", "category": "continent", "prompt": "Q: On which continent is Ethiopia located?\nA:", "must_contain": ["africa"]}
+{"id": "capital:Barbados", "category": "capital", "prompt": "Q: What is the capital of Barbados?\nA:", "must_contain": ["bridgetown"]}
+{"id": "continent:Indonesia", "category": "continent", "prompt": "Q: On which continent is Indonesia located?\nA:", "must_contain": ["asia"]}
+{"id": "capital:Croatia", "category": "capital", "prompt": "Q: What is the capital of Croatia?\nA:", "must_contain": ["zagreb"]}
+{"id": "language:Netherlands", "category": "language", "prompt": "Q: What is the main language spoken in Netherlands?\nA:", "must_contain": ["dutch"]}
+{"id": "element:Potassium", "category": "element", "prompt": "Q: What is the chemical symbol for Potassium?\nA:", "must_contain": ["k"]}
+{"id": "capital:Kenya", "category": "capital", "prompt": "Q: What is the capital of Kenya?\nA:", "must_contain": ["nairobi"]}
+{"id": "capital:Eritrea", "category": "capital", "prompt": "Q: What is the capital of Eritrea?\nA:", "must_contain": ["asmara"]}
+{"id": "language:Indonesia", "category": "language", "prompt": "Q: What is the main language spoken in Indonesia?\nA:", "must_contain": ["indonesian"]}
+{"id": "author:The Iliad", "category": "author", "prompt": "Q: Who wrote The Iliad?\nA:", "must_contain": ["homer"]}
+{"id": "language:Portugal", "category": "language", "prompt": "Q: What is the main language spoken in Portugal?\nA:", "must_contain": ["portuguese"]}
+{"id": "continent:Egypt", "category": "continent", "prompt": "Q: On which continent is Egypt located?\nA:", "must_contain": ["africa"]}
+{"id": "capital:Botswana", "category": "capital", "prompt": "Q: What is the capital of Botswana?\nA:", "must_contain": ["gaborone"]}
+{"id": "capital:Poland", "category": "capital", "prompt": "Q: What is the capital of Poland?\nA:", "must_contain": ["warsaw"]}
+{"id": "element:Bromine", "category": "element", "prompt": "Q: What is the chemical symbol for Bromine?\nA:", "must_contain": ["br"]}
+{"id": "capital:Ukraine", "category": "capital", "prompt": "Q: What is the capital of Ukraine?\nA:", "must_contain": ["kyiv"]}
+{"id": "capital:New Zealand", "category": "capital", "prompt": "Q: What is the capital of New Zealand?\nA:", "must_contain": ["wellington"]}
+{"id": "currency:United Kingdom", "category": "currency", "prompt": "Q: What is the currency of United Kingdom?\nA:", "must_contain": ["pound"]}
+{"id": "language:Egypt", "category": "language", "prompt": "Q: What is the main language spoken in Egypt?\nA:", "must_contain": ["arabic"]}
+{"id": "capital:Georgia", "category": "capital", "prompt": "Q: What is the capital of Georgia?\nA:", "must_contain": ["tbilisi"]}
+{"id": "continent:Senegal", "category": "continent", "prompt": "Q: On which continent is Senegal located?\nA:", "must_contain": ["africa"]}
+{"id": "capital:Norway", "category": "capital", "prompt": "Q: What is the capital of Norway?\nA:", "must_contain": ["oslo"]}
+{"id": "capital:Panama", "category": "capital", "prompt": "Q: What is the capital of Panama?\nA:", "must_contain": ["panama city"]}
+{"id": "continent:Peru", "category": "continent", "prompt": "Q: On which continent is Peru located?\nA:", "must_contain": ["south america"]}
+{"id": "element:Krypton", "category": "element", "prompt": "Q: What is the chemical symbol for Krypton?\nA:", "must_contain": ["kr"]}
+{"id": "capital:Mozambique", "category": "capital", "prompt": "Q: What is the capital of Mozambique?\nA:", "must_contain": ["maputo"]}
+{"id": "currency:Argentina", "category": "currency", "prompt": "Q: What is the currency of Argentina?\nA:", "must_contain": ["peso"]}
+{"id": "capital:Libya", "category": "capital", "prompt": "Q: What is the capital of Libya?\nA:", "must_contain": ["tripoli"]}
+{"id": "continent:Cambodia", "category": "continent", "prompt": "Q: On which continent is Cambodia located?\nA:", "must_contain": ["asia"]}
+{"id": "author:Jane Eyre", "category": "author", "prompt": "Q: Who wrote Jane Eyre?\nA:", "must_contain": ["bronte"]}
+{"id": "capital:Monaco", "category": "capital", "prompt": "Q: What is the capital of Monaco?\nA:", "must_contain": ["monaco"]}
+{"id": "author:Moby Dick", "category": "author", "prompt": "Q: Who wrote Moby Dick?\nA:", "must_contain": ["melville"]}
+{"id": "capital:Ecuador", "category": "capital", "prompt": "Q: What is the capital of Ecuador?\nA:", "must_contain": ["quito"]}
+{"id": "capital:Jamaica", "category": "capital", "prompt": "Q: What is the capital of Jamaica?\nA:", "must_contain": ["kingston"]}
+{"id": "author:Madame Bovary", "category": "author", "prompt": "Q: Who wrote Madame Bovary?\nA:", "must_contain": ["flaubert"]}
+{"id": "capital:Tanzania", "category": "capital", "prompt": "Q: What is the capital of Tanzania?\nA:", "must_contain": ["dodoma"]}
+{"id": "currency:Switzerland", "category": "currency", "prompt": "Q: What is the currency of Switzerland?\nA:", "must_contain": ["franc"]}
+{"id": "capital:Bahamas", "category": "capital", "prompt": "Q: What is the capital of Bahamas?\nA:", "must_contain": ["nassau"]}
+{"id": "capital:Slovakia", "category": "capital", "prompt": "Q: What is the capital of Slovakia?\nA:", "must_contain": ["bratislava"]}
+{"id": "capital:Slovenia", "category": "capital", "prompt": "Q: What is the capital of Slovenia?\nA:", "must_contain": ["ljubljana"]}
+{"id": "capital:Thailand", "category": "capital", "prompt": "Q: What is the capital of Thailand?\nA:", "must_contain": ["bangkok"]}
+{"id": "currency:Sri Lanka", "category": "currency", "prompt": "Q: What is the currency of Sri Lanka?\nA:", "must_contain": ["rupee"]}
+{"id": "capital:Kosovo", "category": "capital", "prompt": "Q: What is the capital of Kosovo?\nA:", "must_contain": ["pristina"]}
+{"id": "capital:Malawi", "category": "capital", "prompt": "Q: What is the capital of Malawi?\nA:", "must_contain": ["lilongwe"]}
+{"id": "capital:Uruguay", "category": "capital", "prompt": "Q: What is the capital of Uruguay?\nA:", "must_contain": ["montevideo"]}
+{"id": "language:Ukraine", "category": "language", "prompt": "Q: What is the main language spoken in Ukraine?\nA:", "must_contain": ["ukrainian"]}
+{"id": "capital:Bahrain", "category": "capital", "prompt": "Q: What is the capital of Bahrain?\nA:", "must_contain": ["manama"]}
+{"id": "continent:Poland", "category": "continent", "prompt": "Q: On which continent is Poland located?\nA:", "must_contain": ["europe"]}
+{"id": "currency:Bangladesh", "category": "currency", "prompt": "Q: What is the currency of Bangladesh?\nA:", "must_contain": ["taka"]}
+{"id": "capital:Jordan", "category": "capital", "prompt": "Q: What is the capital of Jordan?\nA:", "must_contain": ["amman"]}
+{"id": "capital:Sierra Leone", "category": "capital", "prompt": "Q: What is the capital of Sierra Leone?\nA:", "must_contain": ["freetown"]}
+{"id": "capital:Pakistan", "category": "capital", "prompt": "Q: What is the capital of Pakistan?\nA:", "must_contain": ["islamabad"]}
+{"id": "continent:Venezuela", "category": "continent", "prompt": "Q: On which continent is Venezuela located?\nA:", "must_contain": ["south america"]}
+{"id": "capital:Latvia", "category": "capital", "prompt": "Q: What is the capital of Latvia?\nA:", "must_contain": ["riga"]}
+{"id": "capital:Malta", "category": "capital", "prompt": "Q: What is the capital of Malta?\nA:", "must_contain": ["valletta"]}
+{"id": "capital:Bolivia", "category": "capital", "prompt": "Q: What is the capital of Bolivia?\nA:", "must_contain": ["la paz"]}
