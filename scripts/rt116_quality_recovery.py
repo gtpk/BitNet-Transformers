@@ -239,14 +239,21 @@ def factual_ce_term(model, fids, fmask, seq_len, fbatch, gen, device):
     return model(input_ids=fx, labels=labels).loss
 
 
-def load_corpus(source, tokenizer, max_train_tokens, max_eval_tokens, answer_mask=False, exclude_texts=None):
+def load_corpus(source, tokenizer, max_train_tokens, max_eval_tokens, answer_mask=False, exclude_texts=None,
+                factual_blend_file=None, factual_blend_frac=0.0):
     """Returns (train_ids, eval_ids, train_answer_mask). eval is ALWAYS WikiText validation.
 
     train_answer_mask[i] is True for tokens whose CE counts under --answer-loss-only: response
     tokens for instruction data, and all content tokens for WikiText (no prompt/answer split).
     When answer_mask=False the mask is all-True and the token stream is byte-identical to the
     FACT-002 runs (the masked-stream tokenization is only built when actually needed).
-    exclude_texts de-leaks the instruction stream against the factual panel (FACT-003B)."""
+    exclude_texts de-leaks the instruction stream against the factual panel (FACT-003B).
+
+    FACT-003G mixed-stream factual blend: if factual_blend_frac>0, that fraction of the mixed
+    train tokens are protected factual QA BLENDED into the one stream under the SAME answer-only
+    CE -- NOT a separate strong loss (which FACT-003D mu*CE was, and it overfit: the model just
+    memorised the small set). Here facts are a low-ratio part of the normal Q/A distribution, so
+    the lever is "answer questions, keeping facts" not "memorise these N cards"."""
     wt_train, wt_eval = _wikitext_train_eval(tokenizer, max_train_tokens, max_eval_tokens)
     if source == "wikitext":
         return wt_train, wt_eval, torch.ones_like(wt_train, dtype=torch.bool)
@@ -258,11 +265,31 @@ def load_corpus(source, tokenizer, max_train_tokens, max_eval_tokens, answer_mas
     if source == "instruction":
         return instr[:max_train_tokens], wt_eval, instr_msk[:max_train_tokens]
     if source == "mixed":
-        half = max_train_tokens // 2
+        fac = fac_msk = None
+        if factual_blend_file and factual_blend_frac > 0:
+            fac, fac_msk = _factual_ids_mask(tokenizer, factual_blend_file, exclude_texts=exclude_texts)
+            n_fac = int(max_train_tokens * factual_blend_frac)
+            if 0 < fac.numel() < n_fac:
+                reps = (n_fac // fac.numel()) + 1
+                print(f"  [FACT-003G blend] factual set is {fac.numel():,} tokens but the {100*factual_blend_frac:.0f}% "
+                      f"blend budget is {n_fac:,} -> repeated ~{reps}x. SMALL SET => still memorisation risk; "
+                      f"scale the factual data to make the blend diverse.", flush=True)
+                fac = fac.repeat(reps)[:n_fac]
+                fac_msk = fac_msk.repeat(reps)[:n_fac]
+            else:
+                fac, fac_msk = fac[:n_fac], fac_msk[:n_fac]
+        n_fac = fac.numel() if fac is not None else 0
+        rest = max_train_tokens - n_fac
+        half = rest // 2
         wt_part = wt_train[:half]
-        train = torch.cat([instr[:half], wt_part])
-        msk = torch.cat([instr_msk[:half], torch.ones_like(wt_part, dtype=torch.bool)])
-        return train, wt_eval, msk
+        instr_part = instr[: rest - half]
+        parts = ([fac] if fac is not None else []) + [instr_part, wt_part]
+        mparts = ([fac_msk] if fac_msk is not None else []) + [instr_msk[: rest - half],
+                                                               torch.ones_like(wt_part, dtype=torch.bool)]
+        if n_fac:
+            print(f"  [FACT-003G blend] mixed stream = {n_fac:,} factual ({100*factual_blend_frac:.0f}%) "
+                  f"+ {instr_part.numel():,} instruction + {wt_part.numel():,} wikitext tokens", flush=True)
+        return torch.cat(parts), wt_eval, torch.cat(mparts)
     raise ValueError(source)
 
 
@@ -384,6 +411,10 @@ def main():
                     help="FACT-003D: jsonl of protected atomic facts ({prompt,answer}); adds mu*answer-CE")
     ap.add_argument("--factual-weight", type=float, default=1.0, help="FACT-003D: weight mu on the factual CE term")
     ap.add_argument("--factual-batch", type=int, default=4, help="FACT-003D: windows per step for the factual term")
+    ap.add_argument("--factual-blend-file", type=Path, default=None,
+                    help="FACT-003G: jsonl of factual QA BLENDED into the mixed stream (same answer-CE, not a separate loss)")
+    ap.add_argument("--factual-blend-frac", type=float, default=0.0,
+                    help="FACT-003G: fraction of mixed train tokens that are blended factual QA (e.g. 0.05)")
     ap.add_argument("--resume", action="store_true",
                     help="resume training from <ckpt-dir>/ckpt.pt if present (continues the step count)")
     args = ap.parse_args()
@@ -408,11 +439,13 @@ def main():
         model.enable_input_require_grads()  # else ckpt warns: no input needs grad (embeds frozen)
 
     panel_exclude = (_panel_exclude_set(args.panel_file)
-                     if (args.exclude_panel or args.base_kl_replay or args.factual_replay) else None)
+                     if (args.exclude_panel or args.base_kl_replay or args.factual_replay
+                         or args.factual_blend_file) else None)
     train_ids, eval_ids, train_mask = load_corpus(
         args.train_source, tok, args.max_train_tokens, args.max_eval_tokens,
         answer_mask=args.answer_loss_only,
-        exclude_texts=(panel_exclude if args.exclude_panel else None))
+        exclude_texts=(panel_exclude if args.exclude_panel else None),
+        factual_blend_file=args.factual_blend_file, factual_blend_frac=args.factual_blend_frac)
     print(f"train-source={args.train_source}"
           + ("  [train de-leaked vs panel]" if args.exclude_panel else ""))
     print(f"train tokens={train_ids.numel():,}  eval tokens={eval_ids.numel():,}")
@@ -476,7 +509,8 @@ def main():
            + ("+lmhead" if args.train_lm_head else "") + ("+ansmask" if args.answer_loss_only else "")
            + (f"+basekl{args.kl_weight}" if args.base_kl_replay else "")
            + ("c" if (args.base_kl_replay and args.kl_content_only) else "")
-           + (f"+factrep{args.factual_weight}" if args.factual_replay else ""))
+           + (f"+factrep{args.factual_weight}" if args.factual_replay else "")
+           + (f"+blend{args.factual_blend_frac}" if args.factual_blend_file else ""))
     print(f"adapting {sum(p.numel() for p in tparams)/1e6:.1f}M params across {len(tparams)} tensors [{arm}]")
     print(f"microbatch={args.batch}  grad_accum={args.grad_accum_steps}  "
           f"effective_batch={args.batch * args.grad_accum_steps}")
@@ -600,6 +634,8 @@ def main():
               "replay_tokens": args.replay_tokens, "replay_batch": args.replay_batch,
               "factual_replay": str(args.factual_replay) if args.factual_replay else None,
               "factual_weight": args.factual_weight, "factual_batch": args.factual_batch,
+              "factual_blend_file": str(args.factual_blend_file) if args.factual_blend_file else None,
+              "factual_blend_frac": args.factual_blend_frac,
               "ce_fp": ce_fp, "ce_ptq": ce_ptq, "ce_adapted": ce_adapted,
               "ppl_fp": math.exp(ce_fp), "ppl_ptq": math.exp(ce_ptq), "ppl_adapted": math.exp(ce_adapted),
               "recovered_fraction": rec}
