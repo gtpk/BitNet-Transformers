@@ -57,21 +57,28 @@ the 3080. So:
 This box's win over Colab: **persistent (no VM recycle), private, always-on**. Colab Pro L4
 (23 GB) is still the better box for the heavy FACT *training* runs.
 
-## 3. Dev environment setup (build steps)
-
-Status: **IN PROGRESS.** Fill in / check off as completed.
+## 3. Dev environment setup — BUILT (2026-06-27)
 
 ```text
-[ ] clone repo:        git clone https://github.com/gtpk/BitNet-Transformers C:\Users\gtpk\BitNet-Transformers
-[ ] conda env (py3.11): conda create -n bnt python=3.11 -y   (torch has no 3.14 wheels yet)
-[ ] torch (CUDA 12.1):  pip install torch --index-url https://download.pytorch.org/whl/cu121
-[ ] deps:               pip install transformers datasets safetensors sentencepiece accelerate huggingface_hub
-[ ] (training only)     bitsandbytes is Linux-first; on Windows use bitsandbytes-windows or skip --optim adamw8bit
-[ ] verify:             python -c "import torch;print(torch.cuda.is_available(),torch.cuda.get_device_name(0))"
+[x] repo:        C:\Users\gtpk\BitNet-Transformers   (git clone of gtpk/BitNet-Transformers)
+[x] conda env:   bnt  (python 3.11) -> C:\Users\gtpk\anaconda3\envs\bnt\python.exe
+[x] torch:       2.5.1+cu121   (pip install torch --index-url https://download.pytorch.org/whl/cu121)
+[x] deps:        transformers 5.12.1, datasets, numpy 2.4.6, safetensors, sentencepiece, accelerate, huggingface_hub
+[x] verified:    torch.cuda.is_available()=True, RTX 3080 (9 GB usable); bitnet_llama.module imports; GPU matmul OK
+[ ] bitsandbytes: NOT installed (Linux-first; only needed for --optim adamw8bit training -> use plain adamw on Win,
+                  or train on Colab L4). 
 ```
 
-Use the `bnt` conda env's python for all project work once built:
-`C:\Users\gtpk\anaconda3\envs\bnt\python.exe`.
+**Use this for all project work on the box:** `C:\Users\gtpk\anaconda3\envs\bnt\python.exe`
+(run from `C:\Users\gtpk\BitNet-Transformers`). Example:
+
+```bash
+ssh -o BatchMode=yes gtpk@192.168.0.9 "cd C:\Users\gtpk\BitNet-Transformers & C:\Users\gtpk\anaconda3\envs\bnt\python.exe scripts\<driver>.py <args>"
+```
+
+Note: transformers is 5.x (newer than the Colab runs used) — watch for minor `generate()` /
+`from_pretrained(dtype=...)` API differences if a script errors. Long jobs: launch detached
+(e.g. `start /b ...` or a background python) and poll a logfile, since the SSH call is one-shot.
 
 ## 4. Project state — where we are (2026-06-27)
 
