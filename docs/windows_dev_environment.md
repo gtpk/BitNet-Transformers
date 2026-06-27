@@ -5,7 +5,7 @@ project on the Windows GPU server (gtpk@192.168.0.9). It records how to connect,
 spec, the dev-env setup, the current experiment state, and exactly where to continue — so a
 fresh session can resume without re-discovery.
 
-Last updated: 2026-06-27 (env build in progress).
+Last updated: 2026-06-27 (RTX 3080 is a validated fast-predictor/eval box).
 
 ---
 
@@ -101,10 +101,19 @@ FACT-003C (content-KL)      : 0.185 @ λ=0.2   exclude EOS from KL = fix; INVERT
    λ sweep: 0.1 -> 0.037 (salad, too weak) | 0.2 -> 0.185 (best) | 0.5 -> 0.037 (over-anchored)
 ```
 
-**Conclusion:** same-topology (target-linears-only, frozen lm_head/embeds) adaptation+objective
-tuning at 1.1B **plateaus at fact ~0.185**. Reaching the 0.4 "usable" tier needs added
-**capacity** (the variable/hybrid direction), not more λ. All committed; artifacts under
-`reports/rt13{1,2,3,4}_*` (md5-verified).
+**Updated conclusion:** same-topology content-KL found a real lever but plateaus at
+`fact ~0.185`. The first cheap capacity patch, post-hoc late-layer FP restore, failed.
+The next successful signal came from **protected factual replay**:
+
+```text
+FACT-003D 160M predictor on this 3080:
+  mu=0.0 control   eval_panel 0.037, heldout_atomic 0.093
+  mu=1.0 replay    eval_panel 0.259, heldout_atomic 0.227
+```
+
+This is the first strong evidence that factual recovery can transfer to disjoint eval
+items rather than only memorising the replay set. Colab 1.1B `mu=1.0` is the decisive
+run.
 
 ## 5. HYBRID-001A — DONE (result: NOT a capacity bottleneck)
 
@@ -128,26 +137,41 @@ late layers; post-hoc un-quantizing late layers breaks that coherence (distribut
 This rules out the cheap post-hoc capacity patch — it does NOT rule out a **train-from-start
 hybrid** (early layers co-adapt to FP late layers from the beginning).
 
-## 5b. NEXT TASK — pick one (per the FACT-003C/HYBRID decision tree)
+## 5b. FACT-004A — DONE (result: lm_head unfreeze is harmful)
 
-Same-topology objective tuning plateaued at ~0.185 and post-hoc capacity didn't help, so the
-live options are (cheapest first):
+FACT-004A tested whether frozen `lm_head` was the bottleneck:
 
 ```text
-1. lm_head unfreeze (--train-lm-head) + content-KL lambda=0.2   -- cheap; the output head can
-     re-adapt; rt116 already supports the flag. TRAINING (~17 GB -> Colab L4, not the 3080).
-2. protected factual replay (FACT-003D)  -- small fact set disjoint from FACT-001 (leakage gate
-     scripts/check_fact_panel_overlap.py) added to the content-KL run. Needs code.
-3. train-from-start hybrid (HYBRID-001B) -- keep late N blocks FP DURING adaptation (not
-     post-hoc) so early layers co-adapt; then cost-cut Q4->Q3->Q2->2-plane. Bigger; needs code
-     + a hybrid GGUF export path (llama-quantize --exclude-weights leaves tensors un-quantized).
+FACT-003C frozen lm_head: fact 0.185
+FACT-004A train lm_head:  fact 0.04 / 0.00
 ```
 
-Note the **3080 (10 GB) cannot run the FACT training config (~17 GB)**; options 1/2/3 are
-training and should run on Colab Pro L4, OR on the 3080 only with a reduced config (bf16,
-batch 1–2, grad-ckpt, teacher 8-bit/offload). The 3080 is ideal for the *probe/inference/dev*
-side. The FACT-003C λ=0.2 STE `ckpt.pt` (6.4 GB) lives on the Colab Google Drive
-(`MyDrive/bnt_ckpt/fact003c_mixed_ckl0.2/ckpt.pt`) if a probe needs the latents again.
+Verdict:
+
+```text
+lm_head unfreeze is DISCARDED.
+More output freedom caused fluent forgetting, not factual recovery.
+```
+
+## 5c. Current 3080 Role — keep it busy but not speculative
+
+The 3080 is now a validated fast-predictor:
+
+```text
+FACT-004A 160M smoke predicted the lm_head direction before/around the 1.1B result.
+FACT-003D 160M mu-sweep predicted mu=1.0 and showed replay transfer.
+```
+
+While Colab runs the long 1.1B `FACT-003D mu=1.0` job, use the box for:
+
+```text
+1. eval-only dry runs to keep Windows scoring path warm
+2. 160M seed variance for FACT-003D mu=1.0
+3. post-result scoring/report parsing when Colab artifacts arrive
+```
+
+Do **not** launch new speculative branches on the 3080 before the 1.1B result lands.
+See [RTX 3080 Parallel Queue](./box_3080_parallel_queue.md).
 
 ## 6. Transferring results back to origin
 

@@ -38,7 +38,7 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 from fact004a_160m_smoke import score_dir  # reuse the exact PyTorch panel scorer
 
 
-def train_mu(args, mu, out_dir):
+def train_arm(args, mu, seed, out_dir):
     cmd = [sys.executable, str(REPO_ROOT / "scripts" / "rt116_quality_recovery.py"),
            "--model-id", args.model_id,
            "--train-source", "mixed", "--answer-loss-only",
@@ -46,23 +46,24 @@ def train_mu(args, mu, out_dir):
            "--factual-replay", str(REPO_ROOT / "data/atomic_facts_train.jsonl"),
            "--factual-weight", str(mu), "--factual-batch", "4",
            "--steps", str(args.steps), "--seq-len", str(args.seq_len),
-           "--batch", str(args.batch), "--lr", str(args.lr),
+           "--batch", str(args.batch), "--lr", str(args.lr), "--seed", str(seed),
            "--max-train-tokens", str(args.max_train_tokens),
            "--dtype", "float32", "--optim", "adamw",
            "--out-dir", str(out_dir),
-           "--json-out", str(out_dir.parent / f"mu{mu}_train.json"),
+           "--json-out", str(out_dir.parent / f"{out_dir.name}_train.json"),
            "--log-every", str(args.log_every)]
-    print(f"\n===== mu={mu} =====\n{' '.join(cmd)}", flush=True)
+    print(f"\n===== mu={mu} seed={seed} =====\n{' '.join(cmd)}", flush=True)
     env = {**os.environ, "PYTHONUTF8": "1", "PYTHONIOENCODING": "utf-8"}
     t0 = time.time()
     subprocess.run(cmd, check=True, env=env)
-    print(f"  mu={mu} trained in {(time.time()-t0)/60:.1f}m -> {out_dir}", flush=True)
+    print(f"  mu={mu} seed={seed} trained in {(time.time()-t0)/60:.1f}m -> {out_dir}", flush=True)
 
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--model-id", default="Felladrin/Llama-160M-Chat-v1")
     ap.add_argument("--mus", default="0.5,1.0,2.0")
+    ap.add_argument("--seeds", default="0", help="comma list; >1 seed at a single mu = Q1 seed-variance check")
     ap.add_argument("--work", type=Path, default=REPO_ROOT / "reports" / "fact003d_160m_sweep")
     ap.add_argument("--steps", type=int, default=400)
     ap.add_argument("--seq-len", type=int, default=256)
@@ -80,6 +81,8 @@ def main():
     device = "cuda" if torch.cuda.is_available() else "cpu"
     args.work.mkdir(parents=True, exist_ok=True)
     mus = [float(x) for x in args.mus.split(",")]
+    seeds = [int(s) for s in args.seeds.split(",")]
+    multiseed = len(seeds) > 1
     from transformers import AutoTokenizer
     tok = AutoTokenizer.from_pretrained(args.model_id)
     from rt116_quality_recovery import load_wikitext
@@ -96,35 +99,51 @@ def main():
 
     rows = []
     for mu in mus:
-        out_dir = args.work / f"mu{mu}"
-        if not args.skip_train:
-            train_mu(args, mu, out_dir)
-        ev = score_dir(out_dir, tok, eval_panel, device, args.max_new, wt_eval, args.ce_windows)
-        ho = score_dir(out_dir, tok, heldout, device, args.max_new, wt_eval, args.ce_windows)
-        tr = score_dir(out_dir, tok, train_atomic, device, args.max_new, wt_eval, args.ce_windows)
-        rows.append({"mu": mu, "eval": ev, "heldout": ho, "train": tr})
-        print(f"  mu={mu}: eval_panel {ev['fact_rate']} | heldout {ho['fact_rate']} | "
-              f"train_atomic {tr['fact_rate']} | CE {ev['ce']:.3f}", flush=True)
+        for seed in seeds:
+            out_dir = args.work / (f"mu{mu}_s{seed}" if multiseed else f"mu{mu}")
+            if not args.skip_train:
+                train_arm(args, mu, seed, out_dir)
+            ev = score_dir(out_dir, tok, eval_panel, device, args.max_new, wt_eval, args.ce_windows)
+            ho = score_dir(out_dir, tok, heldout, device, args.max_new, wt_eval, args.ce_windows)
+            tr = score_dir(out_dir, tok, train_atomic, device, args.max_new, wt_eval, args.ce_windows)
+            rows.append({"mu": mu, "seed": seed, "eval": ev, "heldout": ho, "train": tr})
+            print(f"  mu={mu} seed={seed}: eval_panel {ev['fact_rate']} | heldout {ho['fact_rate']} | "
+                  f"train_atomic {tr['fact_rate']} | CE {ev['ce']:.3f}", flush=True)
 
-    lines = ["# FACT-003D 160M mu-sweep (protected factual replay direction)", "",
+    title = ("FACT-003D 160M seed-variance (mu=%s)" % mus[0]) if multiseed else "FACT-003D 160M mu-sweep"
+    lines = [f"# {title} (protected factual replay)", "",
              f"model={args.model_id} recipe=content-KL 0.2 + mu*factual-CE steps={args.steps} "
              f"PyTorch-scored (ternary-materialised, rep-penalty 1.2)", "",
-             "| mu | eval_panel | heldout_atomic (transfer) | train_atomic (memorise) | eval CE |",
-             "| ---: | ---: | ---: | ---: | ---: |"]
+             "| mu | seed | eval_panel | heldout_atomic (transfer) | train_atomic (memorise) | eval CE |",
+             "| ---: | ---: | ---: | ---: | ---: | ---: |"]
     for r in rows:
-        lines.append(f"| {r['mu']} | {r['eval']['fact_rate']} | {r['heldout']['fact_rate']} | "
+        lines.append(f"| {r['mu']} | {r['seed']} | {r['eval']['fact_rate']} | {r['heldout']['fact_rate']} | "
                      f"{r['train']['fact_rate']} | {r['eval']['ce']:.3f} |")
-    base_ev = rows[0]["eval"]["fact_rate"] if rows else 0
-    best = max(rows, key=lambda r: r["heldout"]["fact_rate"]) if rows else None
-    if best:
-        transfers = best["heldout"]["fact_rate"] > rows[0]["heldout"]["fact_rate"] + 1e-9
-        lines += ["", f"best heldout: mu={best['mu']} @ {best['heldout']['fact_rate']} "
-                  f"(train_atomic {best['train']['fact_rate']})", "",
+    if multiseed and rows:
+        evs = [r["eval"]["fact_rate"] for r in rows]
+        hos = [r["heldout"]["fact_rate"] for r in rows]
+        mean = lambda xs: sum(xs) / len(xs)
+        lo, hi = min(evs), max(evs)
+        # control eval_panel ~0.037 (mu=0 baseline, reports/rt136_fact003d_160m_sweep.md)
+        consistent = lo > 0.10  # every seed clearly above the mu=0 floor
+        lines += ["", f"eval_panel across seeds: mean {mean(evs):.3f}  range [{lo}, {hi}]  "
+                  f"(mu=0 control ~0.037); heldout mean {mean(hos):.3f}", "",
                   "READING: " + (
-                      f"heldout TRANSFER signal at mu={best['mu']} -> run that mu at 1.1B."
-                      if transfers else
-                      "heldout flat across mu while train_atomic rises -> memorisation, need broader "
-                      "factual data (not just bigger mu).")]
+                      "eval_panel ABOVE the mu=0 control on EVERY seed -> 160M predictor is "
+                      "seed-robust; trust it for future branch-killing."
+                      if consistent else
+                      "eval_panel NOT consistently above the mu=0 control -> predictor is noisy; "
+                      "do not over-read a single 160M run.")]
+    else:
+        best = max(rows, key=lambda r: r["heldout"]["fact_rate"]) if rows else None
+        if best:
+            transfers = best["heldout"]["fact_rate"] > rows[0]["heldout"]["fact_rate"] + 1e-9
+            lines += ["", f"best heldout: mu={best['mu']} @ {best['heldout']['fact_rate']} "
+                      f"(train_atomic {best['train']['fact_rate']})", "",
+                      "READING: " + (
+                          f"heldout TRANSFER signal at mu={best['mu']} -> run that mu at 1.1B."
+                          if transfers else
+                          "heldout flat while train_atomic rises -> memorisation, need broader data.")]
     (args.work / "summary.json").write_text(json.dumps(rows, indent=2), encoding="utf-8")
     (args.work / "summary.md").write_text("\n".join(lines), encoding="utf-8")
     print("\n" + "\n".join(lines))

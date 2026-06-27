@@ -231,6 +231,8 @@ python scripts/rt113_storage_latency.py \
    - RT-130 Outcome B 이후 FACT-002 instruction/mixed adaptation부터 FACT-003 objective 분기까지 한 번에 실행하는 single-flight runbook. 최신 상태: FACT-003C content-KL `lambda=0.2`가 현재 best, `lambda=0.1` 실패, `lambda=0.5` 대기.
 8r. [Fair Comparison Framework](./fair_comparison_framework.md)
    - native BitNet, Q2_K, 우리 all-I2_S, 우리 hybrid를 처음부터 학습시간/후학습비용/파라미터/속도/품질로 공정 비교하는 scorecard.
+8r2. [RTX 3080 Parallel Queue](./box_3080_parallel_queue.md)
+   - Colab이 긴 1.1B run을 돌리는 동안 로컬 RTX 3080 박스를 fast predictor/evaluator로 쓰는 작업 큐와 SSH 명령.
 8s. [Paper Series Plan](./paper_series_plan.md)
    - 지금까지의 결과를 여러 편의 논문/리포트로 나누는 publication roadmap. Paper 1 systems, Paper 2 conversion limits, Paper 3 content-KL, Paper 4 hybrid candidate.
 8t. [Paper Evidence Matrix](./paper_evidence_matrix.md)
@@ -293,6 +295,7 @@ flowchart TD
   V --> FG["factual_gap_experiment_plan.md"]
   FG --> FR["factual_recovery_master_runbook.md"]
   FG --> FC["fair_comparison_framework.md"]
+  FR --> BQ["box_3080_parallel_queue.md"]
   FC --> PS["paper_series_plan.md"]
   PS --> PEM["paper_evidence_matrix.md"]
   PS --> LM["literature_positioning_map.md"]
@@ -355,6 +358,7 @@ flowchart TD
 | [factual_gap_experiment_plan.md](./factual_gap_experiment_plan.md) | FACT-001 current factual gap panel과 FACT-002..003 adaptation/objective 개선 실험 설계 | RT-129 이후 factual quality gap을 다룰 때 |
 | [factual_recovery_master_runbook.md](./factual_recovery_master_runbook.md) | RT-130 결과 이후 FACT-002 instruction/mixed adaptation, FACT-003 분기, 구현 패킷, 문서화 체크포인트, Colab handoff prompt를 한 번에 묶은 실행 문서 | 다음 factual recovery run을 다른 실행자/Colab에 넘길 때 |
 | [fair_comparison_framework.md](./fair_comparison_framework.md) | native BitNet / Q2_K / ours all-I2_S / ours hybrid를 학습비용, 파라미터, storage, speed, 품질로 비교하는 표준 scorecard | 큰 LLaMA 적용이나 논문 비교를 공정하게 정리할 때 |
+| [box_3080_parallel_queue.md](./box_3080_parallel_queue.md) | Colab 본 학습 중 RTX 3080 box가 맡을 seed/eval/smoke 작업 큐와 SSH 명령 | 로컬 PC를 놀리지 않고 다음 분기 준비를 할 때 |
 | [paper_series_plan.md](./paper_series_plan.md) | 여러 편의 논문/리포트로 결과를 나누는 전체 지도 | 무엇을 어느 논문에 넣을지 헷갈릴 때 |
 | [paper_evidence_matrix.md](./paper_evidence_matrix.md) | 논문별 known result, blank cell, claim guardrail을 모은 중앙 증거표 | 논문 초안에 어떤 숫자를 넣고 어떤 칸을 비워둘지 정할 때 |
 | [literature_positioning_map.md](./literature_positioning_map.md) | BitNet, PTQ ternarization, rotation, precision scaling, factual forgetting 문헌과 우리 결과의 위치를 비교 | 우리가 가는 방향이 이미 있는지, 더 앞선 방법에서 무엇을 빌릴지 볼 때 |
