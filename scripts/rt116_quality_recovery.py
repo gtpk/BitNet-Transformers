@@ -415,6 +415,10 @@ def main():
                     help="FACT-003G: jsonl of factual QA BLENDED into the mixed stream (same answer-CE, not a separate loss)")
     ap.add_argument("--factual-blend-frac", type=float, default=0.0,
                     help="FACT-003G: fraction of mixed train tokens that are blended factual QA (e.g. 0.05)")
+    ap.add_argument("--metrics-out", type=Path, default=None,
+                    help="append per-log-step metrics as jsonl (put on Drive to survive VM recycle)")
+    ap.add_argument("--tb-logdir", type=Path, default=None,
+                    help="TensorBoard logdir for scalar curves (put on Drive); skipped if tensorboard missing")
     ap.add_argument("--resume", action="store_true",
                     help="resume training from <ckpt-dir>/ckpt.pt if present (continues the step count)")
     args = ap.parse_args()
@@ -555,6 +559,37 @@ def main():
         os.replace(tmp, ckpt_path)
         print(f"  [checkpoint] step {step} -> {ckpt_path}", flush=True)
 
+    # comprehensive logging: per-step scalars to a Drive jsonl + optional TensorBoard (both survive
+    # recycle when pointed at Drive). Append mode so resumes keep the prior history.
+    metrics_fh = None
+    if args.metrics_out:
+        args.metrics_out.parent.mkdir(parents=True, exist_ok=True)
+        metrics_fh = open(args.metrics_out, "a", encoding="utf-8")
+    tb = None
+    if args.tb_logdir:
+        try:
+            from torch.utils.tensorboard import SummaryWriter
+            args.tb_logdir.mkdir(parents=True, exist_ok=True)
+            tb = SummaryWriter(log_dir=str(args.tb_logdir))
+        except Exception as e:
+            print(f"  [tb] TensorBoard unavailable ({e}); skipping event logging", flush=True)
+
+    def log_metrics(step, ce, kl, fce, elapsed, rate, eta, pct):
+        rec = {"step": step, "pct": round(pct, 2), "train_ce": round(ce, 4),
+               "kl": round(kl, 4) if teacher is not None else None,
+               "fce": round(fce, 4) if factual_ids is not None else None,
+               "elapsed_min": round(elapsed / 60, 2), "eta_min": round(eta / 60, 2),
+               "sec_per_step": round(rate, 2), "arm": arm}
+        if metrics_fh:
+            metrics_fh.write(json.dumps(rec) + "\n"); metrics_fh.flush()
+        if tb:
+            tb.add_scalar("train/ce", ce, step)
+            if teacher is not None:
+                tb.add_scalar("train/kl", kl, step)
+            if factual_ids is not None:
+                tb.add_scalar("train/fce", fce, step)
+            tb.flush()
+
     model.train()
     t_start = time.time()
     last_ckpt = t_start
@@ -602,9 +637,15 @@ def main():
             fce_str = f"  fce={train_fce_sum / args.grad_accum_steps:.4f}" if factual_ids is not None else ""
             print(f"  step {step:4d}/{args.steps} ({pct:5.1f}%)  train_ce={train_ce_sum / args.grad_accum_steps:.4f}{kl_str}{fce_str}  "
                   f"elapsed {elapsed/60:.1f}m  ETA {eta/60:.1f}m  ({rate:.1f}s/step)", flush=True)
+            log_metrics(step, train_ce_sum / args.grad_accum_steps, train_kl_sum / args.grad_accum_steps,
+                        train_fce_sum / args.grad_accum_steps, elapsed, rate, eta, pct)
         if ckpt_path and args.ckpt_every_min > 0 and (time.time() - last_ckpt) >= args.ckpt_every_min * 60:
             save_ckpt(step)
             last_ckpt = time.time()
+    if metrics_fh:
+        metrics_fh.close()
+    if tb:
+        tb.close()
     if teacher is not None:  # free the frozen base teacher before export
         del teacher
         if device == "cuda":
