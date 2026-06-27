@@ -26,6 +26,25 @@ curated atomic-facts train set, 400 steps). PyTorch-scored on the ternary-materi
 - **No fluency collapse.** eval CE moves only 3.90 -> 4.03 (contrast FACT-004A lm_head unfreeze, which
   kept CE but DESTROYED facts -- here facts rise AND CE holds).
 
+## Q1 seed-variance (mu=1.0, seeds 41/42/43)
+
+Tests whether the transfer signal is a single-seed fluke before trusting the predictor repeatedly.
+
+| seed | eval_panel | heldout_atomic | train_atomic | eval CE |
+| ---: | ---: | ---: | ---: | ---: |
+| 41 | 0.185 | 0.227 | 1.000 | 4.020 |
+| 42 | 0.296 | 0.227 | 0.967 | 4.021 |
+| 43 | 0.296 | 0.196 | 1.000 | 4.080 |
+| **mean** | **0.259** | 0.217 | ~0.99 | ~4.04 |
+| mu=0 control | 0.037 | 0.093 | 0.083 | 3.899 |
+
+**Reading: the predictor is seed-ROBUST in DIRECTION, noisy in MAGNITUDE.** Every seed's eval_panel
+(0.185 / 0.296 / 0.296) clears the mu=0 control (0.037) by 5-8x, so "protected replay transfers" is
+not a single-seed artifact -- trustworthy for branch-killing. But eval_panel carries ~+-0.05 seed
+noise (range 0.185-0.296), so do NOT over-read a single 160M run to the second decimal; compare the
+1.1B result against the DIRECTION + the ~0.26 mean, not an exact number. train_atomic saturates and
+CE holds on every seed.
+
 ## Caveat for the 1.1B read-across
 
 160M starts from a ~0 factual floor (control eval_panel 0.037), so it has large headroom. At 1.1B the
