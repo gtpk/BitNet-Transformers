@@ -499,7 +499,13 @@ def main():
             opt.load_state_dict(ck["opt"])
         except Exception as e:
             print(f"  [resume] optimizer state not restored ({e}); continuing with fresh optimizer", flush=True)
-        g.set_state(ck["gen"])
+        try:
+            # map_location=device moved the saved RNG ByteTensor onto CUDA; set_state needs a
+            # CPU uint8 ByteTensor. RNG continuity is non-critical (only the window-sample order),
+            # so fall back to the fresh generator if it cannot be restored.
+            g.set_state(ck["gen"].cpu().to(torch.uint8))
+        except Exception as e:
+            print(f"  [resume] RNG state not restored ({e}); continuing with fresh RNG", flush=True)
         start_step = int(ck["step"]) + 1
         print(f"  [resume] loaded {ckpt_path} -> continue at step {start_step}/{args.steps}", flush=True)
 
