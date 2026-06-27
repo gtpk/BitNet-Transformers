@@ -36,7 +36,7 @@ GGUF parity export the saved adapted_model to bitnet.cpp + rt130 (prior runs: +0
 | **A** | eval_panel > 0.185 AND popqa_tight rises | representative blend WORKS -- the structural fix landed | strengthen Track A mainline: blend ratio sweep / data scale (5k->20k) / 1.1B seed variance |
 | **B** | popqa_tight rises but eval_panel flat (<=~0.185) | PopQA distribution transfers, but FACT panel domain-mismatches | widen the eval panel / add factual-task diversity; the model CAN do factual QA, the 27-item panel just doesn't catch it |
 | **C** | popqa_train rises, popqa_tight flat | PopQA also became a memorise shortcut (even at 5% blend) | bigger/more-diverse data OR objective redesign (content-AKL); blend ratio down |
-| **D** | everything flat (eval ~0.185, tight low) | same-topology I2_S adaptation has plateaued | Track B: selective capacity / PTQTP-lite / from-start hybrid |
+| **D** | everything flat (eval ~0.185, tight low) | same-topology I2_S adaptation has plateaued | add I2_S-rooted auxiliary capacity (SIDE I2_S+LoRA sidecar) / PTQTP-lite / from-start hybrid -- the sidecar is an auxiliary organ of I2_S, not a non-I2_S replacement |
 | **E** | CE improves but facts drop | CE objective still misaligned with factual behaviour | strengthen content-KL/AKL / objective term, not data |
 
 ## Claim discipline
