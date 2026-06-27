@@ -1,0 +1,89 @@
+{
+  "_note": "summary reconstructed from run log; full per-prompt raw generations remain on the Colab run disk (reports/hybrid001a_capacity_probe.json there)",
+  "arms": {
+    "A0": {
+      "restore": "none (all I2_S)",
+      "n_restored_linears": 0,
+      "restored_fp_params_M": 0.0,
+      "fact_hit": 4,
+      "n": 27,
+      "fact_rate": 0.148,
+      "ce": 3.84,
+      "ppl": 46.5,
+      "tags": {
+        "ok": 27
+      }
+    },
+    "A1": {
+      "restore": "last 1 block",
+      "n_restored_linears": 7,
+      "restored_fp_params_M": 44.0,
+      "fact_hit": 2,
+      "n": 27,
+      "fact_rate": 0.074,
+      "ce": 4.935,
+      "ppl": 139.1,
+      "tags": {
+        "ok": 26,
+        "loop": 1
+      }
+    },
+    "A2": {
+      "restore": "last 2 blocks",
+      "n_restored_linears": 14,
+      "restored_fp_params_M": 88.0,
+      "fact_hit": 1,
+      "n": 27,
+      "fact_rate": 0.037,
+      "ce": 4.731,
+      "ppl": 113.5,
+      "tags": {
+        "ok": 27
+      }
+    },
+    "A3": {
+      "restore": "last 4 blocks",
+      "n_restored_linears": 28,
+      "restored_fp_params_M": 176.0,
+      "fact_hit": 3,
+      "n": 27,
+      "fact_rate": 0.111,
+      "ce": 4.555,
+      "ppl": 95.1,
+      "tags": {
+        "ok": 26,
+        "salad": 1
+      }
+    },
+    "A4": {
+      "restore": "last 4 blocks attn only",
+      "n_restored_linears": 16,
+      "restored_fp_params_M": 38.0,
+      "fact_hit": 3,
+      "n": 27,
+      "fact_rate": 0.111,
+      "ce": 5.404,
+      "ppl": 222.2,
+      "tags": {
+        "ok": 17,
+        "repetitive": 6,
+        "loop": 4
+      }
+    },
+    "A5": {
+      "restore": "last 4 blocks MLP only",
+      "n_restored_linears": 12,
+      "restored_fp_params_M": 138.0,
+      "fact_hit": 1,
+      "n": 27,
+      "fact_rate": 0.037,
+      "ce": 4.971,
+      "ppl": 144.2,
+      "tags": {
+        "salad": 4,
+        "empty": 4,
+        "ok": 19
+      }
+    }
+  }
+}
