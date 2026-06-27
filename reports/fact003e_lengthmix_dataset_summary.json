@@ -1,0 +1,77 @@
+{
+  "styles": [
+    "short",
+    "sentence",
+    "chat",
+    "explain",
+    "long"
+  ],
+  "source_train_rows": 291,
+  "source_heldout_rows": 97,
+  "train_rows": 1455,
+  "heldout_rows": 485,
+  "train_by_style": {
+    "chat": 291,
+    "explain": 291,
+    "long": 291,
+    "sentence": 291,
+    "short": 291
+  },
+  "heldout_by_style": {
+    "chat": 97,
+    "explain": 97,
+    "long": 97,
+    "sentence": 97,
+    "short": 97
+  },
+  "train_by_category": {
+    "author": 155,
+    "capital": 545,
+    "continent": 135,
+    "currency": 205,
+    "element": 130,
+    "entity_attr": 5,
+    "language": 100,
+    "simple_fact": 180
+  },
+  "heldout_by_category": {
+    "author": 50,
+    "capital": 235,
+    "continent": 65,
+    "currency": 55,
+    "element": 40,
+    "language": 40
+  },
+  "train_length_stats": {
+    "rows": 1455,
+    "prompt_chars_min": 22,
+    "prompt_chars_mean": 99.9,
+    "prompt_chars_max": 272,
+    "prompt_words_min": 5,
+    "prompt_words_mean": 16.8,
+    "prompt_words_max": 43,
+    "answer_words_min": 1,
+    "answer_words_mean": 6.1,
+    "answer_words_max": 15,
+    "answer_chars_min": 2,
+    "answer_chars_mean": 35.2,
+    "answer_chars_max": 85
+  },
+  "heldout_length_stats": {
+    "rows": 485,
+    "prompt_chars_min": 21,
+    "prompt_chars_mean": 98.9,
+    "prompt_chars_max": 255,
+    "prompt_words_min": 5,
+    "prompt_words_mean": 16.5,
+    "prompt_words_max": 39,
+    "answer_words_min": 1,
+    "answer_words_mean": 1.1,
+    "answer_words_max": 3,
+    "answer_chars_min": 1,
+    "answer_chars_mean": 6.5,
+    "answer_chars_max": 16
+  },
+  "out_train": "/Users/puka/repository/BitNet-Transformers/data/atomic_facts_lengthmix_train.jsonl",
+  "out_heldout": "/Users/puka/repository/BitNet-Transformers/data/atomic_facts_lengthmix_heldout.jsonl"
+}

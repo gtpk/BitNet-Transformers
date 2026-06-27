@@ -41,6 +41,12 @@ FACT-003D protected factual replay:
     heldout atomic 0.093 -> 0.227
     train atomic saturates, so memorisation control is visible.
 
+FACT-003E length-balanced replay:
+  IMPLEMENTATION READY.
+  Tests the user's critique that FACT-003D short atomic replay is not representative
+  PTQ/QAT adaptation data. Same protected facts, mixed short/sentence/chat/explain/long
+  prompt and answer lengths.
+
 Colab 1.1B FACT-003D mu=1.0:
   decisive run in progress / pending result.
 ```
@@ -112,6 +118,62 @@ Pass condition:
 ```text
 summary.md regenerates without pyarrow/cp949/transformers errors.
 ```
+
+### Q2b. FACT-003E Length-Balanced Replay Probe
+
+Why:
+
+```text
+PTQ/QAT calibration normally uses representative data. FACT-003D used deliberately short
+atomic facts. This probe checks whether mixing prompt/answer lengths improves transfer
+or only dilutes the factual signal.
+```
+
+Build the mixed-length replay set:
+
+```cmd
+cd C:\Users\gtpk\BitNet-Transformers
+C:\Users\gtpk\anaconda3\envs\bnt\python.exe -X utf8 scripts\make_length_balanced_factual_replay.py
+```
+
+Run the 160M predictor:
+
+```cmd
+C:\Users\gtpk\anaconda3\envs\bnt\python.exe -X utf8 scripts\fact003d_160m_sweep.py ^
+  --label FACT-003E-lengthmix ^
+  --mus 1.0 ^
+  --steps 400 ^
+  --seed 41 ^
+  --work reports\fact003e_160m_lengthmix_seed41 ^
+  --factual-replay data\atomic_facts_lengthmix_train.jsonl ^
+  --heldout-file data\atomic_facts_lengthmix_heldout.jsonl ^
+  --train-score-file data\atomic_facts_lengthmix_train.jsonl ^
+  --heldout-sample 150 ^
+  --train-sample 80
+```
+
+Optional seed-matched atomic control:
+
+```cmd
+C:\Users\gtpk\anaconda3\envs\bnt\python.exe -X utf8 scripts\fact003d_160m_sweep.py ^
+  --label FACT-003D-atomic-seed41 ^
+  --mus 1.0 ^
+  --steps 400 ^
+  --seed 41 ^
+  --work reports\fact003d_160m_atomic_seed41 ^
+  --factual-replay data\atomic_facts_train.jsonl ^
+  --heldout-file data\atomic_facts_heldout.jsonl ^
+  --train-score-file data\atomic_facts_train.jsonl
+```
+
+Reading:
+
+| result | meaning | next |
+| --- | --- | --- |
+| lengthmix eval/heldout > atomic by >=0.05, CE stable | representative length helps transfer | use lengthmix in the next 1.1B run |
+| same facts, better tags/CE | length helps fluency but not retrieval | keep lengthmix as safer surface, widen facts |
+| train high, heldout/eval flat | memorisation | broader/public factual data |
+| worse than atomic | long surfaces dilute signal under fixed budget | keep atomic for mechanism tests |
 
 ### Q3. Result-Parser Template For 1.1B
 
