@@ -400,6 +400,7 @@ reduce token-time memory traffic, not only checkpoint bytes.
 | H8 | valid rotations/equalization can improve ternary fit | false data-free (RT-WSYNC-001 + H-I2S: row/group/row-norm scaling AND block-Hadamard rotation all fail at 160M -- ternary stays collapsed, FACT 0.0) | demote data-free weight-only sync (plan S4); revisit only combined with STE/adaptation |
 | H9 | selective extra planes/capacity can close the remaining gap | open | only as I2_S-rooted auxiliary capacity, not a replacement |
 | H10 | I2_S-rooted tiny low-rank residual can recover missing behavior | open | SIDE-001 160M rank 2/4/8 smoke |
+| H11 | layers that repeatedly flip ternary states during STE reveal local I2_S capacity bottlenecks | open | EGROW-001: log temporal entropy + residual + task saliency before growing anything |
 
 ## TurboQuant-Style Projection As Part Of `G`
 
@@ -593,6 +594,58 @@ docs/i2s_lora_sidecar_plan.md
 PC should test rank `2/4/8` on 160M first. Colab should only confirm on 1.1B if
 the 160M smoke moves FACT without letting the sidecar dominate bytes/ops.
 
+### Entropy-Guided Growth Candidate
+
+The sidecar should not blindly attach everywhere. A better I2_S-rooted version is:
+
+```text
+monitor where the ternary model cannot settle,
+then grow the smallest auxiliary branch only there.
+```
+
+The signal is not raw entropy. Raw entropy can mean healthy learning, high
+learning rate, data noise, or true capacity shortage. The proposed bottleneck
+score is:
+
+```text
+B_l =
+  instability_l
+  * output_residual_l
+  * task_saliency_l
+```
+
+where:
+
+```text
+instability_l =
+  temporal ternary entropy
+  + ternary flip rate
+  + gradient conflict
+  + update reversal rate
+```
+
+Only layers with high `B_l` are allowed to receive an auxiliary branch:
+
+```text
+I2_S trunk + rank-2/4 sidecar
+I2_S trunk + selected second ternary plane
+I2_S trunk + tiny top-k Q2/Q3 pocket as diagnostic
+```
+
+This turns the user's "the layer keeps going back and forth" observation into a
+testable rule:
+
+```text
+oscillation alone is not capacity shortage;
+oscillation + residual + FACT saliency + held-out gain is.
+```
+
+Plan:
+
+```text
+docs/entropy_guided_i2s_growth_plan.md
+```
+
 ## Hardware Split: Colab vs RTX 3080 PC
 
 ### Colab / L4 / A100 Role
@@ -648,6 +701,10 @@ Turbo projection PyTorch reference on small layers
 I2_S-rooted auxiliary / diagnostic PC jobs:
 
 ```text
+SIDE-001 160M rank 2/4/8 smoke
+SIDE-002 sidecar co-adaptation smoke
+EGROW-001 160M layer-instability logger
+EGROW-002 top-k sidecar by bottleneck_score vs random-k
 two-plane small-layer probes
 random/top-k saliency checks
 custom codebook reconstruction tests only as an upper-bound diagnostic

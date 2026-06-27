@@ -229,6 +229,8 @@ python scripts/rt113_storage_latency.py \
    - content-KL이 plateau될 때 1:1 all-I2_S 대신 selective precision, multi-strip ternary, residual, late-layer capacity를 budgeted topology conversion으로 검증하는 계획.
 8l2. [I2_S + LoRA / Residual Sidecar Plan](./i2s_lora_sidecar_plan.md)
    - I2_S base를 trunk로 유지한 채 전체를 Q2/Q3로 올리지 않고 `gamma*T + BA` 형태의 tiny low-rank sidecar로 behavior를 보정할 수 있는지 검증하는 SIDE-000..005 계획.
+8l3. [Entropy-Guided I2_S Growth Plan](./entropy_guided_i2s_growth_plan.md)
+   - STE 중 ternary code가 계속 뒤집히는 layer를 raw entropy만으로 판단하지 않고, temporal instability + output residual + task saliency로 bottleneck score를 만들고 top-k layer에만 I2_S-rooted auxiliary capacity를 붙이는 EGROW-001..005 계획.
 8m. [Quantization-Aware b1.58 Conversion Plan](./quantization_aware_b158_conversion_plan.md)
    - 기존 quantization toolbox(scale granularity, threshold/MSE objective, activation-aware scaling, GPTQ/Hessian assignment, rotation, signed-epsilon)를 BitNet 변환에 적용하는 처음부터 끝까지의 실험/가지치기 계획.
 8n. [Colab Quantization-Aware Conversion Prompt](./colab_quantization_aware_prompt.md)
@@ -387,6 +389,7 @@ flowchart TD
 | [native_bitnet_architecture_audit.md](./native_bitnet_architecture_audit.md) | 공개 BitNet 자료의 실제 구조와 비공개/미확정 부분을 정리 | native BitNet이 그냥 LLaMA+ternary인지 판단할 때 |
 | [hybrid_variable_bitnet_conversion_plan.md](./hybrid_variable_bitnet_conversion_plan.md) | 1:1 all-I2_S 대신 가변 capacity/하이브리드 topology를 검증하는 HYBRID-001 계획 | factual gap을 capacity/topology 문제로 검증할 때 |
 | [i2s_lora_sidecar_plan.md](./i2s_lora_sidecar_plan.md) | I2_S base를 trunk로 유지하고 tiny low-rank residual sidecar를 붙여, 부족한 factual/behavior capacity를 보정할 수 있는지 검증하는 SIDE-000..005 계획 | Q2/Q3 전체 업그레이드 전에 I2_S-rooted 보정이 가능한지 볼 때 |
+| [entropy_guided_i2s_growth_plan.md](./entropy_guided_i2s_growth_plan.md) | temporal ternary entropy, flip-rate, gradient conflict, output residual, task saliency를 묶어 어디에만 I2_S-rooted auxiliary capacity를 붙일지 정하는 EGROW 계획 | sidecar/extra-plane을 전체에 붙이지 않고 layer별 bottleneck을 찾아 진화시키고 싶을 때 |
 | [quantization_aware_b158_conversion_plan.md](./quantization_aware_b158_conversion_plan.md) | quantization 기법을 b1.58 변환에 적용하는 RT-124..128 전체 실험계획, 가지치기, 결론 도달 규칙 | 다음 Colab 실험을 설계하거나 결과를 해석할 때 |
 | [colab_quantization_aware_prompt.md](./colab_quantization_aware_prompt.md) | Colab 실행 가능한 AI에게 줄 copy-paste prompt와 결과 템플릿 | 다른 실행자에게 RT-124를 넘길 때 |
 | [complex_phase_rotation_plan.md](./complex_phase_rotation_plan.md) | 복소수 위상 `e^{iθ}`를 pairwise real rotation으로 구현하는 후속 분석/후보 아이디어 | factual gap 이후 rotation 후보를 다시 볼지 판단할 때 |
@@ -516,9 +519,12 @@ flowchart TD
    작업으로 넘어가지 않는다.
 5. **Saliency + I2_S-rooted auxiliary capacity:** PopQA/instruction activation으로 `S=phi(...)`를 추정한 뒤
    top-k protection, two-plane/PTQTP-lite, Q2/Q3 pockets를 random-k와 비교한다.
-6. **Scale ladder:** 1.1B에서 실제 component gain이 확인된 뒤 Gemma/Qwen small audit,
+6. **EGROW-001 entropy-guided growth logger:** STE 중 ternary flip-rate, temporal entropy,
+   gradient conflict, output residual, task saliency를 160M에서 먼저 기록해 sidecar/extra-plane을
+   어디에만 붙일지 결정한다.
+7. **Scale ladder:** 1.1B에서 실제 component gain이 확인된 뒤 Gemma/Qwen small audit,
    마지막으로 Qwen 7B-class goalpost로 넘어간다.
-7. Mac M5 I2_S/TL1은 보류한다. 필요하면 upstream bug report용 최소 재현으로 분리한다.
+8. Mac M5 I2_S/TL1은 보류한다. 필요하면 upstream bug report용 최소 재현으로 분리한다.
 
 이전 보류 항목 중 packed reference ladder는 완료됐고, export 경로도 판별됐다
 (per-tensor-native → I2_S 직행). 남은 다음 축:
