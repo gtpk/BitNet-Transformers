@@ -9,6 +9,7 @@ Related:
 - [G5 Baseline Comparison Plan](./g5_baseline_plan.md)
 - [Mixed-Bit DP Plan](./mixed_bit_dp_plan.md)
 - [Quantization-Aware b1.58 Conversion Plan](./quantization_aware_b158_conversion_plan.md)
+- [Conversion vs Native BitNet Training vs 2-bit Quantization](./conversion_vs_native_training_and_2bit.md)
 
 ## The Better Question
 
@@ -27,6 +28,16 @@ b1.58 much harder than ordinary quantization?
 
 This reframes the project from "make it work at all costs" to "identify the exact
 barriers between standard quantization and native ternary training."
+
+The follow-up comparison question is:
+
+```text
+If conversion needs a lot of adaptation, when does it stop being cheaper than native
+BitNet training, and how is it different from ordinary 2-bit quantization?
+```
+
+That question is tracked in
+[Conversion vs Native BitNet Training vs 2-bit Quantization](./conversion_vs_native_training_and_2bit.md).
 
 ## Short Answer
 

@@ -15,6 +15,7 @@ Related:
 - [Literature Deep Dive 04: PT2-LLM](./literature_deep_dive_pt2_llm.md)
 - [Literature Deep Dive 05: KD / KL Objectives](./literature_deep_dive_kd_kl.md)
 - [Literature Deep Dive 06: Precision Scaling Laws](./literature_deep_dive_precision_scaling.md)
+- [Literature Deep Dive 07: Rotation / AWQ / SmoothQuant Stack](./literature_deep_dive_rotation_awq_smoothquant.md)
 - [Fair Comparison Framework](./fair_comparison_framework.md)
 - [Quantization-Aware b1.58 Conversion Plan](./quantization_aware_b158_conversion_plan.md)
 - [Hybrid / Variable BitNet Conversion Plan](./hybrid_variable_bitnet_conversion_plan.md)
@@ -112,6 +113,20 @@ Takeaway:
 Our "rotation as complex phase" intuition points in the right family, but the
 literature implements it as real orthogonal transformations/Hadamard/Kronecker/learned
 rotations, not literal complex weights.
+```
+
+Deep dive:
+
+- [Rotation / AWQ / SmoothQuant stack](./literature_deep_dive_rotation_awq_smoothquant.md)
+
+Project synthesis from that deep dive:
+
+```text
+SmoothQuant and AWQ teach the equivalent-transform / salient-channel discipline.
+QuaRot and SpinQuant teach the rotation/incoherence discipline.
+PTQTP teaches capacity expansion through extra ternary planes.
+TWLA teaches that a real conversion compiler must be rotation-aware, activation-aware,
+and inter-layer-aware.
 ```
 
 ### 4. Precision / Quantization Scaling Laws

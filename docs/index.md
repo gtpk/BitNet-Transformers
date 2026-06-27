@@ -113,15 +113,17 @@ adaptation이 모든 one-shot 트릭을 압도). plan의 Expected Conclusion #4 
 adapted i2_s가 ok `1/12 → 12/12`로 Q2_K/FP급 non-degenerate tier 회복, adapted
 i2_s==f16. **표준 decoding에선 usable-tier 생성 가능**(단 사실 정확성 parity는 아님).
 
-**현재 결론(2026-06-27 최신):** systems(faithful export + storage/speed scale law)
+**현재 결론(2026-06-28 최신):** systems(faithful export + storage/speed scale law)
 해결, CE/PPL recovery는 scales, generation usability는 sane decoding에서 회복,
 quantizer는 lever 아님으로 판정. 남은 open gap은 **factual quality**(FP/Q2_K 미달)다.
-FACT-003C의 `content-KL`이 첫 확실한 factual lever다: raw KL은 EOS/empty를 복사해
-실패했지만, EOS/special token을 KL에서 제외한 content-KL `lambda=0.2`는 fact `0.185`,
-CE recovery `0.845`, ok `27/27`, I2_S≈F16을 동시에 달성했다. `lambda=0.1`은 너무
-약해 fact `0.037`/salad로 실패했고, `lambda=0.5` 결과 대기 중이다. 따라서 최신
-다음 순서는 **content-KL sweep 마감 -> best recipe 고정 -> plateau면 HYBRID-001
-capacity probe**다. 공정 비교 축은 [Fair Comparison Framework](./fair_comparison_framework.md)에 고정한다.
+FACT-003C의 `content-KL`은 첫 확실한 factual lever였고, lambda sweep은 inverted-U로
+마감됐다: `lambda=0.2`가 fact `0.185`, CE recovery `0.845`, ok `27/27`로 best,
+`0.1`은 너무 약해 salad, `0.5`는 과도 anchor로 facts를 씻어냈다. 이후 FACT-004A
+lm_head unfreeze와 HYBRID-001A post-hoc FP restore는 모두 실패했고, FACT-003D small
+hard replay는 1.1B에서 암기/과적합 함정을 보였다. 따라서 최신 모델은 **b1.58 변환을
+단일 quantizer가 아니라 coordinate transform, saliency, capacity, representative
+adaptation을 묶는 compiler 문제로 보는 것**이다. 공정 비교 축은
+[Fair Comparison Framework](./fair_comparison_framework.md)에 고정한다.
 
 packed format Phase 1/2/3/4 검증(로컬):
 
@@ -205,6 +207,8 @@ python scripts/rt113_storage_latency.py \
    - RT-101 upstream I2_S byte layout 감사 + RT-111 x86/Mac runtime 판정.
 8e. [Scale-Up Target Roadmap](./scaleup_target_roadmap.md)
    - RT-114 Llama-160M을 먼저 닫고, 이후 gpt-oss-20b로 넘어가는 타겟 전략.
+8e2. [Qwen 7B Goalpost Plan](./qwen7b_goalpost_plan.md)
+   - 최종 제품 골대로 Qwen2.5-7B-Instruct를 고정하고, Qwen audit/smoke/full-run gate와 환경 예측을 정리한다.
 8f. [Quality Recovery Plan](./quality_recovery_plan.md)
    - PTQ 붕괴, teacher-free adaptation, I2_S runtime 보존, 실제 답변 품질 평가 계획.
 8g. [G1 Budget-Scaling Runbook](./g1_budget_scaling_runbook.md)
@@ -215,6 +219,10 @@ python scripts/rt113_storage_latency.py \
    - all-I2_S b1.58의 품질 한계를 선택적 Q2/Q3 업그레이드와 DP selector로 푸는 축. RT-123 이후에는 additive-DP solver가 아니라 후보 색인/보조축으로 둔다.
 8j. [Why Existing Models Resist b1.58 Conversion](./why_b158_conversion_is_hard.md)
    - 왜 BitNet b1.58은 native 학습에선 좋지만 기존 모델 변환은 quantization처럼 쉽지 않은지 문제정의.
+8j1. [Current Theory, Hypotheses, And Experiment Plan](./current_theory_hypothesis_plan.md)
+   - 지금까지의 이론, 반증된 가설, 통합 수식, I2_S-preserving vs non-I2_S 트랙, Colab/PC 분업, TurboQuant-style projection 후보, 다음 실험 순서를 한 문서로 압축한 현재 관제탑.
+8j2. [BitNet Conversion Compiler Plan](./bitnet_conversion_compiler_plan.md)
+   - 지금까지의 실험과 QuaRot/AWQ/SmoothQuant/PTQTP/TWLA/HAWQ/HAQ/BRECQ 문헌을 합쳐, b1.58 변환을 valid coordinate transform(`G`), estimated saliency(`S=phi(...)`), budgeted capacity 선택(`C`), representative adaptation(`A`)의 staged compiler 문제로 정의한다.
 8k. [Native BitNet Architecture Audit](./native_bitnet_architecture_audit.md)
    - 공개 BitNet 자료가 실제 구조(BitLinear, SubLN, relu2, native training, inference runtime)에 대해 말하는 것과 말하지 않는 것을 고정한다.
 8l. [Hybrid / Variable BitNet Conversion Plan](./hybrid_variable_bitnet_conversion_plan.md)
@@ -225,14 +233,20 @@ python scripts/rt113_storage_latency.py \
    - Colab을 실행할 수 있는 AI에게 그대로 줄 handoff prompt.
 8o. [Complex / Phase Rotation Probe Plan](./complex_phase_rotation_plan.md)
    - `e^{iθ}` pairwise phase rotation이 b1.58 ternary 변환을 더 쉽게 만드는지 나중에 볼 수 있는 후속 분석/후보 아이디어.
+8o2. [Weight-Only Sync Plan](./weight_only_sync_plan.md)
+   - 대표 데이터 없이 weight geometry만으로 FP checkpoint와 b1.58 checkpoint를 먼저 맞추는 data-free 초기화 후보. Equalization, signed/permutation rotation, Hadamard diagnostic, RMSNorm/scale correction, residual upper bound를 WSYNC ladder로 정리한다.
 8p. [Factual Gap Experiment Plan](./factual_gap_experiment_plan.md)
    - RT-129 이후 남은 open gap인 factual quality를 FACT-001 평가패널과 adaptation/objective 실험으로 검증하는 계획.
 8q. [Factual Recovery Master Runbook](./factual_recovery_master_runbook.md)
-   - RT-130 Outcome B 이후 FACT-002 instruction/mixed adaptation부터 FACT-003 objective 분기까지 한 번에 실행하는 single-flight runbook. 최신 상태: FACT-003C content-KL `lambda=0.2`가 현재 best, `lambda=0.1` 실패, `lambda=0.5` 대기.
+   - RT-130 Outcome B 이후 factual recovery 분기를 한 번에 실행하는 single-flight runbook. 최신 상태: content-KL `lambda=0.2`가 current best, small hard replay는 1.1B에서 과적합 위험, 다음은 `mu=0.25` 판정과 PopQA blend 1.1B.
+8q2. [FACT-003E Length-Balanced Replay Plan](./fact003e_length_balanced_replay_plan.md)
+   - FACT-003D의 short atomic replay가 PTQ/QAT식 representative data가 아니라는 약점을 검증하기 위해, 같은 protected facts를 short/sentence/chat/explain/long surface로 확장하는 3080용 실험 계획.
 8r. [Fair Comparison Framework](./fair_comparison_framework.md)
    - native BitNet, Q2_K, 우리 all-I2_S, 우리 hybrid를 처음부터 학습시간/후학습비용/파라미터/속도/품질로 공정 비교하는 scorecard.
 8r2. [RTX 3080 Parallel Queue](./box_3080_parallel_queue.md)
    - Colab이 긴 1.1B run을 돌리는 동안 로컬 RTX 3080 박스를 fast predictor/evaluator로 쓰는 작업 큐와 SSH 명령.
+8r3. [Conversion vs Native BitNet Training vs 2-bit Quantization](./conversion_vs_native_training_and_2bit.md)
+   - b1.58 변환이 native BitNet 재학습이 되어버리는지, Q2_K/2-bit quantization과 무엇이 다른지 비교하는 핵심 리스크 문서.
 8s. [Paper Series Plan](./paper_series_plan.md)
    - 지금까지의 결과를 여러 편의 논문/리포트로 나누는 publication roadmap. Paper 1 systems, Paper 2 conversion limits, Paper 3 content-KL, Paper 4 hybrid candidate.
 8t. [Paper Evidence Matrix](./paper_evidence_matrix.md)
@@ -251,6 +265,8 @@ python scripts/rt113_storage_latency.py \
    - MiniLLM/DistiLLM/AKL 안에서 content-KL의 위치, 안전한 claim, FACT-004 후보.
 8aa. [Literature Deep Dive 06: Precision Scaling Laws](./literature_deep_dive_precision_scaling.md)
    - b1.58의 effective capacity 감소, undertrained quantization, mixed precision capacity budget, CAP-001..004 후보.
+8aa2. [Literature Deep Dive 07: Rotation / AWQ / SmoothQuant Stack](./literature_deep_dive_rotation_awq_smoothquant.md)
+   - QuaRot, SpinQuant, AWQ, SmoothQuant를 PTQTP/TWLA와 함께 묶어, output-preserving transform, salient-channel protection, capacity plane allocation을 우리 WSYNC/PopQA/hybrid 경로에 어떻게 붙일지 정리한다.
 8ab. [Paper 1: I2_S Systems](./paper_1_i2s_systems.md)
    - faithful export, x86 I2_S parity, storage/speed scale law.
 8ac. [Paper 2: Conversion Limits](./paper_2_conversion_limits.md)
@@ -282,20 +298,30 @@ flowchart TD
   K --> M["packed_ternary_format_plan.md"]
   M --> R["bitnet_cpp_export_scoping.md"]
   R --> U["scaleup_target_roadmap.md"]
+  U --> QW["qwen7b_goalpost_plan.md"]
   U --> V["quality_recovery_plan.md"]
   V --> W["g1_budget_scaling_runbook.md"]
   W --> X["g5_baseline_plan.md"]
   X --> Y["mixed_bit_dp_plan.md"]
   Y --> Z["why_b158_conversion_is_hard.md"]
+  Z --> CTH["current_theory_hypothesis_plan.md"]
+  CTH --> BCC["bitnet_conversion_compiler_plan.md"]
   Z --> NA["native_bitnet_architecture_audit.md"]
   NA --> HV["hybrid_variable_bitnet_conversion_plan.md"]
   Z --> QA["quantization_aware_b158_conversion_plan.md"]
   QA --> QP["colab_quantization_aware_prompt.md"]
   QA --> PR["complex_phase_rotation_plan.md"]
+  QA --> WS["weight_only_sync_plan.md"]
+  BCC --> WS
+  BCC --> HV
+  BCC --> FG
+  BCC --> LM
   V --> FG["factual_gap_experiment_plan.md"]
   FG --> FR["factual_recovery_master_runbook.md"]
+  FR --> FL["fact003e_length_balanced_replay_plan.md"]
   FG --> FC["fair_comparison_framework.md"]
   FR --> BQ["box_3080_parallel_queue.md"]
+  FC --> CVQ["conversion_vs_native_training_and_2bit.md"]
   FC --> PS["paper_series_plan.md"]
   PS --> PEM["paper_evidence_matrix.md"]
   PS --> LM["literature_positioning_map.md"]
@@ -305,6 +331,7 @@ flowchart TD
   LM --> DPT2["literature_deep_dive_pt2_llm.md"]
   LM --> DKD["literature_deep_dive_kd_kl.md"]
   LM --> DPS["literature_deep_dive_precision_scaling.md"]
+  LM --> DROT["literature_deep_dive_rotation_awq_smoothquant.md"]
   PEM --> P1["paper_1_i2s_systems.md"]
   LM --> P2["paper_2_conversion_limits.md"]
   LM --> P4["paper_4_hybrid_capacity_candidate.md"]
@@ -345,20 +372,26 @@ flowchart TD
 | [bitnet_cpp_i2s_layout_audit.md](./bitnet_cpp_i2s_layout_audit.md) | RT-101 upstream I2_S byte layout 감사 + 매핑표 | GGUF writer 만들기 전 포맷 고정할 때 |
 | [bitnet_cpp_export_scoping.md](./bitnet_cpp_export_scoping.md) | GGUF/bitnet.cpp export 가능성, format mapping, export TC 초안 | Python reference 이후 실제 runtime으로 넘어갈 때 |
 | [scaleup_target_roadmap.md](./scaleup_target_roadmap.md) | Llama-160M -> gpt-oss-20b scale-up 순서와 gate | 어떤 공개 모델을 다음 목표로 삼을지 정할 때 |
+| [qwen7b_goalpost_plan.md](./qwen7b_goalpost_plan.md) | Qwen2.5-7B-Instruct를 최종 제품 골대로 두고 Qwen 1.5B/3B/7B ladder, 성공 기준, 환경을 역산 | 코앞 실험이 최종 쓸만한 모델로 이어지는지 확인할 때 |
 | [quality_recovery_plan.md](./quality_recovery_plan.md) | PTQ 붕괴 측정, CE-only recovery, I2_S 품질 보존, prompt 품질 평가 | 작고 빠른 모델이 실제로 쓸 만한지 판단할 때 |
 | [g1_budget_scaling_runbook.md](./g1_budget_scaling_runbook.md) | RT-120 / TRAIN-003 사전 점검, A100/L4 one-shot 명령, 성공/실패 판정 | 1.1B 회복률 0.48을 GPU 업그레이드로 보강하기 직전 |
 | [g5_baseline_plan.md](./g5_baseline_plan.md) | B0/B1/Q2_K/Q3_K/Q4_0/OURS baseline panel 설계 | "왜 기존 quantization이 아니라 이 방법인가"를 답할 때 |
 | [mixed_bit_dp_plan.md](./mixed_bit_dp_plan.md) | RT-123 sensitivity scan과 mixed-bit selector 초안. RT-123 이후 full additive DP는 보류 | higher-bit pockets를 후보 색인용으로만 참고할 때 |
 | [why_b158_conversion_is_hard.md](./why_b158_conversion_is_hard.md) | 기존 FP 모델을 b1.58로 변환하기 어려운 이유를 수학/통계/시스템 결과로 정리 | 프로젝트 질문을 다시 정의하고 claim을 좁힐 때 |
+| [current_theory_hypothesis_plan.md](./current_theory_hypothesis_plan.md) | 지금까지의 이론, 가설 판정, 통합 수식, I2_S-preserving/non-I2_S 트랙, Colab/PC 분업, TurboQuant-style projection 후보, 다음 실험 순서를 압축한 관제탑 | 현재 어디까지 왔고 다음 무엇을 해야 하는지 빠르게 정렬할 때 |
+| [bitnet_conversion_compiler_plan.md](./bitnet_conversion_compiler_plan.md) | b1.58 변환을 valid coordinate transform, saliency estimator, adaptive capacity, representative adaptation의 staged compiler 문제로 정의하는 상위 수식/가정/실행 계획 | WSYNC/PopQA/PTQTP-lite/hybrid 중 무엇을 먼저 실험할지 정할 때 |
 | [native_bitnet_architecture_audit.md](./native_bitnet_architecture_audit.md) | 공개 BitNet 자료의 실제 구조와 비공개/미확정 부분을 정리 | native BitNet이 그냥 LLaMA+ternary인지 판단할 때 |
 | [hybrid_variable_bitnet_conversion_plan.md](./hybrid_variable_bitnet_conversion_plan.md) | 1:1 all-I2_S 대신 가변 capacity/하이브리드 topology를 검증하는 HYBRID-001 계획 | factual gap을 capacity/topology 문제로 검증할 때 |
 | [quantization_aware_b158_conversion_plan.md](./quantization_aware_b158_conversion_plan.md) | quantization 기법을 b1.58 변환에 적용하는 RT-124..128 전체 실험계획, 가지치기, 결론 도달 규칙 | 다음 Colab 실험을 설계하거나 결과를 해석할 때 |
 | [colab_quantization_aware_prompt.md](./colab_quantization_aware_prompt.md) | Colab 실행 가능한 AI에게 줄 copy-paste prompt와 결과 템플릿 | 다른 실행자에게 RT-124를 넘길 때 |
 | [complex_phase_rotation_plan.md](./complex_phase_rotation_plan.md) | 복소수 위상 `e^{iθ}`를 pairwise real rotation으로 구현하는 후속 분석/후보 아이디어 | factual gap 이후 rotation 후보를 다시 볼지 판단할 때 |
+| [weight_only_sync_plan.md](./weight_only_sync_plan.md) | 대표 데이터 없이 weight-only equalization/rotation/scale-correction으로 FP와 b1.58을 먼저 맞추는 WSYNC 실험 사다리 | 작은/비대표 후학습 데이터가 암기 함정에 빠질 때, adaptation 전 초기화 후보를 검증할 때 |
 | [factual_gap_experiment_plan.md](./factual_gap_experiment_plan.md) | FACT-001 current factual gap panel과 FACT-002..003 adaptation/objective 개선 실험 설계 | RT-129 이후 factual quality gap을 다룰 때 |
 | [factual_recovery_master_runbook.md](./factual_recovery_master_runbook.md) | RT-130 결과 이후 FACT-002 instruction/mixed adaptation, FACT-003 분기, 구현 패킷, 문서화 체크포인트, Colab handoff prompt를 한 번에 묶은 실행 문서 | 다음 factual recovery run을 다른 실행자/Colab에 넘길 때 |
+| [fact003e_length_balanced_replay_plan.md](./fact003e_length_balanced_replay_plan.md) | short atomic replay가 대표 calibration/adaptation data가 아니라는 약점을 검증하는 length-mixed protected replay 계획과 3080 명령 | FACT-003D가 데이터 대표성 문제였는지 싸게 분리할 때 |
 | [fair_comparison_framework.md](./fair_comparison_framework.md) | native BitNet / Q2_K / ours all-I2_S / ours hybrid를 학습비용, 파라미터, storage, speed, 품질로 비교하는 표준 scorecard | 큰 LLaMA 적용이나 논문 비교를 공정하게 정리할 때 |
 | [box_3080_parallel_queue.md](./box_3080_parallel_queue.md) | Colab 본 학습 중 RTX 3080 box가 맡을 seed/eval/smoke 작업 큐와 SSH 명령 | 로컬 PC를 놀리지 않고 다음 분기 준비를 할 때 |
+| [conversion_vs_native_training_and_2bit.md](./conversion_vs_native_training_and_2bit.md) | b1.58 변환이 native BitNet 재학습과 어떻게 다르고, Q2_K/2-bit quantization과 어떻게 공정 비교해야 하는지 정리 | adaptation cost가 너무 커지는지 판단하거나 목표 tier를 정할 때 |
 | [paper_series_plan.md](./paper_series_plan.md) | 여러 편의 논문/리포트로 결과를 나누는 전체 지도 | 무엇을 어느 논문에 넣을지 헷갈릴 때 |
 | [paper_evidence_matrix.md](./paper_evidence_matrix.md) | 논문별 known result, blank cell, claim guardrail을 모은 중앙 증거표 | 논문 초안에 어떤 숫자를 넣고 어떤 칸을 비워둘지 정할 때 |
 | [literature_positioning_map.md](./literature_positioning_map.md) | BitNet, PTQ ternarization, rotation, precision scaling, factual forgetting 문헌과 우리 결과의 위치를 비교 | 우리가 가는 방향이 이미 있는지, 더 앞선 방법에서 무엇을 빌릴지 볼 때 |
@@ -368,6 +401,7 @@ flowchart TD
 | [literature_deep_dive_pt2_llm.md](./literature_deep_dive_pt2_llm.md) | PT2-LLM의 asymmetric ternary grid, ITF, activation-aware grid alignment, structural reordering을 I2_S projection 질문으로 정리 | `mu + alpha*T` 힌트를 pure I2_S 또는 hybrid로 나눠 검증할 때 |
 | [literature_deep_dive_kd_kl.md](./literature_deep_dive_kd_kl.md) | MiniLLM, DistiLLM, AKL 속에서 content-KL을 vocabulary-support intervention으로 위치시킨다 | FACT-004 factual objective를 설계할 때 |
 | [literature_deep_dive_precision_scaling.md](./literature_deep_dive_precision_scaling.md) | precision scaling law, undertrained quantization, mixed quantization을 effective-capacity 관점으로 정리 | pure b1.58이 부족할 때 strips/planes/hybrid capacity를 정당화할 때 |
+| [literature_deep_dive_rotation_awq_smoothquant.md](./literature_deep_dive_rotation_awq_smoothquant.md) | QuaRot/SpinQuant/AWQ/SmoothQuant와 PTQTP/TWLA를 하나의 conversion stack으로 해석해 WSYNC, PopQA blend, adaptive trit-plane 경로를 정렬 | rotation/equalization/activation-aware scaling 중 무엇을 먼저 빌릴지 정할 때 |
 | [paper_1_i2s_systems.md](./paper_1_i2s_systems.md) | I2_S export/runtime/storage/speed scale law skeleton | systems 논문을 작성할 때 |
 | [paper_2_conversion_limits.md](./paper_2_conversion_limits.md) | one-shot b1.58 변환 실패와 quantizer 한계 skeleton | negative/conversion-limit 논문을 작성할 때 |
 | [paper_3_content_kl_factual_recovery.md](./paper_3_content_kl_factual_recovery.md) | FACT objective/content-KL factual recovery skeleton | λ sweep과 factual recovery 논문을 작성할 때 |
@@ -466,30 +500,32 @@ flowchart TD
 
 다음:
 
-1. **FACT-003C content-KL sweep 마감:** `lambda=0.2`가 현재 best, `lambda=0.1`은 실패.
-   `lambda=0.5` 결과를 받아 best lambda를 고정한다.
-2. **Fair scorecard 업데이트:** [Fair Comparison Framework](./fair_comparison_framework.md)에
-   best recipe의 후학습 토큰/시간, storage, speed, PPL, fact score를 넣는다.
-3. **HYBRID-001A late-layer capacity probe:** content-KL이 `fact_rate 0.3~0.4`로 못 올라가면
-   [Hybrid / Variable BitNet Conversion Plan](./hybrid_variable_bitnet_conversion_plan.md)에 따라
-   last 1/2/4 block F16 restore, attention-only restore, MLP-only restore를 측정한다.
-4. **HYBRID-001B/C:** late restore가 fact_rate를 움직이면 Q2/Q3 hybrid 또는 multi-strip
-   ternary/residual로 비용을 낮춘다.
-5. **Complex/phase rotation:** 메인 트랙이 아니라 후속 분석/후보 아이디어다. cheap
-   sign/swap·Hadamard-like phase만 나중에 좁게 검증한다.
-6. Mac M5 I2_S/TL1은 보류한다. 필요하면 upstream bug report용 최소 재현으로 분리한다.
+1. **FACT-003D `mu=0.25` 1.1B 결과 확인:** content-KL baseline `0.185`를 넘지 못하면
+   small hard replay는 보조 진단으로 강등한다.
+2. **FACT-003H PopQA blend 1.1B:** tiny hard facts가 아니라 representative factual stream이
+   train/heldout/FACT를 함께 움직이는지 본다. 현재 가장 중요한 다음 run이다.
+3. **WSYNC-001/002 160M:** data-free/weight-only equalization, row-scale, signed permutation,
+   Hadamard diagnostic을 좁게 돌려 coordinate transform이 출발점을 개선하는지 확인한다.
+4. **Turbo projection probe:** KV cache에는 RHT/sphere/codebook reference, weight에는
+   `Q(W H^T) Hx` H-I2S linear probe를 돌린다. PyTorch reference에서 이득이 없으면 kernel
+   작업으로 넘어가지 않는다.
+5. **Saliency + selective capacity:** PopQA/instruction activation으로 `S=phi(...)`를 추정한 뒤
+   top-k protection, two-plane/PTQTP-lite, Q2/Q3 pockets를 random-k와 비교한다.
+6. **Scale ladder:** 1.1B에서 실제 component gain이 확인된 뒤 Gemma/Qwen small audit,
+   마지막으로 Qwen 7B-class goalpost로 넘어간다.
+7. Mac M5 I2_S/TL1은 보류한다. 필요하면 upstream bug report용 최소 재현으로 분리한다.
 
 이전 보류 항목 중 packed reference ladder는 완료됐고, export 경로도 판별됐다
 (per-tensor-native → I2_S 직행). 남은 다음 축:
 
-- factual gap: RT-130으로 measured gap 확정, FACT-002 data swap 실패, FACT-003A answer-mask 부분 성공, FACT-003B raw-KL 실패, FACT-003C content-KL `lambda=0.2` WIN. 현재는 `lambda=0.5` 대기
+- factual gap: RT-130으로 measured gap 확정, FACT-002 data swap 실패, FACT-003A answer-mask 부분 성공, FACT-003B raw-KL 실패, FACT-003C content-KL `lambda=0.2` WIN, FACT-004A lm_head unfreeze 폐기, HYBRID-001A post-hoc FP restore 폐기, FACT-003D small hard replay는 1.1B에서 과적합 위험 확인. 현재는 `mu=0.25` 결과와 PopQA blend 1.1B가 다음 분기
 - quantization-aware b1.58 conversion: RT-124~127로 종결. quantizer는 병목이 아님
 - complex/phase rotation probe: 메인 트랙이 아니라 후속 분석/후보 아이디어. arbitrary rotation이 아니라 sign/swap·Hadamard-like cheap phase만 나중에 좁게 검증
 - mixed-bit DP: all-I2_S의 품질/생성 한계를 selective Q2/Q3 업그레이드로 보완하는 보조축. RT-123 결과상 full additive DP는 보류
 - variance: 논문용 설득력을 위해 seed 반복 추가
 - groupwise GGUF 확장 / custom kernel: export 트랙이면 불필요. groupwise의 약간 더 나은
   reconstruction을 살리려는 연구용으로만 선택적
-- TurboQuant KV cache 구현
+- TurboQuant-style projection: KV cache RHT/sphere/codebook과 weight H-I2S projection을 PyTorch reference로 먼저 검증. 이득이 있을 때만 kernel 구현
 
 단, raw Colab JSON이 현재 local workspace에 없으므로 논문식 정량 주장 전에는
 보고서를 회수하거나 sweep을 재실행한다.

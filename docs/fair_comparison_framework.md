@@ -8,6 +8,8 @@ Related:
 - [Paper Draft](./paper_draft.md)
 - [Paper Evidence Matrix](./paper_evidence_matrix.md)
 - [Factual Gap Experiment Plan](./factual_gap_experiment_plan.md)
+- [Conversion vs Native BitNet Training vs 2-bit Quantization](./conversion_vs_native_training_and_2bit.md)
+- [Qwen 7B Goalpost Plan](./qwen7b_goalpost_plan.md)
 - [Hybrid / Variable BitNet Conversion Plan](./hybrid_variable_bitnet_conversion_plan.md)
 - [G5 Baseline Comparison Plan](./g5_baseline_plan.md)
 - [Native BitNet Architecture Audit](./native_bitnet_architecture_audit.md)
@@ -19,12 +21,21 @@ native BitNet on quality after using a tiny fraction of its training compute, an
 is not trying to beat mature Q2_K on pure PPL while using fewer bits and a different
 runtime.
 
+The hardest current risk is documented separately:
+[Conversion vs Native BitNet Training vs 2-bit Quantization](./conversion_vs_native_training_and_2bit.md).
+It asks whether b1.58 conversion can remain cheaper than native BitNet training and
+how to compare it fairly against Q2_K/2-bit quantization.
+
 The product goal is:
 
 ```text
 turn existing public models into small, fast, useful low-resource artifacts
 without paying native-from-scratch training cost.
 ```
+
+The current visible product goalpost is Qwen 7B, tracked in
+[Qwen 7B Goalpost Plan](./qwen7b_goalpost_plan.md). Smaller TinyLlama/160M runs are
+method-discovery ladders, not the final product target.
 
 So every comparison must include:
 

@@ -8,6 +8,7 @@ Related docs:
 - [Memory-Traffic-First BitNet Plan](./memory_traffic_first_plan.md)
 - [Colab Validation Summary](./colab_validation_summary.md)
 - [Research Signal Note](./research_signal_note.md)
+- [Qwen 7B Goalpost Plan](./qwen7b_goalpost_plan.md)
 
 ## Purpose
 
@@ -25,8 +26,8 @@ This roadmap fixes the order:
 ```text
 1. Llama-160M first  -> fast, LLaMA-shaped, linear-dominated scale-up demo
 2. Quality Recovery -> prove the small/fast artifact can regain useful answers
-3. gpt-oss-20b next -> socially useful public target, MoE/runtime audit required
-4. gpt-oss-120b     -> projection only until 20b is understood
+3. Qwen 7B goalpost -> popular dense-ish public target for actual poor-resource usefulness
+4. gpt-oss remains out of scope for ternary-MoE unless a separate runtime project starts
 ```
 
 The goal is not to chase the biggest model first. The goal is to keep the
@@ -128,7 +129,32 @@ Run this before any gpt-oss quality claim:
 
 This track evaluates **same-quality output**, not identical strings.
 
-## Why gpt-oss Later
+## 2026-06-27 Update: Qwen 7B Replaces gpt-oss As The Visible Goalpost
+
+RT-117/118 showed that `gpt-oss-20b` is already MXFP4/MoE and that ternary-MoE has
+poor near-term ROI for this project. The executable product goalpost is now:
+
+```text
+Qwen/Qwen2.5-7B-Instruct
+```
+
+Rationale:
+
+- popular public model with a large local-inference ecosystem;
+- Apache 2.0;
+- dense-ish transformer path closer to our LLaMA pipeline than gpt-oss MoE;
+- multilingual support including Korean;
+- meaningful Q2_K/GGUF baseline availability.
+
+See [Qwen 7B Goalpost Plan](./qwen7b_goalpost_plan.md).
+
+The near-term ladder is:
+
+```text
+TinyLlama-1.1B FACT recipe -> Qwen metadata audit -> Qwen 1.5B/3B smoke -> Qwen 7B
+```
+
+## Why gpt-oss Later / Out Of Scope
 
 Target after Llama-160M: `gpt-oss-20b`.
 
