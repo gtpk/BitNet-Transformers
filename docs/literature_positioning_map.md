@@ -9,6 +9,12 @@ Related:
 
 - [Paper Series Plan](./paper_series_plan.md)
 - [Paper Evidence Matrix](./paper_evidence_matrix.md)
+- [Literature Deep Dive 01: PTQTP](./literature_deep_dive_ptqtp.md)
+- [Literature Deep Dive 02: CAT-Q](./literature_deep_dive_catq.md)
+- [Literature Deep Dive 03: TWLA](./literature_deep_dive_twla.md)
+- [Literature Deep Dive 04: PT2-LLM](./literature_deep_dive_pt2_llm.md)
+- [Literature Deep Dive 05: KD / KL Objectives](./literature_deep_dive_kd_kl.md)
+- [Literature Deep Dive 06: Precision Scaling Laws](./literature_deep_dive_precision_scaling.md)
 - [Fair Comparison Framework](./fair_comparison_framework.md)
 - [Quantization-Aware b1.58 Conversion Plan](./quantization_aware_b158_conversion_plan.md)
 - [Hybrid / Variable BitNet Conversion Plan](./hybrid_variable_bitnet_conversion_plan.md)
@@ -67,6 +73,13 @@ These are the closest to our conversion goal.
 | PTQTP (2025/2026) | dual ternary trit-planes, progressive approximation, model-agnostic deployment | admits pure 1.58 may be under-capacity and uses `2 x 1.58` capacity | multi-strip / trit-plane idea for Paper 4 |
 | TWLA (2026) | E2M asymmetric ternary quantizer, Kronecker orthogonal tri-modal shaping, inter-layer aware activation mixed precision | W1.58A4, activation-aware, rotation-aware, inter-layer-aware | our rotation idea is validated, but should be structured and layer-aware |
 | CAT-Q (2026) | learnable modulation + softened ternarization; 512 calibration samples; 1.7B-8B and 14B-235B claims | far ahead on scale and practical PTQ claim | soft ternarization / learnable modulation as a stronger baseline |
+
+Deep dives:
+
+- [PTQTP deep dive](./literature_deep_dive_ptqtp.md)
+- [CAT-Q deep dive](./literature_deep_dive_catq.md)
+- [TWLA deep dive](./literature_deep_dive_twla.md)
+- [PT2-LLM deep dive](./literature_deep_dive_pt2_llm.md)
 
 Takeaway:
 
@@ -175,6 +188,10 @@ Unsafe claim:
 content-KL is a generally novel KL method.
 ```
 
+Deep dive:
+
+- [KD / KL objectives deep dive](./literature_deep_dive_kd_kl.md)
+
 ## Where Others Are Further Ahead
 
 | area | stronger external work | implication |
@@ -204,16 +221,29 @@ Priority order if FACT-003C plateaus:
 Before claiming Paper 2 broadly, compare against at least one strong recent method:
 
 ```text
-CAT-Q if code is runnable
-TWLA if code is runnable
-PT2-LLM/PTQTP if code is available enough
+  CAT-Q if code is runnable
+  PT2-LLM if code/formulas are enough for PT2-lite
+  TWLA if code is runnable
+  PTQTP if code is available enough
 ```
 
 Minimum goal:
 
 ```text
-Run one method on Llama-160M or TinyLlama-1.1B with the same factual/PPL/runtime
+  Run one method on Llama-160M or TinyLlama-1.1B with the same factual/PPL/runtime
 scorecard.
+```
+
+### A2. Stronger Factual Objective Variants
+
+Before inventing another factual loss from scratch, combine content masking with known
+KD objective axes:
+
+```text
+content-RKL from MiniLLM
+skew-content-KL from DistiLLM
+content-AKL from AKL
+sparse on/off-policy content-KL if exposure bias remains
 ```
 
 ### B. Structured Rotation, Not Free-Form Complex Numbers
@@ -240,6 +270,10 @@ W ~= alpha_1*T_1 + alpha_2*T_2 + ...
 This is exactly the user's "increase strips/channels/layers because 1.58 alone cannot
 hold the function" intuition. It is more plausible than signed-epsilon because it adds
 rank/capacity rather than merely changing the zero code.
+
+Deep dive:
+
+- [Precision scaling laws deep dive](./literature_deep_dive_precision_scaling.md)
 
 ### D. Asymmetric Ternary Parameterization
 

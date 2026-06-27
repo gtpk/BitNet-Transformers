@@ -237,13 +237,25 @@ python scripts/rt113_storage_latency.py \
    - 논문별 known data, blank cells, claim 가능 범위를 한 표로 고정하는 중앙 증거표.
 8u. [Literature Positioning Map](./literature_positioning_map.md)
    - BitNet/PTQ/rotation/precision-scaling 관련 논문들과 우리 결과의 위치, 더 앞선 방법, 빌릴 아이디어를 정리한 외부 문헌 지도.
-8v. [Paper 1: I2_S Systems](./paper_1_i2s_systems.md)
+8v. [Literature Deep Dive 01: PTQTP](./literature_deep_dive_ptqtp.md)
+   - PTQTP의 dual trit-plane 방법, 우리와의 직접 경쟁 지점, 한계/검증 질문, HYBRID-001에 줄 인사이트.
+8w. [Literature Deep Dive 02: CAT-Q](./literature_deep_dive_catq.md)
+   - CAT-Q의 learnable modulation/softened ternarization, one-plane I2_S 유지 가능성, CAT-Q-lite 검증 아이디어.
+8x. [Literature Deep Dive 03: TWLA](./literature_deep_dive_twla.md)
+   - TWLA의 E2M asymmetric ternary, Kronecker rotation, inter-layer-aware activation mixed precision, TWLA-lite 검증 아이디어.
+8y. [Literature Deep Dive 04: PT2-LLM](./literature_deep_dive_pt2_llm.md)
+   - PT2-LLM의 asymmetric `mu + alpha*T`, activation-aware grid alignment, structural reordering, PT2-lite 검증 아이디어.
+8z. [Literature Deep Dive 05: KD / KL Objectives](./literature_deep_dive_kd_kl.md)
+   - MiniLLM/DistiLLM/AKL 안에서 content-KL의 위치, 안전한 claim, FACT-004 후보.
+8aa. [Literature Deep Dive 06: Precision Scaling Laws](./literature_deep_dive_precision_scaling.md)
+   - b1.58의 effective capacity 감소, undertrained quantization, mixed precision capacity budget, CAP-001..004 후보.
+8ab. [Paper 1: I2_S Systems](./paper_1_i2s_systems.md)
    - faithful export, x86 I2_S parity, storage/speed scale law.
-8w. [Paper 2: Conversion Limits](./paper_2_conversion_limits.md)
+8ac. [Paper 2: Conversion Limits](./paper_2_conversion_limits.md)
    - 왜 기존 모델 b1.58 변환이 ordinary quantization이 아닌지, one-shot/quantizer failure 정리.
-8x. [Paper 3: Content-KL Factual Recovery](./paper_3_content_kl_factual_recovery.md)
+8ad. [Paper 3: Content-KL Factual Recovery](./paper_3_content_kl_factual_recovery.md)
    - FACT-001..003C, raw KL 실패와 content-KL 성공, lambda sweep 계획.
-8y. [Paper 4: Hybrid Capacity Candidate](./paper_4_hybrid_capacity_candidate.md)
+8ae. [Paper 4: Hybrid Capacity Candidate](./paper_4_hybrid_capacity_candidate.md)
    - content-KL plateau 이후 mostly-I2_S + selective capacity 가능성.
 9. [Groupwise Alpha Hypothesis](./groupwise_alpha_hypothesis.md)
    - 왜 groupwise `alpha*T`가 per-tensor BitNet b1.58보다 품질을 더 잘 보존할 수 있는지 설명한다.
@@ -284,6 +296,12 @@ flowchart TD
   FC --> PS["paper_series_plan.md"]
   PS --> PEM["paper_evidence_matrix.md"]
   PS --> LM["literature_positioning_map.md"]
+  LM --> DPT["literature_deep_dive_ptqtp.md"]
+  LM --> DCAT["literature_deep_dive_catq.md"]
+  LM --> DTW["literature_deep_dive_twla.md"]
+  LM --> DPT2["literature_deep_dive_pt2_llm.md"]
+  LM --> DKD["literature_deep_dive_kd_kl.md"]
+  LM --> DPS["literature_deep_dive_precision_scaling.md"]
   PEM --> P1["paper_1_i2s_systems.md"]
   LM --> P2["paper_2_conversion_limits.md"]
   LM --> P4["paper_4_hybrid_capacity_candidate.md"]
@@ -340,6 +358,12 @@ flowchart TD
 | [paper_series_plan.md](./paper_series_plan.md) | 여러 편의 논문/리포트로 결과를 나누는 전체 지도 | 무엇을 어느 논문에 넣을지 헷갈릴 때 |
 | [paper_evidence_matrix.md](./paper_evidence_matrix.md) | 논문별 known result, blank cell, claim guardrail을 모은 중앙 증거표 | 논문 초안에 어떤 숫자를 넣고 어떤 칸을 비워둘지 정할 때 |
 | [literature_positioning_map.md](./literature_positioning_map.md) | BitNet, PTQ ternarization, rotation, precision scaling, factual forgetting 문헌과 우리 결과의 위치를 비교 | 우리가 가는 방향이 이미 있는지, 더 앞선 방법에서 무엇을 빌릴지 볼 때 |
+| [literature_deep_dive_ptqtp.md](./literature_deep_dive_ptqtp.md) | PTQTP의 dual trit-plane 방법, 우리 실험과의 겹침, 한계/검증 질문, 다음 reproduction 계획 | multi-strip/adaptive plane 방향을 잡을 때 |
+| [literature_deep_dive_catq.md](./literature_deep_dive_catq.md) | CAT-Q의 learnable modulation, softened ternarization, sliding-layer optimization과 우리 one-plane I2_S 경로의 연결 가능성 | multi-plane으로 가기 전 stronger one-plane PTQ를 검증할 때 |
+| [literature_deep_dive_twla.md](./literature_deep_dive_twla.md) | TWLA의 E2M asymmetric ternary, Kronecker rotation, activation mixed precision, inter-layer allocation을 우리 실험과 연결 | rotation/activation-bit/interaction-aware selector를 진지한 후보로 볼 때 |
+| [literature_deep_dive_pt2_llm.md](./literature_deep_dive_pt2_llm.md) | PT2-LLM의 asymmetric ternary grid, ITF, activation-aware grid alignment, structural reordering을 I2_S projection 질문으로 정리 | `mu + alpha*T` 힌트를 pure I2_S 또는 hybrid로 나눠 검증할 때 |
+| [literature_deep_dive_kd_kl.md](./literature_deep_dive_kd_kl.md) | MiniLLM, DistiLLM, AKL 속에서 content-KL을 vocabulary-support intervention으로 위치시킨다 | FACT-004 factual objective를 설계할 때 |
+| [literature_deep_dive_precision_scaling.md](./literature_deep_dive_precision_scaling.md) | precision scaling law, undertrained quantization, mixed quantization을 effective-capacity 관점으로 정리 | pure b1.58이 부족할 때 strips/planes/hybrid capacity를 정당화할 때 |
 | [paper_1_i2s_systems.md](./paper_1_i2s_systems.md) | I2_S export/runtime/storage/speed scale law skeleton | systems 논문을 작성할 때 |
 | [paper_2_conversion_limits.md](./paper_2_conversion_limits.md) | one-shot b1.58 변환 실패와 quantizer 한계 skeleton | negative/conversion-limit 논문을 작성할 때 |
 | [paper_3_content_kl_factual_recovery.md](./paper_3_content_kl_factual_recovery.md) | FACT objective/content-KL factual recovery skeleton | λ sweep과 factual recovery 논문을 작성할 때 |
