@@ -34,6 +34,9 @@ ssh -o BatchMode=yes gtpk@192.168.0.9 "hostname & ver"
 Run remote commands non-interactively from the Mac with `ssh -o BatchMode=yes gtpk@192.168.0.9 "<cmd>"`.
 cmd.exe quoting: separate statements with `&`, use `%VAR%` for env vars, `where`/`dir`/`findstr`.
 
+**Full SSH guide** (key setup, sshd/firewall, cmd quoting, long-job patterns, troubleshooting):
+[SSH Access to the Windows GPU Server](./ssh_windows_access.md).
+
 ## 2. Machine spec (verified 2026-06-27)
 
 ```text
