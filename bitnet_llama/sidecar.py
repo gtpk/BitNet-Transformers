@@ -81,12 +81,15 @@ _TARGET_GROUPS = {
 }
 
 
-def wrap_targets_with_lora(model, rank, alpha, target="all", init="zero", top_layers=0, n_layers=0):
+def wrap_targets_with_lora(model, rank, alpha, target="all", init="zero", top_layers=0, n_layers=0,
+                           layer_names=None):
     """Replace each PerTensorBitLinear (within the target group) with an I2SLoRALinear. Returns the
-    count wrapped. target in {all, attn, mlp, top_saliency}; top_saliency wraps only the last
-    `top_layers` transformer blocks (a cheap saliency proxy)."""
+    count wrapped. layer_names (exact module-name list, EGROW-002) OVERRIDES the group: wrap only
+    those. Else target in {all, attn, mlp, top_saliency}; top_saliency wraps the last `top_layers`
+    blocks."""
     if rank <= 0:
         return 0
+    names_set = set(layer_names) if layer_names else None
     suffixes = _TARGET_GROUPS.get(target if target != "top_saliency" else "all")
     import re
     lo = (n_layers - top_layers) if (target == "top_saliency" and top_layers and n_layers) else None
@@ -94,12 +97,16 @@ def wrap_targets_with_lora(model, rank, alpha, target="all", init="zero", top_la
     for name, mod in list(model.named_modules()):
         if not isinstance(mod, PerTensorBitLinear):
             continue
-        if suffixes is not None and not any(name.endswith(s) for s in suffixes):
-            continue
-        if lo is not None:
-            m = re.search(r"\.layers\.(\d+)\.", name + ".")
-            if not (m and int(m.group(1)) >= lo):
+        if names_set is not None:
+            if name not in names_set:
                 continue
+        else:
+            if suffixes is not None and not any(name.endswith(s) for s in suffixes):
+                continue
+            if lo is not None:
+                m = re.search(r"\.layers\.(\d+)\.", name + ".")
+                if not (m and int(m.group(1)) >= lo):
+                    continue
         _set_module(model, name, I2SLoRALinear(mod, rank, alpha, init))
         wrapped += 1
     return wrapped

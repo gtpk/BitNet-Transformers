@@ -436,6 +436,7 @@ def main():
                     help="SIDE: also adapt the ternary base (co-adapted, SIDE-002); default = frozen base, LoRA only")
     ap.add_argument("--sidecar-init", choices=["zero", "random", "svd_residual"], default="zero")
     ap.add_argument("--sidecar-top-layers", type=int, default=4, help="SIDE: blocks wrapped when --sidecar-target top_saliency")
+    ap.add_argument("--sidecar-layers", default="", help="EGROW-002: comma list of exact module names to wrap (overrides --sidecar-target)")
     ap.add_argument("--metrics-out", type=Path, default=None,
                     help="append per-log-step metrics as jsonl (put on Drive to survive VM recycle)")
     ap.add_argument("--tb-logdir", type=Path, default=None,
@@ -516,9 +517,11 @@ def main():
     n_side = 0
     if args.sidecar_rank > 0:  # SIDE: wrap target ternary linears with a low-rank LoRA sidecar
         n_layers_cfg = getattr(model.config, "num_hidden_layers", 0)
+        side_layers = [s.strip() for s in args.sidecar_layers.split(",") if s.strip()] or None
         n_side = wrap_targets_with_lora(model, args.sidecar_rank, args.sidecar_alpha,
                                         target=args.sidecar_target, init=args.sidecar_init,
-                                        top_layers=args.sidecar_top_layers, n_layers=n_layers_cfg)
+                                        top_layers=args.sidecar_top_layers, n_layers=n_layers_cfg,
+                                        layer_names=side_layers)
         model.to(device=device, dtype=tdtype)
         acct = sidecar_accounting(model)
         print(f"SIDE: rank={args.sidecar_rank} alpha={args.sidecar_alpha} target={args.sidecar_target} "
