@@ -57,6 +57,89 @@ Our twist:
 expand only inside an I2_S-rooted artifact, using STE instability as a locator.
 ```
 
+## Corrected Projection View
+
+It is useful to describe b1.58 conversion as projection, but this is only a
+modeling frame. I2_S is not a convex linear subspace. It is a discrete codebook:
+
+```text
+M_I2S = { gamma * T | T_ij in {-1,0,+1}, gamma > 0 }
+```
+
+So:
+
+```text
+W -> Q_I2S(W)
+```
+
+is better described as:
+
+```text
+discrete constrained approximation
+```
+
+not a clean Euclidean projection with a unique solution.
+
+The product-relevant problem is also not pure weight MSE. The layer matters only
+through its input distribution:
+
+```text
+Q*(W) = argmin_Q E_x || W x - Q(W) x ||^2
+```
+
+and the model matters only through final task behavior:
+
+```text
+min  L_task(f_Q)
+```
+
+Therefore the more honest objective is:
+
+```text
+min_{G, q, a}
+  L_val(f_{G,q,a})
+  + lambda_mem * Bytes(q,a)
+  + lambda_lat * Latency(q,a)
+  + lambda_aux * AuxCost(a)
+```
+
+where:
+
+```text
+G = cheap coordinate transform
+q = I2_S-compatible ternary trunk
+a = small auxiliary capacity
+```
+
+with constraints:
+
+```text
+q stays I2_S
+a stays small
+I2_S remains the trunk
+```
+
+Coordinate transforms are only allowed if they are cheap or foldable:
+
+```text
+diagonal scale
+signed permutation
+block-Hadamard / RHT
+small structured orthogonal transform
+```
+
+Dense learned rotation is only an upper-bound diagnostic unless it can be
+rewritten into a cheap I2_S-rooted transform.
+
+Current evidence:
+
+```text
+WSYNC scaling failed.
+Fixed block-Hadamard H-I2S failed.
+Therefore data-free projection tricks are not trusted until they beat behavior,
+not only reconstruction.
+```
+
 ## Why Entropy Alone Is Not Enough
 
 A layer can have high code entropy for three different reasons:
@@ -83,6 +166,83 @@ high temporal instability
 
 If growth does not improve held-out FACT/CE, the instability was not useful
 evidence. It was either optimizer noise, data mismatch, or STE mismatch.
+
+This is the central falsification rule:
+
+```text
+top-k layers by bottleneck_score must beat random-k layers.
+```
+
+If top-k does not beat random-k, the entropy score is just a nice-looking
+diagnostic, not a capacity locator.
+
+## EGROW-001 Result: Sensitivity, Not Instability
+
+EGROW-001 has now been run on 160M with two seeds.
+
+Result:
+
+```text
+top-8 bottleneck overlap across seeds 41/42: 7/8
+top blocks: {0, 3, 9, 10, 11}
+not last-layer-only
+```
+
+Shared top layers:
+
+```text
+layers.0.mlp.down_proj
+layers.3.mlp.down_proj
+layers.9.mlp.down_proj
+layers.10.mlp.down_proj
+layers.11.mlp.down_proj
+layers.9.self_attn.o_proj
+layers.11.self_attn.o_proj
+```
+
+Honest correction:
+
+```text
+flip_rate ~= 0.000
+temporal_entropy ~= 0.002
+```
+
+The ternary codes settle quickly. They do not keep flipping. Therefore the
+original intuition:
+
+```text
+frequent ternary flipping => capacity bottleneck
+```
+
+is not supported at 160M.
+
+What did work:
+
+```text
+B_l is driven by output_residual x task_saliency.
+```
+
+So EGROW is no longer "entropy proves the layer is confused." It is now:
+
+```text
+use sensitivity-weighted residual to locate where I2_S loses important function.
+```
+
+The down-proj-heavy result also matches quantization literature intuition:
+
+```text
+MLP down_proj maps expanded intermediate channels back to hidden size,
+so outlier/salient modes can be concentrated there.
+```
+
+Keep the temporal-instability metrics in the logger because they are useful
+false-positive controls, but do not expect them to drive the ranking.
+
+Archived result:
+
+```text
+reports/egrow_160m_layer_instability.md
+```
 
 ## Signals To Log
 
@@ -307,7 +467,7 @@ unstable, it remains an I2_S-rooted conversion method.
 
 ## Immediate Next Work
 
-Implement only the logger first.
+Do not start by adding capacity. Implement only the logger first.
 
 Required output:
 
@@ -338,6 +498,176 @@ and are not identical to "last layers only" by construction.
 ```
 
 Only then should SIDE-001 use the ranking instead of all-layer sidecars.
+
+## Detailed Experiment Ladder
+
+### EGROW-001: Instrumentation Only
+
+Status:
+
+```text
+DONE: first success condition met.
+```
+
+Goal:
+
+```text
+find whether layer instability is measurable and stable
+```
+
+Run on PC / 160M:
+
+```text
+model: Llama-160M
+recipe: current content-KL / PopQA-compatible adaptation recipe
+no sidecar
+no extra plane
+log every N steps
+```
+
+Outputs:
+
+```text
+reports/egrow_160m_layer_instability_seed41.json
+reports/egrow_160m_layer_instability_seed42.json
+reports/egrow_160m_layer_instability_summary.md
+```
+
+Pass:
+
+```text
+MET:
+  top-8 overlap 7/8 across seeds
+  not last-layer-only
+  high residual + FACT saliency drives the ranking
+```
+
+Fail:
+
+```text
+rankings are random across seeds
+or the score is dominated by a single noisy metric
+```
+
+If fail:
+
+```text
+do not add sidecars from entropy;
+return to data/objective or plain SIDE-001 all-layer smoke.
+```
+
+Decision:
+
+```text
+proceed to EGROW-002,
+but interpret the locator as sensitivity/residual-guided, not flip-guided.
+```
+
+### EGROW-002: Top-k Sidecar Versus Random-k
+
+Goal:
+
+```text
+test whether the score actually identifies useful growth locations
+```
+
+Arms:
+
+| arm | layers | sidecar |
+| --- | --- | --- |
+| base | none | rank 0 |
+| top1 | highest `B_l` shared layer | rank 4 |
+| top3 | top 3 shared `B_l` layers, down_proj-heavy | rank 4 |
+| top7 | all shared top layers from EGROW-001 | rank 4 or rank 2 |
+| random3 | random 3 matched module types | rank 4 |
+| random7 | random 7 matched module types | rank 2 or rank 4 |
+| last3 | last 3 target modules | rank 4 |
+| all-small | all target modules | rank 2 |
+
+Initial top-k candidate set:
+
+```text
+layers.0.mlp.down_proj
+layers.3.mlp.down_proj
+layers.9.mlp.down_proj
+layers.10.mlp.down_proj
+layers.11.mlp.down_proj
+layers.9.self_attn.o_proj
+layers.11.self_attn.o_proj
+```
+
+Pass:
+
+```text
+top-k > random-k and top-k > last-k on held-out FACT/PopQA,
+with small byte/ops overhead,
+and no CE/tag collapse.
+```
+
+Fail:
+
+```text
+top-k does not beat random-k,
+or only all-layer sidecar works,
+or required rank is too large.
+```
+
+Interpretation:
+
+```text
+top-k wins      => entropy-guided local capacity is real
+random-k ties   => sidecar helps generically, score is not useful
+all-small wins  => broad low-rank adaptation, not layer locator
+none wins       => capacity not the current bottleneck
+```
+
+### EGROW-003: False-Positive Controls
+
+Run cheap controls before Colab:
+
+```text
+lower LR
+different seed
+shuffle FACT saliency batch
+random-k matched by layer type
+```
+
+If the same layers stay top-ranked under real FACT saliency but not under
+shuffled saliency, the score is more credible.
+
+### EGROW-004: 1.1B Confirmation
+
+Launch on Colab only if EGROW-002 passes on PC.
+
+Arms:
+
+```text
+base content-KL / PopQA blend
+top-k sidecar rank 4
+random-k sidecar rank 4
+```
+
+Pass:
+
+```text
+top-k improves FACT/PopQA over base and random-k,
+i2_s ~= f16 remains,
+sidecar overhead remains below the predeclared budget.
+```
+
+### EGROW-005: Runtime Accounting
+
+Only after quality passes:
+
+```text
+report I2_S target bytes
+report sidecar bytes
+report sidecar ops proxy
+compare against Q2_K/Q3_K whole-model bytes and token-gen
+```
+
+If the sidecar cost approaches Q2_K/Q3_K while quality does not beat them, the
+branch is demoted to analysis, not product.
 
 ## Sources To Read First
 

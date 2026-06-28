@@ -400,7 +400,7 @@ reduce token-time memory traffic, not only checkpoint bytes.
 | H8 | valid rotations/equalization can improve ternary fit | false data-free (RT-WSYNC-001 + H-I2S: row/group/row-norm scaling AND block-Hadamard rotation all fail at 160M -- ternary stays collapsed, FACT 0.0) | demote data-free weight-only sync (plan S4); revisit only combined with STE/adaptation |
 | H9 | selective extra planes/capacity can close the remaining gap | open | only as I2_S-rooted auxiliary capacity, not a replacement |
 | H10 | I2_S-rooted tiny low-rank residual can recover missing behavior | open | SIDE-001 160M rank 2/4/8 smoke |
-| H11 | layers that repeatedly flip ternary states during STE reveal local I2_S capacity bottlenecks | open | EGROW-001: log temporal entropy + residual + task saliency before growing anything |
+| H11 | layers that repeatedly flip ternary states during STE reveal local I2_S capacity bottlenecks | flip part false; sensitivity locator true at 160M (EGROW-001: top-8 overlap 7/8, but flip_rate ~= 0; residual x saliency drives ranking) | EGROW-002: top-k sensitive layers vs random-k sidecar |
 
 ## TurboQuant-Style Projection As Part Of `G`
 

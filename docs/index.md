@@ -519,9 +519,9 @@ flowchart TD
    작업으로 넘어가지 않는다.
 5. **Saliency + I2_S-rooted auxiliary capacity:** PopQA/instruction activation으로 `S=phi(...)`를 추정한 뒤
    top-k protection, two-plane/PTQTP-lite, Q2/Q3 pockets를 random-k와 비교한다.
-6. **EGROW-001 entropy-guided growth logger:** STE 중 ternary flip-rate, temporal entropy,
-   gradient conflict, output residual, task saliency를 160M에서 먼저 기록해 sidecar/extra-plane을
-   어디에만 붙일지 결정한다.
+6. **EGROW-002 sensitivity-guided sidecar:** EGROW-001은 top-8 overlap 7/8로 locator 안정성을
+   보였지만 flip/entropy가 아니라 residual x task saliency가 판별자였다. 다음은
+   down_proj-heavy top-k sidecar가 random-k/last-k를 이기는지 확인한다.
 7. **Scale ladder:** 1.1B에서 실제 component gain이 확인된 뒤 Gemma/Qwen small audit,
    마지막으로 Qwen 7B-class goalpost로 넘어간다.
 8. Mac M5 I2_S/TL1은 보류한다. 필요하면 upstream bug report용 최소 재현으로 분리한다.
