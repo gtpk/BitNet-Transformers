@@ -402,6 +402,59 @@ reduce token-time memory traffic, not only checkpoint bytes.
 | H10 | I2_S-rooted tiny low-rank residual can recover missing behavior | open | SIDE-001 160M rank 2/4/8 smoke |
 | H11 | layers that repeatedly flip ternary states during STE reveal local I2_S capacity bottlenecks | flip part false; sensitivity locator true at 160M (EGROW-001: top-8 overlap 7/8, but flip_rate ~= 0; residual x saliency drives ranking) | EGROW-002: top-k sensitive layers vs random-k sidecar |
 | H12 | 160M cheap geometry/capacity probes can identify the next product lever | mostly exhausted / negative (WSYNC, H-I2S, SIDE-001, EGROW-002); EGROW-004/005 are gated off, not run | wait for FACT-003H; reopen 1.1B capacity only if representative data plateaus or a new locator/growth action appears |
+| H13 | natural-system analogies can produce new I2_S-rooted smoke candidates | open | start with RDT-001 ledger, HOME-001 homeostasis, then SIGMA-001/RHT-002 references; no Colab until PC smoke passes |
+| H14 | DINO-style no-label self-distillation can preserve base factual behavior during I2_S conversion | open | if FACT-003H plateaus or hard replay remains negative, run DINO-I2S-001 PC smoke: content-only KL + hidden alignment from frozen FP teacher |
+
+## DINO-I2S As Objective Branch
+
+DINO-I2S is not a new precision format and not a non-I2_S track. It is an
+adaptation objective:
+
+```text
+I2_S student follows a frozen FP/base teacher on broad unlabeled text.
+```
+
+The reason to keep it on the table is that FACT-003D showed the failure mode of
+small hard factual replay:
+
+```text
+train facts go up,
+held-out/eval facts do not,
+so the model found a memorization shortcut.
+```
+
+DINO-style self-distillation replaces the table-memorization pressure with:
+
+```text
+preserve content logits + selected hidden geometry of the base model.
+```
+
+First-smoke objective:
+
+```text
+L =
+  L_answer_CE
+  + lambda_c * KL_content(p_teacher || p_student)
+  + beta_h * hidden_alignment
+```
+
+The project already learned one important constraint:
+
+```text
+raw KL can copy EOS/stop behavior and cause empty answers.
+```
+
+Therefore DINO-I2S must use content-only KL:
+
+```text
+V_content = V \ {EOS, BOS, PAD, special/control tokens}
+```
+
+Detailed plan:
+
+```text
+docs/dino_i2s_self_distillation_plan.md
+```
 
 ## TurboQuant-Style Projection As Part Of `G`
 
@@ -742,6 +795,10 @@ PC should run:
   160M predictor,
   eval pipeline checks,
   WSYNC/Turbo projection probes.
+  RDT-001 cost ledger,
+  HOME-001 activation-homeostasis smoke if FACT-003H is still running.
+  SIGMA-001 residual-feedback reference,
+  RHT-002 dithered/randomized Hadamard reference.
 ```
 
 When PC finds a positive direction:
