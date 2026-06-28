@@ -401,6 +401,7 @@ reduce token-time memory traffic, not only checkpoint bytes.
 | H9 | selective extra planes/capacity can close the remaining gap | open | only as I2_S-rooted auxiliary capacity, not a replacement |
 | H10 | I2_S-rooted tiny low-rank residual can recover missing behavior | open | SIDE-001 160M rank 2/4/8 smoke |
 | H11 | layers that repeatedly flip ternary states during STE reveal local I2_S capacity bottlenecks | flip part false; sensitivity locator true at 160M (EGROW-001: top-8 overlap 7/8, but flip_rate ~= 0; residual x saliency drives ranking) | EGROW-002: top-k sensitive layers vs random-k sidecar |
+| H12 | 160M cheap geometry/capacity probes can identify the next product lever | mostly exhausted / negative (WSYNC, H-I2S, SIDE-001, EGROW-002); EGROW-004/005 are gated off, not run | wait for FACT-003H; reopen 1.1B capacity only if representative data plateaus or a new locator/growth action appears |
 
 ## TurboQuant-Style Projection As Part Of `G`
 
@@ -686,6 +687,12 @@ every run must produce JSON/MD artifacts before changing the plan.
 Use the 3080 box as a fast predictor and tooling machine, not as the final judge
 for 1.1B quality.
 
+Closed PC branches are tracked here:
+
+```text
+docs/pc_negative_branch_map.md
+```
+
 I2_S trunk PC jobs:
 
 ```text
@@ -719,6 +726,9 @@ use PC to kill bad branches cheaply;
 do not over-trust 160M magnitude for 1.1B;
 direction and failure mode matter more than exact score;
 if PC result only improves weight MSE, do not launch a Colab training run yet.
+if WSYNC/SIDE/EGROW-002 already killed a PC branch, do not reopen it without a
+new 1.1B result or a genuinely new mechanism. EGROW-004/005 are conditional
+stages, not failed stages.
 ```
 
 ### Parallel Execution Policy
