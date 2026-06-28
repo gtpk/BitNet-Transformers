@@ -357,6 +357,42 @@ def base_kl_replay_term(model, teacher, replay_ids, replay_mask, seq_len, replay
     return kl_tok[rm].mean() * (temp * temp)          # answer tokens only, KD temp^2 scale
 
 
+def dino_logit_term(model, teacher, train_ids, seq_len, dino_batch, view_mode, view_p,
+                    temp, gen, device, special_vocab, vocab_size, pad_id):
+    """DINO-I2S-002: no-label self-distillation -- content-KL(teacher_clean || student_view) over
+    ALL positions of UNLABELED text windows (no answer labels). DINO-DIAG-001 showed this raises the
+    teacher's factual content mass in the student (gold-token logprob/rank up); hidden alignment is
+    DISCARDED (it cancelled the gain). The student sees an augmented view (token dropout/noise), the
+    frozen teacher sees the clean window; matching the teacher's content distribution on broad text
+    is the retention pressure. special_vocab (EOS/special) is dropped from BOTH sides as in the
+    content-KL replay, so EOS decisions are never distilled."""
+    import torch.nn.functional as F
+    usable = train_ids.numel() - 1
+    starts = torch.randint(0, max(1, usable - seq_len), (dino_batch,), generator=gen).tolist()
+    uo = torch.stack([train_ids[s : s + seq_len] for s in starts]).to(device)   # teacher clean view
+    if view_mode == "same" or view_p <= 0:
+        uv = uo
+    else:
+        vmask = (torch.rand(uo.shape, generator=gen) < view_p).to(device)
+        repl = (torch.full_like(uo, pad_id) if view_mode == "dropout"
+                else torch.randint(0, vocab_size, uo.shape, generator=gen).to(device))
+        uv = torch.where(vmask, repl, uo)                                        # student augmented view
+    with torch.no_grad():
+        t = teacher(input_ids=uo).logits.float() / temp
+        if special_vocab is not None:
+            t = t.masked_fill(special_vocab, float("-inf"))
+        p_t = F.softmax(t, dim=-1)
+        logp_t = F.log_softmax(t, dim=-1)
+    s = model(input_ids=uv).logits.float() / temp
+    if special_vocab is not None:
+        s = s.masked_fill(special_vocab, float("-inf"))
+    logp_s = F.log_softmax(s, dim=-1)
+    term = p_t * (logp_t - logp_s)                       # [B,T,V] forward-KL summand, all positions
+    if special_vocab is not None:
+        term = term.masked_fill(special_vocab, 0.0)
+    return term.sum(-1).mean() * (temp * temp)
+
+
 def homeostasis_term(model, teacher, input_ids, layer_mode="last", rho=1.0):
     """HOME-001: match base/student hidden-state mean+rms set-points on the same batch.
 
@@ -464,6 +500,14 @@ def main():
                     help="HOME-001: hidden-state layers whose activation stats are matched")
     ap.add_argument("--homeostasis-rho", type=float, default=1.0,
                     help="HOME-001: relative weight on RMS drift versus mean drift")
+    ap.add_argument("--dino-logit-weight", type=float, default=0.0,
+                    help="DINO-I2S-002: weight on no-label self-distillation content-KL over UNLABELED "
+                         "views (teacher_clean||student_view). Needs --base-kl-replay (shares the frozen "
+                         "teacher). hidden alignment is intentionally NOT included (DINO-DIAG-001).")
+    ap.add_argument("--dino-view-mode", choices=["same", "dropout", "noise"], default="dropout",
+                    help="DINO-I2S-002: student-view augmentation of the unlabeled window")
+    ap.add_argument("--dino-view-p", type=float, default=0.1, help="DINO-I2S-002: fraction of view tokens corrupted")
+    ap.add_argument("--dino-batch", type=int, default=2, help="DINO-I2S-002: unlabeled windows per step for the DINO term")
     ap.add_argument("--sidecar-rank", type=int, default=0,
                     help="SIDE: I2_S+LoRA sidecar rank per target linear (0 = disabled, existing behavior)")
     ap.add_argument("--sidecar-alpha", type=float, default=8.0, help="SIDE: LoRA scale = alpha/rank")
@@ -549,6 +593,13 @@ def main():
             home_teacher.config.use_cache = False
         print(f"HOME-001 activation homeostasis: eta={args.homeostasis_weight} "
               f"layers={args.homeostasis_layers} rho={args.homeostasis_rho} teacher={args.teacher_dtype}")
+    dino_pad_id = tok.pad_token_id if tok.pad_token_id is not None else 0
+    if args.dino_logit_weight > 0:
+        if teacher is None:
+            raise SystemExit("--dino-logit-weight needs --base-kl-replay (the DINO term reuses the frozen teacher)")
+        print(f"DINO-I2S-002 logit self-distill: weight={args.dino_logit_weight} "
+              f"view={args.dino_view_mode}@{args.dino_view_p} dino_batch={args.dino_batch} "
+              f"(unlabeled content-KL, EOS/special {'masked' if special_vocab is not None else 'NOT masked'}, no hidden)")
 
     # FACT-003D: protected factual replay -- direct answer-CE on a panel-disjoint atomic-facts set
     factual_ids = factual_mask = None
@@ -613,6 +664,7 @@ def main():
            + (f"+factrep{args.factual_weight}" if args.factual_replay else "")
            + (f"+blend{args.factual_blend_frac}" if args.factual_blend_file else "")
            + (f"+home{args.homeostasis_weight}" if args.homeostasis_weight > 0 else "")
+           + (f"+dino{args.dino_logit_weight}" if args.dino_logit_weight > 0 else "")
            + (f"+side{args.sidecar_rank}{args.sidecar_target[:3]}{'cob' if args.sidecar_train_base else 'frz'}"
               if args.sidecar_rank > 0 else ""))
     print(f"adapting {sum(p.numel() for p in tparams)/1e6:.1f}M params across {len(tparams)} tensors [{arm}]")
@@ -702,6 +754,7 @@ def main():
         train_kl_sum = 0.0
         train_fce_sum = 0.0
         train_home_sum = 0.0
+        train_dino_sum = 0.0
         for _ in range(args.grad_accum_steps):
             starts = torch.randint(0, max(1, usable - args.seq_len), (args.batch,), generator=g)
             sl = starts.tolist()
@@ -733,6 +786,12 @@ def main():
                 home = homeostasis_term(model, home_teacher, x, args.homeostasis_layers, args.homeostasis_rho)
                 train_home_sum += float(home)
                 loss = loss + args.homeostasis_weight * home
+            if args.dino_logit_weight > 0 and teacher is not None:  # DINO-I2S-002: no-label self-distill
+                dino = dino_logit_term(model, teacher, train_ids, args.seq_len, args.dino_batch,
+                                       args.dino_view_mode, args.dino_view_p, args.kl_temp, g, device,
+                                       special_vocab, model.config.vocab_size, dino_pad_id)
+                train_dino_sum += float(dino)
+                loss = loss + args.dino_logit_weight * dino
             (loss / args.grad_accum_steps).backward()
         opt.step()
         if step % args.log_every == 0 or step == args.steps - 1:
@@ -744,7 +803,8 @@ def main():
             kl_str = f"  kl={train_kl_sum / args.grad_accum_steps:.4f}" if teacher is not None else ""
             fce_str = f"  fce={train_fce_sum / args.grad_accum_steps:.4f}" if factual_ids is not None else ""
             home_str = f"  home={train_home_sum / args.grad_accum_steps:.4f}" if home_teacher is not None else ""
-            print(f"  step {step:4d}/{args.steps} ({pct:5.1f}%)  train_ce={train_ce_sum / args.grad_accum_steps:.4f}{kl_str}{fce_str}{home_str}  "
+            dino_str = f"  dino={train_dino_sum / args.grad_accum_steps:.4f}" if args.dino_logit_weight > 0 else ""
+            print(f"  step {step:4d}/{args.steps} ({pct:5.1f}%)  train_ce={train_ce_sum / args.grad_accum_steps:.4f}{kl_str}{fce_str}{home_str}{dino_str}  "
                   f"elapsed {elapsed/60:.1f}m  ETA {eta/60:.1f}m  ({rate:.1f}s/step)", flush=True)
             log_metrics(step, train_ce_sum / args.grad_accum_steps, train_kl_sum / args.grad_accum_steps,
                         train_fce_sum / args.grad_accum_steps, train_home_sum / args.grad_accum_steps,
@@ -797,6 +857,8 @@ def main():
               "homeostasis_weight": args.homeostasis_weight,
               "homeostasis_layers": args.homeostasis_layers,
               "homeostasis_rho": args.homeostasis_rho,
+              "dino_logit_weight": args.dino_logit_weight, "dino_view_mode": args.dino_view_mode,
+              "dino_view_p": args.dino_view_p, "dino_batch": args.dino_batch,
               "sidecar_enabled": args.sidecar_rank > 0, "sidecar_rank": args.sidecar_rank,
               "sidecar_alpha": args.sidecar_alpha, "sidecar_target": args.sidecar_target,
               "sidecar_train_base": args.sidecar_train_base, "sidecar_linears": n_side,
