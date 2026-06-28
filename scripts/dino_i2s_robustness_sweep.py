@@ -71,7 +71,8 @@ def main():
     ap.add_argument("--gate", type=float, default=0.05)
     args = ap.parse_args()
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = ("cuda" if torch.cuda.is_available()
+              else "mps" if torch.backends.mps.is_available() else "cpu")
     args.work.mkdir(parents=True, exist_ok=True)
     seeds = [int(s) for s in args.seeds.split(",") if s]
     lambdas = [float(l) for l in args.lambdas.split(",") if l]

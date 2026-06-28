@@ -138,7 +138,8 @@ def main():
     ap.add_argument("--skip-train", action="store_true", help="re-score existing arm dirs only")
     args = ap.parse_args()
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = ("cuda" if torch.cuda.is_available()
+              else "mps" if torch.backends.mps.is_available() else "cpu")
     args.work.mkdir(parents=True, exist_ok=True)
     from transformers import AutoTokenizer
     tok = AutoTokenizer.from_pretrained(args.model_id)

@@ -1,0 +1,20 @@
+# Mac (Apple Silicon, MPS) dev env for BitNet-Transformers -- 160M DINO smokes + scoring/analysis.
+# Managed venv: .venv (Python 3.12). Create/repair:
+#   python3.12 -m venv .venv && .venv/bin/pip install -U pip && .venv/bin/pip install -r requirements-mac.txt
+# NOTE: bitsandbytes is intentionally EXCLUDED -- it is CUDA-only. On Mac use --optim adamw (default),
+# NOT --optim adamw8bit. 1.1B TRAINING is impractical here (plain adamw ~16GB + slow MPS); use Colab/3080.
+# This box is for 160M DINO (smoke/sweep/diag) + scoring, which run on MPS.
+# Run MPS jobs with PYTORCH_ENABLE_MPS_FALLBACK=1 so any unimplemented op falls back to CPU.
+# pyarrow 24 works on Mac (the pyarrow-21 pin is a Windows-only fix; see docs/mac_dev_env.md).
+torch==2.12.1
+transformers==4.57.6
+datasets==5.0.0
+accelerate==1.14.0
+numpy==2.5.0
+safetensors==0.8.0
+tokenizers==0.22.2
+sentencepiece==0.2.1
+protobuf==7.35.1
+pyarrow==24.0.0
+regex==2026.5.9
+tqdm==4.68.3

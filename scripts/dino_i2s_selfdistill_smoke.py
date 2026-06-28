@@ -233,7 +233,8 @@ def main():
         args.steps = 20
         args.log_every = 5
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = ("cuda" if torch.cuda.is_available()
+              else "mps" if torch.backends.mps.is_available() else "cpu")
     args.work.mkdir(parents=True, exist_ok=True)
     print(f"device={device}  model={args.model_id}  steps={args.steps}  view={args.view_mode}@{args.view_p}", flush=True)
 

@@ -529,7 +529,8 @@ def main():
     if args.log_every < 1:
         raise ValueError("--log-every must be >= 1")
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = ("cuda" if torch.cuda.is_available()
+              else "mps" if torch.backends.mps.is_available() else "cpu")
     torch.manual_seed(args.seed)
     slug = args.model_id.split("/")[-1]
     out_dir = args.out_dir or args.work / f"{slug}_adapted"

@@ -81,7 +81,8 @@ def main():
     ap.add_argument("--out", type=Path, default=None)
     ap.add_argument("--max-new", type=int, default=40)
     args = ap.parse_args()
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = ("cuda" if torch.cuda.is_available()
+              else "mps" if torch.backends.mps.is_available() else "cpu")
     from transformers import AutoModelForCausalLM, AutoTokenizer
     tok = AutoTokenizer.from_pretrained(args.teacher_id)
     panel = load_jsonl(args.panel)
