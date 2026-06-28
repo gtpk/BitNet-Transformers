@@ -123,6 +123,7 @@ def train_arm(arm, args, tok, train_ids, train_mask, unlab_ids, replay_ids, repl
     gen = torch.Generator().manual_seed(args.seed + 1)
     model = AutoModelForCausalLM.from_pretrained(args.model_id, dtype=torch.float32).to(device)
     n_t = replace_targets(model)
+    model.to(device=device, dtype=torch.float32)  # new PerTensorBitLinear modules start on CPU -> move
     model.config.use_cache = False
     teacher = AutoModelForCausalLM.from_pretrained(args.model_id, dtype=torch.float32).to(device).eval()
     for p in teacher.parameters():
