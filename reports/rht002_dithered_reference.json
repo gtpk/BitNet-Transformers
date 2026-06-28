@@ -1,0 +1,110 @@
+{
+  "model": "Felladrin/Llama-160M-Chat-v1",
+  "rows": [
+    {
+      "arm": "fp",
+      "ce": 3.0881,
+      "ppl": 21.93,
+      "fact_rate": 0.296,
+      "fact_hits": 8,
+      "weight_mse": 0.0,
+      "row_norm_ratio": 0.0,
+      "tags": {
+        "ok": 20,
+        "salad": 1,
+        "empty": 6
+      }
+    },
+    {
+      "arm": "pt",
+      "ce": 11.6401,
+      "ppl": 113559.27,
+      "fact_rate": 0.0,
+      "fact_hits": 0,
+      "weight_mse": 0.000695,
+      "row_norm_ratio": 0.6682,
+      "tags": {
+        "ok": 26,
+        "salad": 1
+      }
+    },
+    {
+      "arm": "h1",
+      "ce": 12.4852,
+      "ppl": 264391.53,
+      "fact_rate": 0.0,
+      "fact_hits": 0,
+      "weight_mse": 0.00069,
+      "row_norm_ratio": 0.6699,
+      "tags": {
+        "ok": 24,
+        "loop": 3
+      }
+    },
+    {
+      "arm": "rht1",
+      "ce": 12.4852,
+      "ppl": 264391.53,
+      "fact_rate": 0.0,
+      "fact_hits": 0,
+      "weight_mse": 0.00069,
+      "row_norm_ratio": 0.6699,
+      "tags": {
+        "ok": 24,
+        "loop": 3
+      }
+    },
+    {
+      "arm": "rht2",
+      "ce": 11.4217,
+      "ppl": 91283.73,
+      "fact_rate": 0.0,
+      "fact_hits": 0,
+      "weight_mse": 0.00069,
+      "row_norm_ratio": 0.6698,
+      "tags": {
+        "loop": 16,
+        "ok": 11
+      }
+    },
+    {
+      "arm": "rht1_dither",
+      "ce": 12.6866,
+      "ppl": 323370.1,
+      "fact_rate": 0.0,
+      "fact_hits": 0,
+      "weight_mse": 0.000694,
+      "row_norm_ratio": 0.6711,
+      "tags": {
+        "ok": 27
+      }
+    }
+  ],
+  "best_fact": {
+    "arm": "rht2",
+    "ce": 11.4217,
+    "ppl": 91283.73,
+    "fact_rate": 0.0,
+    "fact_hits": 0,
+    "weight_mse": 0.00069,
+    "row_norm_ratio": 0.6698,
+    "tags": {
+      "loop": 16,
+      "ok": 11
+    }
+  },
+  "best_ce": {
+    "arm": "rht2",
+    "ce": 11.4217,
+    "ppl": 91283.73,
+    "fact_rate": 0.0,
+    "fact_hits": 0,
+    "weight_mse": 0.00069,
+    "row_norm_ratio": 0.6698,
+    "tags": {
+      "loop": 16,
+      "ok": 11
+    }
+  },
+  "verdict": "FAIL"
+}
