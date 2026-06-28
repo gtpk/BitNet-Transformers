@@ -358,14 +358,19 @@ def base_kl_replay_term(model, teacher, replay_ids, replay_mask, seq_len, replay
 
 
 def dino_logit_term(model, teacher, train_ids, seq_len, dino_batch, view_mode, view_p,
-                    temp, gen, device, special_vocab, vocab_size, pad_id):
-    """DINO-I2S-002: no-label self-distillation -- content-KL(teacher_clean || student_view) over
+                    temp, gen, device, special_vocab, vocab_size, pad_id,
+                    center=None, center_m=0.9, do_center=False):
+    """DINO-I2S-002/003: no-label self-distillation -- content-KL(teacher_clean || student_view) over
     ALL positions of UNLABELED text windows (no answer labels). DINO-DIAG-001 showed this raises the
     teacher's factual content mass in the student (gold-token logprob/rank up); hidden alignment is
     DISCARDED (it cancelled the gain). The student sees an augmented view (token dropout/noise), the
     frozen teacher sees the clean window; matching the teacher's content distribution on broad text
-    is the retention pressure. special_vocab (EOS/special) is dropped from BOTH sides as in the
-    content-KL replay, so EOS decisions are never distilled."""
+    is the retention pressure. special_vocab (EOS/special) is dropped from BOTH sides, so EOS
+    decisions are never distilled.
+
+    DINO-I2S-003 stabilisation: optional DINO centering (do_center) subtracts an EMA of the teacher's
+    per-vocab logit mean from the teacher logits before softmax, to stop the student collapsing onto a
+    few dominant tokens (the 1.1B salad failure mode). Returns (term, center) so the EMA persists."""
     import torch.nn.functional as F
     usable = train_ids.numel() - 1
     starts = torch.randint(0, max(1, usable - seq_len), (dino_batch,), generator=gen).tolist()
@@ -379,6 +384,10 @@ def dino_logit_term(model, teacher, train_ids, seq_len, dino_batch, view_mode, v
         uv = torch.where(vmask, repl, uo)                                        # student augmented view
     with torch.no_grad():
         t = teacher(input_ids=uo).logits.float() / temp
+        if do_center:                                    # DINO centering (EMA of teacher logit mean)
+            batch_c = t.mean(dim=(0, 1))                 # [V]
+            center = batch_c if center is None else center_m * center + (1 - center_m) * batch_c
+            t = t - center
         if special_vocab is not None:
             t = t.masked_fill(special_vocab, float("-inf"))
         p_t = F.softmax(t, dim=-1)
@@ -390,7 +399,26 @@ def dino_logit_term(model, teacher, train_ids, seq_len, dino_batch, view_mode, v
     term = p_t * (logp_t - logp_s)                       # [B,T,V] forward-KL summand, all positions
     if special_vocab is not None:
         term = term.masked_fill(special_vocab, 0.0)
-    return term.sum(-1).mean() * (temp * temp)
+    return term.sum(-1).mean() * (temp * temp), center
+
+
+@torch.no_grad()
+def _dino_collapse_frac(model, tok, prompts, device):
+    """DINO-I2S-003 early-collapse detector: generate on a few held-out prompts (read-only, no grad)
+    and return the salad/empty/loop fraction. Used only to STOP a degenerating run early."""
+    import sys as _sys
+    _sys.path.insert(0, str(REPO_ROOT / "scripts"))
+    from fact004a_160m_smoke import generate, tag
+    was_train, was_cache = model.training, model.config.use_cache
+    model.eval(); model.config.use_cache = True
+    bad = 0
+    for p in prompts:
+        if tag(generate(model, tok, p, 40, device)) in ("salad", "empty", "loop"):
+            bad += 1
+    model.config.use_cache = was_cache
+    if was_train:
+        model.train()
+    return bad / max(len(prompts), 1)
 
 
 def homeostasis_term(model, teacher, input_ids, layer_mode="last", rho=1.0):
@@ -508,6 +536,17 @@ def main():
                     help="DINO-I2S-002: student-view augmentation of the unlabeled window")
     ap.add_argument("--dino-view-p", type=float, default=0.1, help="DINO-I2S-002: fraction of view tokens corrupted")
     ap.add_argument("--dino-batch", type=int, default=2, help="DINO-I2S-002: unlabeled windows per step for the DINO term")
+    ap.add_argument("--dino-center", action="store_true",
+                    help="DINO-I2S-003: DINO centering (EMA of teacher logit mean subtracted) to prevent salad collapse")
+    ap.add_argument("--dino-center-m", type=float, default=0.9, help="DINO-I2S-003: centering EMA momentum")
+    ap.add_argument("--dino-warmup-steps", type=int, default=0,
+                    help="DINO-I2S-003: linearly ramp the dino weight 0->target over this many steps (0=off)")
+    ap.add_argument("--dino-collapse-check-every", type=int, default=0,
+                    help="DINO-I2S-003: every N steps generate on a few panel prompts and abort if degenerate (0=off)")
+    ap.add_argument("--dino-collapse-salad-thresh", type=float, default=0.5,
+                    help="DINO-I2S-003: stop if salad/empty/loop fraction exceeds this on the collapse check")
+    ap.add_argument("--dino-collapse-min-step", type=int, default=150,
+                    help="DINO-I2S-003: do not run the collapse check before this step (let warmup settle)")
     ap.add_argument("--sidecar-rank", type=int, default=0,
                     help="SIDE: I2_S+LoRA sidecar rank per target linear (0 = disabled, existing behavior)")
     ap.add_argument("--sidecar-alpha", type=float, default=8.0, help="SIDE: LoRA scale = alpha/rank")
@@ -746,6 +785,22 @@ def main():
                 tb.add_scalar("train/home", home, step)
             tb.flush()
 
+    # DINO-I2S-003 stabilisation state: centering EMA, collapse-check prompts, early-stop flag
+    dino_center = None
+    collapsed = False
+    collapse_prompts = []
+    if args.dino_logit_weight > 0 and args.dino_collapse_check_every > 0:
+        try:
+            collapse_prompts = [json.loads(l)["prompt"] for l in open(args.panel_file, encoding="utf-8") if l.strip()][:10]
+            print(f"DINO-I2S-003 collapse detector: every {args.dino_collapse_check_every} steps from step "
+                  f"{args.dino_collapse_min_step}, stop if salad/empty/loop > {args.dino_collapse_salad_thresh} "
+                  f"on {len(collapse_prompts)} panel prompts (read-only)", flush=True)
+        except Exception as e:
+            print(f"  [collapse-check] could not load panel prompts ({e}); detector off", flush=True)
+    if args.dino_logit_weight > 0 and (args.dino_center or args.dino_warmup_steps > 0):
+        print(f"DINO-I2S-003 stabilisation: center={args.dino_center}(m={args.dino_center_m}) "
+              f"warmup_steps={args.dino_warmup_steps}", flush=True)
+
     model.train()
     t_start = time.time()
     last_ckpt = t_start
@@ -787,12 +842,16 @@ def main():
                 home = homeostasis_term(model, home_teacher, x, args.homeostasis_layers, args.homeostasis_rho)
                 train_home_sum += float(home)
                 loss = loss + args.homeostasis_weight * home
-            if args.dino_logit_weight > 0 and teacher is not None:  # DINO-I2S-002: no-label self-distill
-                dino = dino_logit_term(model, teacher, train_ids, args.seq_len, args.dino_batch,
-                                       args.dino_view_mode, args.dino_view_p, args.kl_temp, g, device,
-                                       special_vocab, model.config.vocab_size, dino_pad_id)
+            if args.dino_logit_weight > 0 and teacher is not None:  # DINO-I2S-002/003: no-label self-distill
+                dino, dino_center = dino_logit_term(
+                    model, teacher, train_ids, args.seq_len, args.dino_batch,
+                    args.dino_view_mode, args.dino_view_p, args.kl_temp, g, device,
+                    special_vocab, model.config.vocab_size, dino_pad_id,
+                    center=dino_center, center_m=args.dino_center_m, do_center=args.dino_center)
+                eff_dino_w = args.dino_logit_weight * (
+                    min(1.0, (step + 1) / args.dino_warmup_steps) if args.dino_warmup_steps > 0 else 1.0)
                 train_dino_sum += float(dino)
-                loss = loss + args.dino_logit_weight * dino
+                loss = loss + eff_dino_w * dino
             (loss / args.grad_accum_steps).backward()
         opt.step()
         if step % args.log_every == 0 or step == args.steps - 1:
@@ -810,6 +869,17 @@ def main():
             log_metrics(step, train_ce_sum / args.grad_accum_steps, train_kl_sum / args.grad_accum_steps,
                         train_fce_sum / args.grad_accum_steps, train_home_sum / args.grad_accum_steps,
                         elapsed, rate, eta, pct)
+        if (collapse_prompts and step >= args.dino_collapse_min_step
+                and step % args.dino_collapse_check_every == 0):
+            sf = _dino_collapse_frac(model, tok, collapse_prompts, device)
+            print(f"  [collapse-check] step {step} salad/empty/loop frac={sf:.2f}", flush=True)
+            if sf > args.dino_collapse_salad_thresh:
+                print(f"  [COLLAPSE DETECTED] {sf:.2f} > {args.dino_collapse_salad_thresh} -> stopping early "
+                      f"at step {step} (DINO-I2S-003 stabilisation FAILED)", flush=True)
+                collapsed = True
+                if ckpt_path:
+                    save_ckpt(step)
+                break
         if ckpt_path and args.ckpt_every_min > 0 and (time.time() - last_ckpt) >= args.ckpt_every_min * 60:
             save_ckpt(step)
             last_ckpt = time.time()
@@ -860,6 +930,8 @@ def main():
               "homeostasis_rho": args.homeostasis_rho,
               "dino_logit_weight": args.dino_logit_weight, "dino_view_mode": args.dino_view_mode,
               "dino_view_p": args.dino_view_p, "dino_batch": args.dino_batch,
+              "dino_center": args.dino_center, "dino_center_m": args.dino_center_m,
+              "dino_warmup_steps": args.dino_warmup_steps, "dino_collapsed_early": collapsed,
               "sidecar_enabled": args.sidecar_rank > 0, "sidecar_rank": args.sidecar_rank,
               "sidecar_alpha": args.sidecar_alpha, "sidecar_target": args.sidecar_target,
               "sidecar_train_base": args.sidecar_train_base, "sidecar_linears": n_side,
