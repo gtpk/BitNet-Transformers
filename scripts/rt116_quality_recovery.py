@@ -357,6 +357,36 @@ def base_kl_replay_term(model, teacher, replay_ids, replay_mask, seq_len, replay
     return kl_tok[rm].mean() * (temp * temp)          # answer tokens only, KD temp^2 scale
 
 
+def homeostasis_term(model, teacher, input_ids, layer_mode="last", rho=1.0):
+    """HOME-001: match base/student hidden-state mean+rms set-points on the same batch.
+
+    This is a cheap biological-homeostasis smoke: the student may adapt, but its
+    selected activation statistics should not drift too far from the base model.
+    Intended for 160M first; it doubles forward compute for the sampled batch.
+    """
+    with torch.no_grad():
+        t_h = teacher(input_ids=input_ids, output_hidden_states=True).hidden_states
+    s_h = model(input_ids=input_ids, output_hidden_states=True).hidden_states
+    n = len(s_h)
+    if layer_mode == "last":
+        idxs = [n - 1]
+    elif layer_mode == "mid_last":
+        idxs = [max(1, n // 2), n - 1]
+    else:
+        raise ValueError(layer_mode)
+
+    terms = []
+    for idx in idxs:
+        sh = s_h[idx].float()
+        th = t_h[idx].float()
+        s_mean = sh.mean(dim=(0, 1))
+        t_mean = th.mean(dim=(0, 1))
+        s_rms = sh.pow(2).mean(dim=(0, 1)).sqrt()
+        t_rms = th.pow(2).mean(dim=(0, 1)).sqrt()
+        terms.append((s_mean - t_mean).pow(2).mean() + rho * (s_rms - t_rms).pow(2).mean())
+    return torch.stack(terms).mean()
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--model-id", default="JackFram/llama-160m")
@@ -428,6 +458,12 @@ def main():
                     help="FACT-003G: jsonl of factual QA BLENDED into the mixed stream (same answer-CE, not a separate loss)")
     ap.add_argument("--factual-blend-frac", type=float, default=0.0,
                     help="FACT-003G: fraction of mixed train tokens that are blended factual QA (e.g. 0.05)")
+    ap.add_argument("--homeostasis-weight", type=float, default=0.0,
+                    help="HOME-001: weight eta on activation mean/RMS homeostasis against the frozen base model")
+    ap.add_argument("--homeostasis-layers", choices=["last", "mid_last"], default="last",
+                    help="HOME-001: hidden-state layers whose activation stats are matched")
+    ap.add_argument("--homeostasis-rho", type=float, default=1.0,
+                    help="HOME-001: relative weight on RMS drift versus mean drift")
     ap.add_argument("--sidecar-rank", type=int, default=0,
                     help="SIDE: I2_S+LoRA sidecar rank per target linear (0 = disabled, existing behavior)")
     ap.add_argument("--sidecar-alpha", type=float, default=8.0, help="SIDE: LoRA scale = alpha/rank")
@@ -481,6 +517,7 @@ def main():
 
     # FACT-003B: frozen base teacher (self-anchor) + fixed instruction replay pool
     teacher = None
+    home_teacher = None
     replay_ids = replay_mask = None
     special_vocab = None
     if args.base_kl_replay:
@@ -501,6 +538,17 @@ def main():
               f"({100*float(replay_mask.float().mean()):.1f}% answer); "
               f"lambda={args.kl_weight} temp={args.kl_temp} replay_batch={args.replay_batch}"
               f"{' content-only' if args.kl_content_only else ''}")
+    if args.homeostasis_weight > 0:
+        if teacher is not None:
+            home_teacher = teacher
+        else:
+            ttd = {"float16": torch.float16, "bfloat16": torch.bfloat16, "float32": torch.float32}[args.teacher_dtype]
+            home_teacher = AutoModelForCausalLM.from_pretrained(args.model_id, dtype=ttd).to(device).eval()
+            for p in home_teacher.parameters():
+                p.requires_grad_(False)
+            home_teacher.config.use_cache = False
+        print(f"HOME-001 activation homeostasis: eta={args.homeostasis_weight} "
+              f"layers={args.homeostasis_layers} rho={args.homeostasis_rho} teacher={args.teacher_dtype}")
 
     # FACT-003D: protected factual replay -- direct answer-CE on a panel-disjoint atomic-facts set
     factual_ids = factual_mask = None
@@ -564,6 +612,7 @@ def main():
            + ("c" if (args.base_kl_replay and args.kl_content_only) else "")
            + (f"+factrep{args.factual_weight}" if args.factual_replay else "")
            + (f"+blend{args.factual_blend_frac}" if args.factual_blend_file else "")
+           + (f"+home{args.homeostasis_weight}" if args.homeostasis_weight > 0 else "")
            + (f"+side{args.sidecar_rank}{args.sidecar_target[:3]}{'cob' if args.sidecar_train_base else 'frz'}"
               if args.sidecar_rank > 0 else ""))
     print(f"adapting {sum(p.numel() for p in tparams)/1e6:.1f}M params across {len(tparams)} tensors [{arm}]")
@@ -625,10 +674,11 @@ def main():
         except Exception as e:
             print(f"  [tb] TensorBoard unavailable ({e}); skipping event logging", flush=True)
 
-    def log_metrics(step, ce, kl, fce, elapsed, rate, eta, pct):
+    def log_metrics(step, ce, kl, fce, home, elapsed, rate, eta, pct):
         rec = {"step": step, "pct": round(pct, 2), "train_ce": round(ce, 4),
                "kl": round(kl, 4) if teacher is not None else None,
                "fce": round(fce, 4) if factual_ids is not None else None,
+               "home": round(home, 4) if home_teacher is not None else None,
                "elapsed_min": round(elapsed / 60, 2), "eta_min": round(eta / 60, 2),
                "sec_per_step": round(rate, 2), "arm": arm}
         if metrics_fh:
@@ -639,6 +689,8 @@ def main():
                 tb.add_scalar("train/kl", kl, step)
             if factual_ids is not None:
                 tb.add_scalar("train/fce", fce, step)
+            if home_teacher is not None:
+                tb.add_scalar("train/home", home, step)
             tb.flush()
 
     model.train()
@@ -649,6 +701,7 @@ def main():
         train_ce_sum = 0.0
         train_kl_sum = 0.0
         train_fce_sum = 0.0
+        train_home_sum = 0.0
         for _ in range(args.grad_accum_steps):
             starts = torch.randint(0, max(1, usable - args.seq_len), (args.batch,), generator=g)
             sl = starts.tolist()
@@ -676,6 +729,10 @@ def main():
                 if fce is not None:
                     train_fce_sum += float(fce)
                     loss = loss + args.factual_weight * fce
+            if home_teacher is not None:
+                home = homeostasis_term(model, home_teacher, x, args.homeostasis_layers, args.homeostasis_rho)
+                train_home_sum += float(home)
+                loss = loss + args.homeostasis_weight * home
             (loss / args.grad_accum_steps).backward()
         opt.step()
         if step % args.log_every == 0 or step == args.steps - 1:
@@ -686,10 +743,12 @@ def main():
             pct = 100.0 * (step + 1) / args.steps         # absolute progress
             kl_str = f"  kl={train_kl_sum / args.grad_accum_steps:.4f}" if teacher is not None else ""
             fce_str = f"  fce={train_fce_sum / args.grad_accum_steps:.4f}" if factual_ids is not None else ""
-            print(f"  step {step:4d}/{args.steps} ({pct:5.1f}%)  train_ce={train_ce_sum / args.grad_accum_steps:.4f}{kl_str}{fce_str}  "
+            home_str = f"  home={train_home_sum / args.grad_accum_steps:.4f}" if home_teacher is not None else ""
+            print(f"  step {step:4d}/{args.steps} ({pct:5.1f}%)  train_ce={train_ce_sum / args.grad_accum_steps:.4f}{kl_str}{fce_str}{home_str}  "
                   f"elapsed {elapsed/60:.1f}m  ETA {eta/60:.1f}m  ({rate:.1f}s/step)", flush=True)
             log_metrics(step, train_ce_sum / args.grad_accum_steps, train_kl_sum / args.grad_accum_steps,
-                        train_fce_sum / args.grad_accum_steps, elapsed, rate, eta, pct)
+                        train_fce_sum / args.grad_accum_steps, train_home_sum / args.grad_accum_steps,
+                        elapsed, rate, eta, pct)
         if ckpt_path and args.ckpt_every_min > 0 and (time.time() - last_ckpt) >= args.ckpt_every_min * 60:
             save_ckpt(step)
             last_ckpt = time.time()
@@ -697,8 +756,15 @@ def main():
         metrics_fh.close()
     if tb:
         tb.close()
+    shared_home_teacher = home_teacher is teacher
     if teacher is not None:  # free the frozen base teacher before export
         del teacher
+        if shared_home_teacher:
+            home_teacher = None
+        if device == "cuda":
+            torch.cuda.empty_cache()
+    if home_teacher is not None:
+        del home_teacher
         if device == "cuda":
             torch.cuda.empty_cache()
     ce_adapted = eval_ce(model, eval_ids, args.seq_len, device)
@@ -728,6 +794,9 @@ def main():
               "factual_weight": args.factual_weight, "factual_batch": args.factual_batch,
               "factual_blend_file": str(args.factual_blend_file) if args.factual_blend_file else None,
               "factual_blend_frac": args.factual_blend_frac,
+              "homeostasis_weight": args.homeostasis_weight,
+              "homeostasis_layers": args.homeostasis_layers,
+              "homeostasis_rho": args.homeostasis_rho,
               "sidecar_enabled": args.sidecar_rank > 0, "sidecar_rank": args.sidecar_rank,
               "sidecar_alpha": args.sidecar_alpha, "sidecar_target": args.sidecar_target,
               "sidecar_train_base": args.sidecar_train_base, "sidecar_linears": n_side,
