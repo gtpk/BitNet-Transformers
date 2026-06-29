@@ -652,6 +652,11 @@ def main():
     # QR-001: FP baseline, then PTQ collapse
     ce_fp = eval_ce(model, eval_ids, args.seq_len, device)
     n_lin = replace_targets(model)
+    if n_lin == 0:
+        raise SystemExit(
+            f"replace_targets matched 0 linears for {args.model_id} -- the target-linear matcher "
+            f"(bitnet_llama.conversion.TARGET_SUFFIXES) does not cover this architecture, so NOTHING "
+            f"would be quantised to b1.58. Add this model's linear names before running (PYTHIA-LADDER P1).")
     model.to(device=device, dtype=tdtype)  # new PerTensorBitLinear modules -> model dtype
     n_side = 0
     if args.sidecar_rank > 0:  # SIDE: wrap target ternary linears with a low-rank LoRA sidecar

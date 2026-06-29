@@ -34,6 +34,7 @@ TERNARY_BITS_PER_ELEM = math.log2(3.0)  # ~1.585, the b1.58 information bound
 
 # Projections we convert first. Matches the conversion plan's layer policy.
 TARGET_SUFFIXES: tuple[str, ...] = (
+    # LLaMA / TinyLlama
     "q_proj",
     "k_proj",
     "v_proj",
@@ -41,9 +42,15 @@ TARGET_SUFFIXES: tuple[str, ...] = (
     "gate_proj",
     "up_proj",
     "down_proj",
+    # GPT-NeoX / Pythia (qualified so the short "dense" cannot false-match; PYTHIA-LADDER P1)
+    "query_key_value",
+    "attention.dense",
+    "dense_h_to_4h",
+    "dense_4h_to_h",
 )
 # Explicitly excluded from the initial conversion (separate quality/storage story).
-EXCLUDE_SUFFIXES: tuple[str, ...] = ("embed_tokens", "lm_head")
+# embed_out = GPT-NeoX output head (the lm_head analogue).
+EXCLUDE_SUFFIXES: tuple[str, ...] = ("embed_tokens", "lm_head", "embed_in", "embed_out")
 EXCLUDE_KEYWORDS: tuple[str, ...] = ("norm",)
 
 
