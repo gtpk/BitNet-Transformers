@@ -4,6 +4,12 @@ Status: active research reframing.
 
 Document position: [Index](./index.md) -> [Current Theory](./current_theory_hypothesis_plan.md) -> DINO / FACT objective branch.
 
+Related literature synthesis:
+
+```text
+docs/literature_deep_dive_collapse_dynamics.md
+```
+
 ## One-Line Reframe
 
 The next question is not:
@@ -333,4 +339,3 @@ The immediate goal is diagnosis:
 find the moment the model begins to fail,
 then design the schedule/objective around that moment.
 ```
-
