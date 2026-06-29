@@ -95,6 +95,17 @@ to ~1.7 on consolidation -- a clean signature of the unstable phase resolving.
 
 Cost ledger verdict (rdt001_cost_ledger.md): NO low-cost branch buys >=0.05 eval.
 
+## G2. PT2-lite initializer smoke (no-train, 160M) -- ITF reconstruction is the wrong objective
+
+| arm | weight_MSE | CE | FACT | gold_rank | report |
+| --- | ---: | ---: | ---: | ---: | --- |
+| E0 absmean (I2_S) | 0.282 | 11.64 | 0.0 | 1996 | pt2_i2s_001_result.md |
+| E2 itf_pure (row-fit -> pure I2_S) | 0.215 | 12.10 | 0.0 | 5590 | (same) |
+| E1 itf_asym (mu+alpha*T upper bound) | 0.191 | 11.64 | 0.0 | 3929 | (same) |
+
+PT2-I2S-001: ITF lowers weight_MSE but gold_rank gets WORSE (anti-correlated) -> reconstruction is
+the wrong objective; ITF-by-weight-MSE discarded. Motivates PT2-I2S-002 (activation-aware output-error).
+
 ## G. IN PROGRESS (2026-06-30)
 
 - **TinyLlama-1.1B longer-budget (1600 steps)** -- the decisive test of whether the 1.1B collapse is a
