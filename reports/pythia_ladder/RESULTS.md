@@ -1,5 +1,12 @@
 # PYTHIA-LADDER-001 results (running)
 
+> **HEADLINE (revised thesis):** Pythia shows NO collapse through 1B -- 160m/410m/1b all recover
+> their degenerate transient within the 800-step budget. **pythia-1b (~same scale as TinyLlama-1.1B)
+> is STABLE, but TinyLlama-1.1B COLLAPSED under the identical recipe.** So the "~1B collapse" is NOT
+> a clean scale wall -- it is **model-specific to TinyLlama** (architecture / pretraining / chat-tune),
+> not a generic 1B-scale property. Open: does Pythia collapse at all (1.4b/2.8b), or is collapse a
+> TinyLlama idiosyncrasy?
+
 Same recipe (content-KL 0.2 + DINO-logit 0.2, no centering/warmup, all target linears b1.58 I2_S,
 lm_head/embeds frozen), same data, 800 steps, telemetry every 25 steps. Per the runbook
 ([docs/pythia_ladder_runbook.md](../../docs/pythia_ladder_runbook.md)). Collapse onset = first step
@@ -14,7 +21,7 @@ reintroducing a confound. Recorded per rung below.
 | --- | --- | --- | ---: | ---: | --- | --- |
 | pythia-160m | Mac MPS / fp32 adamw | **NONE** | 0.00 | 0.962 | 8248 -> 272 | **STABLE, DINO positive** |
 | pythia-410m | 3080 bf16 (auth) + Mac fp32 (aux) | **NONE (transient 50-250, recovers)** | 1.00 (transient) | 0.894 | 19631 -> 128 | **STABLE (slow consolidation)** |
-| pythia-1b | (pending, Colab) | | | | | |
+| pythia-1b | Colab L4 bf16 | **NONE (transient 0-250, recovers ~300)** | 1.00 (transient) | ~high | 6069 -> ~150 | **STABLE** |
 | pythia-1.4b | (pending, Colab) | | | | | |
 | pythia-2.8b | (pending, Colab/A100) | | | | | |
 
@@ -44,3 +51,17 @@ not necessarily a hard capacity wall -> prescriptions: longer training, DINO war
 entropy/top1 guard, stage-wise objective). Onset so far: > 410M. Next: pythia-1b -- key diagnostic
 "is 1b's step 800 like 410m's step 250 (mid-transient, about to recover)?". metrics:
 p410m_metrics.jsonl (Mac fp32, full 800) + p410m_cuda_metrics.jsonl (3080 bf16, teacher-relative).
+
+## pythia-1b (rung 3) -- STABLE (recovers) -- the thesis-revising result
+
+teacher baseline: degen 0.00, gold_rank 5 (1b FP is very factual). Student trajectory (Colab L4,
+bf16): degenerate transient steps 0-~250 (degen_gap +1.00, gold_rank stuck ~5500), then RECOVERS from
+~step 300 (degen_gap -> 0; gold_rank 5480 -> 634 -> 195 -> ~150; top1 0.05 -> 0.5; train_ce 9.6 ->
+2.75). Final gold_rank ~150 (ratio ~30x teacher = the b1.58 quantized ceiling, clean generation,
+degen_gap 0). STABLE -- same shape as 160m/410m, just a slightly longer/deeper transient.
+
+**This is the thesis-revising rung.** pythia-1b (~ TinyLlama-1.1B scale) recovers cleanly, whereas
+TinyLlama-1.1B collapsed under the identical recipe. => the 1B collapse is NOT a generic scale wall;
+it is TinyLlama-model-specific (so far). Pythia: no collapse through 1B. metrics:
+reports/pythia_ladder/p1b_metrics.jsonl (Drive: bnt_results/p1b). recovered_fraction in p1b/train.json
+at run end (step 800).
