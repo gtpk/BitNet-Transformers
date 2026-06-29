@@ -880,11 +880,11 @@ def main():
             # relative to the base model's own behaviour (Pythia is base, not chat -- absolute tags
             # are not comparable across model families; the teacher gap is).
             if teacher is not None:
-                tb = telemetry_probe(teacher, tok, probe_rows, device)
-                teacher_base = {"teacher_degen": tb["degenerate_rate"], "teacher_gold_rank": tb["gold_rank_mean"],
-                                "teacher_gold_logp": tb["gold_logp_mean"], "teacher_top1": tb["top1_prob"]}
-                print(f"  [teacher-baseline] degen={tb['degenerate_rate']:.2f} gold_rank={tb['gold_rank_mean']:.0f} "
-                      f"top1={tb['top1_prob']:.3f} ent={tb['logit_entropy']:.2f} -- collapse judged RELATIVE to this", flush=True)
+                tprobe = telemetry_probe(teacher, tok, probe_rows, device)  # NOTE: not 'tb' -- that is the TB writer
+                teacher_base = {"teacher_degen": tprobe["degenerate_rate"], "teacher_gold_rank": tprobe["gold_rank_mean"],
+                                "teacher_gold_logp": tprobe["gold_logp_mean"], "teacher_top1": tprobe["top1_prob"]}
+                print(f"  [teacher-baseline] degen={tprobe['degenerate_rate']:.2f} gold_rank={tprobe['gold_rank_mean']:.0f} "
+                      f"top1={tprobe['top1_prob']:.3f} ent={tprobe['logit_entropy']:.2f} -- collapse judged RELATIVE to this", flush=True)
         except Exception as e:
             print(f"  [telemetry] could not load probe rows ({e}); telemetry-full off", flush=True)
             probe_rows = []
