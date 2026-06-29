@@ -221,6 +221,8 @@ python scripts/rt113_storage_latency.py \
    - 왜 BitNet b1.58은 native 학습에선 좋지만 기존 모델 변환은 quantization처럼 쉽지 않은지 문제정의.
 8j1. [Current Theory, Hypotheses, And Experiment Plan](./current_theory_hypothesis_plan.md)
    - 지금까지의 이론, 반증된 가설, 통합 수식, I2_S trunk와 보조 가지, Colab/PC 분업, TurboQuant-style projection 후보, 다음 실험 순서를 한 문서로 압축한 현재 관제탑.
+8j1b. [Current Experiment Status -- 2026-06-30](./current_experiment_status_2026_06_30.md)
+   - Pythia-1B stable 이후 최신 상태 요약. I2_S systems, failed branches, DINO 재해석, collapse dynamics, 다음 TinyLlama longer-budget 분기를 한 페이지로 고정한다.
 8j2. [BitNet Conversion Compiler Plan](./bitnet_conversion_compiler_plan.md)
    - 지금까지의 실험과 QuaRot/AWQ/SmoothQuant/PTQTP/TWLA/HAWQ/HAQ/BRECQ 문헌을 합쳐, b1.58 변환을 valid coordinate transform(`G`), estimated saliency(`S=phi(...)`), budgeted capacity 선택(`C`), representative adaptation(`A`)의 staged compiler 문제로 정의한다.
 8k. [Native BitNet Architecture Audit](./native_bitnet_architecture_audit.md)
@@ -395,6 +397,7 @@ flowchart TD
 | [mixed_bit_dp_plan.md](./mixed_bit_dp_plan.md) | RT-123 sensitivity scan과 mixed-bit selector 초안. RT-123 이후 full additive DP는 보류 | higher-bit pockets를 후보 색인용으로만 참고할 때 |
 | [why_b158_conversion_is_hard.md](./why_b158_conversion_is_hard.md) | 기존 FP 모델을 b1.58로 변환하기 어려운 이유를 수학/통계/시스템 결과로 정리 | 프로젝트 질문을 다시 정의하고 claim을 좁힐 때 |
 | [current_theory_hypothesis_plan.md](./current_theory_hypothesis_plan.md) | 지금까지의 이론, 가설 판정, 통합 수식, I2_S trunk와 보조 가지, Colab/PC 분업, TurboQuant-style projection 후보, 다음 실험 순서를 압축한 관제탑 | 현재 어디까지 왔고 다음 무엇을 해야 하는지 빠르게 정렬할 때 |
+| [current_experiment_status_2026_06_30.md](./current_experiment_status_2026_06_30.md) | Pythia-1B stable 이후 최신 결과를 한 페이지로 요약. 성공/실패 가지, DINO 분포 신호, collapse dynamics, TinyLlama longer-budget next를 고정 | 오래된 결론과 최신 결론이 헷갈릴 때 빠르게 현재 상태를 확인할 때 |
 | [bitnet_conversion_compiler_plan.md](./bitnet_conversion_compiler_plan.md) | b1.58 변환을 valid coordinate transform, saliency estimator, adaptive capacity, representative adaptation의 staged compiler 문제로 정의하는 상위 수식/가정/실행 계획 | WSYNC/PopQA/PTQTP-lite/hybrid 중 무엇을 먼저 실험할지 정할 때 |
 | [native_bitnet_architecture_audit.md](./native_bitnet_architecture_audit.md) | 공개 BitNet 자료의 실제 구조와 비공개/미확정 부분을 정리 | native BitNet이 그냥 LLaMA+ternary인지 판단할 때 |
 | [hybrid_variable_bitnet_conversion_plan.md](./hybrid_variable_bitnet_conversion_plan.md) | 1:1 all-I2_S 대신 가변 capacity/하이브리드 topology를 검증하는 HYBRID-001 계획 | factual gap을 capacity/topology 문제로 검증할 때 |

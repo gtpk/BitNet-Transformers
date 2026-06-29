@@ -1,23 +1,68 @@
 # PYTHIA-LADDER-001 Runbook: scale-dependent auxiliary-objective stability threshold
 
 Document position: [Index](./index.md). Follows the confound resolution
-([reports/dino_ctrl_fp32_result.md](../reports/dino_ctrl_fp32_result.md)): the 1.1B DINO collapse is
-SCALE-driven, not precision/optimizer. This runbook fixes the protocol BEFORE running, so the ladder
-is a controlled measurement, not a model swap.
+([reports/dino_ctrl_fp32_result.md](../reports/dino_ctrl_fp32_result.md)): the TinyLlama-1.1B DINO
+collapse is not a precision/optimizer artifact. This runbook fixes the protocol BEFORE running, so
+the ladder is a controlled measurement, not a model swap.
+
+Latest result pointer:
+
+```text
+reports/pythia_ladder/RESULTS.md
+reports/pythia_ladder/p1b_metrics_summary.md
+```
 
 ## Central question
 
 > Same minimal content-KL + DINO-logit recipe, same tokenizer family, same data, varying ONLY scale.
 > **At which scale does the auxiliary objective start to collapse generation?**
 
-Core claim being tested:
+Original core claim being tested:
 
 > **b1.58 same-topology adaptation has a scale-dependent auxiliary-objective stability threshold.**
 
-This is sharper than "DINO works/fails": we measure a *collapse-onset scale* and its telemetry
-signature. TinyLlama 160M-vs-1.1B could not answer it (different family/tokenizer/pretraining/chat
-tuning all confounded). Pythia is a controlled scale series (same architecture, tokenizer, Pile data,
-training curriculum) -> scale is the only variable.
+Latest result after pythia-1b:
+
+> **No generic 1B scale wall has been found. Pythia-160M, 410M, and 1B all recover.**
+
+This is sharper than "DINO works/fails": we measure a degenerate transient and whether it resolves
+within the training budget. TinyLlama 160M-vs-1.1B could not answer it (different family/tokenizer/
+pretraining/chat tuning all confounded). Pythia is a controlled scale series (same architecture,
+tokenizer, Pile data, training curriculum) -> scale is the main controlled variable. The current
+answer is that **TinyLlama-1.1B collapse is not explained by scale alone**.
+
+## Latest Results (2026-06-30)
+
+Same recipe:
+
+```text
+content-KL 0.2 + DINO-logit 0.2,
+all target linears I2_S,
+lm_head/embeds frozen,
+800 steps,
+teacher-relative telemetry.
+```
+
+| rung | transient | result | interpretation |
+| --- | --- | --- | --- |
+| Pythia-160M | none | STABLE | below any observed instability |
+| Pythia-410M | step ~50-250, then recovery | STABLE | recoverable consolidation transient |
+| Pythia-1B | step ~0-250, recovers by ~225-300 | STABLE | no generic 1B scale wall |
+| TinyLlama-1.1B | unresolved within 800 steps | COLLAPSE | model-specific or schedule-specific |
+
+Revised thesis:
+
+```text
+collapse = degenerate transient that fails to resolve within the training budget.
+Pythia resolves it through 1B; TinyLlama-1.1B does not under the same budget.
+```
+
+Most valuable next test:
+
+```text
+TinyLlama-1.1B longer-budget run (1600 steps first; extend only if trajectory
+suggests recovery).
+```
 
 ## 1. Model list (fixed)
 
@@ -125,9 +170,9 @@ keeps the teacher's generation quality (low degenerate_rate, gold_rank tracking 
 | --- | --- | --- |
 | 160M ok, 410M ok, 1B collapse | onset ~1B | bisect 700M; confirm thesis |
 | 160M ok, 410M collapse | earlier than expected scaling instability | re-check recipe; bisect 256M |
-| all ok | TinyLlama-1.1B structure/data idiosyncrasy, not generic scale | revisit the TinyLlama-specific cause |
+| all ok through 1B | TinyLlama-1.1B structure/data/schedule idiosyncrasy, not generic 1B scale | revisit the TinyLlama-specific cause |
 | all collapse | objective mismatched to Pythia base | reconsider objective/teacher for base LMs |
-| onset step EARLIER as scale grows | strong scale-driven collapse thesis | headline result |
+| onset step EARLIER as scale grows at future rungs | higher-scale Pythia instability | continue ladder / bracket threshold |
 
 ## 9. Cost estimate + host split
 

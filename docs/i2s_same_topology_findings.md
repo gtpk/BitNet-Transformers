@@ -1,12 +1,14 @@
-# Minimal Content-KL is the Stable Optimum for Same-Topology 1.1B I2_S Conversion
+# Minimal Content-KL Is The Stable TinyLlama v0, But Collapse Is Model-Specific
 
-A research note wrapping up the base-anchored b1.58 / I2_S factual-recovery line. The headline
-result is a strong negative that re-frames the problem:
+A research note wrapping up the base-anchored b1.58 / I2_S factual-recovery line. This document has
+been updated after the Pythia ladder reached 1B.
 
-> **The bottleneck is no longer the objective; it is the adaptability of the base model under
-> same-topology I2_S conversion.** Minimal content-KL is the stable optimum at 1.1B; every
-> auxiliary objective we added (hard replay, representative-data blend, no-label self-distillation)
-> caused catastrophic generation collapse at 1.1B, while being benign or helpful at 160M.
+Updated headline:
+
+> **TinyLlama-1.1B has a same-topology I2_S collapse problem, but this is not a generic 1B scale
+> wall.** Minimal content-KL remains the stable TinyLlama v0 recipe, while Pythia-160M/410M/1B show
+> that the same DINO/content-KL objective can recover after a degenerate transient in another model
+> family.
 
 Document position: [Index](./index.md). Companion: [v0 recipe + closed branches](./i2s_v0_recipe_and_closed_branches.md),
 [DINO plan](./dino_i2s_self_distillation_plan.md). Result files under `reports/` are cited inline.
@@ -95,21 +97,40 @@ the compute given the consistent three-objective pattern.)
 
 ---
 
-## 5. Central observation
+## 5. Central observation, revised after Pythia
 
 ```
-Same-topology I2_S adaptation is stable only under a minimal content-anchoring objective.
-Adding any auxiliary objective beyond a certain model scale induces catastrophic generation
-collapse rather than improvement. Therefore the factual ceiling of same-topology I2_S conversion
-is set by the base model's adaptability, not by the adaptation objective.
+For TinyLlama-1.1B, same-topology I2_S adaptation is stable only under a minimal
+content-anchoring objective within the 800-step budget. Adding hard replay, PopQA
+blend, or DINO-logit caused generation collapse rather than improvement.
 ```
 
-The three same-direction failures (replay / blend / DINO, the last even fully stabilised) make this
-an observation, not an anecdote. It also flips the research question:
+However, Pythia changes the broader interpretation:
 
-- **Old question:** *will adding an objective raise the ceiling?* -> answered: no (it collapses).
-- **New question:** *if the base model's factuality/adaptability is higher, does the same minimal
-  recipe reach a higher ceiling?* -> the next project (base-model ladder).
+```text
+Pythia-160M: stable
+Pythia-410M: transient -> recovery
+Pythia-1B: transient -> recovery
+TinyLlama-1.1B: transient unresolved within 800 steps
+```
+
+So the stronger, current observation is:
+
+```text
+collapse is not a generic 1B scale wall.
+It is a model-family / chat-tuning / schedule-specific adaptation dynamics issue.
+```
+
+The three same-direction TinyLlama failures (replay / blend / DINO, the last even stabilised) remain
+important, but they should no longer be generalized to all 1B all-I2_S models. They flip the research
+question:
+
+- **Old question:** *will adding an objective raise TinyLlama's ceiling within 800 steps?* -> answered:
+  not with the tested recipes.
+- **New question:** *is TinyLlama a hard collapse or only a longer transient?* -> TinyLlama longer-budget
+  gate.
+- **Second question:** *which model families consolidate under I2_S adaptation?* -> Pythia/Qwen/Gemma
+  ladder.
 
 ---
 
@@ -144,17 +165,34 @@ ceiling for this base under same-topology conversion.
 
 ---
 
-## 8. Future work: the base-model ladder
+## 8. Future work: TinyLlama longer budget, then model-family ladder
 
-The next project keeps the **same minimal content-KL I2_S recipe** and varies the **base model**, to
-test whether a higher base factuality/adaptability lifts the ceiling and tolerates conversion better:
+The immediate next project is not another objective. It is a schedule/dynamics test on the actual
+failing target:
 
-- **1st: Qwen3-1.7B** -- comparable scale to 1.1B, higher factual baseline, modest memory.
-- **2nd: Qwen3-4B** -- larger impact, higher experiment cost.
+```text
+TinyLlama-1.1B longer-budget run:
+  1600 steps first,
+  extend to 2400 only if degen_gap/gold_rank trajectory suggests recovery.
+```
 
-If a stronger base proves more stable under same-topology adaptation, the 160M-validated DINO-logit
-(centering on) is worth re-testing there; cheap DINO iteration now runs locally on Apple-Silicon
-MPS (see [Mac dev env](./mac_dev_env.md)). The one-line thesis carried forward:
+If TinyLlama recovers:
 
-> The bottleneck is no longer the objective; it is the adaptability of the base model under
-> same-topology I2_S conversion.
+```text
+the original I2_S product path reopens as a schedule/curriculum problem.
+```
+
+If TinyLlama remains collapsed:
+
+```text
+TinyLlama is a hard model-specific collapse under this same-topology setup.
+Then move to model-family/product ladders:
+  Qwen/Gemma audit,
+  Qwen 1.5B/3B/7B,
+  optionally Pythia 1.4B/2.8B for academic completeness.
+```
+
+The one-line thesis carried forward:
+
+> The bottleneck is not simply objective choice or 1B scale. It is whether a given base model can
+> consolidate through the degenerate transient induced by same-topology I2_S adaptation.

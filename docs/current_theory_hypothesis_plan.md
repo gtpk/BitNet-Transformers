@@ -39,9 +39,10 @@ and with fallback capacity only where it buys real behavior.
 | quantizer tweaks | mostly ruled out | scale/objective/AWQ/GPTQ/signed-eps all too small |
 | CE/PPL recovery | works | short target-linear adaptation recovers large CE fraction |
 | decoding usability | rescued | repetition penalty/sampling avoids greedy attractors |
-| factual quality | still open | content-KL best fact is modest; small hard replay overfits |
+| factual quality | still open | content-KL/DINO move distribution but do not yet preserve assistant-level facts |
 | post-hoc capacity restore | failed | late FP restore worsens behavior after all-ternary co-adaptation |
-| representative blend | promising mechanism, not yet final | PopQA blend avoids train/eval memorization signature in 160M smoke |
+| representative blend | failed for TinyLlama 1.1B | PopQA blend avoids 160M memorization but collapses at TinyLlama 1.1B |
+| scale/model collapse | revised | Pythia-160M/410M/1B recover; TinyLlama-1.1B collapse is not a generic 1B scale wall |
 
 ## The Main Theory
 
@@ -403,8 +404,10 @@ reduce token-time memory traffic, not only checkpoint bytes.
 | H11 | layers that repeatedly flip ternary states during STE reveal local I2_S capacity bottlenecks | flip part false; sensitivity locator true at 160M (EGROW-001: top-8 overlap 7/8, but flip_rate ~= 0; residual x saliency drives ranking) | EGROW-002: top-k sensitive layers vs random-k sidecar |
 | H12 | 160M cheap geometry/capacity probes can identify the next product lever | mostly exhausted / negative (WSYNC, H-I2S, SIDE-001, EGROW-002); EGROW-004/005 are gated off, not run | wait for FACT-003H; reopen 1.1B capacity only if representative data plateaus or a new locator/growth action appears |
 | H13 | natural-system analogies can produce new I2_S-rooted smoke candidates | open | start with RDT-001 ledger, HOME-001 homeostasis, then SIGMA-001/RHT-002 references; no Colab until PC smoke passes |
-| H14 | DINO-style no-label self-distillation can preserve base factual behavior during I2_S conversion | open | if FACT-003H plateaus or hard replay remains negative, run DINO-I2S-001 PC smoke: content-only KL + hidden alignment from frozen FP teacher |
-| H15 | generation collapse is a dynamic phenomenon, not a final-score event | open / reframed | instrument step-level entropy, top-1 probability, gold rank, hidden variance, gradient/update norm, and salad/empty/loop rates before the next major 1.1B run |
+| H14 | DINO-style no-label self-distillation can preserve base factual behavior during I2_S conversion | partially true | logit-DINO moves gold logprob/rank; hidden alignment overconstrains; exact-match depends on model/schedule |
+| H15 | generation collapse is a dynamic phenomenon, not a final-score event | true / active | Pythia shows recoverable degenerate transients; log teacher-relative degen_gap/gold_rank_ratio |
+| H16 | ~1B model scale itself causes collapse | false so far | Pythia-1B is stable; TinyLlama-1.1B collapse is model-specific or schedule-specific |
+| H17 | TinyLlama-1.1B collapse may be an unresolved transient, not hard impossibility | open | run TinyLlama longer-budget 1600-step gate with teacher-relative telemetry |
 
 ## Collapse Dynamics Reframe
 
