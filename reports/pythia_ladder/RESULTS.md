@@ -33,7 +33,9 @@ teacher; gold_rank stuck ~5000-8000) then RECOVERS** (degen_gap -> 0 from ~step 
 967 -> ~6-21; top1 rises 0.05->0.27, entropy falls 8->4.2, train_ce falls 9.9->3.7). Final (Mac fp32,
 full 800): degen 0, gold_rank 128, recovered_fraction 0.894. Cross-validated across precision: 3080
 bf16 (authoritative, teacher-relative) and Mac fp32 (aux) show the SAME trajectory -> the transient is
-scale-driven, not a precision artifact.
+scale-driven, not a precision artifact. **3080 authoritative final: degen_gap +0.00 (fully recovered,
+clean like teacher), gold_rank_ratio 967 -> 22 (big improvement, plateaus ~20x teacher = the b1.58
+quantized-student factual ceiling, NOT collapse), recovered_fraction 0.898.**
 
 160M had NO transient; 410M has one but resolves it within the 800-step budget; TinyLlama-1.1B never
 resolved it (collapse). **Emerging scale-law: transient length grows with scale; collapse = the
