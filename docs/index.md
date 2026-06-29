@@ -104,9 +104,12 @@ DP는 후보 selector로 격하했다.
 **RT-124~127 (quantization-aware track) 종결:** scale granularity(RT-124A, block +2.36
 nats 부분 lever지만 runtime 필요)·scale/threshold objective(RT-124B, absmean이 이미
 최적)·AWQ/SmoothQuant diagonal(RT-124C, +0.14)·GPTQ/Hessian assignment(RT-125, +0.51 =
-gap의 6%)·signed-epsilon 2-bit codebook(RT-127, ternary 못 이김) — **어느 PTQ 기법도
-one-shot 변환을 살리지 못한다. 병목은 quantizer가 아니라 adaptation/objective다**(짧은
-adaptation이 모든 one-shot 트릭을 압도). plan의 Expected Conclusion #4 도달.
+gap의 6%)·signed-epsilon 2-bit codebook(RT-127, ternary 못 이김) — **우리가 테스트한
+단순 `gamma*T` 계열 PTQ toolbox는 one-shot 변환을 살리지 못한다.** 다만 PT2-LLM
+(ICLR 2026)의 asymmetric `mu + alpha*T`, activation-aware grid alignment, structural
+reordering은 이 음성 결과에 포함되지 않는다. 따라서 병목 해석은 "단순 quantizer가
+아니라 adaptation/objective"에서 한 단계 정밀해져, **PT2-style initializer를 먼저
+검증한 뒤 adaptation budget을 쓴다**로 수정한다.
 
 **RT-129 (decoding probe) — usability 회복:** RT-122의 1.1B greedy degeneration은
 모델 손상이 아니라 **greedy artifact**였다. repetition penalty(1.2)/sampling이면
@@ -124,6 +127,12 @@ hard replay는 1.1B에서 암기/과적합 함정을 보였다. 따라서 최신
 단일 quantizer가 아니라 coordinate transform, saliency, capacity, representative
 adaptation을 묶는 compiler 문제로 보는 것**이다. 공정 비교 축은
 [Fair Comparison Framework](./fair_comparison_framework.md)에 고정한다.
+
+**PT2-LLM 업데이트(2026-06-30):** "PTQ ternary가 안 된다"가 아니라 "순수 I2_S
+`gamma*T` one-shot이 안 됐다"로 claim을 좁힌다. 다음 실험 순서는 TinyLlama
+longer-budget 직행이 아니라 [PT2-I2S Initializer Plan](./pt2_i2s_initializer_plan.md)의
+PC smoke(ITF / activation-aware alpha-only / `mu` correction value)를 먼저 본 뒤,
+도움이 있으면 그 initializer로 TinyLlama longer-budget을 다시 여는 것이다.
 
 packed format Phase 1/2/3/4 검증(로컬):
 
@@ -279,6 +288,8 @@ python scripts/rt113_storage_latency.py \
    - TWLA의 E2M asymmetric ternary, Kronecker rotation, inter-layer-aware activation mixed precision, TWLA-lite 검증 아이디어.
 8y. [Literature Deep Dive 04: PT2-LLM](./literature_deep_dive_pt2_llm.md)
    - PT2-LLM의 asymmetric `mu + alpha*T`, activation-aware grid alignment, structural reordering, PT2-lite 검증 아이디어.
+8y2. [PT2-I2S Initializer Plan](./pt2_i2s_initializer_plan.md)
+   - PT2-LLM을 우리 I2_S 철학 안으로 흡수하기 위한 실행 사다리. pure I2_S projection, I2_S-rooted `mu` correction, SSR을 분리해 TinyLlama longer-budget 전에 PC smoke로 검증한다.
 8z. [Literature Deep Dive 05: KD / KL Objectives](./literature_deep_dive_kd_kl.md)
    - MiniLLM/DistiLLM/AKL 안에서 content-KL의 위치, 안전한 claim, FACT-004 후보.
 8aa. [Literature Deep Dive 06: Precision Scaling Laws](./literature_deep_dive_precision_scaling.md)
@@ -347,6 +358,7 @@ flowchart TD
   LM --> DCAT["literature_deep_dive_catq.md"]
   LM --> DTW["literature_deep_dive_twla.md"]
   LM --> DPT2["literature_deep_dive_pt2_llm.md"]
+  DPT2 --> PT2I["pt2_i2s_initializer_plan.md"]
   LM --> DKD["literature_deep_dive_kd_kl.md"]
   LM --> DPS["literature_deep_dive_precision_scaling.md"]
   LM --> DROT["literature_deep_dive_rotation_awq_smoothquant.md"]
@@ -425,6 +437,7 @@ flowchart TD
 | [literature_deep_dive_catq.md](./literature_deep_dive_catq.md) | CAT-Q의 learnable modulation, softened ternarization, sliding-layer optimization과 우리 one-plane I2_S 경로의 연결 가능성 | multi-plane으로 가기 전 stronger one-plane PTQ를 검증할 때 |
 | [literature_deep_dive_twla.md](./literature_deep_dive_twla.md) | TWLA의 E2M asymmetric ternary, Kronecker rotation, activation mixed precision, inter-layer allocation을 우리 실험과 연결 | rotation/activation-bit/interaction-aware selector를 진지한 후보로 볼 때 |
 | [literature_deep_dive_pt2_llm.md](./literature_deep_dive_pt2_llm.md) | PT2-LLM의 asymmetric ternary grid, ITF, activation-aware grid alignment, structural reordering을 I2_S projection 질문으로 정리 | `mu + alpha*T` 힌트를 pure I2_S 또는 hybrid로 나눠 검증할 때 |
+| [pt2_i2s_initializer_plan.md](./pt2_i2s_initializer_plan.md) | PT2-LLM에서 빌린 ITF/AGA/SSR을 pure I2_S projection과 `mu` 보조항으로 나눠 검증하는 다음 실험 계획 | TinyLlama longer-budget을 돌리기 전에 더 좋은 ternary initializer가 있는지 확인할 때 |
 | [literature_deep_dive_kd_kl.md](./literature_deep_dive_kd_kl.md) | MiniLLM, DistiLLM, AKL 속에서 content-KL을 vocabulary-support intervention으로 위치시킨다 | FACT-004 factual objective를 설계할 때 |
 | [literature_deep_dive_precision_scaling.md](./literature_deep_dive_precision_scaling.md) | precision scaling law, undertrained quantization, mixed quantization을 effective-capacity 관점으로 정리 | pure b1.58이 부족할 때 strips/planes/hybrid capacity를 정당화할 때 |
 | [literature_deep_dive_rotation_awq_smoothquant.md](./literature_deep_dive_rotation_awq_smoothquant.md) | QuaRot/SpinQuant/AWQ/SmoothQuant와 PTQTP/TWLA를 하나의 conversion stack으로 해석해 WSYNC, PopQA blend, adaptive trit-plane 경로를 정렬 | rotation/equalization/activation-aware scaling 중 무엇을 먼저 빌릴지 정할 때 |

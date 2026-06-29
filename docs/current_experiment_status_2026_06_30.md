@@ -19,7 +19,8 @@ dynamics rather than a simple 1B scale wall.
 | I2_S runtime/export | solved on x86/Linux | Path A' `Wq=gamma*T` -> GGUF -> I2_S parity |
 | storage | solved | target linears are 16x smaller than f32, 8x vs f16 |
 | token generation speed | solved for dense LLaMA family | speedup grows with scale; TinyLlama 1.1B showed ~7.5x vs f32 |
-| one-shot b1.58 PTQ | false | PTQ collapses; quantizer tweaks cannot rescue behavior |
+| pure one-shot I2_S PTQ | false | `gamma*T` PTQ collapses; simple quantizer tweaks cannot rescue behavior |
+| PT2-style ternary PTQ | newly open | asymmetric `mu + alpha*T`, AGA, SSR were not covered by our negative PTQ track |
 | short adaptation | works for CE/fluency | CE/PPL and non-degenerate generation recover under content-KL style recipes |
 | I2_S runtime faithfulness after adaptation | solved | i2_s tracks adapted f16; collapse is model/training, not runtime |
 
@@ -35,8 +36,8 @@ Failed or demoted branches:
 
 | branch | result |
 | --- | --- |
-| one-shot PTQ / RTN | collapse |
-| scale/threshold/GPTQ/AWQ/signed-eps | too small; quantizer is not the main lever |
+| one-shot pure I2_S PTQ / RTN | collapse |
+| scale/threshold/GPTQ/AWQ/signed-eps | too small; simple quantizer tweaks are not the main lever |
 | WSYNC / H-I2S / SIGMA / RHT | data-free geometry cannot leave the collapsed regime |
 | small hard factual replay | memorizes train facts; held-out/eval drops |
 | PopQA blend on TinyLlama 1.1B | generation collapse |
@@ -131,7 +132,38 @@ roughly the TinyLlama scale.
 
 ## Current Decision Point
 
-Most valuable next experiment:
+PT2-LLM changes the next-step ordering.
+
+Old next experiment:
+
+```text
+TinyLlama-1.1B longer-budget run (1600 steps first, extend to 2400 only if
+trajectory suggests recovery).
+```
+
+New first experiment:
+
+```text
+PT2-lite I2_S initializer smoke.
+```
+
+Reason:
+
+```text
+If PT2-style ITF/AGA/SSR starts closer to FP, it may shorten the degenerate
+transient before we spend another long TinyLlama run.
+```
+
+So the revised order is:
+
+```text
+1. PT2-I2S-001/002 on PC: ITF + activation-aware alpha-only projection.
+2. If pure I2_S projection helps behavior, use it as the new TinyLlama initializer.
+3. If only mu+alpha*T helps, evaluate the I2_S-rooted mu correction sidecar.
+4. If PT2-lite does not help, return to TinyLlama longer-budget.
+```
+
+Still valuable, but second in line:
 
 ```text
 TinyLlama-1.1B longer-budget run (1600 steps first, extend to 2400 only if
@@ -182,4 +214,3 @@ all-I2_S preserves factual assistant quality.
 content-KL/DINO solves factuality.
 TinyLlama collapse proves all 1B models collapse.
 ```
-

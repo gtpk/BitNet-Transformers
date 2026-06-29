@@ -7,7 +7,7 @@ Paper:
 - PT^2-LLM: Post-Training Ternarization for Large Language Models
 - arXiv: https://arxiv.org/abs/2510.03267
 - Code page: https://github.com/XIANGLONGYAN/PT2-LLM
-- Status checked: 2026-06-27
+- Status checked: 2026-06-30
 
 ## One-Line Read
 
@@ -27,6 +27,52 @@ pre-adaptation quantizer:
 ```text
 Can we initialize the b1.58 model much closer to FP before CE/content-KL adaptation?
 ```
+
+## 2026-06-30 Direction Update
+
+PT2-LLM changes the interpretation of our negative PTQ track.
+
+Old, too-broad reading:
+
+```text
+PTQ ternary conversion does not work.
+```
+
+Corrected reading:
+
+```text
+our pure I2_S one-shot form Wq = gamma*T did not work.
+PT2-style asymmetric, activation-aware ternarization remains open.
+```
+
+The distinction matters because PT2-LLM does not merely tune a threshold. It changes
+the representational family:
+
+```text
+pure I2_S:      Wq = gamma*T
+PT2 family:     Wq = mu + alpha*T
+```
+
+So PT2-LLM is now a real competitor and also a useful donor. It gives us two new
+questions:
+
+```text
+1. Can PT2-style fitting choose a better ternary code T that still survives
+   projection back into pure I2_S?
+
+2. If the gain lives mostly in mu, can we keep I2_S as the root and add only the
+   cheap input-sum correction mu*(1^T x)?
+```
+
+This inserts a new cheap branch before spending another long TinyLlama run:
+
+```text
+PT2-lite initializer -> content-KL/DINO adaptation -> I2_S export/runtime check
+```
+
+The TinyLlama longer-budget experiment is still valuable, but PT2-lite should be
+tested first because it may shorten the degenerate transient by starting closer to
+the FP model.
 
 ## What They Claim
 
@@ -275,7 +321,7 @@ Does it preserve factual knowledge better than absmean init?
 
 ## How This Changes Our Roadmap
 
-PT2-LLM inserts a new branch before TWLA-lite:
+PT2-LLM inserts a new branch before TinyLlama longer-budget and before TWLA-lite:
 
 ```text
 CAT-Q-lite:
@@ -283,6 +329,10 @@ CAT-Q-lite:
 
 PT2-lite:
   test asymmetric grid/reordering, then see whether gains survive I2_S projection
+
+TinyLlama longer-budget:
+  only after PT2-lite says whether the bad initial ternary grid was part of the
+  collapse transient
 
 TWLA-lite:
   add rotation + activation-bit allocation if output/activation bottlenecks remain
@@ -334,6 +384,12 @@ back into pure I2_S gamma*T.
 If it survives, PT2-lite becomes our best cheap initialization before content-KL.
 If it does not, PT2 supports the hybrid/custom-kernel direction rather than the pure
 I2_S conversion direction.
+
+Concrete next document:
+
+```text
+docs/pt2_i2s_initializer_plan.md
+```
 
 ## Source List
 

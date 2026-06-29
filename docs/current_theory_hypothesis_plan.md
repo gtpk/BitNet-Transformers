@@ -35,8 +35,9 @@ and with fallback capacity only where it buys real behavior.
 | I2_S runtime/export | solved on x86/Linux | RT-111/112: f16/f32 ~= i2_s when `Wq=gamma*T` is exported |
 | storage | solved | target linears are 16x smaller than f32, whole-file ratio improves with scale |
 | speed | solved for dense LLaMA | token-generation speedup grows from tiny -> 160M -> 1.1B |
-| one-shot b1.58 PTQ | failed | PTQ PPL/factual collapse |
-| quantizer tweaks | mostly ruled out | scale/objective/AWQ/GPTQ/signed-eps all too small |
+| pure one-shot I2_S PTQ | failed | `gamma*T` PPL/factual collapse |
+| simple quantizer tweaks | mostly ruled out | scale/objective/AWQ/GPTQ/signed-eps all too small |
+| PT2-style asymmetric PTQ | newly open | `mu + alpha*T`, AGA, SSR not covered by our negative PTQ track |
 | CE/PPL recovery | works | short target-linear adaptation recovers large CE fraction |
 | decoding usability | rescued | repetition penalty/sampling avoids greedy attractors |
 | factual quality | still open | content-KL/DINO move distribution but do not yet preserve assistant-level facts |
@@ -179,6 +180,43 @@ early ternary layers learned to feed later ternary layers.
 
 Changing only late layers after training broke that system. Capacity changes must
 be trained from the start or inserted through a valid compiler step.
+
+### T3b. PT2-LLM Narrows The Negative PTQ Claim
+
+The old shortcut was:
+
+```text
+PTQ ternary conversion failed.
+```
+
+This is now too broad. The correct statement is:
+
+```text
+pure gamma*T I2_S PTQ failed.
+```
+
+PT2-LLM adds a different local family:
+
+```text
+Wq = mu + alpha*T
+```
+
+with iterative fitting, activation-aware grid alignment, and structural column
+reordering. That family was not tested by RT-124..127. Therefore PT2-style fitting
+is now a first-class branch:
+
+```text
+PT2-lite init
+  -> project to pure I2_S if possible
+  -> otherwise measure a minimal mu correction as I2_S-rooted auxiliary capacity
+```
+
+The product guardrail remains:
+
+```text
+pure I2_S wins only if the gain survives Wq = gamma*T.
+mu correction is allowed only as an explicitly labeled auxiliary branch.
+```
 
 ### T4. Adaptation Data Is Not Just "More Data"
 
@@ -392,8 +430,8 @@ reduce token-time memory traffic, not only checkpoint bytes.
 | id | hypothesis | current verdict | next use |
 | --- | --- | --- | --- |
 | H1 | I2_S can faithfully run our b1.58 weights | solved | fixed substrate |
-| H2 | one-shot pure b1.58 PTQ is enough | false | do not spend more on pure PTQ |
-| H3 | quantizer tweaks are the main lever | false so far | keep only row/block scale as init candidates |
+| H2 | one-shot pure b1.58/I2_S PTQ (`gamma*T`) is enough | false | do not spend more on naive pure PTQ |
+| H3 | simple quantizer tweaks are the main lever | false so far | keep only row/block scale as weak init candidates |
 | H4 | content-KL improves factual retention | true but weak | default objective component |
 | H5 | tiny hard factual replay generalizes | false on 1.1B | use only as diagnostic |
 | H6 | representative blend should beat tiny replay | open, promising | PopQA blend 1.1B is the key next run |
@@ -408,6 +446,7 @@ reduce token-time memory traffic, not only checkpoint bytes.
 | H15 | generation collapse is a dynamic phenomenon, not a final-score event | true / active | Pythia shows recoverable degenerate transients; log teacher-relative degen_gap/gold_rank_ratio |
 | H16 | ~1B model scale itself causes collapse | false so far | Pythia-1B is stable; TinyLlama-1.1B collapse is model-specific or schedule-specific |
 | H17 | TinyLlama-1.1B collapse may be an unresolved transient, not hard impossibility | open | run TinyLlama longer-budget 1600-step gate with teacher-relative telemetry |
+| H18 | PT2-style asymmetric fitting can shorten the transient by improving the ternary initializer | open / high-priority | run PT2-I2S-001..005 before spending on longer TinyLlama |
 
 ## Collapse Dynamics Reframe
 
