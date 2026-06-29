@@ -273,6 +273,8 @@ CE/PPL
 generation tags
 I2_S vs f16 parity
 extra forward cost
+gold logprob/rank diagnostics
+logit entropy / top-1 probability
 ```
 
 Pass:
@@ -312,6 +314,26 @@ fact_rate > current content-KL baseline 0.185
 preferably >= 0.25
 tags ok
 i2_s ~= f16
+```
+
+Required telemetry:
+
+```text
+metrics.jsonl every log step
+generation probes at step 0/100/200/.../final
+gold-rank diagnostics by category
+collapse onset report
+```
+
+Do not run DINO-I2S-002 as a final-score-only experiment. If it fails, the run
+must still say whether the failure was:
+
+```text
+capacity,
+soft-target weakness,
+hidden/readout mismatch,
+format collapse,
+or optimizer/training dynamics.
 ```
 
 If DINO-I2S-002 passes:
@@ -437,4 +459,3 @@ The honest claim is:
 ```text
 It forgot less.
 ```
-

@@ -404,6 +404,56 @@ reduce token-time memory traffic, not only checkpoint bytes.
 | H12 | 160M cheap geometry/capacity probes can identify the next product lever | mostly exhausted / negative (WSYNC, H-I2S, SIDE-001, EGROW-002); EGROW-004/005 are gated off, not run | wait for FACT-003H; reopen 1.1B capacity only if representative data plateaus or a new locator/growth action appears |
 | H13 | natural-system analogies can produce new I2_S-rooted smoke candidates | open | start with RDT-001 ledger, HOME-001 homeostasis, then SIGMA-001/RHT-002 references; no Colab until PC smoke passes |
 | H14 | DINO-style no-label self-distillation can preserve base factual behavior during I2_S conversion | open | if FACT-003H plateaus or hard replay remains negative, run DINO-I2S-001 PC smoke: content-only KL + hidden alignment from frozen FP teacher |
+| H15 | generation collapse is a dynamic phenomenon, not a final-score event | open / reframed | instrument step-level entropy, top-1 probability, gold rank, hidden variance, gradient/update norm, and salad/empty/loop rates before the next major 1.1B run |
+
+## Collapse Dynamics Reframe
+
+The project question is shifting from:
+
+```text
+Is this objective good?
+```
+
+to:
+
+```text
+When and why does this objective trigger generation collapse?
+```
+
+The core warning from FACT and DINO diagnostics is:
+
+```text
+loss can improve while generation quality collapses.
+```
+
+Therefore final PPL/fact scores are not enough. Future DINO/FACT runs should
+emit step-level telemetry:
+
+```text
+total loss,
+content KL,
+DINO loss,
+gradient norm,
+parameter update norm,
+hidden activation variance,
+logit entropy,
+top-1 probability,
+gold logprob/rank,
+salad/empty/loop rates.
+```
+
+The goal is to locate the collapse onset:
+
+```text
+the first training window where generation tags degrade together with entropy /
+confidence / rank dynamics.
+```
+
+Detailed plan:
+
+```text
+docs/collapse_dynamics_research_plan.md
+```
 
 ## DINO-I2S As Objective Branch
 
