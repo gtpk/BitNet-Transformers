@@ -421,6 +421,57 @@ def _dino_collapse_frac(model, tok, prompts, device):
     return bad / max(len(prompts), 1)
 
 
+@torch.no_grad()
+def telemetry_probe(model, tok, probe_rows, device, max_new=40):
+    """PYTHIA-LADDER P2: per-log-step collapse-signature probe on held-out panel rows (read-only).
+
+    Returns the telemetry schema fields (docs/pythia_ladder_runbook.md S5): student gold-token
+    rank/logp, last-answer-position logit entropy + top1 prob, generation degeneracy
+    (salad/loop/empty), and mid/last hidden-state variance -- the quantities that move at a
+    scale-dependent collapse onset, before/around visible salad."""
+    import sys as _sys
+    _sys.path.insert(0, str(REPO_ROOT / "scripts"))
+    from fact004a_160m_smoke import generate, tag
+    import torch.nn.functional as F
+    was_train, was_cache = model.training, model.config.use_cache
+    model.eval()
+    gr, gl, ents, top1s, hvm, hvl = [], [], [], [], [], []
+    tags = {}
+    for r in probe_rows:
+        gold = r["must_contain"][0].strip()
+        gs = " " + (gold[0].upper() + gold[1:] if gold else gold)
+        pids = tok(r["prompt"], return_tensors="pt").input_ids.to(device)
+        gids = tok(gs, return_tensors="pt", add_special_tokens=False).input_ids.to(device)
+        model.config.use_cache = False
+        out = model(input_ids=torch.cat([pids, gids], dim=1), output_hidden_states=True)
+        logp = F.log_softmax(out.logits[0].float(), dim=-1)
+        Lp = pids.shape[1]
+        gl.append(sum(logp[Lp - 1 + i, g].item() for i, g in enumerate(gids[0].tolist())) / gids.shape[1])
+        dist = logp[Lp - 1]
+        first = int(gids[0, 0])
+        gr.append(int((dist > dist[first]).sum().item()) + 1)
+        pdist = dist.exp()
+        ents.append(float(-(pdist * dist).sum()))
+        top1s.append(float(pdist.max()))
+        hs = out.hidden_states
+        nl = len(hs)
+        hvm.append(float(hs[max(1, nl // 2)][0].float().var()))
+        hvl.append(float(hs[nl - 1][0].float().var()))
+        model.config.use_cache = True
+        t = tag(generate(model, tok, r["prompt"], max_new, device))
+        tags[t] = tags.get(t, 0) + 1
+    model.config.use_cache = was_cache
+    if was_train:
+        model.train()
+    n = max(len(probe_rows), 1)
+    deg = sum(tags.get(k, 0) for k in ("salad", "empty", "loop")) / n
+    return {"gold_rank_mean": round(sum(gr) / n, 1), "gold_logp_mean": round(sum(gl) / n, 3),
+            "logit_entropy": round(sum(ents) / n, 3), "top1_prob": round(sum(top1s) / n, 3),
+            "degenerate_rate": round(deg, 3), "salad_rate": round(tags.get("salad", 0) / n, 3),
+            "loop_rate": round(tags.get("loop", 0) / n, 3), "empty_rate": round(tags.get("empty", 0) / n, 3),
+            "hidden_var_mid": round(sum(hvm) / n, 3), "hidden_var_last": round(sum(hvl) / n, 3)}
+
+
 def homeostasis_term(model, teacher, input_ids, layer_mode="last", rho=1.0):
     """HOME-001: match base/student hidden-state mean+rms set-points on the same batch.
 
@@ -547,6 +598,11 @@ def main():
                     help="DINO-I2S-003: stop if salad/empty/loop fraction exceeds this on the collapse check")
     ap.add_argument("--dino-collapse-min-step", type=int, default=150,
                     help="DINO-I2S-003: do not run the collapse check before this step (let warmup settle)")
+    ap.add_argument("--telemetry-full", action="store_true",
+                    help="PYTHIA-LADDER P2: every log step, run a held-out probe and log the collapse-signature "
+                         "schema (gold_rank/logp, logit_entropy, top1_prob, degenerate/salad/loop/empty rate, "
+                         "hidden_var mid/last) + grad_norm into metrics.jsonl")
+    ap.add_argument("--telemetry-probe-n", type=int, default=10, help="PYTHIA-LADDER P2: # panel prompts in the probe")
     ap.add_argument("--sidecar-rank", type=int, default=0,
                     help="SIDE: I2_S+LoRA sidecar rank per target linear (0 = disabled, existing behavior)")
     ap.add_argument("--sidecar-alpha", type=float, default=8.0, help="SIDE: LoRA scale = alpha/rank")
@@ -771,13 +827,16 @@ def main():
         except Exception as e:
             print(f"  [tb] TensorBoard unavailable ({e}); skipping event logging", flush=True)
 
-    def log_metrics(step, ce, kl, fce, home, elapsed, rate, eta, pct):
+    def log_metrics(step, ce, kl, fce, home, elapsed, rate, eta, pct, extra=None):
         rec = {"step": step, "pct": round(pct, 2), "train_ce": round(ce, 4),
                "kl": round(kl, 4) if teacher is not None else None,
                "fce": round(fce, 4) if factual_ids is not None else None,
                "home": round(home, 4) if home_teacher is not None else None,
+               "dino": round(extra.get("dino_loss"), 4) if (extra and "dino_loss" in extra) else None,
                "elapsed_min": round(elapsed / 60, 2), "eta_min": round(eta / 60, 2),
                "sec_per_step": round(rate, 2), "arm": arm}
+        if extra:
+            rec.update(extra)  # PYTHIA-LADDER P2 telemetry schema (gold_rank, entropy, degenerate_rate, grad_norm, ...)
         if metrics_fh:
             metrics_fh.write(json.dumps(rec) + "\n"); metrics_fh.flush()
         if tb:
@@ -788,6 +847,9 @@ def main():
                 tb.add_scalar("train/fce", fce, step)
             if home_teacher is not None:
                 tb.add_scalar("train/home", home, step)
+            for k, v in (extra or {}).items():
+                if isinstance(v, (int, float)):
+                    tb.add_scalar(f"telemetry/{k}", v, step)
             tb.flush()
 
     # DINO-I2S-003 stabilisation state: centering EMA, collapse-check prompts, early-stop flag
@@ -805,6 +867,17 @@ def main():
     if args.dino_logit_weight > 0 and (args.dino_center or args.dino_warmup_steps > 0):
         print(f"DINO-I2S-003 stabilisation: center={args.dino_center}(m={args.dino_center_m}) "
               f"warmup_steps={args.dino_warmup_steps}", flush=True)
+
+    # PYTHIA-LADDER P2: full collapse-signature telemetry probe rows (held-out panel, read-only)
+    probe_rows = []
+    if args.telemetry_full:
+        try:
+            probe_rows = [json.loads(l) for l in open(args.panel_file, encoding="utf-8") if l.strip()][: args.telemetry_probe_n]
+            print(f"PYTHIA-LADDER telemetry: probing {len(probe_rows)} panel rows every {args.log_every} steps "
+                  f"(gold_rank/entropy/top1/degenerate/hidden_var + grad_norm)", flush=True)
+        except Exception as e:
+            print(f"  [telemetry] could not load probe rows ({e}); telemetry-full off", flush=True)
+            probe_rows = []
 
     model.train()
     t_start = time.time()
@@ -858,22 +931,36 @@ def main():
                 train_dino_sum += float(dino)
                 loss = loss + eff_dino_w * dino
             (loss / args.grad_accum_steps).backward()
+        is_log = step % args.log_every == 0 or step == args.steps - 1
+        grad_norm = None
+        if args.telemetry_full and is_log:  # PYTHIA-LADDER P2: measure grad norm (max_norm=inf -> no clipping)
+            grad_norm = float(torch.nn.utils.clip_grad_norm_(tparams, float("inf")))
         opt.step()
-        if step % args.log_every == 0 or step == args.steps - 1:
+        if is_log:
             done = step - start_step + 1                 # steps done THIS session (for rate/ETA)
             elapsed = time.time() - t_start
             rate = elapsed / done                        # sec per optimizer step
             eta = rate * (args.steps - 1 - step)
             pct = 100.0 * (step + 1) / args.steps         # absolute progress
+            extra = {}
+            if args.dino_logit_weight > 0:
+                extra["dino_loss"] = train_dino_sum / args.grad_accum_steps
+            if grad_norm is not None:
+                extra["grad_norm"] = round(grad_norm, 4)
+            if probe_rows:                               # collapse-signature probe (read-only)
+                extra.update(telemetry_probe(model, tok, probe_rows, device))
             kl_str = f"  kl={train_kl_sum / args.grad_accum_steps:.4f}" if teacher is not None else ""
             fce_str = f"  fce={train_fce_sum / args.grad_accum_steps:.4f}" if factual_ids is not None else ""
             home_str = f"  home={train_home_sum / args.grad_accum_steps:.4f}" if home_teacher is not None else ""
             dino_str = f"  dino={train_dino_sum / args.grad_accum_steps:.4f}" if args.dino_logit_weight > 0 else ""
-            print(f"  step {step:4d}/{args.steps} ({pct:5.1f}%)  train_ce={train_ce_sum / args.grad_accum_steps:.4f}{kl_str}{fce_str}{home_str}{dino_str}  "
+            tele_str = (f"  gnorm={extra['grad_norm']:.2f}  degen={extra.get('degenerate_rate', 0):.2f}  "
+                        f"goldrank={extra.get('gold_rank_mean', 0):.0f}  ent={extra.get('logit_entropy', 0):.2f}"
+                        if grad_norm is not None else "")
+            print(f"  step {step:4d}/{args.steps} ({pct:5.1f}%)  train_ce={train_ce_sum / args.grad_accum_steps:.4f}{kl_str}{fce_str}{home_str}{dino_str}{tele_str}  "
                   f"elapsed {elapsed/60:.1f}m  ETA {eta/60:.1f}m  ({rate:.1f}s/step)", flush=True)
             log_metrics(step, train_ce_sum / args.grad_accum_steps, train_kl_sum / args.grad_accum_steps,
                         train_fce_sum / args.grad_accum_steps, train_home_sum / args.grad_accum_steps,
-                        elapsed, rate, eta, pct)
+                        elapsed, rate, eta, pct, extra=extra)
         if (collapse_prompts and step >= args.dino_collapse_min_step
                 and step % args.dino_collapse_check_every == 0):
             sf = _dino_collapse_frac(model, tok, collapse_prompts, device)
