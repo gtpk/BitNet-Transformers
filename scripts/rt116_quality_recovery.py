@@ -870,11 +870,21 @@ def main():
 
     # PYTHIA-LADDER P2: full collapse-signature telemetry probe rows (held-out panel, read-only)
     probe_rows = []
+    teacher_base = {}
     if args.telemetry_full:
         try:
             probe_rows = [json.loads(l) for l in open(args.panel_file, encoding="utf-8") if l.strip()][: args.telemetry_probe_n]
             print(f"PYTHIA-LADDER telemetry: probing {len(probe_rows)} panel rows every {args.log_every} steps "
                   f"(gold_rank/entropy/top1/degenerate/hidden_var + grad_norm)", flush=True)
+            # teacher-relative baseline: probe the FROZEN FP teacher ONCE so collapse is judged
+            # relative to the base model's own behaviour (Pythia is base, not chat -- absolute tags
+            # are not comparable across model families; the teacher gap is).
+            if teacher is not None:
+                tb = telemetry_probe(teacher, tok, probe_rows, device)
+                teacher_base = {"teacher_degen": tb["degenerate_rate"], "teacher_gold_rank": tb["gold_rank_mean"],
+                                "teacher_gold_logp": tb["gold_logp_mean"], "teacher_top1": tb["top1_prob"]}
+                print(f"  [teacher-baseline] degen={tb['degenerate_rate']:.2f} gold_rank={tb['gold_rank_mean']:.0f} "
+                      f"top1={tb['top1_prob']:.3f} ent={tb['logit_entropy']:.2f} -- collapse judged RELATIVE to this", flush=True)
         except Exception as e:
             print(f"  [telemetry] could not load probe rows ({e}); telemetry-full off", flush=True)
             probe_rows = []
@@ -949,12 +959,17 @@ def main():
                 extra["grad_norm"] = round(grad_norm, 4)
             if probe_rows:                               # collapse-signature probe (read-only)
                 extra.update(telemetry_probe(model, tok, probe_rows, device))
+                extra.update(teacher_base)               # constant FP-teacher baseline for reference
+                if teacher_base:                         # teacher-RELATIVE collapse signals (the real criterion)
+                    extra["degen_gap"] = round(extra["degenerate_rate"] - teacher_base["teacher_degen"], 3)
+                    extra["gold_rank_ratio"] = round(extra["gold_rank_mean"] / max(teacher_base["teacher_gold_rank"], 1.0), 2)
             kl_str = f"  kl={train_kl_sum / args.grad_accum_steps:.4f}" if teacher is not None else ""
             fce_str = f"  fce={train_fce_sum / args.grad_accum_steps:.4f}" if factual_ids is not None else ""
             home_str = f"  home={train_home_sum / args.grad_accum_steps:.4f}" if home_teacher is not None else ""
             dino_str = f"  dino={train_dino_sum / args.grad_accum_steps:.4f}" if args.dino_logit_weight > 0 else ""
-            tele_str = (f"  gnorm={extra['grad_norm']:.2f}  degen={extra.get('degenerate_rate', 0):.2f}  "
-                        f"goldrank={extra.get('gold_rank_mean', 0):.0f}  ent={extra.get('logit_entropy', 0):.2f}"
+            tele_str = (f"  gnorm={extra['grad_norm']:.2f}  degen={extra.get('degenerate_rate', 0):.2f}"
+                        f"(gap{extra.get('degen_gap', 0):+.2f})  goldrank={extra.get('gold_rank_mean', 0):.0f}"
+                        f"(x{extra.get('gold_rank_ratio', 0):.0f}T)  ent={extra.get('logit_entropy', 0):.2f}"
                         if grad_norm is not None else "")
             print(f"  step {step:4d}/{args.steps} ({pct:5.1f}%)  train_ce={train_ce_sum / args.grad_accum_steps:.4f}{kl_str}{fce_str}{home_str}{dino_str}{tele_str}  "
                   f"elapsed {elapsed/60:.1f}m  ETA {eta/60:.1f}m  ({rate:.1f}s/step)", flush=True)
@@ -1024,6 +1039,7 @@ def main():
               "dino_view_p": args.dino_view_p, "dino_batch": args.dino_batch,
               "dino_center": args.dino_center, "dino_center_m": args.dino_center_m,
               "dino_warmup_steps": args.dino_warmup_steps, "dino_collapsed_early": collapsed,
+              **teacher_base,
               "sidecar_enabled": args.sidecar_rank > 0, "sidecar_rank": args.sidecar_rank,
               "sidecar_alpha": args.sidecar_alpha, "sidecar_target": args.sidecar_target,
               "sidecar_train_base": args.sidecar_train_base, "sidecar_linears": n_side,
