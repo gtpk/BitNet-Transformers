@@ -558,3 +558,20 @@ flowchart TD
 
 단, raw Colab JSON이 현재 local workspace에 없으므로 논문식 정량 주장 전에는
 보고서를 회수하거나 sweep을 재실행한다.
+
+## 증거 보존 (Evidence)
+
+모든 실험의 **실제 측정값 + 데이터 출처**는 단일 ledger에 통합 보존한다 (위 "raw JSON이
+로컬에 없다"는 우려에 대한 대응):
+
+- [Evidence Ledger](../reports/EVIDENCE_LEDGER.md) — FACT-002~003C 회복 사다리, 1.1B
+  objective-augmentation wall(replay/blend/DINO/안정화-DINO), DINO 160M 양성(DIAG/sweep),
+  confound control A/B, **Pythia 사다리(160m/410m/1b)**, capacity/geometry 음성 트랙의
+  측정값을 per-experiment 리포트·in-repo metrics.jsonl·Drive 아카이브 포인터와 함께 표로 고정.
+- [Same-Topology Findings](./i2s_same_topology_findings.md) — 서사/해석(헤드라인: collapse는
+  generic 1B scale 벽이 아니라 TinyLlama model-specific; Pythia는 1b까지 transient 후 회복).
+- [Pythia Ladder Runbook](./pythia_ladder_runbook.md) + [reports/pythia_ladder/RESULTS.md](../reports/pythia_ladder/RESULTS.md)
+  — 사다리 프로토콜과 rung별 결과(teacher-relative telemetry).
+- raw per-step telemetry: `reports/pythia_ladder/*_metrics.jsonl`(160m/410m in-repo),
+  pythia-1b는 Drive `bnt_results/p1b/metrics.jsonl` + in-repo 요약. 진행 중: TinyLlama-1.1B
+  longer-budget(1600 step) → 완료 시 ledger에 추가.
