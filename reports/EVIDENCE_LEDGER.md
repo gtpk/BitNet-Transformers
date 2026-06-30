@@ -106,12 +106,25 @@ Cost ledger verdict (rdt001_cost_ledger.md): NO low-cost branch buys >=0.05 eval
 PT2-I2S-001: ITF lowers weight_MSE but gold_rank gets WORSE (anti-correlated) -> reconstruction is
 the wrong objective; ITF-by-weight-MSE discarded. Motivates PT2-I2S-002 (activation-aware output-error).
 
-## G. IN PROGRESS (2026-06-30)
+## G. TinyLlama-1.1B longer-budget (1600 steps) -- reframe CONFIRMED, but fluent-not-factual
 
-- **TinyLlama-1.1B longer-budget (1600 steps)** -- the decisive test of whether the 1.1B collapse is a
-  recoverable transient (budget-limited) or a hard model-specific collapse. Drive: bnt_results/tl1b_long
-  (metrics.jsonl + run.log), ckpt bnt_ckpt/tl1b_long. telemetry-full, probe every 50, no early-stop,
-  --ckpt-every-min 10 --resume. Verdict pending -> will be appended here + to pythia_ladder/RESULTS.md.
+The DINO recipe that collapsed at 800 steps (DINO-002), re-run to 1600 with teacher-relative
+telemetry. Report: reports/pythia_ladder/tl1b_long_metrics_summary.md (with sample generations).
+
+| metric | value |
+| --- | --- |
+| generation stability | RECOVERED -- degen_gap ~0 sustained from step ~850, tags ok 27/27 (no salad/loop) |
+| recovered_fraction / CE_adapted | 0.806 / 4.08 (~ content-KL baseline 0.845/4.10) |
+| gold_rank (final) | 2006 (recovery onset) -> 375 (still far from FP teacher 3) |
+| **FACT exact rate** | **0.111 (3/27) -- BELOW content-KL baseline 0.185** |
+| sample gens | fluent + coherent but factually WRONG and off Q/A format (base-LM rambling) |
+
+Two separate findings: (1) the 1.1B "collapse" under an auxiliary objective is a BUDGET-LIMITED
+TRANSIENT, not a hard impossibility -- generation fully recovers by step ~850 (the 800-step DINO-002
+failure was premature). (2) But DINO at 1.1B is NOT a factual win: FACT 0.111 < 0.185, and it trades
+terse Q/A answering for fluent rambling -> a readout/answer-format decouple (gold_rank 375 reachable
+internally, not emitted). content-KL 0.185 stays the v0 factual best. Next lever = answer-format /
+answer-token-weighted objective or decoding, not just more budget; PT2-lite = transient-shortener.
 
 ## Reproduction
 
