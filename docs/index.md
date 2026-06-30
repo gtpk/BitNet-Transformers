@@ -129,10 +129,19 @@ adaptation을 묶는 compiler 문제로 보는 것**이다. 공정 비교 축은
 [Fair Comparison Framework](./fair_comparison_framework.md)에 고정한다.
 
 **PT2-LLM 업데이트(2026-06-30):** "PTQ ternary가 안 된다"가 아니라 "순수 I2_S
-`gamma*T` one-shot이 안 됐다"로 claim을 좁힌다. 다음 실험 순서는 TinyLlama
-longer-budget 직행이 아니라 [PT2-I2S Initializer Plan](./pt2_i2s_initializer_plan.md)의
-PC smoke(ITF / activation-aware alpha-only / `mu` correction value)를 먼저 본 뒤,
-도움이 있으면 그 initializer로 TinyLlama longer-budget을 다시 여는 것이다.
+`gamma*T` one-shot이 안 됐다"로 claim을 좁힌다. TL1B-1600 이후 TinyLlama generation
+collapse는 hard impossibility가 아니라 budget-limited transient였음이 확인됐으므로,
+PT2는 emergency rescue가 아니라 **initializer/competitor/donor**로 둔다. 즉
+[PT2-I2S Initializer Plan](./pt2_i2s_initializer_plan.md)의 PC smoke(ITF /
+activation-aware alpha-only / `mu` correction value)를 통해 더 좋은 starting artifact를
+찾고, 최종 모델 비교표에서 PT2 exact / PT2 projected-I2_S / ours PT2-init+adapt를 함께
+비교한다.
+
+**TL1B-1600 업데이트:** DINO-002의 800-step 붕괴는 조기 종료였다. 1600 step에서
+TinyLlama-1.1B는 recovered_fraction `0.806`, CE `4.08`, degen_gap `-0.20`, tags
+`ok 27/27`로 생성 안정성과 CE를 회복했다. 하지만 FACT exact는 `0.111`로 content-KL
+baseline `0.185`보다 낮고, 생성은 유창하지만 Q/A 형식과 사실 정확성이 약하다. 최신
+병목은 **capacity/generation collapse가 아니라 factual readout / answer-format**이다.
 
 **최종 골:** PT2, Q2_K, native BitNet, 우리 I2_S를 방법론으로 따로 평가하는 것이 아니라,
 같은 제약에서 **어떤 최종 모델 artifact가 더 좋은가**를 비교한다. 따라서 최종 표는

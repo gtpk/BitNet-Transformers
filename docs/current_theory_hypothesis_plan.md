@@ -56,7 +56,7 @@ and with fallback capacity only where it buys real behavior.
 | factual quality | still open | content-KL/DINO move distribution but do not yet preserve assistant-level facts |
 | post-hoc capacity restore | failed | late FP restore worsens behavior after all-ternary co-adaptation |
 | representative blend | failed for TinyLlama 1.1B | PopQA blend avoids 160M memorization but collapses at TinyLlama 1.1B |
-| scale/model collapse | revised | Pythia-160M/410M/1B recover; TinyLlama-1.1B collapse is not a generic 1B scale wall |
+| scale/model collapse | revised | Pythia-160M/410M/1B recover; TinyLlama-1.1B generation also recovers by 1600, but factual readout stays weak |
 
 ## The Main Theory
 
@@ -457,9 +457,10 @@ reduce token-time memory traffic, not only checkpoint bytes.
 | H13 | natural-system analogies can produce new I2_S-rooted smoke candidates | open | start with RDT-001 ledger, HOME-001 homeostasis, then SIGMA-001/RHT-002 references; no Colab until PC smoke passes |
 | H14 | DINO-style no-label self-distillation can preserve base factual behavior during I2_S conversion | partially true | logit-DINO moves gold logprob/rank; hidden alignment overconstrains; exact-match depends on model/schedule |
 | H15 | generation collapse is a dynamic phenomenon, not a final-score event | true / active | Pythia shows recoverable degenerate transients; log teacher-relative degen_gap/gold_rank_ratio |
-| H16 | ~1B model scale itself causes collapse | false so far | Pythia-1B is stable; TinyLlama-1.1B collapse is model-specific or schedule-specific |
-| H17 | TinyLlama-1.1B collapse may be an unresolved transient, not hard impossibility | open | run TinyLlama longer-budget 1600-step gate with teacher-relative telemetry |
-| H18 | PT2-style asymmetric fitting can shorten the transient by improving the ternary initializer | open / high-priority | run PT2-I2S-001..005 before spending on longer TinyLlama |
+| H16 | ~1B model scale itself causes collapse | false | Pythia-1B is stable; TinyLlama-1.1B generation recovers by 1600 |
+| H17 | TinyLlama-1.1B collapse may be an unresolved transient, not hard impossibility | true for generation / false for factual exact | do not call 800-step failure hard collapse; next bottleneck is readout/format |
+| H18 | PT2-style asymmetric fitting can shorten the transient by improving the ternary initializer | open / high-priority | run PT2-I2S-001..005 as initializer/competitor, not as emergency rescue |
+| H19 | factual knowledge is reachable but not decoded into concise answers | open / supported by TL1B-1600 | gold_rank 375 but FACT 0.111 -> test answer-token/format-aware readout objectives |
 
 ## Collapse Dynamics Reframe
 
@@ -553,6 +554,29 @@ Therefore DINO-I2S must use content-only KL:
 
 ```text
 V_content = V \ {EOS, BOS, PAD, special/control tokens}
+```
+
+TL1B-1600 adds the current DINO boundary:
+
+```text
+1600 steps recover generation stability and CE,
+but factual exact answers remain below content-KL baseline.
+```
+
+Observed signature:
+
+```text
+degen_gap -> clean,
+gold_rank improves strongly,
+FACT exact remains low,
+generations become fluent base-LM rambling instead of short Q/A answers.
+```
+
+Therefore DINO is no longer mainly a "collapse rescue" objective. Its next role is:
+
+```text
+move factual probability mass, then combine with answer-format/readout pressure
+so the model actually emits the reachable answer.
 ```
 
 Detailed plan:

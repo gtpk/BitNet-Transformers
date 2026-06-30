@@ -1,11 +1,11 @@
 # PYTHIA-LADDER-001 results (running)
 
 > **HEADLINE (revised thesis):** Pythia shows NO collapse through 1B -- 160m/410m/1b all recover
-> their degenerate transient within the 800-step budget. **pythia-1b (~same scale as TinyLlama-1.1B)
-> is STABLE, but TinyLlama-1.1B COLLAPSED under the identical recipe.** So the "~1B collapse" is NOT
-> a clean scale wall -- it is **model-specific to TinyLlama** (architecture / pretraining / chat-tune),
-> not a generic 1B-scale property. Open: does Pythia collapse at all (1.4b/2.8b), or is collapse a
-> TinyLlama idiosyncrasy?
+> their degenerate transient within the 800-step budget. TinyLlama-1.1B did NOT recover by 800 steps,
+> but TL1B-1600 later showed generation recovery at 1600 steps. So the "~1B collapse" is NOT a clean
+> scale wall and the 800-step TinyLlama failure was not a hard impossibility. The remaining distinction
+> is schedule/model-family dynamics plus factual readout: Pythia recovers faster, while TinyLlama needs
+> longer and still emits fluent but often wrong/rambling answers.
 
 Same recipe (content-KL 0.2 + DINO-logit 0.2, no centering/warmup, all target linears b1.58 I2_S,
 lm_head/embeds frozen), same data, 800 steps, telemetry every 25 steps. Per the runbook
@@ -44,11 +44,12 @@ scale-driven, not a precision artifact. **3080 authoritative final: degen_gap +0
 clean like teacher), gold_rank_ratio 967 -> 22 (big improvement, plateaus ~20x teacher = the b1.58
 quantized-student factual ceiling, NOT collapse), recovered_fraction 0.898.**
 
-160M had NO transient; 410M has one but resolves it within the 800-step budget; TinyLlama-1.1B never
-resolved it (collapse). **Emerging scale-law: transient length grows with scale; collapse = the
-degenerate transient is not resolved within the training budget** (a recoverable schedule problem,
-not necessarily a hard capacity wall -> prescriptions: longer training, DINO warmup delay, lower LR,
-entropy/top1 guard, stage-wise objective). Onset so far: > 410M. Next: pythia-1b -- key diagnostic
+160M had NO transient; 410M has one but resolves it within the 800-step budget; TinyLlama-1.1B did not
+resolve by 800 but later recovered generation stability at 1600. **Emerging law: transient length
+depends on scale/model family; apparent collapse can mean the transient did not resolve within the
+training budget** (a recoverable schedule problem, not necessarily a hard capacity wall -> prescriptions:
+longer training, DINO warmup delay, lower LR, entropy/top1 guard, stage-wise objective). Onset so far:
+> 410M. Next at the time: pythia-1b -- key diagnostic
 "is 1b's step 800 like 410m's step 250 (mid-transient, about to recover)?". metrics:
 p410m_metrics.jsonl (Mac fp32, full 800) + p410m_cuda_metrics.jsonl (3080 bf16, teacher-relative).
 
@@ -60,8 +61,9 @@ bf16): degenerate transient steps 0-~250 (degen_gap +1.00, gold_rank stuck ~5500
 2.75). Final gold_rank ~150 (ratio ~30x teacher = the b1.58 quantized ceiling, clean generation,
 degen_gap 0). STABLE -- same shape as 160m/410m, just a slightly longer/deeper transient.
 
-**This is the thesis-revising rung.** pythia-1b (~ TinyLlama-1.1B scale) recovers cleanly, whereas
-TinyLlama-1.1B collapsed under the identical recipe. => the 1B collapse is NOT a generic scale wall;
-it is TinyLlama-model-specific (so far). Pythia: no collapse through 1B. metrics:
+**This is the thesis-revising rung.** pythia-1b (~ TinyLlama-1.1B scale) recovers cleanly within 800,
+whereas TinyLlama-1.1B needed a longer TL1B-1600 run to recover generation stability. => the 1B
+collapse is NOT a generic scale wall; it is schedule/model-family dependent. Pythia: no collapse
+through 1B. TinyLlama: generation recovery by 1600, factual readout still weak. metrics:
 reports/pythia_ladder/p1b_metrics.jsonl (Drive: bnt_results/p1b). recovered_fraction in p1b/train.json
 at run end (step 800).
