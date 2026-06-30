@@ -92,6 +92,16 @@ That lambda=0.2 is universal before sweep/seed checks.
 | FACT-003C content-KL 0.2 | 0.185 | 0.845 | ok 27/27 | current best |
 | FACT-003C content-KL 0.5 | pending | pending | pending | decides sweep shape |
 
+## Evidence Links
+
+| evidence | link |
+| --- | --- |
+| central matrix | [Paper Evidence Matrix](./paper_evidence_matrix.md#paper-3-content-kl-factual-recovery-evidence) |
+| factual ladder ledger | [Evidence Ledger](../reports/EVIDENCE_LEDGER.md#a-tinyllama-11b-factual-recovery-ladder-content-kl-is-the-lever-ceiling-0185) |
+| factual gap plan | [Factual Gap Experiment Plan](./factual_gap_experiment_plan.md) |
+| factual recovery master runbook | [Factual Recovery Master Runbook](./factual_recovery_master_runbook.md) |
+| current status | [Current Experiment Status](./current_experiment_status_2026_06_30.md) |
+
 ## Mechanistic Hint
 
 Raw KL was not simply "too strong"; it copied the wrong part of the distribution:

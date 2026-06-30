@@ -128,3 +128,14 @@ Do not cite hybrid as a result until:
 HYBRID-001A has a positive factual signal
 and the cost/quality scorecard beats a simple Q2_K tradeoff in at least one dimension.
 ```
+
+## Evidence Links
+
+| evidence | link |
+| --- | --- |
+| central matrix | [Paper Evidence Matrix](./paper_evidence_matrix.md#paper-4-hybrid-capacity-candidate-evidence) |
+| hybrid plan | [Hybrid / Variable BitNet Conversion Plan](./hybrid_variable_bitnet_conversion_plan.md) |
+| sidecar plan | [I2_S + LoRA / Residual Sidecar Plan](./i2s_lora_sidecar_plan.md) |
+| entropy-guided growth plan | [Entropy-Guided I2_S Growth Plan](./entropy_guided_i2s_growth_plan.md) |
+| PC negative branch map | [PC Negative Branch Map](./pc_negative_branch_map.md) |
+| measured ledger | [Evidence Ledger](../reports/EVIDENCE_LEDGER.md#f-capacity--geometry-track----comprehensively-negative-at-160m-cost-ledger-rdt-001) |

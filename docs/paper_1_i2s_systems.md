@@ -80,6 +80,16 @@ Mac M5 local runtime is reliable.
 | speed | RT-114/115: tg speedup grows to 7.51x vs f32 at 1.1B |
 | Mac caveat | RT-107..109: Mac M5/clang21 runtime/toolchain failure |
 
+## Evidence Links
+
+| evidence | link |
+| --- | --- |
+| central matrix | [Paper Evidence Matrix](./paper_evidence_matrix.md#paper-1-i2_s-systems-evidence) |
+| systems ledger | [Evidence Ledger](../reports/EVIDENCE_LEDGER.md) |
+| I2_S export TC | [reports/i2s_export_tc.json](../reports/i2s_export_tc.json) |
+| bitnet.cpp layout/runtime audit | [bitnet_cpp_i2s_layout_audit.md](./bitnet_cpp_i2s_layout_audit.md) |
+| export scoping | [bitnet_cpp_export_scoping.md](./bitnet_cpp_export_scoping.md) |
+
 ## Key Insight
 
 ```text

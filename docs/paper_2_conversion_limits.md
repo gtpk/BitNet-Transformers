@@ -85,6 +85,17 @@ hybrid capacity will work before HYBRID-001 data exists
 | signed-epsilon no gain | RT-127 |
 | runtime exonerated | RT-111/112, FACT-001 |
 
+## Evidence Links
+
+| evidence | link |
+| --- | --- |
+| central matrix | [Paper Evidence Matrix](./paper_evidence_matrix.md#paper-2-conversion-limits-evidence) |
+| measured ledger | [Evidence Ledger](../reports/EVIDENCE_LEDGER.md) |
+| PT2 caveat / updated external competitor | [PT2-LLM Deep Dive](./literature_deep_dive_pt2_llm.md) |
+| PT2-I2S first smoke | [PT2-I2S-001 Result](../reports/pt2_i2s_001_result.md) |
+| quantization-aware plan/results context | [Quantization-Aware b1.58 Conversion Plan](./quantization_aware_b158_conversion_plan.md) |
+| fair scorecard | [Fair Comparison Framework](./fair_comparison_framework.md) |
+
 ## Key Hints We Saw
 
 ```text

@@ -321,6 +321,12 @@ python scripts/rt113_storage_latency.py \
    - FACT-001..003C, raw KL 실패와 content-KL 성공, lambda sweep 계획.
 8ae. [Paper 4: Hybrid Capacity Candidate](./paper_4_hybrid_capacity_candidate.md)
    - content-KL plateau 이후 I2_S-rooted auxiliary capacity 가능성.
+8af. [Paper 5: Collapse Dynamics](./paper_5_collapse_dynamics.md)
+   - Pythia ladder와 TL1B-1600을 묶어 generation collapse가 최종 실패가 아니라 budget-dependent transient임을 논문화하는 뼈대.
+8ag. [Paper 6: Factual Readout / Answer Format](./paper_6_factual_readout_answer_format.md)
+   - gold-rank는 개선되지만 short factual answer로 배출되지 않는 readout/format 병목과 ANS-001/002 실험 뼈대.
+8ah. [Paper 7: PT2-I2S Model Competition](./paper_7_pt2_i2s_model_competition.md)
+   - PT2 exact/projected/adapted rows를 최종 artifact 비교표에 올리는 경쟁/흡수 논문 뼈대.
 9. [Groupwise Alpha Hypothesis](./groupwise_alpha_hypothesis.md)
    - 왜 groupwise `alpha*T`가 per-tensor BitNet b1.58보다 품질을 더 잘 보존할 수 있는지 설명한다.
 10. [Research Signal Note](./research_signal_note.md)
@@ -463,6 +469,9 @@ flowchart TD
 | [paper_2_conversion_limits.md](./paper_2_conversion_limits.md) | one-shot b1.58 변환 실패와 quantizer 한계 skeleton | negative/conversion-limit 논문을 작성할 때 |
 | [paper_3_content_kl_factual_recovery.md](./paper_3_content_kl_factual_recovery.md) | FACT objective/content-KL factual recovery skeleton | λ sweep과 factual recovery 논문을 작성할 때 |
 | [paper_4_hybrid_capacity_candidate.md](./paper_4_hybrid_capacity_candidate.md) | HYBRID-001 이후 후보 논문 skeleton | I2_S-rooted auxiliary capacity 결과가 나온 뒤 |
+| [paper_5_collapse_dynamics.md](./paper_5_collapse_dynamics.md) | generation collapse를 transient/consolidation 동역학으로 보는 Paper 5 skeleton | Pythia/TL1B 궤적을 논문 그림으로 만들 때 |
+| [paper_6_factual_readout_answer_format.md](./paper_6_factual_readout_answer_format.md) | reachable factual token이 short answer로 배출되지 않는 readout/format 병목 Paper 6 skeleton | ANS-001/002 결과를 정리할 때 |
+| [paper_7_pt2_i2s_model_competition.md](./paper_7_pt2_i2s_model_competition.md) | PT2 exact/projected-I2_S/PT2-init+adapt를 비교하는 Paper 7 skeleton | PT2-I2S-002 이후 모델 우열 비교를 작성할 때 |
 | [groupwise_alpha_hypothesis.md](./groupwise_alpha_hypothesis.md) | groupwise scale이 품질을 보존하는 이유와 검증할 ablation | 알고리즘 우위의 원인을 설명하거나 반증할 때 |
 | [research_signal_note.md](./research_signal_note.md) | 현재 결과가 연구 신호로서 왜 의미 있는지 해석 | 논문화 가능성과 다음 방향을 판단할 때 |
 | [turboquant_bitnet_implementation_plan.md](./turboquant_bitnet_implementation_plan.md) | KV cache 압축 계획과 TC | weight 변환 이후 긴 문맥으로 확장할 때 |
