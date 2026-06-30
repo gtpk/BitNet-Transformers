@@ -12,6 +12,7 @@ Related:
 - [Paper 5: Collapse Dynamics](./paper_5_collapse_dynamics.md)
 - [Paper 6: Factual Readout / Answer Format](./paper_6_factual_readout_answer_format.md)
 - [Paper 7: PT2-I2S Model Competition](./paper_7_pt2_i2s_model_competition.md)
+- [Paper Draft Manuscripts Index](./paper_draft_manuscripts_index.md)
 - [Paper Evidence Matrix](./paper_evidence_matrix.md)
 - [Literature Positioning Map](./literature_positioning_map.md)
 - [Fair Comparison Framework](./fair_comparison_framework.md)
@@ -50,7 +51,9 @@ series.
 | 7 | PT2-I2S Model Competition | new comparative track | PT2 exact/projected/adapted variants must be compared as final artifacts | ours wins before scorecard |
 
 The current `paper_draft.md` is an integrated historical draft. It should stop
-accumulating new results. New work should be routed into the right paper skeleton.
+accumulating new results. New work should be routed into the right paper skeleton
+and then, once stable, into the matching short manuscript draft listed in
+[Paper Draft Manuscripts Index](./paper_draft_manuscripts_index.md).
 
 Use [Paper Evidence Matrix](./paper_evidence_matrix.md) as the canonical table of
 known results and blank cells. Individual papers may summarize those numbers, but
