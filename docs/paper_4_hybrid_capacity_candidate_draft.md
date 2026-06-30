@@ -76,6 +76,19 @@ storage/speed remain meaningfully better than Q2_K or other baselines.
 If it only improves quality by becoming a normal quantized model, it leaves the I2_S
 research question.
 
+## 5. Named Rules
+
+This paper uses two observed rules from
+[Named Rules And Principles](./paper_named_rules.md):
+
+- **Post-Hoc Capacity Mismatch Rule**: precision added after training is not the
+  same as precision present during training.
+- **Sensitivity-Is-Not-Actionability Rule**: a hotspot ranking does not guarantee
+  that a sidecar there improves behavior.
+
+The idea that useful hybrid capacity may require joint adaptation remains a
+hypothesis, not a discovered rule.
+
 ## References
 
 - BitNet b1.58: <https://arxiv.org/abs/2402.17764>

@@ -75,6 +75,20 @@ rank 1, so it cannot test the 1.1B readout bottleneck.
 | FACT up, CE/tags worse | beta too strong | beta sweep |
 | FACT down | answer weighting harmful | demote ANS-001 |
 
+## 5. Named Rules
+
+This paper uses three observed rules from
+[Named Rules And Principles](./paper_named_rules.md):
+
+- **Reachable-But-Not-Emitted Rule**: the correct token can become reachable in
+  rank space without appearing in the generated answer.
+- **Rank-Exact Decoupling Rule**: gold-rank improvement and exact-match improvement
+  are distinct outcomes.
+- **Format Drift Rule**: fluent continuation is not the same as concise factual QA.
+
+Answer-token weighting remains an intervention hypothesis until ANS-001 1.1B
+finishes; it should not be cited as a discovered rule.
+
 ## References
 
 - Neural text degeneration / decoding context: <https://arxiv.org/abs/1904.09751>

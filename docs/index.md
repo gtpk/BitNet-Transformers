@@ -265,6 +265,8 @@ python scripts/rt113_storage_latency.py \
    - 물리/신호처리/통계/생물/회계학에서 가져온 HOME, RDT, SIGMA, RHT, ECC 아이디어를 I2_S-rooted smoke POC로 우선순위화한다. 새 트랙은 반드시 PC smoke gate를 먼저 통과해야 한다.
 8l6. [DINO-I2S Self-Distillation Plan](./dino_i2s_self_distillation_plan.md)
    - DINO/BYOL/Mean-Teacher식 no-label self-distillation을 I2_S adaptation objective로 번역한다. 작은 factual replay를 외우는 대신 FP/base teacher의 content distribution과 hidden geometry를 보존하는 후보 계획.
+8l6b. [Qwen RFIT-D: DINO Anti-Overfit Plan](./qwen_rfit_dino_anti_overfit_plan.md)
+   - Qwen-1.5B가 800 step에서는 저학습, 1600 step에서는 train-stream 과암기를 보인 뒤, DINO를 factual booster가 아니라 약한 late consistency regularizer로 다시 쓰는 RFIT-D 계획.
 8l7. [Generation Collapse Dynamics Research Plan](./collapse_dynamics_research_plan.md)
    - 최종 loss/FACT 점수만 보지 않고, step별 entropy, top-1 confidence, gold rank, hidden variance, gradient/update norm, salad/empty/loop rate로 collapse onset을 찾는 동역학 연구 계획.
 8l8. [Literature Deep Dive: Collapse Dynamics](./literature_deep_dive_collapse_dynamics.md)
@@ -329,6 +331,8 @@ python scripts/rt113_storage_latency.py \
    - PT2 exact/projected/adapted rows를 최종 artifact 비교표에 올리는 경쟁/흡수 논문 뼈대.
 8ai. [Paper Draft Manuscripts Index](./paper_draft_manuscripts_index.md)
    - Paper 1~7의 2~3쪽짜리 읽을 수 있는 초안 묶음. skeleton은 계획, draft는 본문, evidence matrix는 숫자로 역할을 분리한다.
+8aj. [Named Rules And Principles](./paper_named_rules.md)
+   - 각 논문에서 반복해서 쓸 우리가 발견한 법칙/원칙 이름과 Do-Not-Forget 요약 카드. Gamma Repack Law, Same-Shape Ternary Gap, Transient Collapse Rule 등.
 9. [Groupwise Alpha Hypothesis](./groupwise_alpha_hypothesis.md)
    - 왜 groupwise `alpha*T`가 per-tensor BitNet b1.58보다 품질을 더 잘 보존할 수 있는지 설명한다.
 10. [Research Signal Note](./research_signal_note.md)
@@ -379,6 +383,7 @@ flowchart TD
   FC --> PS["paper_series_plan.md"]
   PS --> PEM["paper_evidence_matrix.md"]
   PS --> PDI["paper_draft_manuscripts_index.md"]
+  PS --> PNR["paper_named_rules.md"]
   PS --> LM["literature_positioning_map.md"]
   LM --> DPT["literature_deep_dive_ptqtp.md"]
   LM --> DCAT["literature_deep_dive_catq.md"]
@@ -445,6 +450,7 @@ flowchart TD
 | [pc_negative_branch_map.md](./pc_negative_branch_map.md) | 160M PC cheap screens에서 닫힌 geometry/capacity 가지와 재개 조건을 정리한 실패지도 | 새 실험을 열기 전에 이미 죽은 가지인지 확인할 때 |
 | [nature_inspired_smoke_poc_plan.md](./nature_inspired_smoke_poc_plan.md) | homeostasis, rate-distortion ledger, sigma-delta residual feedback, dithered RHT, ECC syndrome sidecar를 유망도 순서로 smoke POC화한 계획 | 외부 분야 아이디어를 새 트랙으로 키우기 전에 PC에서 싼 gate를 설계할 때 |
 | [dino_i2s_self_distillation_plan.md](./dino_i2s_self_distillation_plan.md) | DINO/BYOL/Mean-Teacher식 비지도/자가증류를 I2_S factual-retention objective로 번역한 계획. content-KL을 broad no-label teacher-student consistency로 확장한다 | 작은 replay가 암기/과적합할 때, 정답 label 없이 FP/base 모델의 지식장을 덜 잊게 만드는 objective를 검증할 때 |
+| [qwen_rfit_dino_anti_overfit_plan.md](./qwen_rfit_dino_anti_overfit_plan.md) | Qwen-1.5B RFIT에서 DINO를 factual booster가 아니라 late anti-overfit consistency regularizer로 재정의하는 계획 | Qwen-1.5B가 train CE는 외우지만 eval CE/FACT가 악화될 때, DINO를 다시 꺼낼지 판단할 때 |
 | [collapse_dynamics_research_plan.md](./collapse_dynamics_research_plan.md) | generation collapse를 최종 실패가 아니라 step-time 동역학으로 보고, loss/entropy/top-1/gold-rank/hidden-var/gradient/update norm/salad-empty-loop rate를 기록하는 분석 계획 | "왜 무너졌는가"를 objective 단위가 아니라 학습 과정 단위로 분해하고 싶을 때 |
 | [literature_deep_dive_collapse_dynamics.md](./literature_deep_dive_collapse_dynamics.md) | text degeneration, self-supervised collapse, catastrophic forgetting, RLHF/DPO, low-bit QAT 문헌에서 collapse telemetry와 schedule 아이디어를 추출한 딥다이브 | collapse 연구 방향이 기존 문헌과 어떻게 닿는지, 다음 실험에 어떤 계측값을 넣어야 하는지 확인할 때 |
 | [quantization_aware_b158_conversion_plan.md](./quantization_aware_b158_conversion_plan.md) | quantization 기법을 b1.58 변환에 적용하는 RT-124..128 전체 실험계획, 가지치기, 결론 도달 규칙 | 다음 Colab 실험을 설계하거나 결과를 해석할 때 |
@@ -476,6 +482,7 @@ flowchart TD
 | [paper_6_factual_readout_answer_format.md](./paper_6_factual_readout_answer_format.md) | reachable factual token이 short answer로 배출되지 않는 readout/format 병목 Paper 6 skeleton | ANS-001/002 결과를 정리할 때 |
 | [paper_7_pt2_i2s_model_competition.md](./paper_7_pt2_i2s_model_competition.md) | PT2 exact/projected-I2_S/PT2-init+adapt를 비교하는 Paper 7 skeleton | PT2-I2S-002 이후 모델 우열 비교를 작성할 때 |
 | [paper_draft_manuscripts_index.md](./paper_draft_manuscripts_index.md) | Paper 1~7의 2~3쪽짜리 draft manuscript 묶음과 skeleton/evidence 연결표 | 실제 원고 prose를 읽거나 어느 초안 파일을 고칠지 찾을 때 |
+| [paper_named_rules.md](./paper_named_rules.md) | 각 paper의 핵심 발견을 새 이름의 empirical rule/principle로 정리한 공통 어휘집과 Do-Not-Forget 요약 카드 | 결과를 논문 문장으로 압축하거나 새 실험 결과가 기존 법칙을 바꾸는지 볼 때 |
 | [groupwise_alpha_hypothesis.md](./groupwise_alpha_hypothesis.md) | groupwise scale이 품질을 보존하는 이유와 검증할 ablation | 알고리즘 우위의 원인을 설명하거나 반증할 때 |
 | [research_signal_note.md](./research_signal_note.md) | 현재 결과가 연구 신호로서 왜 의미 있는지 해석 | 논문화 가능성과 다음 방향을 판단할 때 |
 | [turboquant_bitnet_implementation_plan.md](./turboquant_bitnet_implementation_plan.md) | KV cache 압축 계획과 TC | weight 변환 이후 긴 문맥으로 확장할 때 |

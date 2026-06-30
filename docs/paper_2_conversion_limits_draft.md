@@ -80,6 +80,19 @@ If quality matters, a same-shape one-shot conversion is not enough. If memory an
 speed matter, I2_S remains valuable, but it needs a better initializer or adaptation
 schedule.
 
+## 5. Named Rules
+
+This paper uses four named rules from
+[Named Rules And Principles](./paper_named_rules.md):
+
+- **Same-Shape Ternary Gap**: native BitNet success does not imply post-hoc
+  same-topology conversion works.
+- **Quantizer Lever Ceiling**: PTQ knobs move loss but cannot close the b1.58 gap.
+- **Non-Additive Restore Principle**: layer/group restores can hurt because the
+  all-ternary model is co-adapted.
+- **Adaptation Dominance Rule**: at 1.58 bits, objective/data adaptation dominates
+  pure quantizer design.
+
 ## References
 
 - BitNet: <https://arxiv.org/abs/2310.11453>

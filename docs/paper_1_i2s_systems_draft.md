@@ -74,6 +74,20 @@ that I2_S can faithfully serve compatible weights. It also does not solve ARM
 deployment: our Mac M5 local bitnet.cpp build showed toolchain/runtime problems,
 while x86/Linux remained the authoritative runtime.
 
+## 5. Named Rules
+
+This paper uses four named rules from
+[Named Rules And Principles](./paper_named_rules.md):
+
+- **Gamma Repack Law**: materialized `Wq = gamma*T` lets upstream absmax I2_S
+  preserve our scale.
+- **Linear-Dominance Compression Law**: whole-model compression approaches the
+  target-linear `1/16` floor as linear layers dominate.
+- **Memory-Traffic Amplification Rule**: generation speedup grows with scale when
+  weights dominate memory traffic.
+- **Runtime Fidelity Rule**: once weights are ternary-compatible, I2_S is not the
+  quality bottleneck.
+
 ## References
 
 - Wang et al., "BitNet: Scaling 1-bit Transformers for Large Language Models", arXiv 2310.11453: <https://arxiv.org/abs/2310.11453>

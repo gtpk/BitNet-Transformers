@@ -65,6 +65,20 @@ dynamics and factual readout must be separate papers.
 The next low-bit adaptation experiments should report trajectories, not only final
 tables. A failed step-800 run may be a failed schedule, not a failed method.
 
+## 5. Named Rules
+
+This paper uses four named rules from
+[Named Rules And Principles](./paper_named_rules.md):
+
+- **Transient Collapse Rule**: degenerate generation during training can be a
+  temporary phase, not final failure.
+- **Consolidation-Length Scaling Rule**: larger or different checkpoints may need
+  longer budgets before generation stabilizes.
+- **Teacher-Relative Collapse Rule**: collapse should be judged against the
+  model's own FP teacher behavior.
+- **Dynamics-Before-Endpoint Principle**: trajectory metrics are mandatory because
+  endpoint scores can mislead.
+
 ## References
 
 - Pythia model suite: <https://arxiv.org/abs/2304.01373>

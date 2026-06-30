@@ -19,6 +19,19 @@ I2_S stays the root.
 DINO-style self-distillation is only an adaptation objective.
 ```
 
+2026-06-30 update:
+
+```text
+Old role: DINO as direct factual booster / collapse rescue.
+New candidate role: weak late DINO as anti-overfit consistency regularizer.
+```
+
+The newer Qwen-specific plan is:
+
+```text
+docs/qwen_rfit_dino_anti_overfit_plan.md
+```
+
 ## Why This Exists
 
 The FACT track found a clear split:

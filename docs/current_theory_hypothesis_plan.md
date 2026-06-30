@@ -572,11 +572,29 @@ FACT exact remains low,
 generations become fluent base-LM rambling instead of short Q/A answers.
 ```
 
-Therefore DINO is no longer mainly a "collapse rescue" objective. Its next role is:
+Therefore DINO is no longer mainly a "collapse rescue" objective. Its next role was
+initially framed as:
 
 ```text
 move factual probability mass, then combine with answer-format/readout pressure
 so the model actually emits the reachable answer.
+```
+
+Qwen-1.5B RFIT adds a newer and more specific role:
+
+```text
+DINO as anti-overfit consistency regularizer.
+```
+
+The Qwen-1.5B minimal content-KL recipe undertrained at 800 but over-trained by
+1600: FACT rose from 0.111 to 0.222, yet eval CE worsened from 4.85 to 5.68 while
+train CE collapsed to 0.37. This suggests weak late logit-DINO may be useful not
+as a direct factual booster, but as a brake against answer-CE stream memorization.
+
+Detailed plan:
+
+```text
+docs/qwen_rfit_dino_anti_overfit_plan.md
 ```
 
 Detailed plan:

@@ -87,6 +87,18 @@ min ||(W - Wq) X||^2
 rather than weight MSE. It should separately measure exact `mu+alpha*T`, pure
 projected I2_S, and adapted PT2-initialized I2_S.
 
+## 5. Observed Rule And Open Hypothesis
+
+This paper currently has one observed rule from
+[Named Rules And Principles](./paper_named_rules.md):
+
+- **Reconstruction-Is-Not-Behavior Rule**: better weight reconstruction can still
+  worsen behavior.
+
+PT2 as a competitor/donor and projection survival are comparison strategies or
+open hypotheses, not discovered laws. They should stay out of the named-rule list
+until the exact/projected/adapted scorecard is measured.
+
 ## References
 
 - PT2-LLM: <https://arxiv.org/abs/2510.03267>

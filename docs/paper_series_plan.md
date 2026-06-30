@@ -13,6 +13,7 @@ Related:
 - [Paper 6: Factual Readout / Answer Format](./paper_6_factual_readout_answer_format.md)
 - [Paper 7: PT2-I2S Model Competition](./paper_7_pt2_i2s_model_competition.md)
 - [Paper Draft Manuscripts Index](./paper_draft_manuscripts_index.md)
+- [Named Rules And Principles](./paper_named_rules.md)
 - [Paper Evidence Matrix](./paper_evidence_matrix.md)
 - [Literature Positioning Map](./literature_positioning_map.md)
 - [Fair Comparison Framework](./fair_comparison_framework.md)
@@ -58,6 +59,10 @@ and then, once stable, into the matching short manuscript draft listed in
 Use [Paper Evidence Matrix](./paper_evidence_matrix.md) as the canonical table of
 known results and blank cells. Individual papers may summarize those numbers, but
 the matrix is the first place to update when a new run completes.
+
+Use [Named Rules And Principles](./paper_named_rules.md) as the shared vocabulary
+for the empirical laws discovered across the project. Individual drafts may cite
+the rule names, but this document is the canonical place to define or rename them.
 
 Use [Literature Positioning Map](./literature_positioning_map.md) to decide which
 external papers are direct competitors, which ideas should be borrowed, and where our

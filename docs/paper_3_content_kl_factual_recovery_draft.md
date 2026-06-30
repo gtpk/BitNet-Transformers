@@ -65,6 +65,19 @@ Q2_K. Later TL1B-1600 experiments show that generation stability and factual rea
 can separate: a model can be fluent, have improved gold-rank, and still fail exact
 answers.
 
+## 5. Named Rules
+
+This paper uses four named rules from
+[Named Rules And Principles](./paper_named_rules.md):
+
+- **Runtime Exoneration Rule**: if adapted F16 and adapted I2_S agree, the failure
+  is objective/model-side, not runtime-side.
+- **Stop-Mass Contamination Rule**: raw KL can copy the teacher's EOS/stop
+  behavior instead of content.
+- **Content-Anchor Sweet Spot**: content-KL has an inverted-U; too weak and too
+  strong both fail.
+- **Fluent-But-Fact-Poor Rule**: CE/PPL recovery and factual recovery are separate.
+
 ## References
 
 - DINO self-distillation inspiration: <https://arxiv.org/abs/2104.14294>

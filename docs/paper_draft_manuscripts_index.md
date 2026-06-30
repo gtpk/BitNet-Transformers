@@ -12,6 +12,7 @@ This page is the entry point for the short manuscript drafts. The roles are:
 paper_*_draft.md      readable 2-3 page paper draft with citations
 paper_*.md            planning skeleton: claim, evidence, missing cells
 paper_evidence_matrix central numeric evidence and guardrails
+paper_named_rules     reusable names for the empirical laws/principles
 ```
 
 The drafts are not submission-ready papers. They are intentionally compact
@@ -49,9 +50,10 @@ Use our reports/docs for our claims.
 
 1. Keep [Paper Evidence Matrix](./paper_evidence_matrix.md) as the canonical
    place for new numbers.
-2. Update the relevant paper skeleton when a result changes a claim or branch.
-3. Update the corresponding draft only after the claim is stable enough to read
+2. Update [Named Rules And Principles](./paper_named_rules.md) when a result
+   deserves a reusable law/principle name.
+3. Update the relevant paper skeleton when a result changes a claim or branch.
+4. Update the corresponding draft only after the claim is stable enough to read
    as prose.
-4. Keep the old integrated [Paper Draft](./paper_draft.md) as a historical
+5. Keep the old integrated [Paper Draft](./paper_draft.md) as a historical
    consolidation artifact, not the active manuscript.
-
