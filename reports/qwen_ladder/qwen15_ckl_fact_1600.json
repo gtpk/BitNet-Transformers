@@ -1,0 +1,17 @@
+{
+  "dir": "qwen15_ckl/adapted (step 1600, COLAB L4)",
+  "fact_rate": 0.222,
+  "hits": 6,
+  "n": 27,
+  "gold_rank_mean": 68.2,
+  "first_token_hit": 0.111,
+  "tags": {"ok": 27},
+  "samples": [
+    {"gold": "paris", "hit": false, "out": "The capital city of France is called \"France\" and its capital city, which is also referred to as \"Ryria\". It i"},
+    {"gold": "tokyo", "hit": false, "out": "The Japanese monetary system has a different name. It was established in 1854 by the United Kingdom and became"},
+    {"gold": "rome", "hit": false, "out": "The capital city of Italy is Milan, which has a population of 120 million. It is known for its ancient history"},
+    {"gold": "berlin", "hit": false, "out": "The capital city of Germany, called \"Germany\" refers to a country. It has been referred to as Berlin. The popu"},
+    {"gold": "moscow", "hit": false, "out": "The capital of Germany, Finland is called \"Russia\". The capital city of Poland was Berlin. It has been referre"},
+    {"gold": "oxygen", "hit": false, "out": "Hydrogen, also known as Carbon, carbon or hydrocarbon. In this case we see the formation of a gas atom such as"}
+  ]
+}

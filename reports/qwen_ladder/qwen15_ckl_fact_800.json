@@ -1,0 +1,17 @@
+{
+  "dir": "qwen15_ckl/adapted (step 800, COLAB L4)",
+  "fact_rate": 0.111,
+  "hits": 3,
+  "n": 27,
+  "gold_rank_mean": 70.9,
+  "first_token_hit": 0.0,
+  "tags": {"ok": 27},
+  "samples": [
+    {"gold": "paris", "hit": false, "out": "The capital city in Luxembourg, Germany is not a country. It was formed as an economic centre and has been one"},
+    {"gold": "tokyo", "hit": false, "out": "The capital city in Japan, also known as Shenzhen, is a Japanese-speaking community with over 50 inhabitants."},
+    {"gold": "rome", "hit": false, "out": "The capital city in Japan, also called Ramania. It was a place where most people from 210 years ago and presen"},
+    {"gold": "berlin", "hit": true, "out": "The capital city where the government of the Kingdoms is Berlin, France. It was a member of the German governm"},
+    {"gold": "moscow", "hit": false, "out": "The capital city of Japan, also called Kshia. It was a Russian territory in 1934 and has been ruled by emigran"},
+    {"gold": "oxygen", "hit": false, "out": "Hydrogen energy (energy) is a chemical produced by the atomic, atom. It's also known as mixed carbon. 2. Aries"}
+  ]
+}

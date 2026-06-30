@@ -200,3 +200,27 @@ pre-registered rule, "Base-Floor Transfer Rule" is NOT named yet (requires FACT 
 confirming trend). NEXT: Qwen-1.5B/1.7B same scorecard -- if FACT climbs with base quality (toward/past
 0.4 with crisper gens), the rule is confirmed; if it plateaus near ~0.33, the base lifts the floor but
 b1.58 still caps the readout. Files: reports/qwen_ladder/qwen05_ckl_{train,fact,metrics}.json(l).
+
+### Qwen-1.5B rung (COLAB L4, bf16+adamw8bit+grad-ckpt, SAME minimal recipe) -- 'bigger Qwen = higher FACT' does NOT hold
+
+Qwen2.5-1.5B-Instruct (FP teacher gold_rank 3.1, top1 0.898 -- even sharper than 0.5B's 0.769), same
+content-KL FACT-003C recipe (lambda 0.2, answer_loss_only, answer_token_weight=0.0, no DINO, batch2/
+accum12, mixed). 1.5B has a MUCH longer degenerate transient than 0.5B (degen +1.0 through step ~100,
+cleared only by step 250 vs 0.5B's step 50) -> 800 steps UNDERTRAINS it. Scored at 800, then --resume to 1600.
+
+| step | FACT | first_token_hit | gold_rank_mean | eval CE adapted | recovered | train_ce |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 800 | 0.111 (3/27) | 0.000 | 70.9 | 4.85 | 0.859 | 1.58 |
+| 1600 | **0.222 (6/27)** | 0.111 | 68.2 | 5.68 | 0.749 | 0.37 |
+
+**Verdict -- NEGATIVE for the clean base-scaling story; over-training confirmed.** Best 1.5B FACT
+**0.222 (at 1600) < Qwen-0.5B's 0.333**, though both beat TinyLlama 0.185 (so Qwen base > TinyLlama
+base still holds; bigger-Qwen-is-better does NOT). The 800->1600 resume LIFTED FACT (0.111->0.222,
+fth 0.000->0.111) so 800 was genuinely undertrained -- BUT eval CE WORSENED with budget (4.85->5.68)
+while train_ce crashed to 0.37 = the answer-CE-dominant minimal recipe OVER-TRAINS Qwen-1.5B (memorizes
+the train stream, drifts off teacher: KL rose mid-run). Gens stay fluent-but-hallucinating ("capital of
+Italy is Milan", "capital of France is France"), first_token_hit only 0.111. So "Base-Floor Transfer
+Rule" is NOT named. Read: 0.5B-Instruct's 0.333 remains the best Qwen-I2_S point; 1.5B needs a RECIPE
+RE-FIT (lower LR ~1e-4, higher lambda ~0.4-0.5 to anchor harder to teacher, fewer steps ~400-600, or
+early-stop on held-out FACT not train_ce) before any base-scaling conclusion. Files:
+reports/qwen_ladder/qwen15_ckl_{fact_800,fact_1600,train}.json.
