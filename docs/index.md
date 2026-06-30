@@ -134,6 +134,12 @@ longer-budget 직행이 아니라 [PT2-I2S Initializer Plan](./pt2_i2s_initializ
 PC smoke(ITF / activation-aware alpha-only / `mu` correction value)를 먼저 본 뒤,
 도움이 있으면 그 initializer로 TinyLlama longer-budget을 다시 여는 것이다.
 
+**최종 골:** PT2, Q2_K, native BitNet, 우리 I2_S를 방법론으로 따로 평가하는 것이 아니라,
+같은 제약에서 **어떤 최종 모델 artifact가 더 좋은가**를 비교한다. 따라서 최종 표는
+`size_MB / bits / post-train GPU-hours / tok/s / PPL / QA / FACT / gen_ok / runtime /
+Pareto`로 작성하고, PT2 exact가 이기면 경쟁자로 인정하며, PT2의 아이디어가 우리
+I2_S+adaptation을 더 멀리 보내면 donor로 흡수한다.
+
 packed format Phase 1/2/3/4 검증(로컬):
 
 ```bash

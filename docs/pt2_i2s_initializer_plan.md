@@ -11,6 +11,19 @@ Before spending more GPU on longer TinyLlama adaptation, test whether PT2-style
 asymmetric, activation-aware ternarization gives a better I2_S starting point.
 ```
 
+The final goal is not to prove that our old initializer is clever. The final goal is:
+
+```text
+under the same memory/speed/training budget, which deployed model is better?
+```
+
+Therefore PT2-LLM has two roles:
+
+```text
+competitor: compare PT2 exact / PT2 projected-I2_S against our models
+donor: borrow ITF, AGA, SSR, and possibly mu-correction to improve our model
+```
+
 This plan exists because PT2-LLM changes our negative PTQ interpretation.
 
 Old conclusion:
@@ -270,6 +283,49 @@ Pythia-1B/1.4B if needed for dynamics comparison
 | SSR improves pure I2_S | add SSR before adaptation; compare against rotations |
 | only reconstruction improves | reject as another WSYNC-style dead branch |
 | nothing improves | return to collapse dynamics / longer schedule; PT2 does not explain our failures |
+
+## Final Model Comparison
+
+Every PT2-I2S experiment should emit rows compatible with:
+
+```text
+docs/fair_comparison_framework.md
+```
+
+Minimum comparison rows:
+
+| row | question |
+| --- | --- |
+| FP16 | what is the quality ceiling? |
+| Q2_K | what does a mature low-bit baseline achieve? |
+| PT2 exact | how strong is asymmetric ternary if runtime compatibility is ignored? |
+| PT2 projected-I2_S | does PT2 remain good as pure I2_S? |
+| old I2_S PTQ | known collapsed baseline |
+| old I2_S + adaptation | current product path |
+| PT2-init + adaptation | does PT2 help us go farther? |
+
+Required fields:
+
+```text
+size_MB,
+effective bits,
+post_train_or_calib_GPU_h,
+token_gen_speed,
+Wikitext/C4 PPL,
+zero-shot QA average if available,
+FACT / gold_rank,
+generation tags,
+runtime class,
+Pareto frontier flag.
+```
+
+Interpretation rule:
+
+```text
+PT2 exact is allowed to win as a model.
+If it wins but pure I2_S projection loses, the product decision is not "ignore PT2";
+it is "evaluate whether mu-correction cost is worth the quality gain."
+```
 
 ## Source Notes
 

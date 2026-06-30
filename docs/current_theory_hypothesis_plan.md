@@ -13,6 +13,19 @@ Make existing public LLMs run like low-resource models by reducing memory traffi
 while preserving enough useful behavior to matter.
 ```
 
+The final evaluation question is:
+
+```text
+Under the same user constraint, which deployed model is better?
+```
+
+So I2_S purity is not the final metric. It is a product constraint and an explanation
+for speed/storage. The final comparison is Pareto-style:
+
+```text
+quality + speed + size + post-training cost + runtime support.
+```
+
 This is not the same as:
 
 ```text

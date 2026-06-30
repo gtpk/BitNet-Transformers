@@ -37,6 +37,45 @@ The current visible product goalpost is Qwen 7B, tracked in
 [Qwen 7B Goalpost Plan](./qwen7b_goalpost_plan.md). Smaller TinyLlama/160M runs are
 method-discovery ladders, not the final product target.
 
+## Final Goalpost
+
+The final question is not:
+
+```text
+Is our method philosophically more I2_S?
+```
+
+It is:
+
+```text
+Under the same user constraint, which final model is better?
+```
+
+So I2_S compatibility, PT2 projection, calibration size, and adaptation recipe are
+internal explanations. The final comparison must rank deployable artifacts.
+
+The required final table is:
+
+```text
+method | size_MB | bits | post_train_GPU_h | tok/s | W2_PPL | C4_PPL |
+QA_avg | FACT | gen_ok | runtime | Pareto?
+```
+
+The report must also include winner-by-constraint:
+
+| constraint | winner to report |
+| --- | --- |
+| best quality | highest public benchmark / factual score, regardless of size |
+| best speed | highest same-hardware token-generation throughput |
+| best memory | smallest deployable artifact at acceptable behavior |
+| best no-training | calibration/PTQ-only winner |
+| best low-cost adapted | post-training budget-limited winner |
+| best CPU deploy | best quality under CPU runtime and memory traffic |
+
+This prevents a hidden metric from winning the argument. A method can be useful even
+if it loses global quality, but only if it sits on a Pareto frontier under a real
+constraint.
+
 So every comparison must include:
 
 ```text
@@ -124,7 +163,30 @@ quality still below Q2_K on facts;
 currently best FACT recipe is content-KL lambda=0.2.
 ```
 
-### D. Ours: hybrid / variable capacity
+### D. PT2-LLM-style ternary PTQ
+
+```text
+existing FP model -> asymmetric ternary grid mu + alpha*T
+```
+
+Fair interpretation:
+
+```text
+This is now a direct competitor, not just a reference.
+It may beat our old absmean I2_S PTQ on quality.
+But exact PT2 is not automatically bitnet.cpp I2_S because mu creates an
+input-dependent correction.
+```
+
+Evaluate three artifacts separately:
+
+| artifact | purpose |
+| --- | --- |
+| PT2 exact | best quality upper bound for PT2-style ternary |
+| PT2 projected-I2_S | whether PT2's better `T` survives pure I2_S |
+| PT2-init + ours adaptation | whether PT2 shortens our collapse transient |
+
+### E. Ours: hybrid / variable capacity
 
 ```text
 mostly I2_S, with selected Q2/Q3/F16/multi-strip/residual pockets
@@ -153,6 +215,29 @@ Pending:
 
 ```text
 FACT-003C content-KL lambda=0.5
+```
+
+## PT2 Comparison Scorecard
+
+When PT2-lite starts, report at least this table.
+
+| method | runtime class | train/calib | size | speed | W2/C4 PPL | QA avg | FACT | gen tags | verdict |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| FP16 | dense | none | high | slow | baseline | baseline | baseline | baseline | quality ceiling |
+| Q2_K | k-quant | quant-only | medium | medium | strong | strong | strong | stable | practical baseline |
+| PT2 exact | non-I2_S or custom | calib-only | low | TBD | TBD | TBD | TBD | TBD | quality competitor |
+| PT2 projected-I2_S | pure I2_S | calib-only | lowest | high | TBD | TBD | TBD | TBD | I2_S-compatible competitor |
+| ours old I2_S PTQ | pure I2_S | none | lowest | high | poor | poor | poor | collapse | known negative |
+| ours old I2_S + adapt | pure I2_S | adaptation | lowest | high | recovered | partial | partial | stable if long enough | current product path |
+| ours PT2-init + adapt | pure/A+ I2_S | calib + adaptation | low | high/TBD | TBD | TBD | TBD | TBD | possible next frontier |
+
+Key judgment:
+
+```text
+PT2 exact beating us is not enough to kill our path.
+PT2 projected-I2_S beating old I2_S is the pure-I2_S win.
+PT2 exact beating projected-I2_S by a large margin quantifies the value of mu.
+PT2-init + adaptation beating old-init + adaptation is the product-relevant win.
 ```
 
 ## Claim Discipline
