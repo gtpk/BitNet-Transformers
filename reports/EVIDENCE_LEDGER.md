@@ -169,3 +169,20 @@ trap recovery). REFRAME: the fluent-rambling/readout-decouple was a DINO artifac
 to beat it. ANS-002 (more format data) is low value (content-KL already formats). More promising: a
 stronger BASE (Qwen ladder, higher factual floor under the same recipe) or accept 0.185 + the
 scientific findings (budget-limited transient, model-specific collapse).
+
+## I. Qwen ladder (new axis: base-model quality) -- compatibility + baseline
+
+TinyLlama-1.1B objective search closed (content-KL 0.185 ceiling; every lever -- capacity/replay/
+blend/DINO/answer-token weighting -- failed to beat it). New question: does a stronger base lift the
+ceiling under the SAME minimal content-KL I2_S recipe? Audit + baseline (Mac/MPS, raw Q:/A: panel,
+same as TinyLlama):
+
+| item | result |
+| --- | --- |
+| Qwen2.5-0.5B compatibility | PASS no code change -- Qwen is Llama-named (q/k/v/o/gate/up/down_proj), 168 target linears (24x7); q/k/v have BIAS (copied, weight-only ternary); tie_word_embeddings=True (lm_head frozen via embed exclude); forward finite |
+| **Qwen2.5-0.5B-Instruct FP FACT** | **0.963 (26/27)** -- vs TinyLlama-1.1B FP ~0.81, at HALF the size (much higher factual floor) |
+| Qwen-0.5B one-shot I2_S (no train) | FACT 0.000, CE 11.73, salad 27/27 (collapses like any one-shot ternary PTQ -- expected) |
+| Qwen-0.5B content-KL I2_S recovery | RUNNING (FACT-003C recipe, no DINO/anstok, 800 steps, Mac) -- KEY: does recovered FACT >> TinyLlama 0.185? |
+
+Decisive comparison pending: Qwen-0.5B-I2_S content-KL FACT vs TinyLlama 0.185. If >> 0.185, base
+quality is the lever and the project is reborn (then Qwen-1.5B/1.7B same scorecard, 4B only if signal).
