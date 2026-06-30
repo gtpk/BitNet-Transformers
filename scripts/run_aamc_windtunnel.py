@@ -20,6 +20,14 @@ os.chdir(REPO)
 PY = sys.executable
 BASE = "reports/aamc_wt"
 CKBASE = "bnt_ckpt_wt"
+os.makedirs(BASE, exist_ok=True)
+DLOG = f"{BASE}/_driver.log"
+
+def dlog(msg):
+    line = f"[windtunnel] {msg}"
+    print(line, flush=True)
+    with open(DLOG, "a", encoding="utf-8") as f:
+        f.write(line + "\n")
 
 COMMON = [
     "--model-id", "Qwen/Qwen2.5-0.5B-Instruct", "--dtype", "bfloat16", "--teacher-dtype", "float16",
@@ -42,14 +50,15 @@ for name, extra in ARMS:
     out = f"{BASE}/{name}"
     os.makedirs(out, exist_ok=True)
     if os.path.exists(f"{out}/train.json"):
-        print(f"[windtunnel] {name} already done -> skip", flush=True)
+        dlog(f"{name} already done -> skip")
         continue
     cmd = [PY, "-X", "utf8", "scripts/rt116_quality_recovery.py"] + COMMON + extra + [
         "--out-dir", f"{out}/adapted", "--metrics-out", f"{out}/metrics.jsonl",
         "--json-out", f"{out}/train.json", "--ckpt-dir", f"{CKBASE}/{name}", "--ckpt-every-min", "30",
     ]
-    print(f"[windtunnel] START {name} :: {' '.join(extra)}", flush=True)
+    dlog(f"START {name} :: {' '.join(extra)}")
     t0 = time.time()
-    rc = subprocess.run(cmd).returncode
-    print(f"[windtunnel] END {name} rc={rc} ({(time.time()-t0)/60:.1f}m)", flush=True)
-print("[windtunnel] ALL DONE", flush=True)
+    with open(f"{out}/run.log", "w", encoding="utf-8") as lf:
+        rc = subprocess.run(cmd, stdout=lf, stderr=subprocess.STDOUT).returncode
+    dlog(f"END {name} rc={rc} ({(time.time()-t0)/60:.1f}m)")
+dlog("ALL DONE")
