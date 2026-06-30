@@ -182,7 +182,21 @@ same as TinyLlama):
 | Qwen2.5-0.5B compatibility | PASS no code change -- Qwen is Llama-named (q/k/v/o/gate/up/down_proj), 168 target linears (24x7); q/k/v have BIAS (copied, weight-only ternary); tie_word_embeddings=True (lm_head frozen via embed exclude); forward finite |
 | **Qwen2.5-0.5B-Instruct FP FACT** | **0.963 (26/27)** -- vs TinyLlama-1.1B FP ~0.81, at HALF the size (much higher factual floor) |
 | Qwen-0.5B one-shot I2_S (no train) | FACT 0.000, CE 11.73, salad 27/27 (collapses like any one-shot ternary PTQ -- expected) |
-| Qwen-0.5B content-KL I2_S recovery | RUNNING (FACT-003C recipe, no DINO/anstok, 800 steps, Mac) -- KEY: does recovered FACT >> TinyLlama 0.185? |
+| **Qwen-0.5B content-KL I2_S recovery** | **FACT 0.333 (9/27)** -- FACT-003C recipe (answer_token_weight=0.0, no DINO), 800 steps, 3080/bf16. CE 2.86(fp)->11.58(ptq)->4.08(adapted), **recovered_fraction 0.859**. degen_gap ~0 throughout (gold_rank 46997->~52, NO collapse -- unlike TinyLlama). gold_rank_mean 52, first_token_hit 0.222, tags 27/27 ok (no salad) |
 
-Decisive comparison pending: Qwen-0.5B-I2_S content-KL FACT vs TinyLlama 0.185. If >> 0.185, base
-quality is the lever and the project is reborn (then Qwen-1.5B/1.7B same scorecard, 4B only if signal).
+### Verdict -- PARTIAL positive (does NOT yet name the rule)
+
+Qwen-0.5B-I2_S content-KL FACT **0.333 > TinyLlama-1.1B's 0.185** (+0.148, +80% relative) at HALF the
+params, with a CLEAN recovery (recovered_fraction 0.859, degen_gap ~0 the whole run -- the
+objective-augmentation collapse that wrecked every TinyLlama-1.1B lever simply does not happen here).
+This SUPPORTS the base-quality hypothesis: a stronger base does lift the I2_S factual ceiling under the
+same minimal recipe.
+
+BUT it is held BELOW the pre-registered 0.4 "confirm" bar, AND the sample gens still ramble: the hits
+are substring matches embedded in hallucinated text ("The capital city of Rome, founded in 1840 by
+Joseph Levy"), paris/moscow miss outright, first_token_hit only 0.222. So the readout (emit the short
+fact crisply) is NOT solved -- same fluent-but-imprecise failure, just with a higher floor. Per the
+pre-registered rule, "Base-Floor Transfer Rule" is NOT named yet (requires FACT clearly >0.185 with a
+confirming trend). NEXT: Qwen-1.5B/1.7B same scorecard -- if FACT climbs with base quality (toward/past
+0.4 with crisper gens), the rule is confirmed; if it plateaus near ~0.33, the base lifts the floor but
+b1.58 still caps the readout. Files: reports/qwen_ladder/qwen05_ckl_{train,fact,metrics}.json(l).

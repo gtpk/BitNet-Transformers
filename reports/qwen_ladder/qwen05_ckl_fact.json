@@ -1,0 +1,43 @@
+{
+  "dir": "reports\\qwen_ladder\\qwen05_ckl_adapted",
+  "fact_rate": 0.333,
+  "hits": 9,
+  "n": 27,
+  "gold_rank_mean": 51.8,
+  "first_token_hit": 0.222,
+  "tags": {
+    "ok": 27
+  },
+  "samples": [
+    {
+      "gold": "paris",
+      "hit": false,
+      "out": "The capital of many modern technologies, being the first European currency in Europe. It has been a very popul"
+    },
+    {
+      "gold": "tokyo",
+      "hit": true,
+      "out": "The capital city of Tokyo holds its own currency. It has a unique property that allows you to stay within the "
+    },
+    {
+      "gold": "rome",
+      "hit": true,
+      "out": "The capital city of Rome, which has been founded in 1840. It was built by Joseph Levy and sold in early modern"
+    },
+    {
+      "gold": "berlin",
+      "hit": true,
+      "out": "The capital city of Berlin, which has been founded in 1840. It was built by Joseph Levy and sold in early mode"
+    },
+    {
+      "gold": "moscow",
+      "hit": false,
+      "out": "The capital city of Russia has been called the capital. The capital of many modern technologies, being the big"
+    },
+    {
+      "gold": "oxygen",
+      "hit": false,
+      "out": "1. as a catalyst, the water will be broken into smaller particles. 2. As an example, it has been suggested tha"
+    }
+  ]
+}
