@@ -526,6 +526,37 @@ def fact_panel_eval(model, tok, panel_rows, device, max_new=40):
             "fact_gold_rank_mean": round(sum(ranks) / n, 1), "fact_hits": hits, "fact_n": n}
 
 
+def aamc_controller(hist, cur_lambda, cur_alpha, max_alpha):
+    """AAMC Controller Policy V0 (docs/adaptive_anchor_manifold_controller_plan.md).
+    hist: list of scored-interval dicts {train_ce, eval_ce, fact, gold_rank, entropy, top1,
+    degen_gap, collapse_rate}. Compares the last two intervals -> overfit_score / collapse_score
+    (counts of satisfied conditions, a PATTERN not one scalar), then maps to a lambda/alpha move.
+    Returns (new_lambda, new_alpha, overfit_score, collapse_score, reason). Clamps: 0.2<=lambda<=0.5,
+    0<=alpha<=max_alpha (max_alpha=0 disables DINO -> the dynamic-lambda-only arm)."""
+    cur = hist[-1]
+    prev = hist[-2] if len(hist) >= 2 else None
+    collapse = (int(cur["degen_gap"] >= 0.3) + int(cur["collapse_rate"] >= 0.2))
+    overfit = 0
+    if prev is not None:
+        overfit += int(cur["train_ce"] < prev["train_ce"] - 0.05)   # train stream being memorized
+        overfit += int(cur["eval_ce"] >= prev["eval_ce"] - 0.02)    # held-out CE not improving
+        overfit += int(cur["fact"] <= prev["fact"] + 1e-9)          # FACT flat/down
+        overfit += int(cur["entropy"] < prev["entropy"] - 0.05)     # distribution sharpening
+        overfit += int(cur["top1"] > prev["top1"] + 0.02)           # overconfident
+    collapse_high = collapse >= 1
+    overfit_high = overfit >= 3
+    stall = (prev is not None and cur["train_ce"] > 6.0
+             and abs(cur["train_ce"] - prev["train_ce"]) < 0.1 and cur["gold_rank"] >= prev["gold_rank"])
+    new_lambda, new_alpha, reason = cur_lambda, cur_alpha, "keep"
+    if collapse_high and max_alpha > 0:
+        new_alpha = min(cur_alpha + 0.05, max_alpha); reason = "collapse->raise alpha"
+    elif overfit_high and not collapse_high:
+        new_lambda = min(cur_lambda + 0.1, 0.5); reason = "overfit->raise lambda"
+    elif stall:
+        new_lambda = max(cur_lambda - 0.1, 0.2); new_alpha = 0.0; reason = "stall->lower lambda"
+    return round(new_lambda, 3), round(new_alpha, 3), overfit, collapse, reason
+
+
 def homeostasis_term(model, teacher, input_ids, layer_mode="last", rho=1.0):
     """HOME-001: match base/student hidden-state mean+rms set-points on the same batch.
 
@@ -663,6 +694,12 @@ def main():
                          "schema (gold_rank/logp, logit_entropy, top1_prob, degenerate/salad/loop/empty rate, "
                          "hidden_var mid/last) + grad_norm into metrics.jsonl")
     ap.add_argument("--telemetry-probe-n", type=int, default=10, help="PYTHIA-LADDER P2: # panel prompts in the probe")
+    ap.add_argument("--aamc", action="store_true", help="AAMC: telemetry-driven controller adjusts lambda "
+                    "(kl-weight) and alpha (dino-logit-weight) live at --aamc-score-every intervals per Policy V0 "
+                    "(overfit_score -> raise lambda; collapse_score -> raise alpha). docs/adaptive_anchor_manifold_controller_plan.md")
+    ap.add_argument("--aamc-score-every", type=int, default=200, help="AAMC: controller score interval (steps)")
+    ap.add_argument("--aamc-max-alpha", type=float, default=0.10, help="AAMC: alpha (DINO) clamp upper bound; "
+                    "set 0.0 for the dynamic-lambda-only arm (DINO never turns on), 0.10 for conditional-DINO arm")
     ap.add_argument("--dino-start-step", type=int, default=0, help="RFIT-D: keep DINO fully OFF until this step, "
                     "then ramp over --dino-warmup-steps. Applies DINO as a LATE anti-overfit regularizer only.")
     ap.add_argument("--fact-eval-steps", default="", help="RFIT: comma-separated step numbers at which to run a "
@@ -966,6 +1003,19 @@ def main():
         print(f"RFIT: full-panel FACT eval ({len(fact_panel)} rows) at steps {sorted(fact_eval_steps)}; "
               f"materializing per-step ckpts; log -> {fact_eval_log}", flush=True)
 
+    # AAMC: live-adjustable lambda (teacher anchor) + alpha (DINO). When --aamc, the controller mutates
+    # these at --aamc-score-every; otherwise they stay at the fixed CLI values.
+    cur_lambda = args.kl_weight
+    cur_alpha = args.dino_logit_weight if args.dino_logit_weight > 0 else 0.0
+    aamc_hist = []
+    aamc_log = (Path(str(args.metrics_out) + ".aamc.jsonl") if args.metrics_out
+                else (args.out_dir.parent / "aamc.jsonl" if args.out_dir else None))
+    if args.aamc:
+        aamc_panel = [json.loads(l) for l in open(args.panel_file, encoding="utf-8") if l.strip()]
+        aamc_probe = aamc_panel[: args.telemetry_probe_n]
+        print(f"AAMC controller ON: score every {args.aamc_score_every} steps; lambda0={cur_lambda} "
+              f"alpha0={cur_alpha} max_alpha={args.aamc_max_alpha}; log -> {aamc_log}", flush=True)
+
     model.train()
     t_start = time.time()
     last_ckpt = t_start
@@ -999,7 +1049,7 @@ def main():
                                          special_vocab=special_vocab)
                 if kl is not None:
                     train_kl_sum += float(kl)
-                    loss = loss + args.kl_weight * kl
+                    loss = loss + cur_lambda * kl
             if factual_ids is not None:  # FACT-003D: protected factual replay (direct answer-CE)
                 fce = factual_ce_term(model, factual_ids, factual_mask, args.seq_len,
                                       args.factual_batch, g, device)
@@ -1010,18 +1060,22 @@ def main():
                 home = homeostasis_term(model, home_teacher, x, args.homeostasis_layers, args.homeostasis_rho)
                 train_home_sum += float(home)
                 loss = loss + args.homeostasis_weight * home
-            # RFIT-D: DINO is fully OFF until --dino-start-step, then ramps over --dino-warmup-steps.
-            # (anti-overfit regularizer applied only in the over-training region, not from step 0.)
-            if (args.dino_logit_weight > 0 and teacher is not None
-                    and (step + 1) >= args.dino_start_step):
+            # DINO consistency: AAMC drives it via cur_alpha (controller-set); else RFIT-D fixed-weight
+            # path (fully OFF until --dino-start-step, then ramps over --dino-warmup-steps).
+            if args.aamc:
+                use_dino = teacher is not None and cur_alpha > 0
+                eff_dino_w = cur_alpha
+            else:
+                use_dino = (args.dino_logit_weight > 0 and teacher is not None and (step + 1) >= args.dino_start_step)
+                s_since = step + 1 - args.dino_start_step
+                eff_dino_w = (args.dino_logit_weight
+                              * (min(1.0, (s_since + 1) / args.dino_warmup_steps) if args.dino_warmup_steps > 0 else 1.0))
+            if use_dino:
                 dino, dino_center = dino_logit_term(
                     model, teacher, train_ids, args.seq_len, args.dino_batch,
                     args.dino_view_mode, args.dino_view_p, args.kl_temp, g, device,
                     special_vocab, model.config.vocab_size, dino_pad_id,
                     center=dino_center, center_m=args.dino_center_m, do_center=args.dino_center)
-                s_since = step + 1 - args.dino_start_step
-                eff_dino_w = args.dino_logit_weight * (
-                    min(1.0, (s_since + 1) / args.dino_warmup_steps) if args.dino_warmup_steps > 0 else 1.0)
                 train_dino_sum += float(dino)
                 loss = loss + eff_dino_w * dino
             (loss / args.grad_accum_steps).backward()
@@ -1060,6 +1114,26 @@ def main():
             log_metrics(step, train_ce_sum / args.grad_accum_steps, train_kl_sum / args.grad_accum_steps,
                         train_fce_sum / args.grad_accum_steps, train_home_sum / args.grad_accum_steps,
                         elapsed, rate, eta, pct, extra=extra)
+        if args.aamc and (step + 1) % args.aamc_score_every == 0:
+            ce_now = eval_ce(model, eval_ids, args.seq_len, device, max_windows=32)
+            tp = telemetry_probe(model, tok, aamc_probe, device)
+            fp = fact_panel_eval(model, tok, aamc_panel, device)
+            dg = round(tp["degenerate_rate"] - teacher_base.get("teacher_degen", 0.0), 3) if teacher_base else tp["degenerate_rate"]
+            ent = {"step": step + 1, "train_ce": round(train_ce_sum / args.grad_accum_steps, 4), "eval_ce": round(ce_now, 4),
+                   "fact": fp["fact_rate"], "first_token_hit": fp["first_token_hit"], "gold_rank": fp["fact_gold_rank_mean"],
+                   "entropy": tp["logit_entropy"], "top1": tp["top1_prob"], "degen_gap": dg,
+                   "collapse_rate": round(tp["salad_rate"] + tp["loop_rate"] + tp["empty_rate"], 3)}
+            aamc_hist.append(ent)
+            new_l, new_a, ofs, cs, reason = aamc_controller(aamc_hist, cur_lambda, cur_alpha, args.aamc_max_alpha)
+            ent.update({"lambda": cur_lambda, "alpha": cur_alpha, "new_lambda": new_l, "new_alpha": new_a,
+                        "overfit_score": ofs, "collapse_score": cs, "action": reason})
+            print(f"  [AAMC] step {step+1}: train_ce={ent['train_ce']} eval_ce={ent['eval_ce']} FACT={ent['fact']} "
+                  f"fth={ent['first_token_hit']} ent={ent['entropy']} degen_gap={dg} | overfit={ofs} collapse={cs} "
+                  f"-> {reason}: lambda {cur_lambda}->{new_l} alpha {cur_alpha}->{new_a}", flush=True)
+            if aamc_log:
+                with open(aamc_log, "a", encoding="utf-8") as f:
+                    f.write(json.dumps(ent) + "\n")
+            cur_lambda, cur_alpha = new_l, new_a
         if fact_eval_steps and (step + 1) in fact_eval_steps:
             fe = fact_panel_eval(model, tok, fact_panel, device)
             fe["step"] = step + 1
@@ -1136,6 +1210,7 @@ def main():
               "dino_view_p": args.dino_view_p, "dino_batch": args.dino_batch,
               "dino_center": args.dino_center, "dino_center_m": args.dino_center_m,
               "dino_warmup_steps": args.dino_warmup_steps, "dino_start_step": args.dino_start_step,
+              "aamc": args.aamc, "aamc_final_lambda": cur_lambda, "aamc_final_alpha": cur_alpha,
               "dino_collapsed_early": collapsed,
               **teacher_base,
               "sidecar_enabled": args.sidecar_rank > 0, "sidecar_rank": args.sidecar_rank,
