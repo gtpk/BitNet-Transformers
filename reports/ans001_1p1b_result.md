@@ -28,9 +28,38 @@ plateau instead of consolidating. answer-token weighting may still be a readout 
 it hard directly destabilises 1.1B (consistent with the broader "1.1B adaptation is fragile to extra
 training pressure" theme, though here it STALLS rather than collapses-into-salad).
 
-## beta=1 -- gentler retry (RUNNING)
+## beta=1 -- gentler retry: ALSO STUCK, killed at step 300
 
-content-KL 0.2 + answer-token-weighted CE beta=1 k=3, NO DINO, 800 steps. OUT=bnt_results/ans001b1_1p1b.
-Early-stop rule: if still stuck (CE>7, degen_gap +0.8, gold_rank flat) by step 250-300 -> kill ->
-answer-token weighting is not the readout lever -> ANS-002 (short-answer Q/A format curriculum). If
-CE<6 + gold_rank falling -> run to 800 + score FACT vs the 0.185 baseline. Verdict pending.
+| step | degen_gap | gold_rank | CE |
+| ---: | ---: | ---: | ---: |
+| 150 | +0.8 | 6115 | 7.4 |
+| 200 | +0.8 | 6042 | 7.4 |
+| 250 | +0.8 | 5758 | 7.2 |
+| 300 | +0.8 | 6150 | 7.4 |
+
+beta=1 trapped IDENTICALLY to beta=4: CE ~7.4 flat, gold_rank ~6000 flat, degen_gap +0.8 -- never
+enters the content-KL recovery (which reaches CE ~4.1). Killed at step 300 per the early-stop rule
+(metrics_beta1_stuck.jsonl preserved).
+
+**Key caveat:** beta=1 (mild, weight 2x on first-3 answer tokens) traps just as hard as beta=4
+(strong). If it were a weight-magnitude effect, beta=1 should trap less. Identical trapping suggests
+the answer-token-weighted-CE PATH itself (any beta>0) -- not the weight value -- breaks the 1.1B
+content-KL recovery dynamics. So the honest claim is "this weighted-CE-on-content-KL recipe traps
+1.1B recovery", not necessarily "all answer-token weighting is dead".
+
+## ANS-001 verdict + reframe
+
+answer-token weighting (the ANS-001 weighted-CE) is NOT a working readout lever at 1.1B -- it traps
+recovery (beta 1 and 4 both). Recommend NOT chasing the beta sweep further.
+
+**Bigger-picture reframe:** the "fluent rambling / readout decouple" that motivated ANS-001 was a
+DINO artifact (TL1B-1600 had it because DINO's unlabeled-content-KL drifts the format). **content-KL
+ALONE (FACT-003C) already answers in Q/A format at 0.185 (ok 27/27) -- it does NOT ramble.** So the
+readout "bottleneck" was specific to the DINO-recovered model, not content-KL. ANS-001 tried to push
+content-KL's 0.185 higher via answer emphasis and failed (traps).
+
+Net: content-KL 0.185 remains the robust 1.1B factual best; every lever tried to beat it (capacity,
+hard replay, blend, DINO, answer-token weighting) has failed. ANS-002 (more Q/A format data) is low
+value because content-KL already formats correctly. The more promising directions are a stronger
+BASE model (Qwen ladder -- higher factual floor under the same minimal content-KL recipe) or
+accepting 0.185 + the scientific findings (budget-limited transient, model-specific collapse).

@@ -160,4 +160,12 @@ up-weights the first-k answer tokens (beta) on content-KL (no DINO). reports/ans
 | --- | --- | --- |
 | 160M beta=0 vs 4 | FACT 0.000 -> 0.074, CE/tags clean | harmless + slight gain; but 160M first_token_hit saturated (0.778) so it can't test 1.1B readout |
 | **1.1B beta=4** | **STUCK, killed @450** | CE 7.3 / gold_rank ~5000 / degen_gap +0.8 FLAT 250+ steps = "Answer-Site Overweight Trap" (strong token loss breaks 1.1B content-KL recovery); 160M did not predict |
-| 1.1B beta=1 | RUNNING | gentler retry; early-stop if stuck by step ~300 -> ANS-002 |
+| 1.1B beta=1 | STUCK, killed @300 | trapped IDENTICALLY to beta=4 (CE 7.4 / gold_rank ~6000 / degen +0.8 flat) -- mild beta traps as hard as strong => the weighted-CE recipe (any beta>0), not the magnitude, breaks 1.1B content-KL recovery |
+
+ANS-001 verdict: answer-token weighting is NOT a working readout lever at 1.1B (beta 1 and 4 both
+trap recovery). REFRAME: the fluent-rambling/readout-decouple was a DINO artifact -- content-KL ALONE
+(FACT-003C) already answers in Q/A format at 0.185 (no rambling). So content-KL 0.185 stays the robust
+1.1B factual best; EVERY lever tried (capacity, hard replay, blend, DINO, answer-token weighting) fails
+to beat it. ANS-002 (more format data) is low value (content-KL already formats). More promising: a
+stronger BASE (Qwen ladder, higher factual floor under the same recipe) or accept 0.185 + the
+scientific findings (budget-limited transient, model-specific collapse).
