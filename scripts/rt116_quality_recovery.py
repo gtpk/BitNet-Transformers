@@ -252,6 +252,25 @@ def factual_ce_term(model, fids, fmask, seq_len, fbatch, gen, device):
     return model(input_ids=fx, labels=labels).loss
 
 
+def answer_token_weighted_ce(model, x, m, beta, first_k):
+    """ANS-001: answer-masked next-token CE with EXTRA weight beta on the FIRST-k tokens of each answer
+    span. gold_rank shows the answer token is reachable but not emitted (the model rambles); concentrating
+    gradient on the first answer token(s) pulls the answer to the front / short form. Returns scalar loss."""
+    import torch.nn.functional as F
+    logits = model(input_ids=x).logits[:, :-1].float()      # predict token t+1
+    tgt = x[:, 1:]
+    mb = m[:, 1:].bool()                                     # answer mask aligned to targets
+    B, Tm1, V = logits.shape
+    ce = F.cross_entropy(logits.reshape(-1, V), tgt.reshape(-1), reduction="none").reshape(B, Tm1)
+    prev = torch.cat([torch.zeros(B, 1, dtype=torch.bool, device=x.device), mb[:, :-1]], dim=1)
+    first = (mb & ~prev).float()                            # answer-span starts (F->T transitions)
+    boost = first.clone()
+    for k in range(1, first_k):                             # also the k-1 tokens after each start
+        boost = boost + torch.cat([torch.zeros(B, k, device=x.device), first[:, :-k]], dim=1)
+    w = (1.0 + beta * boost) * mb.float()                   # answer tokens only; first-k up-weighted
+    return (ce * w).sum() / w.sum().clamp_min(1.0)
+
+
 def load_corpus(source, tokenizer, max_train_tokens, max_eval_tokens, answer_mask=False, exclude_texts=None,
                 factual_blend_file=None, factual_blend_frac=0.0):
     """Returns (train_ids, eval_ids, train_answer_mask). eval is ALWAYS WikiText validation.
@@ -538,6 +557,12 @@ def main():
                     help="FACT-003A: compute CE only on response tokens of instruction data "
                          "(prompt 'Q:..\\nA:' + separators masked to -100); WikiText content "
                          "tokens always count. Avoids overfitting the Q/A prompt formatting.")
+    ap.add_argument("--answer-token-weight", type=float, default=0.0,
+                    help="ANS-001: extra weight beta on the first-k tokens of each answer span "
+                         "(answer-token-weighted CE) -- pulls the reachable gold token to the front / short "
+                         "answer. Needs --answer-loss-only. 0 = uniform answer CE (existing behaviour).")
+    ap.add_argument("--answer-token-first-k", type=int, default=1,
+                    help="ANS-001: how many leading answer-span tokens get the extra weight (default 1)")
     ap.add_argument("--base-kl-replay", action="store_true",
                     help="FACT-003B: base-anchored adaptation. Add KL(base||student) on the answer "
                          "tokens of a fixed instruction replay set, with the SAME original FP model "
@@ -760,6 +785,7 @@ def main():
     tparams = uniq
     arm = ("QR-002a(linears)" + ("+norms" if args.train_norms else "")
            + ("+lmhead" if args.train_lm_head else "") + ("+ansmask" if args.answer_loss_only else "")
+           + (f"+anstok{args.answer_token_weight}k{args.answer_token_first_k}" if args.answer_token_weight > 0 else "")
            + (f"+basekl{args.kl_weight}" if args.base_kl_replay else "")
            + ("c" if (args.base_kl_replay and args.kl_content_only) else "")
            + (f"+factrep{args.factual_weight}" if args.factual_replay else "")
@@ -909,7 +935,10 @@ def main():
                 labels[~m] = -100
                 if not (labels != -100).any():
                     continue  # window(s) landed entirely on prompt/sep tokens; skip (rare)
-                loss = model(input_ids=x, labels=labels).loss
+                if args.answer_token_weight > 0:  # ANS-001: up-weight the first-k answer-span tokens
+                    loss = answer_token_weighted_ce(model, x, m, args.answer_token_weight, args.answer_token_first_k)
+                else:
+                    loss = model(input_ids=x, labels=labels).loss
             else:
                 loss = model(input_ids=x, labels=x).loss
             train_ce_sum += float(loss)
@@ -1025,6 +1054,7 @@ def main():
               "effective_tokens_per_step": args.batch * args.grad_accum_steps * args.seq_len,
               "arm": arm, "train_source": args.train_source, "train_norms": args.train_norms, "train_lm_head": args.train_lm_head,
               "answer_loss_only": args.answer_loss_only,
+              "answer_token_weight": args.answer_token_weight, "answer_token_first_k": args.answer_token_first_k,
               "base_kl_replay": args.base_kl_replay, "kl_weight": args.kl_weight, "kl_temp": args.kl_temp,
               "kl_content_only": args.kl_content_only,
               "replay_tokens": args.replay_tokens, "replay_batch": args.replay_batch,
