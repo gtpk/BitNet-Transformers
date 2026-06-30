@@ -491,6 +491,41 @@ def telemetry_probe(model, tok, probe_rows, device, max_new=40):
             "hidden_var_mid": round(sum(hvm) / n, 3), "hidden_var_last": round(sum(hvl) / n, 3)}
 
 
+@torch.no_grad()
+def fact_panel_eval(model, tok, panel_rows, device, max_new=40):
+    """RFIT peak-hunting: FULL-panel factual eval (generate + exact hit + first-token rank) on the
+    LIVE model (i2_s==f16 parity holds, so this matches the materialized score_fact_panel). Returns
+    fact_rate + first_token_hit + gold_rank_mean over ALL panel rows -- the real FACT metric that the
+    10-row telemetry gold_rank only loosely/noisily proxies. Called at --fact-eval-steps to find the
+    step where FACT peaks (Qwen-1.5B over-trains: FACT can peak mid-run then fall)."""
+    import sys as _sys
+    _sys.path.insert(0, str(REPO_ROOT / "scripts"))
+    from fact004a_160m_smoke import generate, hit
+    import torch.nn.functional as F
+    was_train, was_cache = model.training, model.config.use_cache
+    model.eval()
+    hits, ft, ranks = 0, 0, []
+    for r in panel_rows:
+        model.config.use_cache = True
+        txt = generate(model, tok, r["prompt"], max_new, device)
+        hits += int(hit(txt, r["must_contain"]))
+        gold = r["must_contain"][0].strip()
+        gs = " " + (gold[0].upper() + gold[1:] if gold else gold)
+        pids = tok(r["prompt"], return_tensors="pt").input_ids.to(device)
+        gids = tok(gs, return_tensors="pt", add_special_tokens=False).input_ids.to(device)
+        model.config.use_cache = False
+        lp = F.log_softmax(model(torch.cat([pids, gids], dim=1)).logits[0].float(), dim=-1)[pids.shape[1] - 1]
+        first = int(gids[0, 0]); rk = int((lp > lp[first]).sum().item()) + 1
+        ranks.append(rk); ft += int(rk == 1)
+        model.config.use_cache = True
+    model.config.use_cache = was_cache
+    if was_train:
+        model.train()
+    n = max(len(panel_rows), 1)
+    return {"fact_rate": round(hits / n, 3), "first_token_hit": round(ft / n, 3),
+            "fact_gold_rank_mean": round(sum(ranks) / n, 1), "fact_hits": hits, "fact_n": n}
+
+
 def homeostasis_term(model, teacher, input_ids, layer_mode="last", rho=1.0):
     """HOME-001: match base/student hidden-state mean+rms set-points on the same batch.
 
@@ -628,6 +663,9 @@ def main():
                          "schema (gold_rank/logp, logit_entropy, top1_prob, degenerate/salad/loop/empty rate, "
                          "hidden_var mid/last) + grad_norm into metrics.jsonl")
     ap.add_argument("--telemetry-probe-n", type=int, default=10, help="PYTHIA-LADDER P2: # panel prompts in the probe")
+    ap.add_argument("--fact-eval-steps", default="", help="RFIT: comma-separated step numbers at which to run a "
+                    "FULL-panel FACT eval (generate+hit, all panel rows) on the live model + materialize a per-step "
+                    "ckpt <out-dir>_s<step> -- for peak-hunting when FACT may peak mid-run then over-train")
     ap.add_argument("--sidecar-rank", type=int, default=0,
                     help="SIDE: I2_S+LoRA sidecar rank per target linear (0 = disabled, existing behavior)")
     ap.add_argument("--sidecar-alpha", type=float, default=8.0, help="SIDE: LoRA scale = alpha/rank")
@@ -915,6 +953,17 @@ def main():
             print(f"  [telemetry] could not load probe rows ({e}); telemetry-full off", flush=True)
             probe_rows = []
 
+    # RFIT peak-hunting: full panel + the step set at which to FACT-eval (generate+hit on all rows)
+    fact_eval_steps = set(int(s) for s in args.fact_eval_steps.split(",") if s.strip())
+    fact_panel = []
+    fact_eval_log = None
+    if fact_eval_steps:
+        fact_panel = [json.loads(l) for l in open(args.panel_file, encoding="utf-8") if l.strip()]
+        fact_eval_log = (Path(str(args.metrics_out) + ".facteval.jsonl") if args.metrics_out
+                         else (args.out_dir.parent / "fact_eval.jsonl" if args.out_dir else None))
+        print(f"RFIT: full-panel FACT eval ({len(fact_panel)} rows) at steps {sorted(fact_eval_steps)}; "
+              f"materializing per-step ckpts; log -> {fact_eval_log}", flush=True)
+
     model.train()
     t_start = time.time()
     last_ckpt = t_start
@@ -1005,6 +1054,18 @@ def main():
             log_metrics(step, train_ce_sum / args.grad_accum_steps, train_kl_sum / args.grad_accum_steps,
                         train_fce_sum / args.grad_accum_steps, train_home_sum / args.grad_accum_steps,
                         elapsed, rate, eta, pct, extra=extra)
+        if fact_eval_steps and (step + 1) in fact_eval_steps:
+            fe = fact_panel_eval(model, tok, fact_panel, device)
+            fe["step"] = step + 1
+            print(f"  [FACT-eval] step {step+1}: FACT {fe['fact_hits']}/{fe['fact_n']}={fe['fact_rate']}  "
+                  f"first_token_hit={fe['first_token_hit']}  gold_rank={fe['fact_gold_rank_mean']}", flush=True)
+            if fact_eval_log:
+                with open(fact_eval_log, "a", encoding="utf-8") as f:
+                    f.write(json.dumps(fe) + "\n")
+            if args.out_dir is not None:
+                sd = Path(str(args.out_dir) + f"_s{step+1}")
+                materialize_and_save(model, sd, tok)
+                print(f"  [FACT-eval] materialized peak-candidate -> {sd}", flush=True)
         if (collapse_prompts and step >= args.dino_collapse_min_step
                 and step % args.dino_collapse_check_every == 0):
             sf = _dino_collapse_frac(model, tok, collapse_prompts, device)
