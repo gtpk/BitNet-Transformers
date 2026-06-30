@@ -17,7 +17,7 @@ Related:
 
 ## Why Split The Work
 
-The project no longer fits one clean paper. We now have at least four separable
+The project no longer fits one clean paper. We now have at least seven separable
 stories:
 
 ```text
@@ -25,6 +25,9 @@ stories:
 2. Same-shape one-shot b1.58 conversion fails for principled reasons.
 3. Factual recovery needs the right objective; content-KL is the first working lever.
 4. If content-KL plateaus, the product path may need variable/hybrid capacity.
+5. Generation collapse is a dynamic transient; 800-step TinyLlama failure was not final.
+6. Factual tokens can be reachable internally but not emitted as concise answers.
+7. PT2-style ternary PTQ is both a competitor and a donor for better I2_S initializers.
 ```
 
 Forcing all four into one paper would blur the strongest results and make the open
@@ -36,9 +39,12 @@ series.
 | paper | working title | status | main claim | should not claim |
 | --- | --- | --- | --- | --- |
 | 1 | I2_S Systems | nearly ready | b1.58 weights can be faithfully exported and run with scaling storage/speed gains | quality parity |
-| 2 | Conversion Limits | nearly ready | one-shot/same-shape b1.58 conversion fails; quantizer tricks are not enough | final product quality |
+| 2 | Conversion Limits | nearly ready, PT2 caveat added | one-shot/same-shape `gamma*T` b1.58 conversion fails; simple quantizer tricks are not enough | all PTQ ternary is impossible |
 | 3 | Content-KL Factual Recovery | active | factual gap is objective-sensitive; content-KL fixes raw-KL EOS failure and moves facts | Q2_K/FP parity |
 | 4 | Hybrid Capacity | candidate | mostly-I2_S plus selective capacity may be the product path if content-KL plateaus | evidence before HYBRID-001 |
+| 5 | Collapse Dynamics | new strong topic | low-bit adaptation collapse is a transient/consolidation phenomenon; schedule decides apparent failure | DINO solves factuality |
+| 6 | Factual Readout / Answer Format | active, ANS-001 pending | facts may be reachable by rank but not emitted as concise answers | solved before ANS results |
+| 7 | PT2-I2S Model Competition | new comparative track | PT2 exact/projected/adapted variants must be compared as final artifacts | ours wins before scorecard |
 
 The current `paper_draft.md` is an integrated historical draft. It should stop
 accumulating new results. New work should be routed into the right paper skeleton.
@@ -50,6 +56,9 @@ the matrix is the first place to update when a new run completes.
 Use [Literature Positioning Map](./literature_positioning_map.md) to decide which
 external papers are direct competitors, which ideas should be borrowed, and where our
 claims must be narrowed.
+
+Use [Experiment History And Paper Opportunities](./experiment_history_and_paper_opportunities.md)
+to understand why the paper list expanded and which result caused each thesis revision.
 
 ## Shared Scorecard
 
@@ -213,10 +222,11 @@ model with small capacity/precision pockets.
 ## Current Priority
 
 ```text
-1. Finish FACT-003C lambda=0.5.
-2. Update Paper 3 and fair scorecard.
-3. If content-KL plateaus below useful factual quality, start HYBRID-001A.
-4. Keep Paper 1 and Paper 2 stable; do not keep adding every factual experiment to them.
+1. Finish ANS-001 1.1B and decide whether answer-token weighting fixes readout.
+2. If ANS-001 passes, update Paper 6 and the final model scorecard.
+3. If ANS-001 is flat, move to ANS-002 short-answer format curriculum.
+4. Run PT2-I2S-002 on PC to test activation-aware PT2 as initializer/donor.
+5. Keep Paper 1 stable; keep Paper 2 caveated against PT2-style asymmetric PTQ.
 ```
 
 ## Drafting Rule

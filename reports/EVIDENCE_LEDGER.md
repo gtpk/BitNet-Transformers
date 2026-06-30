@@ -126,6 +126,23 @@ terse Q/A answering for fluent rambling -> a readout/answer-format decouple (gol
 internally, not emitted). content-KL 0.185 stays the v0 factual best. Next lever = answer-format /
 answer-token-weighted objective or decoding, not just more budget; PT2-lite = transient-shortener.
 
+## H. ANS readout track -- active
+
+Motivation: TL1B-1600 recovered generation stability but stayed fact-poor. The final gold rank (375)
+suggests the correct token is reachable internally but not emitted as a concise answer. ANS-001 tests
+answer-token-weighted CE:
+
+`L = CE_answer + 0.2 * content_KL + beta * CE_answer_token`, with `beta=4`, first `k=3` answer tokens.
+
+| run | beta | FACT | gold_rank_mean | first_token_hit | CE | tags | interpretation |
+| --- | ---: | ---: | ---: | ---: | ---: | --- | --- |
+| ANS-001 160M baseline | 0 | 0.000 | 1 | 0.778 | 3.955 | ok26/empty1 | baseline |
+| ANS-001 160M anstok | 4 | 0.074 | 1 | 0.778 | 3.972 | ok27 | directionally positive and harmless |
+| ANS-001 1.1B | 4 | running | running | running | running | running | decisive readout test |
+
+Caveat: 160M does **not** reproduce the 1.1B readout bottleneck because its first-token rank is already
+saturated (`gold_rank_mean=1`). The 160M result is a safety/sanity signal, not a magnitude predictor.
+
 ## Reproduction
 
 Each report names its driver flags. Pythia ladder + TinyLlama longer-budget: `rt116_quality_recovery.py`

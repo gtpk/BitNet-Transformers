@@ -110,6 +110,69 @@ Known blank cells:
 Do not claim factual parity with FP/Q2_K. The current claim is narrower: content-KL
 is the first working factual lever and fixes the raw-KL EOS failure.
 
+## Paper 5: Collapse Dynamics Evidence
+
+Claim candidate: generation collapse during low-bit adaptation is a dynamic
+transient/consolidation phenomenon. A run can look failed at step 800 but recover by
+step 1600.
+
+| run | transient / recovery | final generation | factual exact | interpretation |
+| --- | --- | --- | ---: | --- |
+| Pythia-160M | no transient | stable | n/a | small rung stable |
+| Pythia-410M | transient step ~50-250, recovery ~275 | stable | n/a | slower consolidation |
+| Pythia-1B | transient step ~0-250, recovery ~225-300 | stable | n/a | no generic 1B wall |
+| TL1B-1600 | unresolved at 800, recovers by ~850-1600 | ok 27/27, CE 4.08 | 0.111 | 800-step DINO collapse was premature |
+
+Known blank cells:
+
+| blank | why it matters | minimum fill |
+| --- | --- | --- |
+| clean collapse plots | needed for a readable paper | plot degen_gap/gold_rank/CE/top1/hidden_var vs step |
+| Pythia 1.4B/2.8B | tests whether Pythia eventually collapses | optional ladder completion |
+| TinyLlama chat-vs-base | tests whether chat-tune / data style causes slower consolidation | base-model ablation |
+
+Do not claim DINO solves factuality. The new claim is dynamics: collapse at an
+intermediate step can be a transient.
+
+## Paper 6: Readout / Answer-Format Evidence
+
+Claim candidate: after low-bit adaptation, factual tokens can be reachable in the
+distribution but fail to be emitted as concise answers.
+
+| run | gold-rank signal | exact answer | behavior | interpretation |
+| --- | ---: | ---: | --- | --- |
+| TL1B-1600 | final gold_rank 375, improved from ~2006 near recovery onset | 0.111 | fluent but Q/A format drift | reachable but not emitted |
+| ANS-001 160M beta=0 | gold_rank_mean 1, first_token_hit 0.778 | 0.000 | ok26/empty1 | 160M does not reproduce 1.1B readout bottleneck |
+| ANS-001 160M beta=4 | gold_rank_mean 1, first_token_hit 0.778 | 0.074 | ok27 | answer-token weighting is safe and directionally positive |
+| ANS-001 1.1B | running | TBD | TBD | decisive readout test |
+
+Known blank cells:
+
+| blank | why it matters | minimum fill |
+| --- | --- | --- |
+| ANS-001 1.1B final | decides whether answer-token weighting beats content-KL 0.185 | FACT/gold_rank/tags/CE table |
+| ANS-002 short-answer format | if ANS-001 is flat, format data is next | one 1.1B or 160M-gated run |
+| first-token metrics standardization | needed to compare readout experiments | report first-token hit, gold-rank, exact answer together |
+
+## Paper 7: PT2-I2S Model Competition Evidence
+
+Claim candidate: PT2-LLM is both a competitor and a donor. The final question is
+which deployed model is better under a constraint, not whether a method is pure.
+
+| row | status | interpretation |
+| --- | --- | --- |
+| PT2-I2S-001 ITF by weight-MSE | done; MSE improves but behavior/gold-rank worsens | reconstruction-only fitting is not enough |
+| PT2-I2S-002 activation-aware grid | pending | next meaningful PT2 smoke |
+| PT2 exact vs projected-I2_S vs ours adapt | pending | required final comparison |
+
+Known blank cells:
+
+| blank | why it matters | minimum fill |
+| --- | --- | --- |
+| PT2 exact quality row | tells how strong asymmetric ternary is | PPL/FACT/generation on same model |
+| PT2 projected-I2_S row | tells whether gains survive pure I2_S | compare against old I2_S PTQ |
+| PT2-init + adaptation row | tells whether PT2 helps us go farther | same adaptation schedule scorecard |
+
 ## Paper 4: Hybrid Capacity Candidate Evidence
 
 Claim candidate: if all-I2_S plus content-KL plateaus below useful factual quality,
@@ -138,8 +201,11 @@ explicitly decides the product path needs capacity now.
 | --- | --- | --- | --- |
 | Paper 1 systems | strong | draftable now | optional timing error bars |
 | Paper 2 limits | strong | draftable now | optional seed/larger-model baseline |
-| Paper 3 content-KL | promising, active | draftable as workshop/tech report | lambda=0.5 and seed check |
-| Paper 4 hybrid | hypothesis only | not draftable as result paper | HYBRID-001 positive signal |
+| Paper 3 content-KL | promising, active | draftable as workshop/tech report | seed / larger factual eval |
+| Paper 4 hybrid | hypothesis only | not draftable as result paper | HYBRID positive signal |
+| Paper 5 collapse dynamics | strong new topic | draftable as dynamics report | plots + optional larger Pythia rung |
+| Paper 6 readout/answer format | active | not draftable until ANS-001 final | ANS-001/002 |
+| Paper 7 PT2-I2S | active competitor/donor track | not draftable until PT2-I2S-002 | PT2 comparison scorecard |
 
 ## Interpretation Guardrails
 
@@ -157,4 +223,3 @@ FP/Q2_K factual parity.
 
 Hybrid capacity is a candidate response to a plateau, not yet an established result.
 ```
-
