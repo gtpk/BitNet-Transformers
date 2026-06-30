@@ -150,3 +150,14 @@ with `--telemetry-full` (teacher-relative telemetry). Pythia needs the GPT-NeoX 
 (commit 421e333) + n_target>0 guard. Controls: `colab/run_dino_ctrl_{adamw,fp32}.sh`. Ladder launch
 configs: `colab/run_dino002.sh` / session cells. Datasets de-leaked vs the panel (never trained on the
 panel). i2_s==f16 parity established in the RT-112..115 systems work.
+
+## H. ANS-001 answer-token-weighted CE (1.1B) -- readout lever attempt
+
+The TL1B-1600 limiter was readout (gold_rank 375 reachable but not emitted, fluent-rambling). ANS-001
+up-weights the first-k answer tokens (beta) on content-KL (no DINO). reports/ans001_1p1b_result.md.
+
+| arm | result | note |
+| --- | --- | --- |
+| 160M beta=0 vs 4 | FACT 0.000 -> 0.074, CE/tags clean | harmless + slight gain; but 160M first_token_hit saturated (0.778) so it can't test 1.1B readout |
+| **1.1B beta=4** | **STUCK, killed @450** | CE 7.3 / gold_rank ~5000 / degen_gap +0.8 FLAT 250+ steps = "Answer-Site Overweight Trap" (strong token loss breaks 1.1B content-KL recovery); 160M did not predict |
+| 1.1B beta=1 | RUNNING | gentler retry; early-stop if stuck by step ~300 -> ANS-002 |
