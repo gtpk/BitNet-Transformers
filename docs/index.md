@@ -267,6 +267,8 @@ python scripts/rt113_storage_latency.py \
    - DINO/BYOL/Mean-Teacher식 no-label self-distillation을 I2_S adaptation objective로 번역한다. 작은 factual replay를 외우는 대신 FP/base teacher의 content distribution과 hidden geometry를 보존하는 후보 계획.
 8l6b. [Qwen RFIT-D: DINO Anti-Overfit Plan](./qwen_rfit_dino_anti_overfit_plan.md)
    - Qwen-1.5B가 800 step에서는 저학습, 1600 step에서는 train-stream 과암기를 보인 뒤, DINO를 factual booster가 아니라 약한 late consistency regularizer로 다시 쓰는 RFIT-D 계획.
+8l6c. [Adaptive Anchor-Manifold Controller Plan](./adaptive_anchor_manifold_controller_plan.md)
+   - 고정 λ/DINO 대신 telemetry로 `lambda_t`(teacher/content anchor)와 `alpha_t`(DINO/manifold anchor)를 조절하는 AAMC 가설/실험 관제 문서. Qwen RFIT-D와 collapse dynamics를 다음 실험에 연결한다.
 8l7. [Generation Collapse Dynamics Research Plan](./collapse_dynamics_research_plan.md)
    - 최종 loss/FACT 점수만 보지 않고, step별 entropy, top-1 confidence, gold rank, hidden variance, gradient/update norm, salad/empty/loop rate로 collapse onset을 찾는 동역학 연구 계획.
 8l8. [Literature Deep Dive: Collapse Dynamics](./literature_deep_dive_collapse_dynamics.md)
@@ -451,6 +453,7 @@ flowchart TD
 | [nature_inspired_smoke_poc_plan.md](./nature_inspired_smoke_poc_plan.md) | homeostasis, rate-distortion ledger, sigma-delta residual feedback, dithered RHT, ECC syndrome sidecar를 유망도 순서로 smoke POC화한 계획 | 외부 분야 아이디어를 새 트랙으로 키우기 전에 PC에서 싼 gate를 설계할 때 |
 | [dino_i2s_self_distillation_plan.md](./dino_i2s_self_distillation_plan.md) | DINO/BYOL/Mean-Teacher식 비지도/자가증류를 I2_S factual-retention objective로 번역한 계획. content-KL을 broad no-label teacher-student consistency로 확장한다 | 작은 replay가 암기/과적합할 때, 정답 label 없이 FP/base 모델의 지식장을 덜 잊게 만드는 objective를 검증할 때 |
 | [qwen_rfit_dino_anti_overfit_plan.md](./qwen_rfit_dino_anti_overfit_plan.md) | Qwen-1.5B RFIT에서 DINO를 factual booster가 아니라 late anti-overfit consistency regularizer로 재정의하는 계획 | Qwen-1.5B가 train CE는 외우지만 eval CE/FACT가 악화될 때, DINO를 다시 꺼낼지 판단할 때 |
+| [adaptive_anchor_manifold_controller_plan.md](./adaptive_anchor_manifold_controller_plan.md) | `lambda_t`와 DINO `alpha_t`를 고정 상수가 아니라 overfit/collapse telemetry로 움직이는 AAMC 실험 관제 계획 | RFIT-A/B/C 결과를 보고 다음이 stronger content-KL인지, weak late DINO인지, 아니면 data/model 재검토인지 결정할 때 |
 | [collapse_dynamics_research_plan.md](./collapse_dynamics_research_plan.md) | generation collapse를 최종 실패가 아니라 step-time 동역학으로 보고, loss/entropy/top-1/gold-rank/hidden-var/gradient/update norm/salad-empty-loop rate를 기록하는 분석 계획 | "왜 무너졌는가"를 objective 단위가 아니라 학습 과정 단위로 분해하고 싶을 때 |
 | [literature_deep_dive_collapse_dynamics.md](./literature_deep_dive_collapse_dynamics.md) | text degeneration, self-supervised collapse, catastrophic forgetting, RLHF/DPO, low-bit QAT 문헌에서 collapse telemetry와 schedule 아이디어를 추출한 딥다이브 | collapse 연구 방향이 기존 문헌과 어떻게 닿는지, 다음 실험에 어떤 계측값을 넣어야 하는지 확인할 때 |
 | [quantization_aware_b158_conversion_plan.md](./quantization_aware_b158_conversion_plan.md) | quantization 기법을 b1.58 변환에 적용하는 RT-124..128 전체 실험계획, 가지치기, 결론 도달 규칙 | 다음 Colab 실험을 설계하거나 결과를 해석할 때 |

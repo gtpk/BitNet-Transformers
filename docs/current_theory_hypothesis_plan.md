@@ -360,6 +360,47 @@ Expected good signature:
 train PopQA, tight held-out PopQA, and FACT panel move together.
 ```
 
+### T4c. Objective Weights Should Become A Controller
+
+The fixed-loss view was:
+
+```text
+choose lambda,
+choose optional DINO,
+run to the endpoint.
+```
+
+The latest Qwen/TinyLlama results make that too crude. Different failures need
+different objective pressure:
+
+| failure pattern | primary knob |
+| --- | --- |
+| train CE falls while eval CE/FACT worsen and generation is still clean | stronger content anchor `lambda` |
+| gold rank improves but salad/loop/empty persists | weak manifold consistency `alpha` (DINO-logit) |
+| train CE and gold rank both stall high | reduce objective stiffness / adjust LR |
+| facts are reachable but not emitted in short-answer form | answer-format/data intervention, not DINO by default |
+
+So the current control equation is:
+
+```text
+L_t =
+  L_answer_CE
+  + lambda_t * KL_content(base || student)
+  + alpha_t  * DINO_logit(student_clean || student_view)
+```
+
+where `lambda_t` and `alpha_t` are not constants chosen by taste. They are
+controlled by telemetry:
+
+```text
+overfit_score  -> raise lambda_t
+collapse_score -> raise alpha_t weakly
+```
+
+This is recorded as the [Adaptive Anchor-Manifold Controller Plan](./adaptive_anchor_manifold_controller_plan.md).
+It is an operating hypothesis, not a named empirical rule yet. It becomes a
+rule only if controlled runs beat fixed-arm baselines across multiple rungs.
+
 Bad signatures:
 
 ```text

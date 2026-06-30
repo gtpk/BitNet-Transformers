@@ -32,6 +32,21 @@ The newer Qwen-specific plan is:
 docs/qwen_rfit_dino_anti_overfit_plan.md
 ```
 
+The controller-level version is:
+
+```text
+docs/adaptive_anchor_manifold_controller_plan.md
+```
+
+Current rule of thumb:
+
+```text
+DINO is not the default factual lever.
+DINO is the manifold/stability knob when telemetry shows collapse or unstable
+generation. If the model is fluent but overfits the answer stream, adjust
+content-KL lambda first.
+```
+
 ## Why This Exists
 
 The FACT track found a clear split:

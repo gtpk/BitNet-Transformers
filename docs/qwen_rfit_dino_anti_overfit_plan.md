@@ -5,6 +5,18 @@ Document position: [Index](./index.md) -> Qwen ladder -> RFIT-D plan.
 Status: proposed after Qwen-1.5B rung showed undertraining at 800 and
 over-training by 1600.
 
+2026-07-01 update:
+
+```text
+RFIT-D is now a special case of AAMC:
+docs/adaptive_anchor_manifold_controller_plan.md
+```
+
+That means DINO is not turned on because it is fashionable or because it helped
+one small run. It is turned on only when telemetry says the model needs a
+manifold/stability anchor. If the failure is ordinary train-stream overfit with
+clean generation, the first knob is `lambda`, not DINO.
+
 ## Why This Exists
 
 The earlier DINO interpretation was:
@@ -35,6 +47,15 @@ worse while train CE collapsed. That is exactly the regime where a weak
 consistency regularizer may help: not to teach facts directly, but to keep the
 student from memorizing the answer-CE stream and drifting away from the base
 distribution.
+
+The later RFIT interpretation refines this:
+
+```text
+if generation is clean but eval CE/FACT worsens -> increase lambda first.
+if generation collapses or becomes unstable -> add weak late DINO.
+```
+
+So RFIT-D remains valid, but only behind the AAMC gate.
 
 ## Hypothesis
 
@@ -210,9 +231,11 @@ That is a different mechanism and a different failure target.
 
 ## Recommended Next Action
 
-1. Finish RFIT-A and inspect `FACT@400/600/800`.
-2. If RFIT-A is still below Qwen-0.5B `0.333`, run RFIT-B before DINO.
-3. If RFIT-B improves eval CE but still has readout/hallucination, run RFIT-D2.
-4. If RFIT-A already beats `0.333`, use DINO only as an optional stabilizer, not
-   as a required branch.
-
+1. Finish RFIT-A/B fixed-arm diagnosis and inspect `FACT@400/600/800`,
+   `train_ce`, `eval_ce`, `gold_rank`, and generation tags.
+2. If the pattern is clean-generation overfit, raise/shape `lambda` first.
+3. If the pattern includes degen/salad/loop/empty or unstable hidden variance,
+   run RFIT-D as weak late DINO (`alpha=0.05`, hidden OFF).
+4. If neither fixed lambda nor AAMC-style control beats Qwen-0.5B `0.333`,
+   stop RFIT on this recipe and revisit data/model choice rather than stacking
+   more fixed auxiliary losses.

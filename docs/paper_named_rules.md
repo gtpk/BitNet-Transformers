@@ -103,6 +103,9 @@ export math
 
 - Can answer-site weighting or short-answer formatting turn reachable factual
   rank into exact factual answers?
+- Can a telemetry-driven AAMC controller beat fixed `lambda`/DINO arms by
+  changing the objective weights only when overfit or collapse telemetry asks
+  for it? This is an open hypothesis, not a named rule.
 - Can PT2-style activation-aware initialization improve the starting point
   without leaving the I2_S-rooted artifact goal?
 - If hybrid capacity returns, can it be trained jointly instead of patched in
