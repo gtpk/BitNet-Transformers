@@ -663,6 +663,8 @@ def main():
                          "schema (gold_rank/logp, logit_entropy, top1_prob, degenerate/salad/loop/empty rate, "
                          "hidden_var mid/last) + grad_norm into metrics.jsonl")
     ap.add_argument("--telemetry-probe-n", type=int, default=10, help="PYTHIA-LADDER P2: # panel prompts in the probe")
+    ap.add_argument("--dino-start-step", type=int, default=0, help="RFIT-D: keep DINO fully OFF until this step, "
+                    "then ramp over --dino-warmup-steps. Applies DINO as a LATE anti-overfit regularizer only.")
     ap.add_argument("--fact-eval-steps", default="", help="RFIT: comma-separated step numbers at which to run a "
                     "FULL-panel FACT eval (generate+hit, all panel rows) on the live model + materialize a per-step "
                     "ckpt <out-dir>_s<step> -- for peak-hunting when FACT may peak mid-run then over-train")
@@ -1008,14 +1010,18 @@ def main():
                 home = homeostasis_term(model, home_teacher, x, args.homeostasis_layers, args.homeostasis_rho)
                 train_home_sum += float(home)
                 loss = loss + args.homeostasis_weight * home
-            if args.dino_logit_weight > 0 and teacher is not None:  # DINO-I2S-002/003: no-label self-distill
+            # RFIT-D: DINO is fully OFF until --dino-start-step, then ramps over --dino-warmup-steps.
+            # (anti-overfit regularizer applied only in the over-training region, not from step 0.)
+            if (args.dino_logit_weight > 0 and teacher is not None
+                    and (step + 1) >= args.dino_start_step):
                 dino, dino_center = dino_logit_term(
                     model, teacher, train_ids, args.seq_len, args.dino_batch,
                     args.dino_view_mode, args.dino_view_p, args.kl_temp, g, device,
                     special_vocab, model.config.vocab_size, dino_pad_id,
                     center=dino_center, center_m=args.dino_center_m, do_center=args.dino_center)
+                s_since = step + 1 - args.dino_start_step
                 eff_dino_w = args.dino_logit_weight * (
-                    min(1.0, (step + 1) / args.dino_warmup_steps) if args.dino_warmup_steps > 0 else 1.0)
+                    min(1.0, (s_since + 1) / args.dino_warmup_steps) if args.dino_warmup_steps > 0 else 1.0)
                 train_dino_sum += float(dino)
                 loss = loss + eff_dino_w * dino
             (loss / args.grad_accum_steps).backward()
@@ -1129,7 +1135,8 @@ def main():
               "dino_logit_weight": args.dino_logit_weight, "dino_view_mode": args.dino_view_mode,
               "dino_view_p": args.dino_view_p, "dino_batch": args.dino_batch,
               "dino_center": args.dino_center, "dino_center_m": args.dino_center_m,
-              "dino_warmup_steps": args.dino_warmup_steps, "dino_collapsed_early": collapsed,
+              "dino_warmup_steps": args.dino_warmup_steps, "dino_start_step": args.dino_start_step,
+              "dino_collapsed_early": collapsed,
               **teacher_base,
               "sidecar_enabled": args.sidecar_rank > 0, "sidecar_rank": args.sidecar_rank,
               "sidecar_alpha": args.sidecar_alpha, "sidecar_target": args.sidecar_target,
