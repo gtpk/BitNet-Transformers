@@ -700,6 +700,8 @@ def main():
     ap.add_argument("--aamc-score-every", type=int, default=200, help="AAMC: controller score interval (steps)")
     ap.add_argument("--aamc-max-alpha", type=float, default=0.10, help="AAMC: alpha (DINO) clamp upper bound; "
                     "set 0.0 for the dynamic-lambda-only arm (DINO never turns on), 0.10 for conditional-DINO arm")
+    ap.add_argument("--aamc-min-step", type=int, default=300, help="AAMC: observe-only before this step (no lambda/alpha "
+                    "change) -- ignores the normal early PTQ-recovery transient so DINO/anchor moves stay 'weak and late'")
     ap.add_argument("--dino-start-step", type=int, default=0, help="RFIT-D: keep DINO fully OFF until this step, "
                     "then ramp over --dino-warmup-steps. Applies DINO as a LATE anti-overfit regularizer only.")
     ap.add_argument("--fact-eval-steps", default="", help="RFIT: comma-separated step numbers at which to run a "
@@ -1124,7 +1126,11 @@ def main():
                    "entropy": tp["logit_entropy"], "top1": tp["top1_prob"], "degen_gap": dg,
                    "collapse_rate": round(tp["salad_rate"] + tp["loop_rate"] + tp["empty_rate"], 3)}
             aamc_hist.append(ent)
-            new_l, new_a, ofs, cs, reason = aamc_controller(aamc_hist, cur_lambda, cur_alpha, args.aamc_max_alpha)
+            if (step + 1) < args.aamc_min_step:   # observe-only during the early PTQ transient
+                new_l, new_a, ofs, cs, reason = cur_lambda, cur_alpha, 0, 0, "warmup-hold"
+                _, _, ofs, cs, _ = aamc_controller(aamc_hist, cur_lambda, cur_alpha, args.aamc_max_alpha)
+            else:
+                new_l, new_a, ofs, cs, reason = aamc_controller(aamc_hist, cur_lambda, cur_alpha, args.aamc_max_alpha)
             ent.update({"lambda": cur_lambda, "alpha": cur_alpha, "new_lambda": new_l, "new_alpha": new_a,
                         "overfit_score": ofs, "collapse_score": cs, "action": reason})
             print(f"  [AAMC] step {step+1}: train_ce={ent['train_ce']} eval_ce={ent['eval_ce']} FACT={ent['fact']} "
