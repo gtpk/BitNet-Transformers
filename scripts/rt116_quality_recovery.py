@@ -1065,7 +1065,7 @@ def main():
             # DINO consistency: AAMC drives it via cur_alpha (controller-set); else RFIT-D fixed-weight
             # path (fully OFF until --dino-start-step, then ramps over --dino-warmup-steps).
             if args.aamc:
-                use_dino = teacher is not None and cur_alpha > 0
+                use_dino = teacher is not None and cur_alpha > 0 and (step + 1) >= args.dino_start_step
                 eff_dino_w = cur_alpha
             else:
                 use_dino = (args.dino_logit_weight > 0 and teacher is not None and (step + 1) >= args.dino_start_step)
