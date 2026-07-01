@@ -224,3 +224,24 @@ Rule" is NOT named. Read: 0.5B-Instruct's 0.333 remains the best Qwen-I2_S point
 RE-FIT (lower LR ~1e-4, higher lambda ~0.4-0.5 to anchor harder to teacher, fewer steps ~400-600, or
 early-stop on held-out FACT not train_ce) before any base-scaling conclusion. Files:
 reports/qwen_ladder/qwen15_ckl_{fact_800,fact_1600,train}.json.
+
+### Qwen-1.5B RFIT sweep (recipe-fit A-D) -- late-DINO anti-overfit TIES 0.5B 0.333 (reports/qwen_ladder/qwen15_rfit_sweep.md)
+
+Follow-up: is 0.222 a real 1.5B cap or a recipe mismatch? Sweep A->B->C->D (Colab L4, same content-KL
+base, full-panel FACT at fact-eval steps for peak-hunting):
+
+| arm | lr | λ | steps | extra | peak FACT |
+| --- | ---: | ---: | ---: | --- | ---: |
+| A | 1e-4 | 0.2 | 800 | -- | 0.111 |
+| B | 1e-4 | 0.4 | 800 | -- | 0.148 |
+| C | 5e-5 | 0.4 | 1000 | -- | 0.222 (STABLE all ckpts, no overfit decay) |
+| **D** | 1e-4 | 0.4 | 800 | **late DINO** (logit w0.1 start300 warmup100) | **0.333** (traj 0.0->0.296->0.333) |
+
+**Gentle lr alone (A/B) does NOT help; lower lr (C) only STABILIZES at 0.222; the late anti-overfit DINO
+(D) breaks 0.222 -> 0.333, TYING Qwen-0.5B.** Validates DINO as an **Anti-Overfit Consistency Regularizer**
+(weak/late/logit-only) -- distinct from the failed DINO-as-factual-lever. D disrupts on turn-on (@400=0.0)
+then slows train drift so content-KL holds facts to 0.333. D gens genuinely better ("capital of Italy is
+Rome"/"Germany is Berlin" crisp, vs earlier "Italy is Milan" hallucination); first_token_hit still low
+(0.074). REFINES rung-2: bigger Qwen needs an anti-overfit regularizer to MATCH the smaller base (0.333),
+not yet to EXCEED it. Open: does D's recipe push Qwen-1.7B/3B PAST 0.333, or is readout the cross-scale
+wall? Files: reports/qwen_ladder/qwen15_rfit{A,B,C,D}_* + qwen15_rfit_sweep.md.
