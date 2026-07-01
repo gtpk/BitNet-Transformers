@@ -1,0 +1,4 @@
+{"fact_rate": 0.148, "first_token_hit": 0.037, "fact_gold_rank_mean": 226.7, "fact_hits": 4, "fact_n": 27, "step": 400}
+{"fact_rate": 0.111, "first_token_hit": 0.037, "fact_gold_rank_mean": 184.7, "fact_hits": 3, "fact_n": 27, "step": 600}
+{"fact_rate": 0.222, "first_token_hit": 0.037, "fact_gold_rank_mean": 334.0, "fact_hits": 6, "fact_n": 27, "step": 800}
+{"fact_rate": 0.148, "first_token_hit": 0.0, "fact_gold_rank_mean": 343.3, "fact_hits": 4, "fact_n": 27, "step": 1000}
